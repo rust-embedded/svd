@@ -11,7 +11,7 @@ elementIn() {
 }
 
 main() {
-    local device tests_dir=$(pwd)/tests/
+    local tests_dir=$(pwd)/tests
     local blacklist=(
         # These SVD files have some registers with a `resetValue` bigger than the register itself
         Toshiba/M365
@@ -21,7 +21,8 @@ main() {
         Toshiba/M36B
     )
 
-    rm -f tests/*.rs
+    rm -rf tests
+    mkdir -p tests
 
     local vendor_dir
     for vendor_dir in $(echo cmsis-svd/data/*); do
