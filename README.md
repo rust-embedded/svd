@@ -6,6 +6,8 @@
 
 > A WIP CMSIS-SVD file parser
 
+## ["Documentation"](https://japaric.github.io/svd/svd/)
+
 ## License
 
 Licensed under either of
