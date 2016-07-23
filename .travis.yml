@@ -1,0 +1,31 @@
+language: rust
+rust: nightly
+
+cache: cargo
+
+install:
+  - git clone --depth 1 https://github.com/davisp/ghp-import
+
+script:
+  - cargo build
+  - cargo doc
+  - bash generate-tests.sh
+  - cargo test --release
+
+after_success:
+  - bash ci/after_success.sh
+
+branches:
+  only:
+    - auto
+    - master
+    - try
+
+notifications:
+  email:
+    on_success: never
+  webhooks: https://homu.herokuapp.com/travis
+
+env:
+  global:
+    - secure: OyghfiE9JYWngTe3m65pd/SmdgWKsBk1PAQZD42o+kTUYJzQvojHcY/+wi4+4GKIxqlDEkvr4FrHIR0f7287qQcypx01+OHlF6rIiH4+h7Uz0f+WG6jvIza0PD194WJEX0SJ4BW5C/XUViEy1OwP+yCKXtLasTEZKSYQugxWRtxEIEoKCDr4jhWrGmXcOtNzqJT3t68eANhzUeCaY85OJlSDlr8ZXOH3vNYJLc/HU05KtsC16aw8BS8jMVw+0ghWj5UN+5gk6/qciGS9k2F99L4oGtNcI2Ef3/e7umVXI/l2YQqq1Me9WBInN+mHIHr0CM2RJkEh2RfGQDyfc3Nm8jujYNOi8lzInMhNTX8hU0naHsnIS+k2DAEYApCTeljtLlXhuKpz571XwD4FjnXUQf9JA2b0F3gTVTgty55wBt4MoVQwZatX5ZSzLPLr8W4mIXYEnNUXHa9X/iWU+fP6FreYSpRfX4+r9uI5B9ebNr3cs68nA8pG/iWZqTJClYqr5vsFryuKGGCBHWi5Xo+y+FAC+m5jyE+VvrS4ryBZmmbt+8WcWimFv13oHi9i0P1thmg+TpzLX96IcDzRAfrCEDL6rMBp821Lm2JUuJfTG8M/lsJr3avoWQxNwd8P2nNZMW/IYhp+qCmJIskyY7Z6gr1KCs07y+gwPsbcHKorDNo=
