@@ -166,6 +166,7 @@ pub enum Access {
     ReadOnly,
     ReadWrite,
     ReadWriteOnce,
+    WriteOnce,
     WriteOnly,
 }
 
@@ -178,6 +179,7 @@ impl Access {
             "read-write" => Access::ReadWrite,
             "read-writeOnce" => Access::ReadWriteOnce,
             "write-only" => Access::WriteOnly,
+            "writeOnce" => Access::WriteOnce,
             _ => panic!("unknown access variant: {}", text),
         }
     }
