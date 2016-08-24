@@ -88,6 +88,7 @@ pub struct Peripheral {
     pub base_address: u32,
     pub interrupt: Option<Interrupt>,
     pub registers: Option<Vec<Register>>,
+    pub derived_from: Option<String>,
 }
 
 impl Peripheral {
@@ -105,6 +106,8 @@ impl Peripheral {
                     .filter_map(Register::parse)
                     .collect()
             }),
+            derived_from: tree.attributes.get(&"derivedFrom".to_owned())
+                .map(|s| s.to_owned()),
         }
     }
 }
