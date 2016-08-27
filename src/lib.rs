@@ -190,6 +190,7 @@ pub struct Field {
     pub name: String,
     pub description: Option<String>,
     pub bit_range: BitRange,
+    pub enumerated_values: Option<EnumeratedValues>,
 }
 
 impl Field {
@@ -200,6 +201,9 @@ impl Field {
             name: try!(tree.get_child_text("name")),
             description: tree.get_child_text("description"),
             bit_range: BitRange::parse(tree),
+
+            enumerated_values:
+                tree.get_child("enumeratedValues").map(EnumeratedValues::parse),
         }
     }
 }
@@ -253,5 +257,87 @@ impl Defaults {
             reset_value: tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
             reset_mask: tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
         }
+    }
+}
+
+#[derive(Debug)]
+pub enum Usage {
+    Read,
+    Write,
+    ReadWrite,
+}
+
+impl Usage {
+    fn parse(tree: &Element) -> Usage {
+        let text = try!(tree.text.as_ref());
+
+        match &text[..] {
+            "read" => Usage::Read,
+            "write" => Usage::Write,
+            "read-write" => Usage::ReadWrite,
+            _ => panic!("unknown usage variant: {}", text),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct EnumeratedValues {
+    pub name: Option<String>,
+    pub usage: Option<Usage>,
+    pub derived_from: Option<String>,
+    pub values: Vec<EnumeratedValue>,
+}
+
+impl EnumeratedValues {
+    fn parse(tree: &Element) -> EnumeratedValues {
+        assert_eq!(tree.name, "enumeratedValues");
+
+        EnumeratedValues {
+            name: tree.get_child_text("name"),
+            usage: tree.get_child("usage").map(Usage::parse),
+            derived_from: tree.attributes.get(&"derivedFrom".to_owned())
+                .map(|s| s.to_owned()),
+            values: tree.children.iter()
+                .filter_map(EnumeratedValue::parse)
+                .collect(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Choice {
+    value: Option<u32>,
+    is_default: Option<bool>,
+}
+
+impl Choice {
+    fn parse(tree: &Element) -> Choice {
+        Choice {
+            value: try!(tree.get_child_text("value")).parse().ok(),
+            is_default: try!(tree.get_child_text("isDefault")).parse().ok(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct EnumeratedValue {
+    pub name: String,
+    pub description: Option<String>,
+    pub choice: Option<Choice>,
+    pub value: u32,
+}
+
+impl EnumeratedValue {
+    fn parse(tree: &Element) -> Option<EnumeratedValue> {
+        if tree.name != "enumeratedValue" {
+            return None;
+        }
+
+        Some(EnumeratedValue {
+            name: try!(tree.get_child_text("name")),
+            description: tree.get_child_text("description"),
+            choice: tree.get_child("choice").map(Choice::parse),
+            value: try!(parse::u32(try!(tree.get_child("value")))),
+        })
     }
 }
