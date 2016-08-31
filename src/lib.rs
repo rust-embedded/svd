@@ -161,7 +161,7 @@ impl Register {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Access {
     ReadOnly,
     ReadWrite,
