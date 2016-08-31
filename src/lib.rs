@@ -305,25 +305,9 @@ impl EnumeratedValues {
 }
 
 #[derive(Debug)]
-pub struct Choice {
-    value: Option<u32>,
-    is_default: Option<bool>,
-}
-
-impl Choice {
-    fn parse(tree: &Element) -> Choice {
-        Choice {
-            value: try!(tree.get_child_text("value")).parse().ok(),
-            is_default: try!(tree.get_child_text("isDefault")).parse().ok(),
-        }
-    }
-}
-
-#[derive(Debug)]
 pub struct EnumeratedValue {
     pub name: String,
     pub description: Option<String>,
-    pub choice: Option<Choice>,
     pub value: u32,
 }
 
@@ -336,7 +320,6 @@ impl EnumeratedValue {
         Some(EnumeratedValue {
             name: try!(tree.get_child_text("name")),
             description: tree.get_child_text("description"),
-            choice: tree.get_child("choice").map(Choice::parse),
             value: try!(parse::u32(try!(tree.get_child("value")))),
         })
     }
