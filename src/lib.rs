@@ -310,7 +310,8 @@ impl EnumeratedValues {
 pub struct EnumeratedValue {
     pub name: String,
     pub description: Option<String>,
-    pub value: u32,
+    pub value: Option<u32>,
+    pub is_default: Option<bool>,
 }
 
 impl EnumeratedValue {
@@ -322,7 +323,8 @@ impl EnumeratedValue {
         Some(EnumeratedValue {
             name: try!(tree.get_child_text("name")),
             description: tree.get_child_text("description"),
-            value: try!(parse::u32(try!(tree.get_child("value")))),
+            value: tree.get_child("value").map(|t| try!(parse::u32(t))),
+            is_default: tree.get_child_text("isDefault").map(|t| try!(t.parse())),
         })
     }
 }
