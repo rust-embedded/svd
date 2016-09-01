@@ -218,7 +218,7 @@ pub struct BitRange {
 
 impl BitRange {
     fn parse(tree: &Element) -> BitRange {
-        let (start, end) = if let Some(range) = tree.get_child("bitRange") {
+        let (end, start): (u32, u32) = if let Some(range) = tree.get_child("bitRange") {
             let text = try!(range.text.as_ref());
 
             assert!(text.starts_with('['));
@@ -229,7 +229,7 @@ impl BitRange {
             (try!(try!(parts.next()).parse()), try!(try!(parts.next()).parse()))
         } else if let (Some(lsb), Some(msb)) = (tree.get_child_text("lsb"),
                                                                    tree.get_child_text("msb")) {
-            (try!(lsb.parse()), try!(msb.parse::<u32>()))
+            (try!(msb.parse()), try!(lsb.parse::<u32>()))
         } else {
             return BitRange {
                 offset: try!(try!(tree.get_child_text("bitOffset")).parse()),
