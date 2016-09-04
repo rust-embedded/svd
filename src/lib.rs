@@ -164,7 +164,7 @@ impl Register {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Access {
     ReadOnly,
     ReadWrite,
@@ -193,6 +193,8 @@ pub struct Field {
     pub name: String,
     pub description: Option<String>,
     pub bit_range: BitRange,
+    pub access: Option<Access>,
+    pub enumerated_values: Option<EnumeratedValues>,
 }
 
 impl Field {
@@ -203,6 +205,10 @@ impl Field {
             name: try!(tree.get_child_text("name")),
             description: tree.get_child_text("description"),
             bit_range: BitRange::parse(tree),
+            access: tree.get_child("access").map(Access::parse),
+
+            enumerated_values:
+                tree.get_child("enumeratedValues").map(EnumeratedValues::parse),
         }
     }
 }
@@ -215,7 +221,7 @@ pub struct BitRange {
 
 impl BitRange {
     fn parse(tree: &Element) -> BitRange {
-        let (start, end) = if let Some(range) = tree.get_child("bitRange") {
+        let (end, start): (u32, u32) = if let Some(range) = tree.get_child("bitRange") {
             let text = try!(range.text.as_ref());
 
             assert!(text.starts_with('['));
@@ -226,7 +232,7 @@ impl BitRange {
             (try!(try!(parts.next()).parse()), try!(try!(parts.next()).parse()))
         } else if let (Some(lsb), Some(msb)) = (tree.get_child_text("lsb"),
                                                                    tree.get_child_text("msb")) {
-            (try!(lsb.parse()), try!(msb.parse::<u32>()))
+            (try!(msb.parse()), try!(lsb.parse::<u32>()))
         } else {
             return BitRange {
                 offset: try!(try!(tree.get_child_text("bitOffset")).parse()),
@@ -256,5 +262,72 @@ impl Defaults {
             reset_value: tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
             reset_mask: tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
         }
+    }
+}
+
+#[derive(Debug)]
+pub enum Usage {
+    Read,
+    Write,
+    ReadWrite,
+}
+
+impl Usage {
+    fn parse(tree: &Element) -> Usage {
+        let text = try!(tree.text.as_ref());
+
+        match &text[..] {
+            "read" => Usage::Read,
+            "write" => Usage::Write,
+            "read-write" => Usage::ReadWrite,
+            _ => panic!("unknown usage variant: {}", text),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct EnumeratedValues {
+    pub name: Option<String>,
+    pub usage: Option<Usage>,
+    pub derived_from: Option<String>,
+    pub values: Vec<EnumeratedValue>,
+}
+
+impl EnumeratedValues {
+    fn parse(tree: &Element) -> EnumeratedValues {
+        assert_eq!(tree.name, "enumeratedValues");
+
+        EnumeratedValues {
+            name: tree.get_child_text("name"),
+            usage: tree.get_child("usage").map(Usage::parse),
+            derived_from: tree.attributes.get(&"derivedFrom".to_owned())
+                .map(|s| s.to_owned()),
+            values: tree.children.iter()
+                .filter_map(EnumeratedValue::parse)
+                .collect(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct EnumeratedValue {
+    pub name: String,
+    pub description: Option<String>,
+    pub value: Option<u32>,
+    pub is_default: Option<bool>,
+}
+
+impl EnumeratedValue {
+    fn parse(tree: &Element) -> Option<EnumeratedValue> {
+        if tree.name != "enumeratedValue" {
+            return None;
+        }
+
+        Some(EnumeratedValue {
+            name: try!(tree.get_child_text("name")),
+            description: tree.get_child_text("description"),
+            value: tree.get_child("value").map(|t| try!(parse::u32(t))),
+            is_default: tree.get_child_text("isDefault").map(|t| try!(t.parse())),
+        })
     }
 }

@@ -19,6 +19,7 @@ main() {
         Toshiba/M368
         Toshiba/M369
         Toshiba/M36B
+        SiliconLabs/SIM3L1x8_SVD
     )
 
     rm -rf tests
