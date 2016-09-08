@@ -84,6 +84,7 @@ impl Device {
 #[derive(Debug)]
 pub struct Peripheral {
     pub name: String,
+    pub group_name: Option<String>,
     pub description: Option<String>,
     pub base_address: u32,
     pub interrupt: Option<Interrupt>,
@@ -97,6 +98,7 @@ impl Peripheral {
 
         Peripheral {
             name: try!(tree.get_child_text("name")),
+            group_name: tree.get_child_text("groupName"),
             description: tree.get_child_text("description"),
             base_address: try!(parse::u32(try!(tree.get_child("baseAddress")))),
             interrupt: tree.get_child("interrupt").map(Interrupt::parse),
