@@ -215,7 +215,7 @@ impl Field {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct BitRange {
     pub offset: u32,
     pub width: u32,
