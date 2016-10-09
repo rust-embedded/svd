@@ -1,6 +1,11 @@
 [package]
 authors = ["Jorge Aparicio <japaricious@gmail.com>"]
-name = "svd"
+description = "A crate to play with the STM32F3DISCOVERY"
+documentation = "https://docs.rs/svd-parser"
+keywords = ["CMSIS", "SVD", "parser"]
+license = "MIT OR Apache-2.0"
+name = "svd-parser"
+repository = "https://github.com/japaric/svd"
 version = "0.1.0"
 
 [dependencies]

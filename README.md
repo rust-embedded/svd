@@ -2,11 +2,11 @@
 
 [status]: https://travis-ci.org/japaric/svd.svg?branch=master
 
-# `svd`
+# `svd-parser`
 
-> A WIP CMSIS-SVD file parser
+> A CMSIS-SVD file parser
 
-## ["Documentation"](https://japaric.github.io/svd/svd/)
+## ["Documentation"](https://docs.rs/svd-parser)
 
 ## License
 

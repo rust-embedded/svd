@@ -1,14 +1,18 @@
-//! WIP CMSIS-SVD file parser
+//! CMSIS-SVD file parser
 //!
-//! Early stage. Not much documentation at the moment but here's some starting code:
+//! # Usage
 //!
-//! ``` ignore
-//! extern crate svd;
+//! ``` no_run
+//! extern crate svd_parser as svd;
 //!
-//! use svd::Device;
+//! use std::fs::File;
+//! use std::io::Read;
 //!
 //! fn main() {
-//!     println!("{:?}", Device::parse(include_str!("/path/to/file.svd")));
+//!     let xml = &mut String::new();
+//!     File::open("STM32F30x.svd").unwrap().read_to_string(xml);
+//!
+//!     println!("{:?}", svd::parse(xml));
 //! }
 //! ```
 //!
@@ -31,6 +35,11 @@ macro_rules! try {
 }
 
 mod parse;
+
+/// Parses the contents of a SVD file (XML)
+pub fn parse(xml: &str) -> Device {
+    Device::parse(xml)
+}
 
 trait ElementExt {
     fn get_child_text<K>(&self, k: K) -> Option<String> where String: PartialEq<K>;
