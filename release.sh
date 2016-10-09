@@ -14,6 +14,8 @@ main() {
     git commit -m 'clean up'
 
     cargo publish
+
+    rm -rf $td
 }
 
 main
