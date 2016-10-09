@@ -31,9 +31,8 @@ main() {
         cat >"$tests_dir/$vendor.rs" <<EOF
 #![allow(non_snake_case)]
 
-extern crate svd;
+extern crate svd_parser as svd;
 
-use svd::Device;
 EOF
 
         local device_path
@@ -52,7 +51,7 @@ EOF
 fn $device() {
     let xml = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/$device_path"));
 
-    Device::parse(xml);
+    svd::parse(xml);
 }
 EOF
         done
