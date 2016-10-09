@@ -1,6 +1,6 @@
 [package]
 authors = ["Jorge Aparicio <japaricious@gmail.com>"]
-description = "A crate to play with the STM32F3DISCOVERY"
+description = "A CMSIS-SVD file parser"
 documentation = "https://docs.rs/svd-parser"
 keywords = ["CMSIS", "SVD", "parser"]
 license = "MIT OR Apache-2.0"
