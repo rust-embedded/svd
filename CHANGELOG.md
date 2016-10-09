@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [v0.1.0] - 2016-10-09
+## v0.1.0 - 2016-10-09
 
 ### Added
 
 - Initial SVD parser
 - A `parse` utility function to parse the contents of a SVD file (XML)
 
-[Unreleased]: https://github.com/japaric/rustc-cfg/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/japaric/svd/compare/v0.1.0...HEAD
