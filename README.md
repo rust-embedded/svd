@@ -1,6 +1,6 @@
-[![Build Status][status]](https://travis-ci.org/japaric/svd)
-
-[status]: https://travis-ci.org/japaric/svd.svg?branch=master
+[![Build status](https://travis-ci.org/japaric/svd.svg?branch=master)](https://travis-ci.org/japaric/svd)
+[![crates.io](https://img.shields.io/crates/d/svd-parser.svg)](https://crates.io/crates/svd-parser)
+[![crates.io](https://img.shields.io/crates/v/svd-parser.svg)](https://crates.io/crates/svd-parser)
 
 # `svd-parser`
 
