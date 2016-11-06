@@ -264,6 +264,7 @@ pub struct Defaults {
     pub size: Option<u32>,
     pub reset_value: Option<u32>,
     pub reset_mask: Option<u32>,
+    pub access: Option<Access>,
 }
 
 impl Defaults {
@@ -272,6 +273,7 @@ impl Defaults {
             size: tree.get_child("size").map(|t| try!(parse::u32(t))),
             reset_value: tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
             reset_mask: tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
+            access: tree.get_child("access").map(Access::parse),
         }
     }
 }
