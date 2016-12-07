@@ -62,7 +62,7 @@ impl ElementExt for Element {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Device {
     pub name: String,
     pub peripherals: Vec<Peripheral>,
@@ -90,7 +90,7 @@ impl Device {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Peripheral {
     pub name: String,
     pub group_name: Option<String>,
@@ -123,7 +123,7 @@ impl Peripheral {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Interrupt {
     pub name: String,
     pub description: Option<String>,
@@ -140,7 +140,7 @@ impl Interrupt {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Register {
     pub name: String,
     pub description: String,
@@ -199,7 +199,7 @@ impl Access {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Field {
     pub name: String,
     pub description: Option<String>,
@@ -259,7 +259,7 @@ impl BitRange {
 }
 
 /// Register default properties
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Defaults {
     pub size: Option<u32>,
     pub reset_value: Option<u32>,
@@ -278,7 +278,7 @@ impl Defaults {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum Usage {
     Read,
     Write,
@@ -298,7 +298,7 @@ impl Usage {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct EnumeratedValues {
     pub name: Option<String>,
     pub usage: Option<Usage>,
@@ -322,7 +322,7 @@ impl EnumeratedValues {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct EnumeratedValue {
     pub name: String,
     pub description: Option<String>,
