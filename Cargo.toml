@@ -6,7 +6,7 @@ keywords = ["CMSIS", "SVD", "parser"]
 license = "MIT OR Apache-2.0"
 name = "svd-parser"
 repository = "https://github.com/japaric/svd"
-version = "0.1.2"
+version = "0.1.3"
 
 [dependencies]
 xmltree = "0.3.2"
