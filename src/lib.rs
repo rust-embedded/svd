@@ -219,6 +219,9 @@ impl Register {
             Some(_) => {
                 let array_info = RegisterArrayInfo::parse(tree);
                 assert!(info.name.contains("%s"));
+                if let Some(ref indices) = array_info.dim_index {
+                    assert_eq!(array_info.dim as usize, indices.len())
+                }
                 Some(Register::Array(info, array_info))
             },
             None => Some(Register::Single(info))

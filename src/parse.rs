@@ -19,7 +19,7 @@ pub fn dim_index(text: &str) -> Vec<String> {
     if text.contains('-') {
         let mut parts = text.splitn(2, '-');
         let start = try!(try!(parts.next()).parse::<u32>());
-        let end = try!(try!(parts.next()).parse());
+        let end = try!(try!(parts.next()).parse::<u32>()) + 1;
 
         (start..end).map(|i| i.to_string()).collect()
     } else if text.contains(',') {
