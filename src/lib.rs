@@ -218,6 +218,7 @@ impl Register {
         match tree.get_child("dimIncrement") {
             Some(_) => {
                 let array_info = RegisterArrayInfo::parse(tree);
+                assert!(info.name.contains("%s"));
                 Some(Register::Array(info, array_info))
             },
             None => Some(Register::Single(info))
