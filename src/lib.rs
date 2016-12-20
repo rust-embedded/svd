@@ -199,7 +199,7 @@ impl RegisterArrayInfo {
         RegisterArrayInfo {
             dim: try!(tree.get_child_text("dim").unwrap().parse::<u32>()),
             dim_increment: try!(tree.get_child("dimIncrement").map(|t| try!(parse::u32(t)))),
-            dim_index: None
+            dim_index: tree.get_child("dimIndex").map(|c| parse::dim_index(try!(c.text.as_ref()))),
         }
     }
 }

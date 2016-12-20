@@ -14,3 +14,17 @@ pub fn u32(tree: &Element) -> Option<u32> {
         text.parse().ok()
     }
 }
+
+pub fn dim_index(text: &str) -> Vec<String> {
+    if text.contains('-') {
+        let mut parts = text.splitn(2, '-');
+        let start = try!(try!(parts.next()).parse::<u32>());
+        let end = try!(try!(parts.next()).parse());
+
+        (start..end).map(|i| i.to_string()).collect()
+    } else if text.contains(',') {
+        text.split(',').map(|s| s.to_string()).collect()
+    } else {
+        unreachable!()
+    }
+}
