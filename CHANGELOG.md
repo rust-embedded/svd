@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.2.0] - 2016-12-21
+
+### Added
+
+- Support for "register arrays". This converted the `struct Register` into an
+  `enum` (to represent normal registers and register arrays) thus breaking
+  construction of this item (which should be pretty rare).
+
 ## [v0.1.2] - 2016-12-07
 
 ### Added
