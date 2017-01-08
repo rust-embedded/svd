@@ -1,19 +1,23 @@
-cache: cargo
 dist: trusty
-env: TARGET=x86_64-unknown-linux-gnu
 language: rust
 services: docker
 sudo: required
 
 rust:
-  - stable
   - nightly
+  - stable
+
+env: TARGET=x86_64-unknown-linux-gnu
+
+install:
+  - sh ci/install.sh
+  - source ~/.cargo/env || true
 
 script:
-  - bash generate-tests.sh
-  - cargo generate-lockfile
-  - sh ci/run-docker.sh $TARGET
-  # Travis can't cache files that are not readable by "others"
+  - sh ci/script.sh
+
+cache: cargo
+before_cache:
   - chmod -R a+r $HOME/.cargo
 
 branches:
