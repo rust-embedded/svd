@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.3.0] - 2017-02-18
+
+### Changed
+
+- The type of `Field.enumeratedValues` changed from `Option<EnumeratedValues>`
+  to `Vec<EnumeratedValues>` to properly reflect what the SVD allows.
+
 ## [v0.2.0] - 2016-12-21
 
 ### Added
@@ -34,7 +41,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Initial SVD parser
 - A `parse` utility function to parse the contents of a SVD file (XML)
 
-[Unreleased]: https://github.com/japaric/svd/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/japaric/svd/compare/v0.3.0...HEAD
+[v0.3.0]: https://github.com/japaric/svd/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/japaric/svd/compare/v0.1.2...v0.2.0
 [v0.1.2]: https://github.com/japaric/svd/compare/v0.1.1...v0.1.2
 [v0.1.1]: https://github.com/japaric/svd/compare/v0.1.0...v0.1.1
