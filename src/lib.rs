@@ -99,7 +99,7 @@ pub struct Peripheral {
     pub group_name: Option<String>,
     pub description: Option<String>,
     pub base_address: u32,
-    pub interrupt: Option<Interrupt>,
+    pub interrupt: Vec<Interrupt>,
     /// `None` indicates that the `<registers>` node is not present
     pub registers: Option<Vec<Register>>,
     pub derived_from: Option<String>,
@@ -114,7 +114,11 @@ impl Peripheral {
             group_name: tree.get_child_text("groupName"),
             description: tree.get_child_text("description"),
             base_address: try!(parse::u32(try!(tree.get_child("baseAddress")))),
-            interrupt: tree.get_child("interrupt").map(Interrupt::parse),
+            interrupt: tree.children
+                .iter()
+                .filter(|t| t.name == "interrupt")
+                .map(Interrupt::parse)
+                .collect::<Vec<_>>(),
             registers: tree.get_child("registers")
                 .map(|rs| {
                     rs.children
@@ -297,25 +301,27 @@ pub struct BitRange {
 
 impl BitRange {
     fn parse(tree: &Element) -> BitRange {
-        let (end, start): (u32, u32) = if let Some(range) =
-            tree.get_child("bitRange") {
-            let text = try!(range.text.as_ref());
+        let (end, start): (u32, u32) =
+            if let Some(range) = tree.get_child("bitRange") {
+                let text = try!(range.text.as_ref());
 
-            assert!(text.starts_with('['));
-            assert!(text.ends_with(']'));
+                assert!(text.starts_with('['));
+                assert!(text.ends_with(']'));
 
-            let mut parts = text[1..text.len() - 1].split(':');
+                let mut parts = text[1..text.len() - 1].split(':');
 
-            (try!(try!(parts.next()).parse()), try!(try!(parts.next()).parse()))
-        } else if let (Some(lsb), Some(msb)) =
-            (tree.get_child_text("lsb"), tree.get_child_text("msb")) {
-            (try!(msb.parse()), try!(lsb.parse::<u32>()))
-        } else {
-            return BitRange {
-                offset: try!(try!(tree.get_child_text("bitOffset")).parse()),
-                width: try!(try!(tree.get_child_text("bitWidth")).parse()),
+                (try!(try!(parts.next()).parse()),
+                 try!(try!(parts.next()).parse()))
+            } else if let (Some(lsb), Some(msb)) =
+                (tree.get_child_text("lsb"), tree.get_child_text("msb")) {
+                (try!(msb.parse()), try!(lsb.parse::<u32>()))
+            } else {
+                return BitRange {
+                    offset: try!(try!(tree.get_child_text("bitOffset"))
+                        .parse()),
+                    width: try!(try!(tree.get_child_text("bitWidth")).parse()),
+                };
             };
-        };
 
         BitRange {
             offset: start,
