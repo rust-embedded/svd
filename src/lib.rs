@@ -69,6 +69,8 @@ pub struct Device {
     pub name: String,
     pub peripherals: Vec<Peripheral>,
     pub defaults: Defaults,
+    // Reserve the right to add more fields to this struct
+    _extensible: (),
 }
 
 impl Device {
@@ -88,6 +90,7 @@ impl Device {
                 .map(Peripheral::parse)
                 .collect(),
             defaults: Defaults::parse(tree),
+            _extensible: (),
         }
     }
 }
@@ -102,6 +105,8 @@ pub struct Peripheral {
     /// `None` indicates that the `<registers>` node is not present
     pub registers: Option<Vec<Register>>,
     pub derived_from: Option<String>,
+    // Reserve the right to add more fields to this struct
+    _extensible: (),
 }
 
 impl Peripheral {
@@ -126,6 +131,7 @@ impl Peripheral {
                              .collect()
                      }),
             derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
+            _extensible: (),
         }
     }
 }
@@ -158,6 +164,8 @@ pub struct RegisterInfo {
     pub reset_mask: Option<u32>,
     /// `None` indicates that the `<fields>` node is not present
     pub fields: Option<Vec<Field>>,
+    // Reserve the right to add more fields to this struct
+    _extensible: (),
 }
 
 #[derive(Clone, Debug)]
@@ -196,6 +204,7 @@ impl RegisterInfo {
             reset_mask: tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
             fields: tree.get_child("fields")
                 .map(|fs| fs.children.iter().map(Field::parse).collect()),
+            _extensible: (),
         }
     }
 }
@@ -268,6 +277,8 @@ pub struct Field {
     pub access: Option<Access>,
     pub enumerated_values: Vec<EnumeratedValues>,
     pub write_constraint: Option<WriteConstraint>,
+    // Reserve the right to add more fields to this struct
+    _extensible: (),
 }
 
 impl Field {
@@ -286,6 +297,7 @@ impl Field {
                 .collect::<Vec<_>>(),
             write_constraint: tree.get_child("writeConstraint")
                 .map(WriteConstraint::parse),
+            _extensible: (),
         }
     }
 }
@@ -382,6 +394,8 @@ pub struct Defaults {
     pub reset_value: Option<u32>,
     pub reset_mask: Option<u32>,
     pub access: Option<Access>,
+    // Reserve the right to add more fields to this struct
+    _extensible: (),
 }
 
 impl Defaults {
@@ -391,6 +405,7 @@ impl Defaults {
             reset_value: tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
             reset_mask: tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
             access: tree.get_child("access").map(Access::parse),
+            _extensible: (),
         }
     }
 }
@@ -421,6 +436,8 @@ pub struct EnumeratedValues {
     pub usage: Option<Usage>,
     pub derived_from: Option<String>,
     pub values: Vec<EnumeratedValue>,
+    // Reserve the right to add more fields to this struct
+    _extensible: (),
 }
 
 impl EnumeratedValues {
@@ -437,6 +454,7 @@ impl EnumeratedValues {
                 .iter()
                 .filter_map(EnumeratedValue::parse)
                 .collect(),
+            _extensible: (),
         }
     }
 }
@@ -447,6 +465,8 @@ pub struct EnumeratedValue {
     pub description: Option<String>,
     pub value: Option<u32>,
     pub is_default: Option<bool>,
+    // Reserve the right to add more fields to this struct
+    _extensible: (),
 }
 
 impl EnumeratedValue {
@@ -460,6 +480,7 @@ impl EnumeratedValue {
                  description: tree.get_child_text("description"),
                  value: tree.get_child("value").map(|t| try!(parse::u32(t))),
                  is_default: tree.get_child_text("isDefault").map(|t| try!(t.parse())),
+                 _extensible: (),
              })
     }
 }
