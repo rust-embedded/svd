@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.5.0] - 2017-04-23
+
+### Added
+
+- [breaking-change] A WriteConstraint field to the Field struct.
+
+### Changed
+
+- [breaking-change]. Added a private field to Device, Peripheral, RegisterInfo,
+  RegisterArrayInfo, Defaults, EnumeratedValues and EnumeratedValue to be able
+  to add more fields to them in the future without technically breaking backward
+  compatibility.
+
 ## [v0.4.0] - 2017-04-03
 
 ### Changed
@@ -48,7 +61,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Initial SVD parser
 - A `parse` utility function to parse the contents of a SVD file (XML)
 
-[Unreleased]: https://github.com/japaric/svd/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/japaric/svd/compare/v0.5.0...HEAD
+[v0.5.0]: https://github.com/japaric/svd/compare/v0.4.0...v0.5.0
 [v0.4.0]: https://github.com/japaric/svd/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/japaric/svd/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/japaric/svd/compare/v0.1.2...v0.2.0
