@@ -375,7 +375,6 @@ impl WriteConstraintRange {
 
 #[derive(Clone, Copy, Debug)]
 pub enum WriteConstraint {
-    Invalid,
     WriteAsRead(bool),
     UseEnumeratedValues(bool),
     Range(WriteConstraintRange),
@@ -411,10 +410,10 @@ impl WriteConstraint {
                         ),
                     )
                 }
-                _ => WriteConstraint::Invalid,
+                v => panic!("unknown <writeConstraint> variant: {}", v),
             }
         } else {
-            WriteConstraint::Invalid
+            panic!("found more than one <WriteConstraint> element")
         }
     }
 }
