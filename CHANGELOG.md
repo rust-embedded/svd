@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.5.1] - 2017-04-29
+
+### Added
+
+- A WriteConstraint field to the RegisterInfo struct.
+
 ## [v0.5.0] - 2017-04-23
 
 ### Added
@@ -61,7 +67,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Initial SVD parser
 - A `parse` utility function to parse the contents of a SVD file (XML)
 
-[Unreleased]: https://github.com/japaric/svd/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/japaric/svd/compare/v0.5.1...HEAD
+[v0.5.1]: https://github.com/japaric/svd/compare/v0.5.0...v0.5.1
 [v0.5.0]: https://github.com/japaric/svd/compare/v0.4.0...v0.5.0
 [v0.4.0]: https://github.com/japaric/svd/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/japaric/svd/compare/v0.2.0...v0.3.0
