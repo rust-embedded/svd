@@ -173,6 +173,7 @@ pub struct RegisterInfo {
     pub reset_mask: Option<u32>,
     /// `None` indicates that the `<fields>` node is not present
     pub fields: Option<Vec<Field>>,
+    pub write_constraint: Option<WriteConstraint>,
     // Reserve the right to add more fields to this struct
     _extensible: (),
 }
@@ -218,6 +219,8 @@ impl RegisterInfo {
             fields:
                 tree.get_child("fields")
                     .map(|fs| fs.children.iter().map(Field::parse).collect()),
+            write_constraint: tree.get_child("writeConstraint")
+                .map(WriteConstraint::parse),
             _extensible: (),
         }
     }
