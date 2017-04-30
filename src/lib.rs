@@ -356,7 +356,7 @@ impl BitRange {
 
         BitRange {
             offset: start,
-            width: end - start + 1,
+            width: end + 1 - start,
         }
     }
 }
