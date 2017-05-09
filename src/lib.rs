@@ -18,9 +18,9 @@
 //!
 //! # References
 //!
-//! - [SVD Schema file](https://www.keil.com/pack/doc/CMSIS/SVD/html/group__schema__1__2__gr.html)
+//! - [SVD Schema file](https://www.keil.com/pack/doc/CMSIS/SVD/html/schema_1_2_gr.html)
 //! - [SVD file database](https://github.com/posborne/cmsis-svd/tree/master/data)
-//! - [Sample SVD file](https://www.keil.com/pack/doc/CMSIS/SVD/html/svd__example_pg.html)
+//! - [Sample SVD file](https://www.keil.com/pack/doc/CMSIS/SVD/html/svd_Example_pg.html)
 
 #![deny(warnings)]
 
