@@ -49,7 +49,7 @@ EOF
 fn $device() {
     let xml = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/$device_path"));
 
-    svd::parse(xml);
+    svd::parse(xml).unwrap();
 }
 EOF
         done

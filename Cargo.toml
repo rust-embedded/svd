@@ -10,3 +10,4 @@ version = "0.5.1"
 
 [dependencies]
 xmltree = "0.3.2"
+error-chain = "0.10.0"
