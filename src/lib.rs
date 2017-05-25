@@ -340,17 +340,12 @@ impl BitRange {
 
             (try!(try!(parts.next()).parse()), try!(try!(parts.next()).parse()))
         } else if let (Some(lsb), Some(msb)) =
-            (tree.get_child_text("lsb"), tree.get_child_text("msb")) {
-            (try!(msb.parse()), try!(lsb.parse::<u32>()))
+            (tree.get_child("lsb"), tree.get_child("msb")) {
+            (try!(parse::u32(msb)), try!(parse::u32(lsb)))
         } else {
             return BitRange {
-                       offset: try!(
-                try!(tree.get_child_text("bitOffset"))
-                    .parse()
-            ),
-                       width: {
-                           try!(try!(tree.get_child_text("bitWidth")).parse())
-                       },
+                       offset: try!(parse::u32(try!(tree.get_child("bitOffset")))),
+                       width: try!(parse::u32(try!(tree.get_child("bitWidth")))),
                    };
         };
 
