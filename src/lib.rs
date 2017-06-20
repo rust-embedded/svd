@@ -70,6 +70,7 @@ impl ElementExt for Element {
 #[derive(Clone, Debug)]
 pub struct Device {
     pub name: String,
+    pub cpu: Option<CPU>,
     pub peripherals: Vec<Peripheral>,
     pub defaults: Defaults,
     // Reserve the right to add more fields to this struct
@@ -87,6 +88,7 @@ impl Device {
 
         Device {
             name: try!(tree.get_child_text("name")),
+            cpu: tree.get_child("cpu").map(CPU::parse),
             peripherals: try!(tree.get_child("peripherals"))
                 .children
                 .iter()
@@ -95,6 +97,67 @@ impl Device {
             defaults: Defaults::parse(tree),
             _extensible: (),
         }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Endian {
+    Little,
+    Big,
+    Selectable,
+    Other
+}
+
+impl Endian {
+    fn parse(tree: &Element) -> Endian {
+        let text = try!(tree.text.as_ref());
+
+        match &text[..] {
+            "little" => Endian::Little,
+            "big" => Endian::Big,
+            "selectable" => Endian::Selectable,
+            "other" => Endian::Other,
+            _ => panic!("unknown endian variant: {}", text),
+        }
+    }
+}
+
+
+#[derive(Clone, Debug)]
+pub struct CPU {
+    pub name: String,
+    pub revision: String,
+    pub endian: Endian,
+    pub mpu_present: bool,
+    pub fpu_present: bool,
+    pub nvic_priority_bits: u32,
+    pub has_vendor_systick: bool,
+
+    // Reserve the right to add more fields to this struct
+    _extensible: (),
+}
+
+impl CPU {
+    fn parse(tree: &Element) -> CPU {
+        assert_eq!(tree.name, "cpu");
+
+        CPU {
+            name: try!(tree.get_child_text("name")),
+            revision: try!(tree.get_child_text("revision")),
+            endian: Endian::parse(try!(tree.get_child("endian"))),
+            mpu_present: try!(parse::bool(try!(tree.get_child("mpuPresent")))),
+            fpu_present: try!(parse::bool(try!(tree.get_child("fpuPresent")))),
+            nvic_priority_bits:
+                try!(parse::u32(try!(tree.get_child("nvicPrioBits")))),
+            has_vendor_systick:
+                try!(parse::bool(try!(tree.get_child("vendorSystickConfig")))),
+            
+            _extensible: (),
+        }
+    }
+
+    pub fn is_cortex_m(&self) -> bool {
+        self.name.starts_with("CM")
     }
 }
 
