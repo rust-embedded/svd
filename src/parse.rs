@@ -17,7 +17,11 @@ pub fn u32(tree: &Element) -> Option<u32> {
 
 pub fn bool(tree: &Element) -> Option<bool> {
     let text = try!(tree.text.as_ref());
-    text.parse::<bool>().ok()
+    match text.as_ref() {
+        "0" => Some(false),
+        "1" => Some(true),
+        _ => text.parse::<bool>().ok()
+    }
 }
 
 pub fn dim_index(text: &str) -> Vec<String> {
