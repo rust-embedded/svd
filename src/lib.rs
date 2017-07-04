@@ -70,7 +70,7 @@ impl ElementExt for Element {
 #[derive(Clone, Debug)]
 pub struct Device {
     pub name: String,
-    pub cpu: Option<CPU>,
+    pub cpu: Option<Cpu>,
     pub peripherals: Vec<Peripheral>,
     pub defaults: Defaults,
     // Reserve the right to add more fields to this struct
@@ -88,7 +88,7 @@ impl Device {
 
         Device {
             name: try!(tree.get_child_text("name")),
-            cpu: tree.get_child("cpu").map(CPU::parse),
+            cpu: tree.get_child("cpu").map(Cpu::parse),
             peripherals: try!(tree.get_child("peripherals"))
                 .children
                 .iter()
@@ -124,7 +124,7 @@ impl Endian {
 
 
 #[derive(Clone, Debug)]
-pub struct CPU {
+pub struct Cpu {
     pub name: String,
     pub revision: String,
     pub endian: Endian,
@@ -137,11 +137,11 @@ pub struct CPU {
     _extensible: (),
 }
 
-impl CPU {
-    fn parse(tree: &Element) -> CPU {
+impl Cpu {
+    fn parse(tree: &Element) -> Cpu {
         assert_eq!(tree.name, "cpu");
 
-        CPU {
+        Cpu {
             name: try!(tree.get_child_text("name")),
             revision: try!(tree.get_child_text("revision")),
             endian: Endian::parse(try!(tree.get_child("endian"))),
@@ -151,7 +151,7 @@ impl CPU {
                 try!(parse::u32(try!(tree.get_child("nvicPrioBits")))),
             has_vendor_systick:
                 try!(parse::bool(try!(tree.get_child("vendorSystickConfig")))),
-            
+
             _extensible: (),
         }
     }
