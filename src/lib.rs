@@ -249,9 +249,15 @@ pub struct RegisterArrayInfo {
 }
 
 #[derive(Clone, Debug)]
+pub struct RegisterClusterInfo {
+    pub registers: Option<Vec<Register>>,
+}
+
+#[derive(Clone, Debug)]
 pub enum Register {
     Single(RegisterInfo),
     Array(RegisterInfo, RegisterArrayInfo),
+    Cluster(RegisterInfo, RegisterClusterInfo),
 }
 
 impl Deref for Register {
@@ -261,6 +267,7 @@ impl Deref for Register {
         match *self {
             Register::Single(ref info) => info,
             Register::Array(ref info, _) => info,
+            Register::Cluster(ref info, _) => info,
         }
     }
 }
@@ -303,11 +310,24 @@ impl RegisterArrayInfo {
     }
 }
 
+impl RegisterClusterInfo {
+    fn parse(tree: &Element) -> RegisterClusterInfo {
+        RegisterClusterInfo {
+            registers: Some(tree.children.iter()
+                        .filter(|c| c.name == "register")
+                        .filter_map(Register::parse)
+                        .collect())
+        }
+    }
+}
+
 impl Register {
     // TODO handle "clusters", return `Register` not an `Option`
     fn parse(tree: &Element) -> Option<Register> {
         if tree.name == "cluster" {
-            return None;
+            let info = RegisterInfo::parse(tree);
+            let cluster = RegisterClusterInfo::parse(tree);
+            return Some(Register::Cluster(info, cluster));
         }
 
         assert_eq!(tree.name, "register");
