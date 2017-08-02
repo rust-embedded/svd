@@ -24,10 +24,12 @@
 
 #![deny(warnings)]
 
+extern crate either;
 extern crate xmltree;
 
 use std::ops::Deref;
 
+use either::Either;
 use xmltree::Element;
 
 macro_rules! try {
@@ -169,7 +171,7 @@ pub struct Peripheral {
     pub base_address: u32,
     pub interrupt: Vec<Interrupt>,
     /// `None` indicates that the `<registers>` node is not present
-    pub registers: Option<Vec<Register>>,
+    pub registers: Option<Vec<Either<Register, Cluster>>>,
     pub derived_from: Option<String>,
     // Reserve the right to add more fields to this struct
     _extensible: (),
@@ -189,15 +191,9 @@ impl Peripheral {
                 .filter(|t| t.name == "interrupt")
                 .map(Interrupt::parse)
                 .collect::<Vec<_>>(),
-            registers: tree.get_child("registers")
-                .map(
-                    |rs| {
-                        rs.children
-                            .iter()
-                            .filter_map(Register::parse)
-                            .collect()
-                    },
-                ),
+            registers: tree.get_child("registers").map(|rs| {
+                rs.children.iter().map(cluster_register_parse).collect()
+            }),
             derived_from: tree.attributes.get("derivedFrom").map(
                 |s| {
                     s.to_owned()
@@ -226,6 +222,21 @@ impl Interrupt {
 }
 
 #[derive(Clone, Debug)]
+pub struct ClusterInfo {
+    pub name: String,
+    pub description: String,
+    pub header_struct_name: String,
+    pub address_offset: u32,
+    pub size: Option<u32>,
+    pub access: Option<Access>,
+    pub reset_value: Option<u32>,
+    pub reset_mask: Option<u32>,
+    pub children: Vec<Either<Register, Cluster>>,
+    // Reserve the right to add more fields to this struct
+    _extensible: (),
+}
+
+#[derive(Clone, Debug)]
 pub struct RegisterInfo {
     pub name: String,
     pub description: String,
@@ -242,22 +253,62 @@ pub struct RegisterInfo {
 }
 
 #[derive(Clone, Debug)]
-pub struct RegisterArrayInfo {
+pub struct RegisterClusterArrayInfo {
     pub dim: u32,
     pub dim_increment: u32,
     pub dim_index: Option<Vec<String>>,
 }
 
+fn cluster_register_parse(tree: &Element) -> Either<Register, Cluster> {
+    if tree.name == "register" {
+        Either::Left(Register::parse(tree))
+    } else if tree.name == "cluster" {
+        Either::Right(Cluster::parse(tree))
+    } else {
+        unreachable!()
+    }
+}
+
+impl Cluster {
+    fn parse(tree: &Element) -> Cluster {
+        assert_eq!(tree.name, "cluster");
+
+        let info = ClusterInfo::parse(tree);
+
+        if tree.get_child("dimIncrement").is_some() {
+            let array_info = RegisterClusterArrayInfo::parse(tree);
+            assert!(info.name.contains("%s"));
+            if let Some(ref indices) = array_info.dim_index {
+                assert_eq!(array_info.dim as usize, indices.len())
+            }
+            Cluster::Array(info, array_info)
+        } else {
+            Cluster::Single(info)
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
-pub struct RegisterClusterInfo {
-    pub registers: Option<Vec<Register>>,
+pub enum Cluster {
+    Single(ClusterInfo),
+    Array(ClusterInfo, RegisterClusterArrayInfo),
+}
+
+impl Deref for Cluster {
+    type Target = ClusterInfo;
+
+    fn deref(&self) -> &ClusterInfo {
+        match *self {
+            Cluster::Single(ref info) => info,
+            Cluster::Array(ref info, _) => info,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
 pub enum Register {
     Single(RegisterInfo),
-    Array(RegisterInfo, RegisterArrayInfo),
-    Cluster(RegisterInfo, RegisterClusterInfo),
+    Array(RegisterInfo, RegisterClusterArrayInfo),
 }
 
 impl Deref for Register {
@@ -267,7 +318,31 @@ impl Deref for Register {
         match *self {
             Register::Single(ref info) => info,
             Register::Array(ref info, _) => info,
-            Register::Cluster(ref info, _) => info,
+        }
+    }
+}
+
+impl ClusterInfo {
+    fn parse(tree: &Element) -> ClusterInfo {
+        ClusterInfo {
+            name: try!(tree.get_child_text("name")),
+            description: try!(tree.get_child_text("description")),
+            header_struct_name: try!(tree.get_child_text("headerStructName")),
+            address_offset: {
+                try!(parse::u32(try!(tree.get_child("addressOffset"))))
+            },
+            size: tree.get_child("size").map(|t| try!(parse::u32(t))),
+            access: tree.get_child("access").map(Access::parse),
+            reset_value:
+                tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
+            reset_mask:
+                tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
+            children: tree.children
+                .iter()
+                .filter(|t| t.name == "register" || t.name == "cluster")
+                .map(cluster_register_parse)
+                .collect(),
+            _extensible: (),
         }
     }
 }
@@ -296,53 +371,35 @@ impl RegisterInfo {
     }
 }
 
-impl RegisterArrayInfo {
-    fn parse(tree: &Element) -> RegisterArrayInfo {
-        RegisterArrayInfo {
+impl RegisterClusterArrayInfo {
+    fn parse(tree: &Element) -> RegisterClusterArrayInfo {
+        RegisterClusterArrayInfo {
             dim: try!(tree.get_child_text("dim").unwrap().parse::<u32>()),
-            dim_increment: try!(
-                tree.get_child("dimIncrement")
-                    .map(|t| try!(parse::u32(t)))
-            ),
-            dim_index: tree.get_child("dimIndex")
-                .map(|c| parse::dim_index(try!(c.text.as_ref()))),
-        }
-    }
-}
-
-impl RegisterClusterInfo {
-    fn parse(tree: &Element) -> RegisterClusterInfo {
-        RegisterClusterInfo {
-            registers: Some(tree.children.iter()
-                        .filter(|c| c.name == "register")
-                        .filter_map(Register::parse)
-                        .collect())
+            dim_increment: try!(tree.get_child("dimIncrement").map(|t| {
+                try!(parse::u32(t))
+            })),
+            dim_index: tree.get_child("dimIndex").map(|c| {
+                parse::dim_index(try!(c.text.as_ref()))
+            }),
         }
     }
 }
 
 impl Register {
-    // TODO handle "clusters", return `Register` not an `Option`
-    fn parse(tree: &Element) -> Option<Register> {
-        if tree.name == "cluster" {
-            let info = RegisterInfo::parse(tree);
-            let cluster = RegisterClusterInfo::parse(tree);
-            return Some(Register::Cluster(info, cluster));
-        }
-
+    fn parse(tree: &Element) -> Register {
         assert_eq!(tree.name, "register");
 
         let info = RegisterInfo::parse(tree);
 
         if tree.get_child("dimIncrement").is_some() {
-            let array_info = RegisterArrayInfo::parse(tree);
+            let array_info = RegisterClusterArrayInfo::parse(tree);
             assert!(info.name.contains("%s"));
             if let Some(ref indices) = array_info.dim_index {
                 assert_eq!(array_info.dim as usize, indices.len())
             }
-            Some(Register::Array(info, array_info))
+            Register::Array(info, array_info)
         } else {
-            Some(Register::Single(info))
+            Register::Single(info)
         }
     }
 }
