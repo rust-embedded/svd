@@ -4,6 +4,8 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
+use helpers::*;
+
 macro_rules! try {
     ($e:expr) => {
         $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
@@ -19,8 +21,8 @@ pub enum Access {
     WriteOnly,
 }
 
-impl Access {
-    pub fn parse(tree: &Element) -> Access {
+impl Parse for Access {
+    fn parse(tree: &Element) -> Access {
         let text = try!(tree.text.as_ref());
 
         match &text[..] {
@@ -32,8 +34,10 @@ impl Access {
             _ => panic!("unknown access variant: {}", text),
         }
     }
+}
 
-    pub fn encode(&self) -> Element {
+impl Encode for Access {
+    fn encode(&self) -> Element {
         let text = match *self {
             Access::ReadOnly => String::from("read-only"),
             Access::ReadWrite => String::from("read-write"),

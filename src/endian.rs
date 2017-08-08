@@ -4,6 +4,8 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
+use helpers::*;
+
 macro_rules! try {
     ($e:expr) => {
         $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
@@ -18,8 +20,8 @@ pub enum Endian {
     Other
 }
 
-impl Endian {
-    pub fn parse(tree: &Element) -> Endian {
+impl Parse for Endian {
+    fn parse(tree: &Element) -> Endian {
         let text = try!(tree.text.as_ref());
 
         match &text[..] {
@@ -30,8 +32,10 @@ impl Endian {
             _ => panic!("unknown endian variant: {}", text),
         }
     }
+}
 
-    pub fn encode(&self) -> Element {
+impl Encode for Endian {
+    fn encode(&self) -> Element {
         let text = match *self {
             Endian::Little => String::from("little"),
             Endian::Big => String::from("big"),

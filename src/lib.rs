@@ -31,10 +31,15 @@ use std::ops::Deref;
 
 use xmltree::Element;
 
+mod helpers;
+use helpers::*;
+
 mod endian;
 pub use endian::*;
 mod access;
 pub use access::*;
+mod usage;
+pub use usage::*;
 
 macro_rules! try {
     ($e:expr) => {
@@ -460,26 +465,6 @@ impl Defaults {
                 tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
             access: tree.get_child("access").map(Access::parse),
             _extensible: (),
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Usage {
-    Read,
-    Write,
-    ReadWrite,
-}
-
-impl Usage {
-    fn parse(tree: &Element) -> Usage {
-        let text = try!(tree.text.as_ref());
-
-        match &text[..] {
-            "read" => Usage::Read,
-            "write" => Usage::Write,
-            "read-write" => Usage::ReadWrite,
-            _ => panic!("unknown usage variant: {}", text),
         }
     }
 }
