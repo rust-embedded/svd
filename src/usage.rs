@@ -19,7 +19,7 @@ pub enum Usage {
     ReadWrite,
 }
 
-impl Parse for Usage {
+impl ParseElem for Usage {
     fn parse(tree: &Element) -> Usage {
         let text = try!(tree.text.as_ref());
 
@@ -32,7 +32,7 @@ impl Parse for Usage {
     }
 }
 
-impl Encode for Usage {
+impl EncodeElem for Usage {
     fn encode(&self) -> Element {
         let text = match *self {
             Usage::Read => String::from("read"),

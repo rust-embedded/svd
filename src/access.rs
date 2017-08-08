@@ -21,7 +21,7 @@ pub enum Access {
     WriteOnly,
 }
 
-impl Parse for Access {
+impl ParseElem for Access {
     fn parse(tree: &Element) -> Access {
         let text = try!(tree.text.as_ref());
 
@@ -36,7 +36,7 @@ impl Parse for Access {
     }
 }
 
-impl Encode for Access {
+impl EncodeElem for Access {
     fn encode(&self) -> Element {
         let text = match *self {
             Access::ReadOnly => String::from("read-only"),

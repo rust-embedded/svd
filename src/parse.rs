@@ -1,5 +1,11 @@
 use xmltree::Element;
 
+macro_rules! try {
+    ($e:expr) => {
+        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
+    }
+}
+
 pub fn u32(tree: &Element) -> Option<u32> {
     let text = try!(tree.text.as_ref());
 

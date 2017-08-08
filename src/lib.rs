@@ -34,20 +34,24 @@ use xmltree::Element;
 mod helpers;
 use helpers::*;
 
+mod parse;
+
 mod endian;
 pub use endian::*;
 mod access;
 pub use access::*;
 mod usage;
 pub use usage::*;
+mod enumeratedvalue;
+pub use enumeratedvalue::*;
+mod enumeratedvalues;
+pub use enumeratedvalues::*;
 
 macro_rules! try {
     ($e:expr) => {
         $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
     }
 }
-
-mod parse;
 
 /// Parses the contents of a SVD file (XML)
 pub fn parse(xml: &str) -> Device {
@@ -466,66 +470,5 @@ impl Defaults {
             access: tree.get_child("access").map(Access::parse),
             _extensible: (),
         }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct EnumeratedValues {
-    pub name: Option<String>,
-    pub usage: Option<Usage>,
-    pub derived_from: Option<String>,
-    pub values: Vec<EnumeratedValue>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
-
-impl EnumeratedValues {
-    fn parse(tree: &Element) -> EnumeratedValues {
-        assert_eq!(tree.name, "enumeratedValues");
-
-        EnumeratedValues {
-            name: tree.get_child_text("name"),
-            usage: tree.get_child("usage").map(Usage::parse),
-            derived_from: tree.attributes
-                .get(&"derivedFrom".to_owned())
-                .map(|s| s.to_owned()),
-            values: tree.children
-                .iter()
-                .filter_map(EnumeratedValue::parse)
-                .collect(),
-            _extensible: (),
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct EnumeratedValue {
-    pub name: String,
-    pub description: Option<String>,
-    pub value: Option<u32>,
-    pub is_default: Option<bool>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
-
-impl EnumeratedValue {
-    fn parse(tree: &Element) -> Option<EnumeratedValue> {
-        if tree.name != "enumeratedValue" {
-            return None;
-        }
-
-        Some(
-            EnumeratedValue {
-                name: try!(tree.get_child_text("name")),
-                description: tree.get_child_text("description"),
-                value: tree.get_child("value").map(|t| try!(parse::u32(t))),
-                is_default: tree.get_child_text("isDefault").map(
-                    |t| {
-                        try!(t.parse())
-                    },
-                ),
-                _extensible: (),
-            },
-        )
     }
 }

@@ -20,7 +20,7 @@ pub enum Endian {
     Other
 }
 
-impl Parse for Endian {
+impl ParseElem for Endian {
     fn parse(tree: &Element) -> Endian {
         let text = try!(tree.text.as_ref());
 
@@ -34,7 +34,7 @@ impl Parse for Endian {
     }
 }
 
-impl Encode for Endian {
+impl EncodeElem for Endian {
     fn encode(&self) -> Element {
         let text = match *self {
             Endian::Little => String::from("little"),
