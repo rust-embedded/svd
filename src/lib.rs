@@ -24,11 +24,15 @@
 
 #![deny(warnings)]
 
+
 extern crate xmltree;
 
 use std::ops::Deref;
 
 use xmltree::Element;
+
+mod endian;
+pub use endian::*;
 
 macro_rules! try {
     ($e:expr) => {
@@ -96,28 +100,6 @@ impl Device {
                 .collect(),
             defaults: Defaults::parse(tree),
             _extensible: (),
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Endian {
-    Little,
-    Big,
-    Selectable,
-    Other
-}
-
-impl Endian {
-    fn parse(tree: &Element) -> Endian {
-        let text = try!(tree.text.as_ref());
-
-        match &text[..] {
-            "little" => Endian::Little,
-            "big" => Endian::Big,
-            "selectable" => Endian::Selectable,
-            "other" => Endian::Other,
-            _ => panic!("unknown endian variant: {}", text),
         }
     }
 }
