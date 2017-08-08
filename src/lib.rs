@@ -33,6 +33,8 @@ use xmltree::Element;
 
 mod endian;
 pub use endian::*;
+mod access;
+pub use access::*;
 
 macro_rules! try {
     ($e:expr) => {
@@ -305,30 +307,6 @@ impl Register {
             Some(Register::Array(info, array_info))
         } else {
             Some(Register::Single(info))
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Access {
-    ReadOnly,
-    ReadWrite,
-    ReadWriteOnce,
-    WriteOnce,
-    WriteOnly,
-}
-
-impl Access {
-    fn parse(tree: &Element) -> Access {
-        let text = try!(tree.text.as_ref());
-
-        match &text[..] {
-            "read-only" => Access::ReadOnly,
-            "read-write" => Access::ReadWrite,
-            "read-writeOnce" => Access::ReadWriteOnce,
-            "write-only" => Access::WriteOnly,
-            "writeOnce" => Access::WriteOnce,
-            _ => panic!("unknown access variant: {}", text),
         }
     }
 }
