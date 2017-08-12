@@ -46,6 +46,8 @@ mod enumeratedvalue;
 pub use enumeratedvalue::*;
 mod enumeratedvalues;
 pub use enumeratedvalues::*;
+mod defaults;
+pub use defaults::*;
 
 macro_rules! try {
     ($e:expr) => {
@@ -448,27 +450,3 @@ impl WriteConstraint {
     }
 }
 
-/// Register default properties
-#[derive(Clone, Copy, Debug)]
-pub struct Defaults {
-    pub size: Option<u32>,
-    pub reset_value: Option<u32>,
-    pub reset_mask: Option<u32>,
-    pub access: Option<Access>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
-
-impl Defaults {
-    fn parse(tree: &Element) -> Defaults {
-        Defaults {
-            size: tree.get_child("size").map(|t| try!(parse::u32(t))),
-            reset_value:
-                tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
-            reset_mask:
-                tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
-            access: tree.get_child("access").map(Access::parse),
-            _extensible: (),
-        }
-    }
-}

@@ -16,6 +16,10 @@ pub trait EncodeElem {
     fn encode(&self) -> Element;
 }
 
+pub trait EncodeChildren {
+    fn encode_children(&self, &Element) -> Element;
+}
+
 pub fn new_element(name: &str, text: Option<String>) -> Element {
     Element{
         name: String::from(name),
