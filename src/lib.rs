@@ -48,6 +48,10 @@ mod enumeratedvalues;
 pub use enumeratedvalues::*;
 mod defaults;
 pub use defaults::*;
+mod writeconstraintrange;
+pub use writeconstraintrange::*;
+mod writeconstraint;
+pub use writeconstraint::*;
 
 macro_rules! try {
     ($e:expr) => {
@@ -390,63 +394,4 @@ impl BitRange {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
-pub struct WriteConstraintRange {
-    pub min: u32,
-    pub max: u32,
-}
-
-impl WriteConstraintRange {
-    fn parse(tree: &Element) -> WriteConstraintRange {
-        WriteConstraintRange {
-            min: try!(try!(tree.get_child_text("minimum")).parse()),
-            max: try!(try!(tree.get_child_text("maximum")).parse()),
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug)]
-pub enum WriteConstraint {
-    WriteAsRead(bool),
-    UseEnumeratedValues(bool),
-    Range(WriteConstraintRange),
-}
-
-impl WriteConstraint {
-    fn parse(tree: &Element) -> WriteConstraint {
-        if tree.children.len() == 1 {
-            let ref field = tree.children[0].name;
-            // Write constraint can only be one of the following
-            match field.as_ref() {
-                "writeAsRead" => {
-                    WriteConstraint::WriteAsRead(
-                        try!(
-                            tree.get_child(field.as_ref())
-                                .map(|t| try!(parse::bool(t)))
-                        ),
-                    )
-                }
-                "useEnumeratedValues" => {
-                    WriteConstraint::UseEnumeratedValues(
-                        try!(
-                            tree.get_child(field.as_ref())
-                                .map(|t| try!(parse::bool(t)))
-                        ),
-                    )
-                }
-                "range" => {
-                    WriteConstraint::Range(
-                        try!(
-                            tree.get_child(field.as_ref())
-                                .map(WriteConstraintRange::parse)
-                        ),
-                    )
-                }
-                v => panic!("unknown <writeConstraint> variant: {}", v),
-            }
-        } else {
-            panic!("found more than one <WriteConstraint> element")
-        }
-    }
-}
 
