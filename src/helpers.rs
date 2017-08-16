@@ -12,6 +12,10 @@ pub trait ParseOption {
     fn parse(tree: &Element) -> Self;
 }
 
+pub trait ParseChildren {
+    fn parse_children(tree: &Element) -> Self;
+}
+
 pub trait EncodeElem {
     fn encode(&self) -> Element;
 }
@@ -19,6 +23,7 @@ pub trait EncodeElem {
 pub trait EncodeChildren {
     fn encode_children(&self, &Element) -> Element;
 }
+
 
 pub fn new_element(name: &str, text: Option<String>) -> Element {
     Element{
