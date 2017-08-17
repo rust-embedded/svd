@@ -54,6 +54,8 @@ mod writeconstraint;
 pub use writeconstraint::*;
 mod bitrange;
 pub use bitrange::*;
+mod interrupt;
+pub use interrupt::*;
 
 
 macro_rules! try {
@@ -210,22 +212,6 @@ impl Peripheral {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct Interrupt {
-    pub name: String,
-    pub description: Option<String>,
-    pub value: u32,
-}
-
-impl Interrupt {
-    fn parse(tree: &Element) -> Interrupt {
-        Interrupt {
-            name: try!(tree.get_child_text("name")),
-            description: tree.get_child_text("description"),
-            value: try!(parse::u32(try!(tree.get_child("value")))),
-        }
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct RegisterInfo {
