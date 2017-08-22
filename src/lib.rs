@@ -31,7 +31,6 @@ use xmltree::Element;
 
 mod helpers;
 use helpers::*;
-mod types;
 
 mod parse;
 
@@ -61,6 +60,14 @@ mod register;
 pub use register::*;
 mod registerinfo;
 pub use registerinfo::*;
+mod registerarrayinfo;
+pub use registerarrayinfo::*;
+mod peripheral;
+pub use peripheral::*;
+mod cpu;
+pub use cpu::*;
+mod device;
+pub use device::*;
 
 macro_rules! try {
     ($e:expr) => {
@@ -97,124 +104,8 @@ impl ElementExt for Element {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct Device {
-    pub name: String,
-    pub cpu: Option<Cpu>,
-    pub peripherals: Vec<Peripheral>,
-    pub defaults: Defaults,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
-
-impl Device {
-    /// Parses a SVD file
-    ///
-    /// # Panics
-    ///
-    /// If the input is an invalid SVD file (yay, no error handling)
-    pub fn parse(svd: &str) -> Device {
-        let tree = &try!(Element::parse(svd.as_bytes()));
-
-        Device {
-            name: try!(tree.get_child_text("name")),
-            cpu: tree.get_child("cpu").map(Cpu::parse),
-            peripherals: try!(tree.get_child("peripherals"))
-                .children
-                .iter()
-                .map(Peripheral::parse)
-                .collect(),
-            defaults: Defaults::parse(tree),
-            _extensible: (),
-        }
-    }
-}
 
 
-#[derive(Clone, Debug)]
-pub struct Cpu {
-    pub name: String,
-    pub revision: String,
-    pub endian: Endian,
-    pub mpu_present: bool,
-    pub fpu_present: bool,
-    pub nvic_priority_bits: u32,
-    pub has_vendor_systick: bool,
-
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
-
-impl Cpu {
-    fn parse(tree: &Element) -> Cpu {
-        assert_eq!(tree.name, "cpu");
-
-        Cpu {
-            name: try!(tree.get_child_text("name")),
-            revision: try!(tree.get_child_text("revision")),
-            endian: Endian::parse(try!(tree.get_child("endian"))),
-            mpu_present: try!(parse::bool(try!(tree.get_child("mpuPresent")))),
-            fpu_present: try!(parse::bool(try!(tree.get_child("fpuPresent")))),
-            nvic_priority_bits:
-                try!(parse::u32(try!(tree.get_child("nvicPrioBits")))),
-            has_vendor_systick:
-                try!(parse::bool(try!(tree.get_child("vendorSystickConfig")))),
-
-            _extensible: (),
-        }
-    }
-
-    pub fn is_cortex_m(&self) -> bool {
-        self.name.starts_with("CM")
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct Peripheral {
-    pub name: String,
-    pub group_name: Option<String>,
-    pub description: Option<String>,
-    pub base_address: u32,
-    pub interrupt: Vec<Interrupt>,
-    /// `None` indicates that the `<registers>` node is not present
-    pub registers: Option<Vec<Register>>,
-    pub derived_from: Option<String>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
-
-impl Peripheral {
-    fn parse(tree: &Element) -> Peripheral {
-        assert_eq!(tree.name, "peripheral");
-
-        Peripheral {
-            name: try!(tree.get_child_text("name")),
-            group_name: tree.get_child_text("groupName"),
-            description: tree.get_child_text("description"),
-            base_address: try!(parse::u32(try!(tree.get_child("baseAddress")))),
-            interrupt: tree.children
-                .iter()
-                .filter(|t| t.name == "interrupt")
-                .map(Interrupt::parse)
-                .collect::<Vec<_>>(),
-            registers: tree.get_child("registers")
-                .map(
-                    |rs| {
-                        rs.children
-                            .iter()
-                            .filter_map(Register::parse)
-                            .collect()
-                    },
-                ),
-            derived_from: tree.attributes.get("derivedFrom").map(
-                |s| {
-                    s.to_owned()
-                },
-            ),
-            _extensible: (),
-        }
-    }
-}
 
 
 
