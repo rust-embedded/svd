@@ -26,14 +26,12 @@
 
 
 extern crate xmltree;
-
 use xmltree::Element;
 
-mod helpers;
-use helpers::*;
 
 mod parse;
-
+mod helpers;
+use helpers::*;
 mod endian;
 pub use endian::*;
 mod access;
@@ -69,15 +67,18 @@ pub use cpu::*;
 mod device;
 pub use device::*;
 
+
 macro_rules! try {
     ($e:expr) => {
         $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
     }
 }
 
+
 /// Parses the contents of a SVD file (XML)
 pub fn parse(xml: &str) -> Device {
-    Device::parse(xml)
+    let tree = &try!(Element::parse(xml.as_bytes()));
+    Device::parse(tree)
 }
 
 trait ElementExt {
