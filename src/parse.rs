@@ -26,7 +26,7 @@ pub fn bool(tree: &Element) -> Option<bool> {
     match text.as_ref() {
         "0" => Some(false),
         "1" => Some(true),
-        _ => text.parse::<bool>().ok()
+        _ => text.parse::<bool>().ok(),
     }
 }
 

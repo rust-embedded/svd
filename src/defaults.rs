@@ -27,10 +27,8 @@ impl ParseElem for Defaults {
     fn parse(tree: &Element) -> Defaults {
         Defaults {
             size: tree.get_child("size").map(|t| try!(parse::u32(t))),
-            reset_value:
-                tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
-            reset_mask:
-                tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
+            reset_value: tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
+            reset_mask: tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
             access: tree.get_child("access").map(Access::parse),
             _extensible: (),
         }
@@ -42,25 +40,33 @@ impl EncodeChildren for Defaults {
         let mut children = Vec::new();
 
         match self.size {
-            Some(ref v) => { children.push(new_element("size", Some(format!("0x{:08.x}", v)))); },
+            Some(ref v) => {
+                children.push(new_element("size", Some(format!("0x{:08.x}", v))));
+            }
             None => (),
         };
 
         match self.reset_value {
-            Some(ref v) => { children.push(new_element("resetValue", Some(format!("0x{:08.x}", v)))); },
+            Some(ref v) => {
+                children.push(new_element("resetValue", Some(format!("0x{:08.x}", v))));
+            }
             None => (),
         };
 
         match self.reset_mask {
-            Some(ref v) => { children.push(new_element("resetMask", Some(format!("0x{:08.x}", v)))); },
+            Some(ref v) => {
+                children.push(new_element("resetMask", Some(format!("0x{:08.x}", v))));
+            }
             None => (),
         };
 
         match self.access {
-            Some(ref v) => { children.push(v.encode()); },
+            Some(ref v) => {
+                children.push(v.encode());
+            }
             None => (),
         };
-        
+
         children
     }
 }
@@ -71,14 +77,16 @@ mod tests {
 
     #[test]
     fn decode_encode() {
-        let example = String::from("
+        let example = String::from(
+            "
             <mock>
                 <size>0xaabbccdd</size>
                 <resetValue>0x11223344</resetValue>
                 <resetMask>0x00000000</resetMask>
                 <access>read-only</access>
             </mock>
-        ");
+        ",
+        );
 
         let expected = Defaults {
             size: Some(0xaabbccdd),

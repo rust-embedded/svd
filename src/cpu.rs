@@ -47,10 +47,8 @@ impl ParseElem for Cpu {
             endian: Endian::parse(try!(tree.get_child("endian"))),
             mpu_present: try!(parse::bool(try!(tree.get_child("mpuPresent")))),
             fpu_present: try!(parse::bool(try!(tree.get_child("fpuPresent")))),
-            nvic_priority_bits:
-                try!(parse::u32(try!(tree.get_child("nvicPrioBits")))),
-            has_vendor_systick:
-                try!(parse::bool(try!(tree.get_child("vendorSystickConfig")))),
+            nvic_priority_bits: try!(parse::u32(try!(tree.get_child("nvicPrioBits")))),
+            has_vendor_systick: try!(parse::bool(try!(tree.get_child("vendorSystickConfig")))),
 
             _extensible: (),
         }
@@ -59,7 +57,7 @@ impl ParseElem for Cpu {
 
 impl EncodeElem for Cpu {
     fn encode(&self) -> Element {
-        Element{
+        Element {
             name: String::from("cpu"),
             attributes: HashMap::new(),
             children: vec![
@@ -69,7 +67,10 @@ impl EncodeElem for Cpu {
                 new_element("mpuPresent", Some(format!("{}", self.mpu_present))),
                 new_element("fpuPresent", Some(format!("{}", self.fpu_present))),
                 new_element("nvicPrioBits", Some(format!("{}", self.nvic_priority_bits))),
-                new_element("vendorSystickConfig", Some(format!("{}", self.has_vendor_systick))),
+                new_element(
+                    "vendorSystickConfig",
+                    Some(format!("{}", self.has_vendor_systick))
+                ),
             ],
             text: None,
         }
@@ -84,16 +85,19 @@ mod tests {
     #[test]
     fn decode_encode() {
         let types = vec![
-            (Cpu{
-                name: String::from("EFM32JG12B500F512GM48"),
-                revision: String::from("5.1.1"),
-                endian: Endian::Little,
-                mpu_present: true,
-                fpu_present: true,
-                nvic_priority_bits: 8,
-                has_vendor_systick: false,
-                _extensible: (),
-            }, String::from("
+            (
+                Cpu {
+                    name: String::from("EFM32JG12B500F512GM48"),
+                    revision: String::from("5.1.1"),
+                    endian: Endian::Little,
+                    mpu_present: true,
+                    fpu_present: true,
+                    nvic_priority_bits: 8,
+                    has_vendor_systick: false,
+                    _extensible: (),
+                },
+                String::from(
+                    "
                 <cpu>
                     <name>EFM32JG12B500F512GM48</name>  
                     <revision>5.1.1</revision>
@@ -103,7 +107,9 @@ mod tests {
                     <nvicPrioBits>8</nvicPrioBits>
                     <vendorSystickConfig>false</vendorSystickConfig>
                 </cpu>
-            "))
+            ",
+                )
+            ),
         ];
 
         for (a, s) in types {
@@ -115,6 +121,3 @@ mod tests {
         }
     }
 }
-
-
-

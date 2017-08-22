@@ -17,7 +17,7 @@ pub enum Endian {
     Little,
     Big,
     Selectable,
-    Other
+    Other,
 }
 
 impl ParseElem for Endian {
@@ -43,7 +43,7 @@ impl EncodeElem for Endian {
             Endian::Other => String::from("other"),
         };
 
-        Element{
+        Element {
             name: String::from("endian"),
             attributes: HashMap::new(),
             children: Vec::new(),
@@ -59,10 +59,13 @@ mod tests {
     #[test]
     fn decode_encode() {
         let types = vec![
-            (Endian::Little,        String::from("<endian>little</endian>")),
-            (Endian::Big,           String::from("<endian>big</endian>")),
-            (Endian::Selectable,    String::from("<endian>selectable</endian>")),
-            (Endian::Other,         String::from("<endian>other</endian>"))
+            (Endian::Little, String::from("<endian>little</endian>")),
+            (Endian::Big, String::from("<endian>big</endian>")),
+            (
+                Endian::Selectable,
+                String::from("<endian>selectable</endian>")
+            ),
+            (Endian::Other, String::from("<endian>other</endian>")),
         ];
 
         for (e, s) in types {

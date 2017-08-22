@@ -28,30 +28,22 @@ impl EnumeratedValue {
     pub fn parse(tree: &Element) -> Option<EnumeratedValue> {
         assert_eq!(tree.name, "enumeratedValue");
 
-        Some(
-            EnumeratedValue {
-                name: try!(tree.get_child_text("name")),
-                description: tree.get_child_text("description"),
-                value: tree.get_child("value").map(|t| try!(parse::u32(t))),
-                is_default: tree.get_child_text("isDefault").map(
-                    |t| {
-                        try!(t.parse())
-                    },
-                ),
-                _extensible: (),
-            },
-        )
+        Some(EnumeratedValue {
+            name: try!(tree.get_child_text("name")),
+            description: tree.get_child_text("description"),
+            value: tree.get_child("value").map(|t| try!(parse::u32(t))),
+            is_default: tree.get_child_text("isDefault").map(|t| try!(t.parse())),
+            _extensible: (),
+        })
     }
 }
 
 impl EncodeElem for EnumeratedValue {
     fn encode(&self) -> Element {
-        let mut base = Element{
+        let mut base = Element {
             name: String::from("enumeratedValue"),
             attributes: HashMap::new(),
-            children: vec![
-                new_element("name", Some(self.name.clone())),
-            ],
+            children: vec![new_element("name", Some(self.name.clone()))],
             text: None,
         };
 
@@ -59,21 +51,27 @@ impl EncodeElem for EnumeratedValue {
             Some(ref d) => {
                 let s = (*d).clone();
                 base.children.push(new_element("description", Some(s)));
-            },
+            }
             None => (),
         };
 
         match self.value {
             Some(ref v) => {
-                base.children.push(new_element("value", Some(format!("0x{:08.x}", *v))));
-            },
+                base.children.push(new_element(
+                    "value",
+                    Some(format!("0x{:08.x}", *v)),
+                ));
+            }
             None => (),
         };
 
         match self.is_default {
             Some(ref v) => {
-                base.children.push(new_element("isDefault", Some(format!("{}", v))));
-            },
+                base.children.push(new_element(
+                    "isDefault",
+                    Some(format!("{}", v)),
+                ));
+            }
             None => (),
         };
 
@@ -88,17 +86,21 @@ mod tests {
 
     #[test]
     fn decode_encode() {
-        let example = String::from("
+        let example = String::from(
+            "
             <enumeratedValue>
                 <name>WS0</name>
                 <description>Zero wait-states inserted in fetch or read transfers</description>
                 <value>0x00000000</value>
                 <isDefault>true</isDefault>
             </enumeratedValue>
-        ");
-        let expected = EnumeratedValue{
+        ",
+        );
+        let expected = EnumeratedValue {
             name: String::from("WS0"),
-            description: Some(String::from("Zero wait-states inserted in fetch or read transfers")),
+            description: Some(String::from(
+                "Zero wait-states inserted in fetch or read transfers",
+            )),
             value: Some(0),
             is_default: Some(true),
             _extensible: (),

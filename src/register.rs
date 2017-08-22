@@ -51,14 +51,12 @@ impl ParseElem for Register {
 impl EncodeElem for Register {
     fn encode(&self) -> Element {
         match *self {
-            Register::Single(ref info) => {
-                info.encode()
-            },
+            Register::Single(ref info) => info.encode(),
             Register::Array(ref info, ref array_info) => {
                 // TODO: fix this (does not encode array stuff)
                 // Not even slightly sure what to do here
                 info.encode()
-            },
+            }
         }
     }
 }

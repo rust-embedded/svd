@@ -26,11 +26,10 @@ pub trait EncodeChildren {
 
 // Helper to assist with creation of simple elements
 pub fn new_element(name: &str, text: Option<String>) -> Element {
-    Element{
+    Element {
         name: String::from(name),
         attributes: HashMap::new(),
         children: Vec::new(),
         text: text,
     }
 }
-

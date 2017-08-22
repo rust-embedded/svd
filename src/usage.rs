@@ -40,7 +40,7 @@ impl EncodeElem for Usage {
             Usage::ReadWrite => String::from("read-write"),
         };
 
-        Element{
+        Element {
             name: String::from("usage"),
             attributes: HashMap::new(),
             children: Vec::new(),
@@ -56,8 +56,8 @@ mod tests {
     #[test]
     fn decode_encode() {
         let types = vec![
-            (Usage::Read,      String::from("<usage>read</usage>")),
-            (Usage::Write,     String::from("<usage>write</usage>")),
+            (Usage::Read, String::from("<usage>read</usage>")),
+            (Usage::Write, String::from("<usage>write</usage>")),
             (Usage::ReadWrite, String::from("<usage>read-write</usage>")),
         ];
 

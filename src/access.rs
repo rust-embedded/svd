@@ -46,7 +46,7 @@ impl EncodeElem for Access {
             Access::WriteOnce => String::from("writeOnce"),
         };
 
-        Element{
+        Element {
             name: String::from("access"),
             attributes: HashMap::new(),
             children: Vec::new(),
@@ -62,11 +62,23 @@ mod tests {
     #[test]
     fn decode_encode() {
         let types = vec![
-            (Access::ReadOnly,        String::from("<access>read-only</access>")),
-            (Access::ReadWrite,       String::from("<access>read-write</access>")),
-            (Access::ReadWriteOnce,   String::from("<access>read-writeOnce</access>")),
-            (Access::WriteOnly,       String::from("<access>write-only</access>")),
-            (Access::WriteOnce,       String::from("<access>writeOnce</access>"))
+            (Access::ReadOnly, String::from("<access>read-only</access>")),
+            (
+                Access::ReadWrite,
+                String::from("<access>read-write</access>")
+            ),
+            (
+                Access::ReadWriteOnce,
+                String::from("<access>read-writeOnce</access>")
+            ),
+            (
+                Access::WriteOnly,
+                String::from("<access>write-only</access>")
+            ),
+            (
+                Access::WriteOnce,
+                String::from("<access>writeOnce</access>")
+            ),
         ];
 
         for (a, s) in types {

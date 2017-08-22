@@ -44,15 +44,14 @@ impl ParseElem for RegisterInfo {
             },
             size: tree.get_child("size").map(|t| try!(parse::u32(t))),
             access: tree.get_child("access").map(Access::parse),
-            reset_value:
-                tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
-            reset_mask:
-                tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
-            fields:
-                tree.get_child("fields")
-                    .map(|fs| fs.children.iter().map(Field::parse).collect()),
-            write_constraint: tree.get_child("writeConstraint")
-                .map(WriteConstraint::parse),
+            reset_value: tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
+            reset_mask: tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
+            fields: tree.get_child("fields").map(|fs| {
+                fs.children.iter().map(Field::parse).collect()
+            }),
+            write_constraint: tree.get_child("writeConstraint").map(
+                WriteConstraint::parse,
+            ),
             _extensible: (),
         }
     }
@@ -60,55 +59,76 @@ impl ParseElem for RegisterInfo {
 
 impl EncodeElem for RegisterInfo {
     fn encode(&self) -> Element {
-        let mut elem = Element{
+        let mut elem = Element {
             name: String::from("register"),
             attributes: HashMap::new(),
             children: vec![
                 new_element("name", Some(self.name.clone())),
                 new_element("description", Some(self.description.clone())),
-                new_element("addressOffset", Some(format!("0x{:03.x}", self.address_offset))),
+                new_element(
+                    "addressOffset",
+                    Some(format!("0x{:03.x}", self.address_offset))
+                ),
             ],
             text: None,
         };
 
         match self.size {
-            Some(ref v) => { elem.children.push(new_element("size", Some(format!("{}", v)))); },
+            Some(ref v) => {
+                elem.children.push(
+                    new_element("size", Some(format!("{}", v))),
+                );
+            }
             None => (),
         };
 
         match self.access {
-            Some(ref v) => { elem.children.push( v.encode()); },
+            Some(ref v) => {
+                elem.children.push(v.encode());
+            }
             None => (),
         };
 
         match self.reset_value {
-            Some(ref v) => { elem.children.push(new_element("resetValue", Some(format!("0x{:08.x}", v)))); },
+            Some(ref v) => {
+                elem.children.push(new_element(
+                    "resetValue",
+                    Some(format!("0x{:08.x}", v)),
+                ));
+            }
             None => (),
         };
 
-         match self.reset_mask {
-            Some(ref v) => { elem.children.push(new_element("resetMask", Some(format!("0x{:08.x}", v)))); },
+        match self.reset_mask {
+            Some(ref v) => {
+                elem.children.push(new_element(
+                    "resetMask",
+                    Some(format!("0x{:08.x}", v)),
+                ));
+            }
             None => (),
         };
 
-         match self.fields {
-            Some(ref v) => { 
-                let fields = Element{
+        match self.fields {
+            Some(ref v) => {
+                let fields = Element {
                     name: String::from("fields"),
                     attributes: HashMap::new(),
                     children: v.iter().map(Field::encode).collect(),
                     text: None,
                 };
                 elem.children.push(fields);
-            },
+            }
             None => (),
         };
 
-         match self.write_constraint {
-            Some(ref v) => { elem.children.push(v.encode()); },
+        match self.write_constraint {
+            Some(ref v) => {
+                elem.children.push(v.encode());
+            }
             None => (),
         };
-        
+
         elem
     }
 }
@@ -122,29 +142,35 @@ mod tests {
     #[test]
     fn decode_encode() {
         let types = vec![
-            (RegisterInfo{
-                name: String::from("WRITECTRL"),
-                description: String::from("Write Control Register"),
-                address_offset: 8,
-                size: Some(32),
-                access: Some(Access::ReadWrite),
-                reset_value: Some(0x00000000),
-                reset_mask: Some(0x00000023),
-                fields: Some(vec![
-                    Field {
-                        name: String::from("WREN"),
-                        description: Some(String::from("Enable Write/Erase Controller")),
-                        bit_range: BitRange{offset: 0, width: 1, range_type: BitRangeType::OffsetWidth},
-                        access: Some(Access::ReadWrite),
-                        enumerated_values: Vec::new(),
-                        write_constraint: None,
-                        _extensible: (),
-                    }
-                ]),
-                write_constraint: None,
-                _extensible: (),
-            },
-            String::from("
+            (
+                RegisterInfo {
+                    name: String::from("WRITECTRL"),
+                    description: String::from("Write Control Register"),
+                    address_offset: 8,
+                    size: Some(32),
+                    access: Some(Access::ReadWrite),
+                    reset_value: Some(0x00000000),
+                    reset_mask: Some(0x00000023),
+                    fields: Some(vec![
+                        Field {
+                            name: String::from("WREN"),
+                            description: Some(String::from("Enable Write/Erase Controller")),
+                            bit_range: BitRange {
+                                offset: 0,
+                                width: 1,
+                                range_type: BitRangeType::OffsetWidth,
+                            },
+                            access: Some(Access::ReadWrite),
+                            enumerated_values: Vec::new(),
+                            write_constraint: None,
+                            _extensible: (),
+                        },
+                    ]),
+                    write_constraint: None,
+                    _extensible: (),
+                },
+                String::from(
+                    "
             <register>
                 <name>WRITECTRL</name>
                 <description>Write Control Register</description>
@@ -163,7 +189,9 @@ mod tests {
                     </field>
                 </fields>
             </register>
-            ")),
+            ",
+                )
+            ),
         ];
 
         for (a, s) in types {
@@ -175,6 +203,3 @@ mod tests {
         }
     }
 }
-
-
-

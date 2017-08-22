@@ -45,17 +45,17 @@ impl EncodeElem for Device {
         let mut elem = Element {
             name: String::from("device"),
             attributes: HashMap::new(),
-            children: vec![
-                new_element("name", Some(self.name.clone())),
-            ],
+            children: vec![new_element("name", Some(self.name.clone()))],
             text: None,
         };
 
         match self.cpu {
-            Some(ref v) => { elem.children.push(v.encode()); },
+            Some(ref v) => {
+                elem.children.push(v.encode());
+            }
             None => (),
         };
-        elem.children.push(Element{
+        elem.children.push(Element {
             name: String::from("peripherals"),
             attributes: HashMap::new(),
             children: self.peripherals.iter().map(Peripheral::encode).collect(),

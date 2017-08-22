@@ -42,8 +42,9 @@ impl ParseElem for Field {
                 .filter(|t| t.name == "enumeratedValues")
                 .map(EnumeratedValues::parse)
                 .collect::<Vec<_>>(),
-            write_constraint: tree.get_child("writeConstraint")
-                .map(WriteConstraint::parse),
+            write_constraint: tree.get_child("writeConstraint").map(
+                WriteConstraint::parse,
+            ),
             _extensible: (),
         }
     }
@@ -51,7 +52,7 @@ impl ParseElem for Field {
 
 impl EncodeElem for Field {
     fn encode(&self) -> Element {
-        let mut elem = Element{
+        let mut elem = Element {
             name: String::from("field"),
             attributes: HashMap::new(),
             children: vec![
@@ -65,15 +66,19 @@ impl EncodeElem for Field {
         elem.children.append(&mut self.bit_range.encode_children());
 
         match self.access {
-            Some(ref v) => { elem.children.push(v.encode()); },
+            Some(ref v) => {
+                elem.children.push(v.encode());
+            }
             None => (),
         };
 
-        let mut enumerated_values: Vec<Element> = self.enumerated_values.iter().map(|v| { v.encode() }).collect();
+        let mut enumerated_values: Vec<Element> = self.enumerated_values.iter().map(|v| v.encode()).collect();
         elem.children.append(&mut enumerated_values);
 
         match self.write_constraint {
-            Some(ref v) => { elem.children.push(v.encode()); },
+            Some(ref v) => {
+                elem.children.push(v.encode());
+            }
             None => (),
         };
 
@@ -91,31 +96,40 @@ mod tests {
     #[test]
     fn decode_encode() {
         let types = vec![
-            (Field{
-                name: String::from("MODE"),
-                description: Some(String::from("Read Mode")),
-                bit_range: BitRange{offset: 24, width: 2, range_type: BitRangeType::OffsetWidth},
-                access: Some(Access::ReadWrite),
-                enumerated_values: vec![
-                    EnumeratedValues {
-                    name: None,
-                    usage: None,
-                    derived_from: None,
-                    values: vec![ 
-                        EnumeratedValue {
-                            name: String::from("WS0"),
-                            description: Some(String::from("Zero wait-states inserted in fetch or read transfers")),
-                            value: Some(0),
-                            is_default: None,
+            (
+                Field {
+                    name: String::from("MODE"),
+                    description: Some(String::from("Read Mode")),
+                    bit_range: BitRange {
+                        offset: 24,
+                        width: 2,
+                        range_type: BitRangeType::OffsetWidth,
+                    },
+                    access: Some(Access::ReadWrite),
+                    enumerated_values: vec![
+                        EnumeratedValues {
+                            name: None,
+                            usage: None,
+                            derived_from: None,
+                            values: vec![
+                                EnumeratedValue {
+                                    name: String::from("WS0"),
+                                    description: Some(String::from(
+                                        "Zero wait-states inserted in fetch or read transfers",
+                                    )),
+                                    value: Some(0),
+                                    is_default: None,
+                                    _extensible: (),
+                                },
+                            ],
                             _extensible: (),
-                        }, 
+                        },
                     ],
+                    write_constraint: None,
                     _extensible: (),
-                }],
-                write_constraint: None,
-                _extensible: (),
-            },
-            String::from("
+                },
+                String::from(
+                    "
             <field>
               <name>MODE</name>
               <description>Read Mode</description>
@@ -130,7 +144,9 @@ mod tests {
                 </enumeratedValue>
               </enumeratedValues>
             </field>
-            ")),
+            ",
+                )
+            ),
         ];
 
         for (a, s) in types {
@@ -142,6 +158,3 @@ mod tests {
         }
     }
 }
-
-
-

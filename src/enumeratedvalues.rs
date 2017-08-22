@@ -26,9 +26,9 @@ impl ParseElem for EnumeratedValues {
         EnumeratedValues {
             name: tree.get_child_text("name"),
             usage: tree.get_child("usage").map(Usage::parse),
-            derived_from: tree.attributes
-                .get(&"derivedFrom".to_owned())
-                .map(|s| s.to_owned()),
+            derived_from: tree.attributes.get(&"derivedFrom".to_owned()).map(|s| {
+                s.to_owned()
+            }),
             values: tree.children
                 .iter()
                 .filter_map(EnumeratedValue::parse)
@@ -40,7 +40,7 @@ impl ParseElem for EnumeratedValues {
 
 impl EncodeElem for EnumeratedValues {
     fn encode(&self) -> Element {
-        let mut base = Element{
+        let mut base = Element {
             name: String::from("enumeratedValues"),
             attributes: HashMap::new(),
             children: Vec::new(),
@@ -48,20 +48,27 @@ impl EncodeElem for EnumeratedValues {
         };
 
         match self.name {
-            Some(ref d) => { 
+            Some(ref d) => {
                 base.children.push(new_element("name", Some((*d).clone())));
-            },
+            }
             None => (),
         };
 
         match self.usage {
-            Some(ref v) => { base.children.push(v.encode()); },
+            Some(ref v) => {
+                base.children.push(v.encode());
+            }
             None => (),
         };
 
         match self.derived_from {
-            Some(ref v) => { base.attributes.insert(String::from("derivedFrom"), (*v).clone()); },
-            None => ()
+            Some(ref v) => {
+                base.attributes.insert(
+                    String::from("derivedFrom"),
+                    (*v).clone(),
+                );
+            }
+            None => (),
         }
 
         for v in &self.values {
@@ -85,7 +92,8 @@ mod tests {
 
     #[test]
     fn decode_encode() {
-        let example = String::from("
+        let example = String::from(
+            "
             <enumeratedValues derivedFrom=\"fake-derivation.png\">
                 <enumeratedValue>
                     <name>WS0</name>
@@ -99,23 +107,28 @@ mod tests {
                     <value>0x00000001</value>
                 </enumeratedValue>
             </enumeratedValues>
-        ");
+        ",
+        );
 
-        let expected = EnumeratedValues{
+        let expected = EnumeratedValues {
             name: None,
             usage: None,
             derived_from: Some(String::from("fake-derivation.png")),
-            values: vec![ 
-                EnumeratedValue{
+            values: vec![
+                EnumeratedValue {
                     name: String::from("WS0"),
-                    description: Some(String::from("Zero wait-states inserted in fetch or read transfers")),
+                    description: Some(String::from(
+                        "Zero wait-states inserted in fetch or read transfers",
+                    )),
                     value: Some(0),
                     is_default: Some(true),
                     _extensible: (),
-                }, 
-                EnumeratedValue{
+                },
+                EnumeratedValue {
                     name: String::from("WS1"),
-                    description: Some(String::from("One wait-state inserted for each fetch or read transfer. See Flash Wait-States table for details")),
+                    description: Some(String::from(
+                        "One wait-state inserted for each fetch or read transfer. See Flash Wait-States table for details",
+                    )),
                     value: Some(1),
                     is_default: None,
                     _extensible: (),

@@ -46,21 +46,14 @@ impl ParseElem for Peripheral {
                 .filter(|t| t.name == "interrupt")
                 .map(Interrupt::parse)
                 .collect::<Vec<_>>(),
-            registers: tree.get_child("registers")
-                .map(
-                    |rs| {
-                        rs.children
-                            .iter()
-                            .filter(|v| {v.name == "register"})
-                            .map(Register::parse)
-                            .collect()
-                    },
-                ),
-            derived_from: tree.attributes.get("derivedFrom").map(
-                |s| {
-                    s.to_owned()
-                },
-            ),
+            registers: tree.get_child("registers").map(|rs| {
+                rs.children
+                    .iter()
+                    .filter(|v| v.name == "register")
+                    .map(Register::parse)
+                    .collect()
+            }),
+            derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
             _extensible: (),
         }
     }
@@ -68,41 +61,59 @@ impl ParseElem for Peripheral {
 
 impl EncodeElem for Peripheral {
     fn encode(&self) -> Element {
-        let mut elem = Element{
+        let mut elem = Element {
             name: String::from("peripheral"),
             attributes: HashMap::new(),
-            children: vec![
-                new_element("name", Some(self.name.clone())),
-            ],
+            children: vec![new_element("name", Some(self.name.clone()))],
             text: None,
         };
 
         match self.version {
-            Some(ref v) => { elem.children.push(new_element("version", Some(format!("{}", v)))); },
+            Some(ref v) => {
+                elem.children.push(
+                    new_element("version", Some(format!("{}", v))),
+                );
+            }
             None => (),
         };
         match self.group_name {
-            Some(ref v) => { elem.children.push(new_element("groupName", Some(format!("{}", v)))); },
+            Some(ref v) => {
+                elem.children.push(new_element(
+                    "groupName",
+                    Some(format!("{}", v)),
+                ));
+            }
             None => (),
         };
         match self.description {
-            Some(ref v) => { elem.children.push(new_element("description", Some(format!("{}", v)))); },
+            Some(ref v) => {
+                elem.children.push(new_element(
+                    "description",
+                    Some(format!("{}", v)),
+                ));
+            }
             None => (),
         };
-        elem.children.push(new_element("baseAddress", Some(format!("{:.08x}", self.base_address))));
-        elem.children.append(&mut self.interrupt.iter().map(Interrupt::encode).collect());
-         match self.registers {
+        elem.children.push(new_element(
+            "baseAddress",
+            Some(format!("{:.08x}", self.base_address)),
+        ));
+        elem.children.append(&mut self.interrupt
+            .iter()
+            .map(Interrupt::encode)
+            .collect());
+        match self.registers {
             Some(ref v) => {
-                elem.children.push(Element{
+                elem.children.push(Element {
                     name: String::from("registers"),
                     attributes: HashMap::new(),
                     children: v.iter().map(Register::encode).collect(),
                     text: None,
                 });
-            },
+            }
             None => (),
         };
-        
+
         elem
     }
 }

@@ -30,7 +30,7 @@ impl ParseElem for WriteConstraintRange {
 
 impl EncodeElem for WriteConstraintRange {
     fn encode(&self) -> Element {
-        Element{
+        Element {
             name: String::from("range"),
             attributes: HashMap::new(),
             children: vec![

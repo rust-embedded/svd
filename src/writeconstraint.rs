@@ -28,25 +28,19 @@ impl ParseElem for WriteConstraint {
             // Write constraint can only be one of the following
             match field.as_ref() {
                 "writeAsRead" => {
-                    WriteConstraint::WriteAsRead(
-                        try!(tree.get_child(field.as_ref())
-                                .map(|t| try!(parse::bool(t)))
-                        ),
-                    )
+                    WriteConstraint::WriteAsRead(try!(
+                        tree.get_child(field.as_ref()).map(|t| try!(parse::bool(t)))
+                    ))
                 }
                 "useEnumeratedValues" => {
-                    WriteConstraint::UseEnumeratedValues(
-                        try!(tree.get_child(field.as_ref())
-                                .map(|t| try!(parse::bool(t)))
-                        ),
-                    )
+                    WriteConstraint::UseEnumeratedValues(try!(
+                        tree.get_child(field.as_ref()).map(|t| try!(parse::bool(t)))
+                    ))
                 }
                 "range" => {
-                    WriteConstraint::Range(
-                        try!( tree.get_child(field.as_ref())
-                                .map(WriteConstraintRange::parse)
-                        ),
-                    )
+                    WriteConstraint::Range(try!(tree.get_child(field.as_ref()).map(
+                        WriteConstraintRange::parse,
+                    )))
                 }
                 v => panic!("unknown <writeConstraint> variant: {}", v),
             }
@@ -80,7 +74,12 @@ mod tests {
     #[test]
     fn decode_encode() {
         let examples = vec![
-            ( String::from("<WriteConstraint><writeAsRead>true</writeAsRead></WriteConstraint>"), WriteConstraint::WriteAsRead(true) )
+            (
+                String::from(
+                    "<WriteConstraint><writeAsRead>true</writeAsRead></WriteConstraint>",
+                ),
+                WriteConstraint::WriteAsRead(true)
+            ),
         ];
 
         for (example, expected) in examples {

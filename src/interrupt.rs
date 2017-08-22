@@ -33,8 +33,8 @@ impl ParseElem for Interrupt {
 }
 
 impl EncodeElem for Interrupt {
-   fn encode(&self) -> Element {
-        Element{
+    fn encode(&self) -> Element {
+        Element {
             name: String::from("interrupt"),
             attributes: HashMap::new(),
             children: vec![
@@ -44,7 +44,7 @@ impl EncodeElem for Interrupt {
             ],
             text: None,
         }
-    } 
+    }
 }
 
 #[cfg(test)]
@@ -54,18 +54,21 @@ mod tests {
     #[test]
     fn decode_encode() {
         let types = vec![
-            (Interrupt{
-                name: String::from("test"),
-                description: Some(String::from("description")),
-                value: 14,
-            },
-            String::from("
+            (
+                Interrupt {
+                    name: String::from("test"),
+                    description: Some(String::from("description")),
+                    value: 14,
+                },
+                String::from(
+                    "
                 <interrupt>
                     <name>test</name>
                     <description>description</description>
                     <value>14</value>
-                </interrupt>"
-            )),
+                </interrupt>",
+                )
+            ),
         ];
 
         for (a, s) in types {
@@ -77,5 +80,3 @@ mod tests {
         }
     }
 }
-
-
