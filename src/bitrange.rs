@@ -12,17 +12,18 @@ macro_rules! try {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-enum BitRangeType {
+pub enum BitRangeType {
     BitRange,
     OffsetWidth,
     MsbLsb,
 }
 
+// TODO: reimplement equality
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct BitRange {
     pub offset: u32,
     pub width: u32,
-    range_type: BitRangeType
+    pub range_type: BitRangeType
 }
 
 impl ParseElem for BitRange {
@@ -58,10 +59,8 @@ impl ParseElem for BitRange {
 
 
 impl EncodeChildren for BitRange {
-    fn encode_children(&self, elem: &Element) -> Element {
-        let mut tree = elem.clone();
-        
-        let children = match self.range_type {
+    fn encode_children(&self) -> Vec<Element> {
+        match self.range_type {
             BitRangeType::BitRange => vec![
                 new_element("bitRange", Some(format!("[{}:{}]", self.offset + self.width - 1, self.offset))),
             ],
@@ -73,10 +72,7 @@ impl EncodeChildren for BitRange {
                 new_element("bitOffset", Some(format!("{}", self.offset))),
                 new_element("bitWidth", Some(format!("{}", self.width)))
             ],
-        };
-
-        tree.children.append(&mut children.clone());
-        tree
+        }
     }
 }
 
@@ -103,9 +99,9 @@ mod tests {
             let tree1 = &try!(Element::parse(s.as_bytes()));
             let value = BitRange::parse(tree1);
             assert_eq!(value, a, "Parsing `{}` expected `{:?}`", s, a);
-            let tree2 = new_element("fake", None);
-            let tree2 = &value.encode_children(&tree2);
-            assert_eq!(tree1, tree2, "Encoding {:?} expected {}", a, s);
+            let mut tree2 = new_element("fake", None);
+            tree2.children = value.encode_children();
+            assert_eq!(tree1, &tree2, "Encoding {:?} expected {}", a, s);
         }
     }
 }

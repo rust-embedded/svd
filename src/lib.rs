@@ -58,6 +58,8 @@ mod field;
 pub use field::*;
 mod register;
 pub use register::*;
+mod registerinfo;
+pub use registerinfo::*;
 
 macro_rules! try {
     ($e:expr) => {

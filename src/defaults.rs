@@ -38,30 +38,30 @@ impl ParseElem for Defaults {
 }
 
 impl EncodeChildren for Defaults {
-    fn encode_children(&self, e: &Element) -> Element {
-        let mut elem = (*e).clone();
+    fn encode_children(&self) -> Vec<Element> {
+        let mut children = Vec::new();
 
         match self.size {
-            Some(ref v) => { elem.children.push(new_element("size", Some(format!("0x{:08.x}", v)))); },
+            Some(ref v) => { children.push(new_element("size", Some(format!("0x{:08.x}", v)))); },
             None => (),
         };
 
         match self.reset_value {
-            Some(ref v) => { elem.children.push(new_element("resetValue", Some(format!("0x{:08.x}", v)))); },
+            Some(ref v) => { children.push(new_element("resetValue", Some(format!("0x{:08.x}", v)))); },
             None => (),
         };
 
-         match self.reset_mask {
-            Some(ref v) => { elem.children.push(new_element("resetMask", Some(format!("0x{:08.x}", v)))); },
+        match self.reset_mask {
+            Some(ref v) => { children.push(new_element("resetMask", Some(format!("0x{:08.x}", v)))); },
             None => (),
         };
 
         match self.access {
-            Some(ref v) => { elem.children.push(v.encode()); },
+            Some(ref v) => { children.push(v.encode()); },
             None => (),
         };
         
-        elem
+        children
     }
 }
 
@@ -94,7 +94,7 @@ mod tests {
         assert_eq!(parsed, expected, "Parsing tree failed");
 
         let mut tree2 = new_element("mock", None);
-        tree2 = parsed.encode_children(&tree2);
+        tree2.children = parsed.encode_children();
         assert_eq!(tree1, &tree2, "Encoding value failed");
     }
 }

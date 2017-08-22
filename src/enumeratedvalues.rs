@@ -16,7 +16,7 @@ pub struct EnumeratedValues {
     pub derived_from: Option<String>,
     pub values: Vec<EnumeratedValue>,
     // Reserve the right to add more fields to this struct
-    _extensible: (),
+    pub _extensible: (),
 }
 
 impl ParseElem for EnumeratedValues {

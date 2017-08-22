@@ -5,12 +5,9 @@ use std::ops::Deref;
 use xmltree::Element;
 use ElementExt;
 
-use helpers::*;
-use access::*;
 use parse;
-use Field;
-use writeconstraint::*;
-
+use helpers::*;
+use registerinfo::*;
 
 macro_rules! try {
     ($e:expr) => {
@@ -18,23 +15,6 @@ macro_rules! try {
     }
 }
 
-
-
-#[derive(Clone, Debug)]
-pub struct RegisterInfo {
-    pub name: String,
-    pub description: String,
-    pub address_offset: u32,
-    pub size: Option<u32>,
-    pub access: Option<Access>,
-    pub reset_value: Option<u32>,
-    pub reset_mask: Option<u32>,
-    /// `None` indicates that the `<fields>` node is not present
-    pub fields: Option<Vec<Field>>,
-    pub write_constraint: Option<WriteConstraint>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
 
 #[derive(Clone, Debug)]
 pub struct RegisterArrayInfo {
@@ -60,29 +40,6 @@ impl Deref for Register {
     }
 }
 
-impl ParseElem for RegisterInfo {
-    fn parse(tree: &Element) -> RegisterInfo {
-        RegisterInfo {
-            name: try!(tree.get_child_text("name")),
-            description: try!(tree.get_child_text("description")),
-            address_offset: {
-                try!(parse::u32(try!(tree.get_child("addressOffset"))))
-            },
-            size: tree.get_child("size").map(|t| try!(parse::u32(t))),
-            access: tree.get_child("access").map(Access::parse),
-            reset_value:
-                tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
-            reset_mask:
-                tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
-            fields:
-                tree.get_child("fields")
-                    .map(|fs| fs.children.iter().map(Field::parse).collect()),
-            write_constraint: tree.get_child("writeConstraint")
-                .map(WriteConstraint::parse),
-            _extensible: (),
-        }
-    }
-}
 
 impl ParseElem for RegisterArrayInfo {
     fn parse(tree: &Element) -> RegisterArrayInfo {
