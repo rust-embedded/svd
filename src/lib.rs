@@ -22,7 +22,7 @@
 //! - [SVD file database](https://github.com/posborne/cmsis-svd/tree/master/data)
 //! - [Sample SVD file](https://www.keil.com/pack/doc/CMSIS/SVD/html/svd_Example_pg.html)
 
-#![deny(warnings)]
+//#![deny(warnings)]
 
 
 extern crate xmltree;
@@ -31,6 +31,7 @@ use xmltree::Element;
 
 mod helpers;
 use helpers::*;
+mod types;
 
 mod parse;
 
