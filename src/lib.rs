@@ -81,6 +81,10 @@ pub fn parse(xml: &str) -> Device {
     Device::parse(tree)
 }
 
+pub fn encode(device: &Device) -> Element {
+    device.encode()
+}
+
 trait ElementExt {
     fn get_child_text<K>(&self, k: K) -> Option<String>
     where
@@ -102,5 +106,57 @@ impl ElementExt for Element {
             println!("{}: {:?}", c.name, c.text)
         }
         println!("</{}>", self.name);
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bitrange::*;
+
+    use std::fs;
+    use std::process::Command;
+    use std::fs::{File, OpenOptions};
+    use std::io;
+    use std::io::prelude::*;
+    use std::path::Path;
+
+    #[test]
+    fn decode_encode() {
+        let path = String::from("./examples");
+
+        let files: Vec<String> = fs::read_dir(&path).unwrap()
+        .map(|res| res.unwrap())
+        .filter(|f| !f.metadata().unwrap().is_dir())
+        .map(|f| f.file_name().into_string().unwrap())
+        .filter(|f| !(f.starts_with(".") || f.starts_with("_")))
+        .collect();
+
+        println!("Files: {:?}", files);
+    
+        for name in files {
+            let p1 = format!("{}/{}", path, name);
+
+            let mut xml = String::new();
+            let mut f = fs::File::open(&p1).unwrap();
+            f.read_to_string(&mut xml).unwrap();
+
+            let device = parse(&xml);
+
+            let p2 = format!("{}/{}", String::from("target"), name);
+            encode(&device).write(File::create(&p2).unwrap());
+
+            let output1 = Command::new("xmllint").arg("--exc-c14n").arg(p1).output().unwrap();
+            let mut f1 = File::create("target/p1.svd").unwrap();
+            f1.write_all(&output1.stdout);
+
+            let output2 = Command::new("xmllint").arg("--exc-c14n").arg(p2).output().unwrap();
+            let mut f2 = File::create("target/p2.svd").unwrap();
+            f2.write_all(&output2.stdout);
+
+            
+
+        }
     }
 }
