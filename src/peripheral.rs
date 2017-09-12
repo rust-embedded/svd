@@ -135,6 +135,12 @@ impl EncodeElem for Peripheral {
             None => (),
         };
 
+        match self.derived_from {
+            Some(ref v) => {
+                elem.attributes.insert(String::from("derivedFrom"), format!("{}", v));
+            }, None => (),
+        }
+
         elem
     }
 }
