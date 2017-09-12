@@ -51,6 +51,8 @@ mod bitrange;
 pub use bitrange::*;
 mod interrupt;
 pub use interrupt::*;
+mod addressblock;
+pub use addressblock::*;
 mod field;
 pub use field::*;
 mod register;
@@ -116,7 +118,7 @@ mod tests {
 
     use std::fs;
     use std::process::Command;
-    use std::fs::{File, OpenOptions};
+    use std::fs::File;
     use std::io;
     use std::io::prelude::*;
     use std::path::Path;

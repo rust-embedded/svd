@@ -9,6 +9,7 @@ use parse;
 use helpers::*;
 use interrupt::*;
 use register::*;
+use addressblock::*;
 
 macro_rules! try {
     ($e:expr) => {
@@ -24,6 +25,7 @@ pub struct Peripheral {
     pub group_name: Option<String>,
     pub description: Option<String>,
     pub base_address: u32,
+    pub address_block: Option<AddressBlock>,
     pub interrupt: Vec<Interrupt>,
     /// `None` indicates that the `<registers>` node is not present
     pub registers: Option<Vec<Register>>,
@@ -43,6 +45,7 @@ impl ParseElem for Peripheral {
             group_name: tree.get_child_text("groupName"),
             description: tree.get_child_text("description"),
             base_address: try!(parse::u32(try!(tree.get_child("baseAddress")))),
+            address_block: tree.get_child("addressBlock").map(AddressBlock::parse),
             interrupt: tree.children
                 .iter()
                 .filter(|t| t.name == "interrupt")
@@ -107,8 +110,15 @@ impl EncodeElem for Peripheral {
         };
         elem.children.push(new_element(
             "baseAddress",
-            Some(format!("{:.08x}", self.base_address)),
+            Some(format!("0x{:.08x}", self.base_address)),
         ));
+        match self.address_block {
+            Some(ref v) => {
+                elem.children.push(v.encode());
+            }
+            None => (),
+        };
+
         elem.children.append(&mut self.interrupt
             .iter()
             .map(Interrupt::encode)

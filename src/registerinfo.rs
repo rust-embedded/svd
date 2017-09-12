@@ -11,7 +11,6 @@ use parse;
 use Field;
 use writeconstraint::*;
 
-
 macro_rules! try {
     ($e:expr) => {
         $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
@@ -67,7 +66,7 @@ impl EncodeElem for RegisterInfo {
                 new_element("description", Some(self.description.clone())),
                 new_element(
                     "addressOffset",
-                    Some(format!("0x{:03.x}", self.address_offset))
+                    Some(format!("0x{:x}", self.address_offset))
                 ),
             ],
             text: None,
@@ -174,7 +173,7 @@ mod tests {
             <register>
                 <name>WRITECTRL</name>
                 <description>Write Control Register</description>
-                <addressOffset>0x008</addressOffset>
+                <addressOffset>0x8</addressOffset>
                 <size>32</size>
                 <access>read-write</access>
                 <resetValue>0x00000000</resetValue>
