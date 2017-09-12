@@ -24,7 +24,6 @@
 
 //#![deny(warnings)]
 
-
 extern crate xmltree;
 use xmltree::Element;
 
@@ -128,34 +127,54 @@ mod tests {
 
         let files: Vec<String> = fs::read_dir(&path).unwrap()
         .map(|res| res.unwrap())
-        .filter(|f| !f.metadata().unwrap().is_dir())
-        .map(|f| f.file_name().into_string().unwrap())
-        .filter(|f| !(f.starts_with(".") || f.starts_with("_")))
+        .filter(|all| !all.metadata().unwrap().is_dir())
+        .map(|file| file.file_name().into_string().unwrap())
+        .filter(|filename| !(filename.starts_with(".") || filename.starts_with("_")) && filename.ends_with(".svd"))
+        .map(|filename| String::from(Path::new(&filename).file_stem().unwrap().to_str().unwrap()))
         .collect();
 
         println!("Files: {:?}", files);
     
         for name in files {
-            let p1 = format!("{}/{}", path, name);
+            let source_file = format!("{}/{}.svd", path, name);
+            let original_file = format!("target/{}-original.svd", name);
+            let encoded_file = format!("target/{}-encoded.svd", name);
+            let diff_file = format!("target/{}-diff.svd", name);
 
+            // Load orignal target file
             let mut xml = String::new();
-            let mut f = fs::File::open(&p1).unwrap();
+            let mut f = fs::File::open(&source_file).unwrap();
             f.read_to_string(&mut xml).unwrap();
 
+            // Parse device info
             let device = parse(&xml);
 
-            let p2 = format!("{}/{}", String::from("target"), name);
-            encode(&device).write(File::create(&p2).unwrap());
-
-            let output1 = Command::new("xmllint").arg("--exc-c14n").arg(p1).output().unwrap();
-            let mut f1 = File::create("target/p1.svd").unwrap();
-            f1.write_all(&output1.stdout);
-
-            let output2 = Command::new("xmllint").arg("--exc-c14n").arg(p2).output().unwrap();
-            let mut f2 = File::create("target/p2.svd").unwrap();
-            f2.write_all(&output2.stdout);
-
+            // Encode device info
             
+            encode(&device).write(File::create(&encoded_file).unwrap());
+
+            // Normalize source info
+            let output = Command::new("xmllint").arg("--c14n").arg(source_file.clone()).output().unwrap();
+            let mut f = File::create(original_file.clone()).unwrap();
+            f.write_all(&output.stdout).unwrap();
+
+            let output = Command::new("xmllint").arg("--format").arg(source_file.clone()).output().unwrap();
+            let mut f = File::create(original_file.clone()).unwrap();
+            f.write_all(&output.stdout).unwrap();
+
+            // Normalise encoded info
+            let output = Command::new("xmllint").arg("--c14n").arg(encoded_file.clone()).output().unwrap();
+            let mut f = File::create(encoded_file.clone()).unwrap();
+            f.write_all(&output.stdout).unwrap();
+
+            let output = Command::new("xmllint").arg("--format").arg(encoded_file.clone()).output().unwrap();
+            let mut f = File::create(encoded_file.clone()).unwrap();
+            f.write_all(&output.stdout).unwrap();
+
+            // Diff normalised source and output
+            let output = Command::new("diff").arg(original_file).arg(encoded_file).output().unwrap();
+            let mut f = File::create(diff_file).unwrap();
+            f.write_all(&output.stdout).unwrap();
 
         }
     }

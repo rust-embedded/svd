@@ -49,6 +49,10 @@ impl EncodeElem for Device {
             text: None,
         };
 
+        elem.attributes.insert(String::from("xmlns:xs"), String::from("http://www.w3.org/2001/XMLSchema-instance"));
+        elem.attributes.insert(String::from("schemaVersion"), String::from("1.0"));
+        elem.attributes.insert(String::from("xs:noNamespaceSchemaLocation"), String::from("CMSIS-SVD_Schema_1.0.xsd"));
+
         match self.cpu {
             Some(ref v) => {
                 elem.children.push(v.encode());

@@ -20,6 +20,7 @@ macro_rules! try {
 pub struct Peripheral {
     pub name: String,
     pub version: Option<String>,
+    pub display_name: Option<String>,
     pub group_name: Option<String>,
     pub description: Option<String>,
     pub base_address: u32,
@@ -38,6 +39,7 @@ impl ParseElem for Peripheral {
         Peripheral {
             name: try!(tree.get_child_text("name")),
             version: tree.get_child_text("version"),
+            display_name: tree.get_child_text("displayName"),
             group_name: tree.get_child_text("groupName"),
             description: tree.get_child_text("description"),
             base_address: try!(parse::u32(try!(tree.get_child("baseAddress")))),
@@ -73,6 +75,15 @@ impl EncodeElem for Peripheral {
                 elem.children.push(
                     new_element("version", Some(format!("{}", v))),
                 );
+            }
+            None => (),
+        };
+         match self.display_name {
+            Some(ref v) => {
+                elem.children.push(new_element(
+                    "displayName",
+                    Some(format!("{}", v)),
+                ));
             }
             None => (),
         };
