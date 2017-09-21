@@ -3,7 +3,9 @@ extern crate xmltree;
 use std::collections::HashMap;
 
 use xmltree::Element;
-use ElementExt;
+
+#[macro_use]
+use elementext::*;
 
 use helpers::*;
 use usage::*;
@@ -137,7 +139,7 @@ mod tests {
             _extensible: (),
         };
 
-        let tree1 = &try!(Element::parse(example.as_bytes()));
+        let tree1 = &try_get_child!(Element::parse(example.as_bytes()));
 
         let parsed = EnumeratedValues::parse(tree1);
         assert_eq!(parsed, expected, "Parsing tree failed");

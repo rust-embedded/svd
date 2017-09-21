@@ -1,23 +1,13 @@
 extern crate xmltree;
 extern crate either;
 
-use std::ops::Deref;
-
 use xmltree::Element;
-use either::Either;
 
-use ElementExt;
+#[macro_use]
+use elementext::*;
 
 use helpers::*;
-use register::*;
-use cluster::*;
 use parse;
-
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
 
 
 #[derive(Clone, Debug, PartialEq)]
@@ -30,12 +20,12 @@ pub struct RegisterClusterArrayInfo {
 impl ParseElem for RegisterClusterArrayInfo {
     fn parse(tree: &Element) -> RegisterClusterArrayInfo {
         RegisterClusterArrayInfo {
-            dim: try!(tree.get_child_text("dim").unwrap().parse::<u32>()),
-            dim_increment: try!(tree.get_child("dimIncrement").map(|t| {
-                try!(parse::u32(t))
+            dim: try_get_child!(tree.get_child_text("dim").unwrap().parse::<u32>()),
+            dim_increment: try_get_child!(tree.get_child("dimIncrement").map(|t| {
+                try_get_child!(parse::u32(t))
             })),
             dim_index: tree.get_child("dimIndex").map(|c| {
-                parse::dim_index(try!(c.text.as_ref()))
+                parse::dim_index(try_get_child!(c.text.as_ref()))
             }),
         }
     }

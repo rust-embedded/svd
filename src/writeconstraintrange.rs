@@ -3,15 +3,12 @@ extern crate xmltree;
 use std::collections::HashMap;
 
 use xmltree::Element;
-use ElementExt;
+
+#[macro_use]
+use elementext::*;
 
 use helpers::*;
 
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WriteConstraintRange {
@@ -22,8 +19,8 @@ pub struct WriteConstraintRange {
 impl ParseElem for WriteConstraintRange {
     fn parse(tree: &Element) -> WriteConstraintRange {
         WriteConstraintRange {
-            min: try!(try!(tree.get_child_text("minimum")).parse()),
-            max: try!(try!(tree.get_child_text("maximum")).parse()),
+            min: try_get_child!(try_get_child!(tree.get_child_text("minimum")).parse()),
+            max: try_get_child!(try_get_child!(tree.get_child_text("maximum")).parse()),
         }
     }
 }

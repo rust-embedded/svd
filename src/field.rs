@@ -2,7 +2,9 @@ extern crate xmltree;
 
 use std::collections::HashMap;
 use xmltree::Element;
-use ElementExt;
+
+#[macro_use]
+use elementext::*;
 
 use helpers::*;
 use access::*;
@@ -10,11 +12,6 @@ use writeconstraint::*;
 use bitrange::*;
 use enumeratedvalues::*;
 
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Field {
@@ -33,7 +30,7 @@ impl ParseElem for Field {
         assert_eq!(tree.name, "field");
 
         Field {
-            name: try!(tree.get_child_text("name")),
+            name: try_get_child!(tree.get_child_text("name")),
             description: tree.get_child_text("description"),
             bit_range: BitRange::parse(tree),
             access: tree.get_child("access").map(Access::parse),
@@ -150,7 +147,7 @@ mod tests {
         ];
 
         for (a, s) in types {
-            let tree1 = &try!(Element::parse(s.as_bytes()));
+            let tree1 = &try_get_child!(Element::parse(s.as_bytes()));
             let v = Field::parse(tree1);
             assert_eq!(v, a, "Parsing `{}` expected `{:?}`", s, a);
             let tree2 = &v.encode();

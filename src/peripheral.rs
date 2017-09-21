@@ -7,7 +7,8 @@ use std::ops::Deref;
 use xmltree::Element;
 use either::Either;
 
-use ElementExt;
+#[macro_use]
+use elementext::*;
 
 use parse;
 use helpers::*;
@@ -17,11 +18,6 @@ use cluster::*;
 use addressblock::*;
 use registercluster::*;
 
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct Peripheral {
@@ -45,12 +41,12 @@ impl ParseElem for Peripheral {
         assert_eq!(tree.name, "peripheral");
 
         Peripheral {
-            name: try!(tree.get_child_text("name")),
+            name: try_get_child!(tree.get_child_text("name")),
             version: tree.get_child_text("version"),
             display_name: tree.get_child_text("displayName"),
             group_name: tree.get_child_text("groupName"),
             description: tree.get_child_text("description"),
-            base_address: try!(parse::u32(try!(tree.get_child("baseAddress")))),
+            base_address: try_get_child!(parse::u32(try_get_child!(tree.get_child("baseAddress")))),
             address_block: tree.get_child("addressBlock").map(AddressBlock::parse),
             interrupt: tree.children
                 .iter()

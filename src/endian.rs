@@ -6,12 +6,6 @@ use xmltree::Element;
 
 use helpers::*;
 
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
-
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Endian {
     Little,
@@ -22,7 +16,7 @@ pub enum Endian {
 
 impl ParseElem for Endian {
     fn parse(tree: &Element) -> Endian {
-        let text = try!(tree.text.as_ref());
+        let text = try_get_child!(tree.text.as_ref());
 
         match &text[..] {
             "little" => Endian::Little,
@@ -69,7 +63,7 @@ mod tests {
         ];
 
         for (e, s) in types {
-            let tree1 = &try!(Element::parse(s.as_bytes()));
+            let tree1 = &try_get_child!(Element::parse(s.as_bytes()));
             let endian = Endian::parse(tree1);
             assert_eq!(endian, e, "Parsing `{}` expected `{:?}`", s, e);
             let tree2 = &endian.encode();

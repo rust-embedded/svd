@@ -4,15 +4,12 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use ElementExt;
+#[macro_use]
+use elementext::*;
+
 use helpers::*;
 use parse;
 
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
 
 
 #[derive(Clone, Debug, PartialEq)]
@@ -25,9 +22,9 @@ pub struct Interrupt {
 impl ParseElem for Interrupt {
     fn parse(tree: &Element) -> Interrupt {
         Interrupt {
-            name: try!(tree.get_child_text("name")),
+            name: try_get_child!(tree.get_child_text("name")),
             description: tree.get_child_text("description"),
-            value: try!(parse::u32(try!(tree.get_child("value")))),
+            value: try_get_child!(parse::u32(try_get_child!(tree.get_child("value")))),
         }
     }
 }
@@ -72,7 +69,7 @@ mod tests {
         ];
 
         for (a, s) in types {
-            let tree1 = &try!(Element::parse(s.as_bytes()));
+            let tree1 = &try_get_child!(Element::parse(s.as_bytes()));
             let v = Interrupt::parse(tree1);
             assert_eq!(v, a, "Parsing `{}` expected `{:?}`", s, a);
             let tree2 = &v.encode();

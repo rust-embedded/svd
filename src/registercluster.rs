@@ -4,7 +4,8 @@ extern crate either;
 use xmltree::Element;
 use either::Either;
 
-use ElementExt;
+#[macro_use]
+use elementext::*;
 
 use helpers::*;
 use register::*;

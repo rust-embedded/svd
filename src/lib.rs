@@ -28,8 +28,11 @@ extern crate either;
 extern crate xmltree;
 use xmltree::Element;
 
-
+#[macro_use]
+mod elementext;
+use elementext::*;
 mod parse;
+
 mod helpers;
 use helpers::*;
 mod endian;
@@ -76,45 +79,15 @@ pub use cpu::*;
 mod device;
 pub use device::*;
 
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
-
 
 /// Parses the contents of a SVD file (XML)
 pub fn parse(xml: &str) -> Device {
-    let tree = &try!(Element::parse(xml.as_bytes()));
+    let tree = &try_get_child!(Element::parse(xml.as_bytes()));
     Device::parse(tree)
 }
 
 pub fn encode(device: &Device) -> Element {
     device.encode()
-}
-
-trait ElementExt {
-    fn get_child_text<K>(&self, k: K) -> Option<String>
-    where
-        String: PartialEq<K>;
-    fn debug(&self);
-}
-
-impl ElementExt for Element {
-    fn get_child_text<K>(&self, k: K) -> Option<String>
-    where
-        String: PartialEq<K>,
-    {
-        self.get_child(k).map(|c| try!(c.text.clone()))
-    }
-
-    fn debug(&self) {
-        println!("<{}>", self.name);
-        for c in &self.children {
-            println!("{}: {:?}", c.name, c.text)
-        }
-        println!("</{}>", self.name);
-    }
 }
 
 

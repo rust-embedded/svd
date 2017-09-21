@@ -4,15 +4,12 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use ElementExt;
+#[macro_use]
+use elementext::*;
+
 use helpers::*;
 use parse;
 
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AddressBlock {
@@ -24,9 +21,9 @@ pub struct AddressBlock {
 impl ParseElem for AddressBlock {
     fn parse(tree: &Element) -> AddressBlock {
         AddressBlock {
-            offset: try!(parse::u32(try!(tree.get_child("offset")))),
-            size: try!(parse::u32(try!(tree.get_child("size")))),
-            usage: try!(tree.get_child_text("usage")),
+            offset: try_get_child!(parse::u32(try_get_child!(tree.get_child("offset")))),
+            size: try_get_child!(parse::u32(try_get_child!(tree.get_child("size")))),
+            usage: try_get_child!(tree.get_child_text("usage")),
         }
     }
 }
@@ -70,7 +67,7 @@ mod tests {
         ];
 
         for (a, s) in types {
-            let tree1 = &try!(Element::parse(s.as_bytes()));
+            let tree1 = &try_get_child!(Element::parse(s.as_bytes()));
             let v = AddressBlock::parse(tree1);
             assert_eq!(v, a, "Parsing `{}` expected `{:?}`", s, a);
             let tree2 = &v.encode();

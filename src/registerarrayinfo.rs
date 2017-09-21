@@ -3,16 +3,12 @@ extern crate xmltree;
 use std::collections::HashMap;
 
 use xmltree::Element;
-use ElementExt;
+
+#[macro_use]
+use elementext::*;
 
 use parse;
 use helpers::*;
-
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct RegisterArrayInfo {
@@ -24,10 +20,10 @@ pub struct RegisterArrayInfo {
 impl ParseElem for RegisterArrayInfo {
     fn parse(tree: &Element) -> RegisterArrayInfo {
         RegisterArrayInfo {
-            dim: try!(tree.get_child_text("dim").unwrap().parse::<u32>()),
-            dim_increment: try!(tree.get_child("dimIncrement").map(|t| try!(parse::u32(t)))),
+            dim: try_get_child!(tree.get_child_text("dim").unwrap().parse::<u32>()),
+            dim_increment: try_get_child!(tree.get_child("dimIncrement").map(|t| try_get_child!(parse::u32(t)))),
             dim_index: tree.get_child("dimIndex").map(|c| {
-                parse::dim_index(try!(c.text.as_ref()))
+                parse::dim_index(try_get_child!(c.text.as_ref()))
             }),
         }
     }

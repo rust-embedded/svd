@@ -4,16 +4,11 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use ElementExt;
+#[macro_use]
+use elementext::*;
 use parse;
 use helpers::*;
 use endian::*;
-
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Cpu {
@@ -42,13 +37,13 @@ impl ParseElem for Cpu {
         assert_eq!(tree.name, "cpu");
 
         Cpu {
-            name: try!(tree.get_child_text("name")),
-            revision: try!(tree.get_child_text("revision")),
-            endian: Endian::parse(try!(tree.get_child("endian"))),
-            mpu_present: try!(parse::bool(try!(tree.get_child("mpuPresent")))),
-            fpu_present: try!(parse::bool(try!(tree.get_child("fpuPresent")))),
-            nvic_priority_bits: try!(parse::u32(try!(tree.get_child("nvicPrioBits")))),
-            has_vendor_systick: try!(parse::bool(try!(tree.get_child("vendorSystickConfig")))),
+            name: try_get_child!(tree.get_child_text("name")),
+            revision: try_get_child!(tree.get_child_text("revision")),
+            endian: Endian::parse(try_get_child!(tree.get_child("endian"))),
+            mpu_present: try_get_child!(parse::bool(try_get_child!(tree.get_child("mpuPresent")))),
+            fpu_present: try_get_child!(parse::bool(try_get_child!(tree.get_child("fpuPresent")))),
+            nvic_priority_bits: try_get_child!(parse::u32(try_get_child!(tree.get_child("nvicPrioBits")))),
+            has_vendor_systick: try_get_child!(parse::bool(try_get_child!(tree.get_child("vendorSystickConfig")))),
 
             _extensible: (),
         }
@@ -113,7 +108,7 @@ mod tests {
         ];
 
         for (a, s) in types {
-            let tree1 = &try!(Element::parse(s.as_bytes()));
+            let tree1 = &try_get_child!(Element::parse(s.as_bytes()));
             let value = Cpu::parse(tree1);
             assert_eq!(value, a, "Parsing `{}` expected `{:?}`", s, a);
             let tree2 = value.encode();

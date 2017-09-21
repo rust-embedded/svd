@@ -3,7 +3,9 @@ extern crate xmltree;
 use std::collections::HashMap;
 
 use xmltree::Element;
-use ElementExt;
+
+#[macro_use]
+use elementext::*;
 
 use helpers::*;
 use access::*;
@@ -11,11 +13,6 @@ use parse;
 use Field;
 use writeconstraint::*;
 
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RegisterInfo {
@@ -36,15 +33,15 @@ pub struct RegisterInfo {
 impl ParseElem for RegisterInfo {
     fn parse(tree: &Element) -> RegisterInfo {
         RegisterInfo {
-            name: try!(tree.get_child_text("name")),
-            description: try!(tree.get_child_text("description")),
+            name: try_get_child!(tree.get_child_text("name")),
+            description: try_get_child!(tree.get_child_text("description")),
             address_offset: {
-                try!(parse::u32(try!(tree.get_child("addressOffset"))))
+                try_get_child!(parse::u32(try_get_child!(tree.get_child("addressOffset"))))
             },
-            size: tree.get_child("size").map(|t| try!(parse::u32(t))),
+            size: tree.get_child("size").map(|t| try_get_child!(parse::u32(t))),
             access: tree.get_child("access").map(Access::parse),
-            reset_value: tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
-            reset_mask: tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
+            reset_value: tree.get_child("resetValue").map(|t| try_get_child!(parse::u32(t))),
+            reset_mask: tree.get_child("resetMask").map(|t| try_get_child!(parse::u32(t))),
             fields: tree.get_child("fields").map(|fs| {
                 fs.children.iter().map(Field::parse).collect()
             }),
@@ -194,7 +191,7 @@ mod tests {
         ];
 
         for (a, s) in types {
-            let tree1 = &try!(Element::parse(s.as_bytes()));
+            let tree1 = &try_get_child!(Element::parse(s.as_bytes()));
             let v = RegisterInfo::parse(tree1);
             assert_eq!(v, a, "Parsing `{}` expected `{:?}`", s, a);
             let tree2 = &v.encode();

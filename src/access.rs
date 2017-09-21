@@ -6,12 +6,6 @@ use xmltree::Element;
 
 use helpers::*;
 
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
-
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Access {
     ReadOnly,
@@ -23,7 +17,7 @@ pub enum Access {
 
 impl ParseElem for Access {
     fn parse(tree: &Element) -> Access {
-        let text = try!(tree.text.as_ref());
+        let text = try_get_child!(tree.text.as_ref());
 
         match &text[..] {
             "read-only" => Access::ReadOnly,
@@ -82,7 +76,7 @@ mod tests {
         ];
 
         for (a, s) in types {
-            let tree1 = &try!(Element::parse(s.as_bytes()));
+            let tree1 = &try_get_child!(Element::parse(s.as_bytes()));
             let access = Access::parse(tree1);
             assert_eq!(access, a, "Parsing `{}` expected `{:?}`", s, a);
             let tree2 = &access.encode();

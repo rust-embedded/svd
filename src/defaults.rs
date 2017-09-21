@@ -6,12 +6,6 @@ use helpers::*;
 use access::*;
 use parse;
 
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
-
 /// Register default properties
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Defaults {
@@ -26,9 +20,9 @@ pub struct Defaults {
 impl ParseElem for Defaults {
     fn parse(tree: &Element) -> Defaults {
         Defaults {
-            size: tree.get_child("size").map(|t| try!(parse::u32(t))),
-            reset_value: tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
-            reset_mask: tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
+            size: tree.get_child("size").map(|t| try_get_child!(parse::u32(t))),
+            reset_value: tree.get_child("resetValue").map(|t| try_get_child!(parse::u32(t))),
+            reset_mask: tree.get_child("resetMask").map(|t| try_get_child!(parse::u32(t))),
             access: tree.get_child("access").map(Access::parse),
             _extensible: (),
         }
@@ -96,7 +90,7 @@ mod tests {
             _extensible: (),
         };
 
-        let tree1 = &try!(Element::parse(example.as_bytes()));
+        let tree1 = &try_get_child!(Element::parse(example.as_bytes()));
 
         let parsed = Defaults::parse(tree1);
         assert_eq!(parsed, expected, "Parsing tree failed");

@@ -2,18 +2,14 @@ use xmltree::Element;
 
 use std::collections::HashMap;
 
+#[macro_use]
+use elementext::*;
 use helpers::*;
-use ElementExt;
 use cpu::*;
 use defaults::*;
 use peripheral::*;
 use parse;
 
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct Device {
@@ -34,13 +30,13 @@ impl ParseElem for Device {
     fn parse(tree: &Element) -> Device {
         Device {
             schema_version: tree.attributes.get("schemaVersion").unwrap().clone(),
-            name: try!(tree.get_child_text("name")),
-            version: try!(tree.get_child_text("version")),
-            description: try!(tree.get_child_text("description")),
-            address_unit_bits: try!(parse::u32(try!(tree.get_child("addressUnitBits")))),
-            width: try!(parse::u32(try!(tree.get_child("width")))),
+            name: try_get_child!(tree.get_child_text("name")),
+            version: try_get_child!(tree.get_child_text("version")),
+            description: try_get_child!(tree.get_child_text("description")),
+            address_unit_bits: try_get_child!(parse::u32(try_get_child!(tree.get_child("addressUnitBits")))),
+            width: try_get_child!(parse::u32(try_get_child!(tree.get_child("width")))),
             cpu: tree.get_child("cpu").map(Cpu::parse),
-            peripherals: try!(tree.get_child("peripherals"))
+            peripherals: try_get_child!(tree.get_child("peripherals"))
                 .children
                 .iter()
                 .map(Peripheral::parse)
