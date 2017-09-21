@@ -1,15 +1,21 @@
 extern crate xmltree;
+extern crate either;
 
 use std::collections::HashMap;
+use std::ops::Deref;
 
 use xmltree::Element;
+use either::Either;
+
 use ElementExt;
 
 use parse;
 use helpers::*;
 use interrupt::*;
 use register::*;
+use cluster::*;
 use addressblock::*;
+use registercluster::*;
 
 macro_rules! try {
     ($e:expr) => {
@@ -28,7 +34,7 @@ pub struct Peripheral {
     pub address_block: Option<AddressBlock>,
     pub interrupt: Vec<Interrupt>,
     /// `None` indicates that the `<registers>` node is not present
-    pub registers: Option<Vec<Register>>,
+    pub registers: Option<Vec<Either<Register, Cluster>>>,
     pub derived_from: Option<String>,
     // Reserve the right to add more fields to this struct
     _extensible: (),
@@ -52,11 +58,7 @@ impl ParseElem for Peripheral {
                 .map(Interrupt::parse)
                 .collect::<Vec<_>>(),
             registers: tree.get_child("registers").map(|rs| {
-                rs.children
-                    .iter()
-                    .filter(|v| v.name == "register")
-                    .map(Register::parse)
-                    .collect()
+                rs.children.iter().map(cluster_register_parse).collect()
             }),
             derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
             _extensible: (),
@@ -81,7 +83,7 @@ impl EncodeElem for Peripheral {
             }
             None => (),
         };
-         match self.display_name {
+        match self.display_name {
             Some(ref v) => {
                 elem.children.push(new_element(
                     "displayName",
@@ -128,7 +130,13 @@ impl EncodeElem for Peripheral {
                 elem.children.push(Element {
                     name: String::from("registers"),
                     attributes: HashMap::new(),
-                    children: v.iter().map(Register::encode).collect(),
+                    children: v.iter().map(|e| {
+                        if e.is_left() {
+                            e.left().unwrap().encode()
+                        } else {
+                            e.right().unwrap().encode()
+                        }
+                    }).collect(),
                     text: None,
                 });
             }
@@ -137,8 +145,12 @@ impl EncodeElem for Peripheral {
 
         match self.derived_from {
             Some(ref v) => {
-                elem.attributes.insert(String::from("derivedFrom"), format!("{}", v));
-            }, None => (),
+                elem.attributes.insert(
+                    String::from("derivedFrom"),
+                    format!("{}", v),
+                );
+            }
+            None => (),
         }
 
         elem

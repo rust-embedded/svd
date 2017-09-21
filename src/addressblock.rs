@@ -57,14 +57,14 @@ mod tests {
                 AddressBlock {
                     offset: 0,
                     size: 0x00000800,
-                    usage: String::from("registers")
+                    usage: String::from("registers"),
                 },
                 String::from(
                     "<addressBlock>
                         <offset>0</offset>
                         <size>0x00000800</size>
                         <usage>registers</usage>
-                    </addressBlock>"
+                    </addressBlock>",
                 )
             ),
         ];

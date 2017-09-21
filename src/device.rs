@@ -60,15 +60,27 @@ impl EncodeElem for Device {
                 new_element("name", Some(self.name.clone())),
                 new_element("version", Some(self.version.clone())),
                 new_element("description", Some(self.description.clone())),
-                new_element("addressUnitBits", Some(format!("{}", self.address_unit_bits))),
+                new_element(
+                    "addressUnitBits",
+                    Some(format!("{}", self.address_unit_bits))
+                ),
                 new_element("width", Some(format!("{}", self.width))),
             ],
             text: None,
         };
 
-        elem.attributes.insert(String::from("xmlns:xs"), String::from("http://www.w3.org/2001/XMLSchema-instance"));
-        elem.attributes.insert(String::from("schemaVersion"), format!("{}", self.schema_version));
-        elem.attributes.insert(String::from("xs:noNamespaceSchemaLocation"), format!("CMSIS-SVD_Schema_{}.xsd", self.schema_version));
+        elem.attributes.insert(
+            String::from("xmlns:xs"),
+            String::from("http://www.w3.org/2001/XMLSchema-instance"),
+        );
+        elem.attributes.insert(
+            String::from("schemaVersion"),
+            format!("{}", self.schema_version),
+        );
+        elem.attributes.insert(
+            String::from("xs:noNamespaceSchemaLocation"),
+            format!("CMSIS-SVD_Schema_{}.xsd", self.schema_version),
+        );
 
         match self.cpu {
             Some(ref v) => {
