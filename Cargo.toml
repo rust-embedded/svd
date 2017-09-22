@@ -1,0 +1,7 @@
+[package]
+authors = ["Jorge Aparicio <jorge@japaric.io>"]
+name = "svd-parser"
+version = "0.1.0"
+[dependencies]
+error-chain = "0.11.0"
+xmltree = "0.4.0"
