@@ -14,7 +14,7 @@ pub struct Defaults {
     pub reset_mask: Option<u32>,
     pub access: Option<Access>,
     // Reserve the right to add more fields to this struct
-    _extensible: (),
+    pub(crate) _extensible: (),
 }
 
 impl ParseElem for Defaults {

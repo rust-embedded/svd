@@ -33,7 +33,7 @@ pub struct Peripheral {
     pub registers: Option<Vec<Either<Register, Cluster>>>,
     pub derived_from: Option<String>,
     // Reserve the right to add more fields to this struct
-    _extensible: (),
+    pub(crate) _extensible: (),
 }
 
 impl ParseElem for Peripheral {
@@ -126,11 +126,11 @@ impl EncodeElem for Peripheral {
                 elem.children.push(Element {
                     name: String::from("registers"),
                     attributes: HashMap::new(),
-                    children: v.iter().map(|e| {
+                    children: v.iter().map(|&ref e| {
                         if e.is_left() {
-                            e.left().unwrap().encode()
+                            e.clone().left().unwrap().encode()
                         } else {
-                            e.right().unwrap().encode()
+                            e.clone().right().unwrap().encode()
                         }
                     }).collect(),
                     text: None,

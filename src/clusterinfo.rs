@@ -27,7 +27,7 @@ pub struct ClusterInfo {
     pub reset_mask: Option<u32>,
     pub children: Vec<Either<Register, Cluster>>,
     // Reserve the right to add more fields to this struct
-    _extensible: (),
+    pub(crate) _extensible: (),
 }
 
 impl ParseElem for ClusterInfo {

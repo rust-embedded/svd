@@ -12,7 +12,7 @@ use registerinfo::*;
 use registerarrayinfo::*;
 
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Register {
     Single(RegisterInfo),
     Array(RegisterInfo, RegisterArrayInfo),
@@ -55,7 +55,7 @@ impl EncodeElem for Register {
     fn encode(&self) -> Element {
         match *self {
             Register::Single(ref info) => info.encode(),
-            Register::Array(ref info, ref array_info) => {
+            Register::Array(ref info, ref _array_info) => {
                 // TODO: fix this (does not encode array stuff)
                 // Not even slightly sure what to do here
                 info.encode()

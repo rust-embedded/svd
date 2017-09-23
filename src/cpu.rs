@@ -21,7 +21,7 @@ pub struct Cpu {
     pub has_vendor_systick: bool,
 
     // Reserve the right to add more fields to this struct
-    pub _extensible: (),
+    pub(crate) _extensible: (),
 }
 
 impl Cpu {

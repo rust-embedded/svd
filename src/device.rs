@@ -23,7 +23,7 @@ pub struct Device {
     pub peripherals: Vec<Peripheral>,
     pub defaults: Defaults,
     // Reserve the right to add more fields to this struct
-    _extensible: (),
+    pub(crate) _extensible: (),
 }
 
 impl ParseElem for Device {

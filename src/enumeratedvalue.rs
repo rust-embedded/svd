@@ -18,7 +18,7 @@ pub struct EnumeratedValue {
     pub value: Option<u32>,
     pub is_default: Option<bool>,
     // Reserve the right to add more fields to this struct
-    pub _extensible: (),
+    pub(crate) _extensible: (),
 }
 
 impl EnumeratedValue {

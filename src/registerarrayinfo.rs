@@ -10,7 +10,7 @@ use elementext::*;
 use parse;
 use helpers::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct RegisterArrayInfo {
     pub dim: u32,
     pub dim_increment: u32,
