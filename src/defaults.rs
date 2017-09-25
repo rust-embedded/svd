@@ -1,4 +1,3 @@
-extern crate xmltree;
 
 use xmltree::Element;
 
@@ -20,9 +19,15 @@ pub struct Defaults {
 impl ParseElem for Defaults {
     fn parse(tree: &Element) -> Defaults {
         Defaults {
-            size: tree.get_child("size").map(|t| try_get_child!(parse::u32(t))),
-            reset_value: tree.get_child("resetValue").map(|t| try_get_child!(parse::u32(t))),
-            reset_mask: tree.get_child("resetMask").map(|t| try_get_child!(parse::u32(t))),
+            size: tree.get_child("size").map(
+                |t| try_get_child!(parse::u32(t)),
+            ),
+            reset_value: tree.get_child("resetValue").map(|t| {
+                try_get_child!(parse::u32(t))
+            }),
+            reset_mask: tree.get_child("resetMask").map(
+                |t| try_get_child!(parse::u32(t)),
+            ),
             access: tree.get_child("access").map(Access::parse),
             _extensible: (),
         }

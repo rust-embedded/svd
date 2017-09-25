@@ -1,9 +1,7 @@
-extern crate xmltree;
-extern crate either;
 
 use xmltree::Element;
 
-#[macro_use]
+
 use elementext::*;
 
 use helpers::*;
@@ -30,4 +28,3 @@ impl ParseElem for RegisterClusterArrayInfo {
         }
     }
 }
-

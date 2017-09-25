@@ -1,11 +1,6 @@
-extern crate xmltree;
-extern crate either;
 
 use xmltree::Element;
 use either::Either;
-
-#[macro_use]
-use elementext::*;
 
 use helpers::*;
 use register::*;

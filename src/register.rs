@@ -1,11 +1,7 @@
-extern crate xmltree;
 
 use std::ops::Deref;
 
 use xmltree::Element;
-
-#[macro_use]
-use elementext::*;
 
 use helpers::*;
 use registerinfo::*;

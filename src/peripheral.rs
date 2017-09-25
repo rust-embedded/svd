@@ -1,13 +1,9 @@
-extern crate xmltree;
-extern crate either;
 
 use std::collections::HashMap;
-use std::ops::Deref;
 
 use xmltree::Element;
 use either::Either;
 
-#[macro_use]
 use elementext::*;
 
 use parse;
@@ -126,13 +122,13 @@ impl EncodeElem for Peripheral {
                 elem.children.push(Element {
                     name: String::from("registers"),
                     attributes: HashMap::new(),
-                    children: v.iter().map(|&ref e| {
-                        if e.is_left() {
+                    children: v.iter()
+                        .map(|&ref e| if e.is_left() {
                             e.clone().left().unwrap().encode()
                         } else {
                             e.clone().right().unwrap().encode()
-                        }
-                    }).collect(),
+                        })
+                        .collect(),
                     text: None,
                 });
             }

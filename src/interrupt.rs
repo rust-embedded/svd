@@ -1,10 +1,9 @@
-extern crate xmltree;
 
 use std::collections::HashMap;
 
 use xmltree::Element;
 
-#[macro_use]
+
 use elementext::*;
 
 use helpers::*;

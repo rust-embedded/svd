@@ -1,10 +1,8 @@
-extern crate xmltree;
 
 use std::collections::HashMap;
 
 use xmltree::Element;
 
-#[macro_use]
 use elementext::*;
 use parse;
 use helpers::*;
@@ -43,7 +41,9 @@ impl ParseElem for Cpu {
             mpu_present: try_get_child!(parse::bool(try_get_child!(tree.get_child("mpuPresent")))),
             fpu_present: try_get_child!(parse::bool(try_get_child!(tree.get_child("fpuPresent")))),
             nvic_priority_bits: try_get_child!(parse::u32(try_get_child!(tree.get_child("nvicPrioBits")))),
-            has_vendor_systick: try_get_child!(parse::bool(try_get_child!(tree.get_child("vendorSystickConfig")))),
+            has_vendor_systick: try_get_child!(parse::bool(
+                try_get_child!(tree.get_child("vendorSystickConfig")),
+            )),
 
             _extensible: (),
         }

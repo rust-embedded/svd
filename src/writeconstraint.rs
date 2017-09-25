@@ -1,4 +1,3 @@
-extern crate xmltree;
 
 use std::collections::HashMap;
 
@@ -23,14 +22,14 @@ impl ParseElem for WriteConstraint {
             // Write constraint can only be one of the following
             match field.as_ref() {
                 "writeAsRead" => {
-                    WriteConstraint::WriteAsRead(try_get_child!(
-                        tree.get_child(field.as_ref()).map(|t| try_get_child!(parse::bool(t)))
-                    ))
+                    WriteConstraint::WriteAsRead(try_get_child!(tree.get_child(field.as_ref()).map(|t| {
+                        try_get_child!(parse::bool(t))
+                    })))
                 }
                 "useEnumeratedValues" => {
-                    WriteConstraint::UseEnumeratedValues(try_get_child!(
-                        tree.get_child(field.as_ref()).map(|t| try_get_child!(parse::bool(t)))
-                    ))
+                    WriteConstraint::UseEnumeratedValues(try_get_child!(tree.get_child(field.as_ref()).map(|t| {
+                        try_get_child!(parse::bool(t))
+                    })))
                 }
                 "range" => {
                     WriteConstraint::Range(try_get_child!(tree.get_child(field.as_ref()).map(

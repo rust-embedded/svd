@@ -30,7 +30,6 @@ use xmltree::Element;
 
 #[macro_use]
 mod elementext;
-use elementext::*;
 mod parse;
 
 mod helpers;

@@ -1,4 +1,3 @@
-extern crate xmltree;
 
 use std::collections::HashMap;
 

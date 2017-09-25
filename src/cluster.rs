@@ -1,4 +1,3 @@
-extern crate xmltree;
 
 use std::ops::Deref;
 use std::collections::hash_map::*;

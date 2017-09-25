@@ -1,10 +1,9 @@
-extern crate xmltree;
 
 use std::collections::HashMap;
 
 use xmltree::Element;
 
-#[macro_use]
+
 use elementext::*;
 
 use helpers::*;
@@ -28,8 +27,12 @@ impl EnumeratedValue {
         Some(EnumeratedValue {
             name: try_get_child!(tree.get_child_text("name")),
             description: tree.get_child_text("description"),
-            value: tree.get_child("value").map(|t| try_get_child!(parse::u32(t))),
-            is_default: tree.get_child_text("isDefault").map(|t| try_get_child!(t.parse())),
+            value: tree.get_child("value").map(
+                |t| try_get_child!(parse::u32(t)),
+            ),
+            is_default: tree.get_child_text("isDefault").map(|t| {
+                try_get_child!(t.parse())
+            }),
             _extensible: (),
         })
     }

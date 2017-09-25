@@ -1,11 +1,9 @@
-extern crate xmltree;
-extern crate either;
 
 use xmltree::Element;
 use either::Either;
 
 
-#[macro_use] use elementext::*;
+use elementext::*;
 
 use helpers::*;
 use parse;
@@ -39,10 +37,16 @@ impl ParseElem for ClusterInfo {
             address_offset: {
                 try_get_child!(parse::u32(try_get_child!(tree.get_child("addressOffset"))))
             },
-            size: tree.get_child("size").map(|t| try_get_child!(parse::u32(t))),
+            size: tree.get_child("size").map(
+                |t| try_get_child!(parse::u32(t)),
+            ),
             access: tree.get_child("access").map(Access::parse),
-            reset_value: tree.get_child("resetValue").map(|t| try_get_child!(parse::u32(t))),
-            reset_mask: tree.get_child("resetMask").map(|t| try_get_child!(parse::u32(t))),
+            reset_value: tree.get_child("resetValue").map(|t| {
+                try_get_child!(parse::u32(t))
+            }),
+            reset_mask: tree.get_child("resetMask").map(
+                |t| try_get_child!(parse::u32(t)),
+            ),
             children: tree.children
                 .iter()
                 .filter(|t| t.name == "register" || t.name == "cluster")
@@ -52,4 +56,3 @@ impl ParseElem for ClusterInfo {
         }
     }
 }
-

@@ -2,7 +2,7 @@ use xmltree::Element;
 
 use std::collections::HashMap;
 
-#[macro_use]
+
 use elementext::*;
 use helpers::*;
 use cpu::*;
@@ -33,7 +33,9 @@ impl ParseElem for Device {
             name: try_get_child!(tree.get_child_text("name")),
             version: try_get_child!(tree.get_child_text("version")),
             description: try_get_child!(tree.get_child_text("description")),
-            address_unit_bits: try_get_child!(parse::u32(try_get_child!(tree.get_child("addressUnitBits")))),
+            address_unit_bits: try_get_child!(parse::u32(
+                try_get_child!(tree.get_child("addressUnitBits")),
+            )),
             width: try_get_child!(parse::u32(try_get_child!(tree.get_child("width")))),
             cpu: tree.get_child("cpu").map(Cpu::parse),
             peripherals: try_get_child!(tree.get_child("peripherals"))

@@ -1,10 +1,9 @@
-extern crate xmltree;
 
 use std::collections::HashMap;
 
 use xmltree::Element;
 
-#[macro_use]
+
 use elementext::*;
 
 use helpers::*;
@@ -38,10 +37,16 @@ impl ParseElem for RegisterInfo {
             address_offset: {
                 try_get_child!(parse::u32(try_get_child!(tree.get_child("addressOffset"))))
             },
-            size: tree.get_child("size").map(|t| try_get_child!(parse::u32(t))),
+            size: tree.get_child("size").map(
+                |t| try_get_child!(parse::u32(t)),
+            ),
             access: tree.get_child("access").map(Access::parse),
-            reset_value: tree.get_child("resetValue").map(|t| try_get_child!(parse::u32(t))),
-            reset_mask: tree.get_child("resetMask").map(|t| try_get_child!(parse::u32(t))),
+            reset_value: tree.get_child("resetValue").map(|t| {
+                try_get_child!(parse::u32(t))
+            }),
+            reset_mask: tree.get_child("resetMask").map(
+                |t| try_get_child!(parse::u32(t)),
+            ),
             fields: tree.get_child("fields").map(|fs| {
                 fs.children.iter().map(Field::parse).collect()
             }),
