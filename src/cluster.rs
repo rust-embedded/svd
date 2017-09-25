@@ -4,10 +4,9 @@ use std::collections::hash_map::*;
 
 use xmltree::Element;
 
-
-use helpers::*;
-use clusterinfo::*;
-use registerclusterarrayinfo::*;
+use helpers::{ParseElem, EncodeElem};
+use clusterinfo::ClusterInfo;
+use registerclusterarrayinfo::RegisterClusterArrayInfo;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Cluster {

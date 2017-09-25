@@ -3,14 +3,15 @@ use xmltree::Element;
 use either::Either;
 
 
-use elementext::*;
+use elementext::ElementExt;
 
-use helpers::*;
+use helpers::{ParseElem, EncodeElem, new_element};
 use parse;
-use access::*;
-use register::*;
-use cluster::*;
-use registercluster::*;
+
+use access::Access;
+use register::Register;
+use cluster::Cluster;
+use registercluster::cluster_register_parse;
 
 
 #[derive(Clone, Debug, PartialEq)]
@@ -54,5 +55,11 @@ impl ParseElem for ClusterInfo {
                 .collect(),
             _extensible: (),
         }
+    }
+}
+
+impl EncodeElem for ClusterInfo {
+    fn encode(&self) -> Element {
+        new_element("fake", None)
     }
 }

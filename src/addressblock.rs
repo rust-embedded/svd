@@ -3,12 +3,9 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-
-use elementext::*;
-
-use helpers::*;
+use elementext::ElementExt;
+use helpers::{ParseElem, EncodeElem, new_element};
 use parse;
-
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AddressBlock {

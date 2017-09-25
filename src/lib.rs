@@ -35,48 +35,48 @@ mod parse;
 mod helpers;
 use helpers::*;
 mod endian;
-pub use endian::*;
+pub use endian::Endian;
 mod access;
-pub use access::*;
+pub use access::Access;
 mod usage;
-pub use usage::*;
+pub use usage::Usage;
 mod enumeratedvalue;
-pub use enumeratedvalue::*;
+pub use enumeratedvalue::EnumeratedValue;
 mod enumeratedvalues;
-pub use enumeratedvalues::*;
+pub use enumeratedvalues::EnumeratedValues;
 mod defaults;
-pub use defaults::*;
+pub use defaults::Defaults;
 mod writeconstraintrange;
-pub use writeconstraintrange::*;
+pub use writeconstraintrange::WriteConstraintRange;
 mod writeconstraint;
-pub use writeconstraint::*;
+pub use writeconstraint::WriteConstraint;
 mod bitrange;
-pub use bitrange::*;
+pub use bitrange::BitRange;
 mod interrupt;
-pub use interrupt::*;
+pub use interrupt::Interrupt;
 mod addressblock;
-pub use addressblock::*;
+pub use addressblock::AddressBlock;
 mod field;
-pub use field::*;
+pub use field::Field;
 mod register;
-pub use register::*;
+pub use register::Register;
 mod clusterinfo;
-pub use clusterinfo::*;
+pub use clusterinfo::ClusterInfo;
 mod cluster;
-pub use cluster::*;
+pub use cluster::Cluster;
 mod registerinfo;
-pub use registerinfo::*;
+pub use registerinfo::RegisterInfo;
 mod registerarrayinfo;
-pub use registerarrayinfo::*;
+pub use registerarrayinfo::RegisterArrayInfo;
 mod registerclusterarrayinfo;
-pub use registerclusterarrayinfo::*;
+pub use registerclusterarrayinfo::RegisterClusterArrayInfo;
 mod registercluster;
 mod peripheral;
-pub use peripheral::*;
+pub use peripheral::Peripheral;
 mod cpu;
-pub use cpu::*;
+pub use cpu::Cpu;
 mod device;
-pub use device::*;
+pub use device::Device;
 
 
 /// Parses the contents of a SVD file (XML)
@@ -93,12 +93,10 @@ pub fn encode(device: &Device) -> Element {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use bitrange::*;
 
     use std::fs;
     use std::process::Command;
     use std::fs::File;
-    use std::io;
     use std::io::prelude::*;
     use std::path::Path;
 

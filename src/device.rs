@@ -3,12 +3,14 @@ use xmltree::Element;
 use std::collections::HashMap;
 
 
-use elementext::*;
-use helpers::*;
-use cpu::*;
-use defaults::*;
-use peripheral::*;
+use elementext::ElementExt;
+use helpers::{ParseElem, EncodeElem, new_element};
 use parse;
+
+use cpu::Cpu;
+use defaults::Defaults;
+use peripheral::Peripheral;
+
 
 
 #[derive(Clone, Debug)]

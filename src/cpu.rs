@@ -3,10 +3,11 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use elementext::*;
+use elementext::ElementExt;
 use parse;
-use helpers::*;
-use endian::*;
+
+use helpers::{ParseElem, EncodeElem, new_element};
+use endian::Endian;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Cpu {

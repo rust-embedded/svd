@@ -1,7 +1,7 @@
 
 use xmltree::Element;
 
-use helpers::*;
+use helpers::{ParseElem, EncodeChildren, new_element};
 use parse;
 
 #[derive(Clone, Copy, Debug, PartialEq)]

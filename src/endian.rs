@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use helpers::*;
+use helpers::{ParseElem, EncodeElem};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Endian {

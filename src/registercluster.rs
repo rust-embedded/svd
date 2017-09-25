@@ -2,9 +2,9 @@
 use xmltree::Element;
 use either::Either;
 
-use helpers::*;
-use register::*;
-use cluster::*;
+use helpers::ParseElem;
+use register::Register;
+use cluster::Cluster;
 
 pub fn cluster_register_parse(tree: &Element) -> Either<Register, Cluster> {
     if tree.name == "register" {

@@ -3,9 +3,10 @@ use std::ops::Deref;
 
 use xmltree::Element;
 
-use helpers::*;
-use registerinfo::*;
-use registerarrayinfo::*;
+use helpers::{ParseElem, EncodeElem};
+
+use registerinfo::RegisterInfo;
+use registerarrayinfo::RegisterArrayInfo;
 
 
 #[derive(Clone, Debug, PartialEq)]

@@ -3,12 +3,11 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
+use elementext::ElementExt;
+use helpers::{ParseElem, EncodeElem, new_element};
 
-use elementext::*;
-
-use helpers::*;
-use usage::*;
-use enumeratedvalue::*;
+use usage::Usage;
+use enumeratedvalue::EnumeratedValue;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnumeratedValues {
@@ -82,13 +81,6 @@ impl EncodeElem for EnumeratedValues {
 
 #[cfg(test)]
 mod tests {
-    macro_rules! try {
-        ($e:expr) => {
-            $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-        }
-    }
-
-
     use super::*;
 
     #[test]

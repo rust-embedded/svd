@@ -3,11 +3,10 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-
-use elementext::*;
-
+use elementext::ElementExt;
+use helpers::{ParseElem, EncodeElem};
 use parse;
-use helpers::*;
+
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RegisterArrayInfo {

@@ -1,12 +1,9 @@
 
 use xmltree::Element;
 
-
-use elementext::*;
-
-use helpers::*;
+use elementext::ElementExt;
+use helpers::{ParseElem, EncodeElem, new_element};
 use parse;
-
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RegisterClusterArrayInfo {
@@ -26,5 +23,11 @@ impl ParseElem for RegisterClusterArrayInfo {
                 parse::dim_index(try_get_child!(c.text.as_ref()))
             }),
         }
+    }
+}
+
+impl EncodeElem for RegisterClusterArrayInfo {
+    fn encode(&self) -> Element {
+        new_element("FAKE", None)
     }
 }

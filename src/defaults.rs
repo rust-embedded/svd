@@ -1,9 +1,10 @@
 
 use xmltree::Element;
 
-use helpers::*;
-use access::*;
+use helpers::{ParseElem, EncodeElem, EncodeChildren, new_element};
 use parse;
+
+use access::Access;
 
 /// Register default properties
 #[derive(Clone, Copy, Debug, PartialEq)]

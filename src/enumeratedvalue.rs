@@ -3,10 +3,8 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-
-use elementext::*;
-
-use helpers::*;
+use elementext::ElementExt;
+use helpers::{EncodeElem, new_element};
 use parse;
 
 

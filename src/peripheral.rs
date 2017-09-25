@@ -4,15 +4,15 @@ use std::collections::HashMap;
 use xmltree::Element;
 use either::Either;
 
-use elementext::*;
-
+use elementext::ElementExt;
+use helpers::{ParseElem, EncodeElem, new_element};
 use parse;
-use helpers::*;
-use interrupt::*;
-use register::*;
-use cluster::*;
-use addressblock::*;
-use registercluster::*;
+
+use interrupt::Interrupt;
+use register::Register;
+use cluster::Cluster;
+use addressblock::AddressBlock;
+use registercluster::cluster_register_parse;
 
 
 #[derive(Clone, Debug)]

@@ -2,14 +2,13 @@
 use std::collections::HashMap;
 use xmltree::Element;
 
+use elementext::ElementExt;
+use helpers::{ParseElem, EncodeElem, EncodeChildren, new_element};
 
-use elementext::*;
-
-use helpers::*;
-use access::*;
-use writeconstraint::*;
-use bitrange::*;
-use enumeratedvalues::*;
+use access::Access;
+use writeconstraint::WriteConstraint;
+use bitrange::BitRange;
+use enumeratedvalues::EnumeratedValues;
 
 
 #[derive(Clone, Debug, PartialEq)]
@@ -86,7 +85,7 @@ impl EncodeElem for Field {
 #[cfg(test)]
 mod tests {
     use super::*;
-
+    use bitrange::BitRangeType;
     use enumeratedvalue::EnumeratedValue;
 
     #[test]

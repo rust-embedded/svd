@@ -3,14 +3,13 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-
-use elementext::*;
-
-use helpers::*;
-use access::*;
+use elementext::ElementExt;
+use helpers::{ParseElem, EncodeElem, new_element};
 use parse;
+
 use Field;
-use writeconstraint::*;
+use access::Access;
+use writeconstraint::WriteConstraint;
 
 
 #[derive(Clone, Debug, PartialEq)]

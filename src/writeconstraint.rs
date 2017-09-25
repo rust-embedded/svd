@@ -3,9 +3,10 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
+use helpers::{ParseElem, EncodeElem, new_element};
 use parse;
-use helpers::*;
-use writeconstraintrange::*;
+
+use writeconstraintrange::WriteConstraintRange;
 
 
 #[derive(Clone, Copy, Debug, PartialEq)]
