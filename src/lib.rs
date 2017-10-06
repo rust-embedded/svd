@@ -225,7 +225,7 @@ impl Interrupt {
 pub struct ClusterInfo {
     pub name: String,
     pub description: String,
-    pub header_struct_name: String,
+    pub header_struct_name: Option<String>,
     pub address_offset: u32,
     pub size: Option<u32>,
     pub access: Option<Access>,
@@ -327,7 +327,7 @@ impl ClusterInfo {
         ClusterInfo {
             name: try!(tree.get_child_text("name")),
             description: try!(tree.get_child_text("description")),
-            header_struct_name: try!(tree.get_child_text("headerStructName")),
+            header_struct_name: tree.get_child_text("headerStructName"),
             address_offset: {
                 try!(parse::u32(try!(tree.get_child("addressOffset"))))
             },
