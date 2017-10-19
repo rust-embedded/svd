@@ -9,7 +9,7 @@ pub fn u32(tree: &Element) -> Option<u32> {
         // Handle strings in the binary form of:
         // #01101x1
         // along with don't care character x (replaced with 0)
-        u32::from_str_radix(&str::replace(&text["#".len()..], "x", "0"), 2).ok()
+        u32::from_str_radix(&str::replace(&text.to_lowercase()["#".len()..], "x", "0"), 2).ok()
     } else if text.starts_with("0b"){
         // Handle strings in the binary form of:
         // 0b01101x1
