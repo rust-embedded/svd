@@ -1,7 +1,8 @@
 use xmltree::Element;
 
+
 pub fn u32(tree: &Element) -> Option<u32> {
-    let text = try!(tree.text.as_ref());
+    let text = try_get_child!(tree.text.as_ref());
 
     if text.starts_with("0x") || text.starts_with("0X") {
         u32::from_str_radix(&text["0x".len()..], 16).ok()
@@ -21,19 +22,19 @@ pub fn u32(tree: &Element) -> Option<u32> {
 }
 
 pub fn bool(tree: &Element) -> Option<bool> {
-    let text = try!(tree.text.as_ref());
+    let text = try_get_child!(tree.text.as_ref());
     match text.as_ref() {
         "0" => Some(false),
         "1" => Some(true),
-        _ => text.parse::<bool>().ok()
+        _ => text.parse::<bool>().ok(),
     }
 }
 
 pub fn dim_index(text: &str) -> Vec<String> {
     if text.contains('-') {
         let mut parts = text.splitn(2, '-');
-        let start = try!(try!(parts.next()).parse::<u32>());
-        let end = try!(try!(parts.next()).parse::<u32>()) + 1;
+        let start = try_get_child!(try_get_child!(parts.next()).parse::<u32>());
+        let end = try_get_child!(try_get_child!(parts.next()).parse::<u32>()) + 1;
 
         (start..end).map(|i| i.to_string()).collect()
     } else if text.contains(',') {
