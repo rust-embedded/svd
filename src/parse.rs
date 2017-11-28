@@ -1,43 +1,43 @@
 use xmltree::Element;
-
-pub fn u32(tree: &Element) -> Option<u32> {
-    let text = try!(tree.text.as_ref());
+use failure::{Error, err_msg};
+pub fn u32(tree: &Element) -> Result<u32, Error> { // FIXME: Fix messages
+    let text = tree.text.as_ref().ok_or(format_err!("couldn't get {:?}",tree.name))?; // FIXME
 
     if text.starts_with("0x") || text.starts_with("0X") {
-        u32::from_str_radix(&text["0x".len()..], 16).ok()
+        Ok(u32::from_str_radix(&text["0x".len()..], 16)?)
     } else if text.starts_with('#') {
         // Handle strings in the binary form of:
         // #01101x1
         // along with don't care character x (replaced with 0)
-        u32::from_str_radix(&str::replace(&text.to_lowercase()["#".len()..], "x", "0"), 2).ok()
+        Ok(u32::from_str_radix(&str::replace(&text.to_lowercase()["#".len()..], "x", "0"), 2)?)
     } else if text.starts_with("0b"){
         // Handle strings in the binary form of:
         // 0b01101x1
         // along with don't care character x (replaced with 0)
-        u32::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2).ok()
+        Ok(u32::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2)?)
     } else {
-        text.parse().ok()
+        Ok(text.parse()?)
     }
 }
 
-pub fn bool(tree: &Element) -> Option<bool> {
-    let text = try!(tree.text.as_ref());
+pub fn bool(tree: &Element) -> Result<bool,Error> {
+    let text = tree.text.as_ref().ok_or(format_err!("couldn't get {:?}",tree.name))?; // FIXME
     match text.as_ref() {
-        "0" => Some(false),
-        "1" => Some(true),
-        _ => text.parse::<bool>().ok()
+        "0" => Ok(false),
+        "1" => Ok(true),
+        _ => Ok(text.parse::<bool>()?)
     }
 }
 
-pub fn dim_index(text: &str) -> Vec<String> {
+pub fn dim_index(text: &str) -> Result<Vec<String>,Error> {
     if text.contains('-') {
         let mut parts = text.splitn(2, '-');
-        let start = try!(try!(parts.next()).parse::<u32>());
-        let end = try!(try!(parts.next()).parse::<u32>()) + 1;
+        let start = parts.next().ok_or(err_msg("couldn't advance"))?.parse::<u32>()?;
+        let end = parts.next().ok_or(err_msg("couldn't advance"))?.parse::<u32>()? + 1;
 
-        (start..end).map(|i| i.to_string()).collect()
+        Ok((start..end).map(|i| i.to_string()).collect())
     } else if text.contains(',') {
-        text.split(',').map(|s| s.to_string()).collect()
+        Ok(text.split(',').map(|s| s.to_string()).collect())
     } else {
         unreachable!()
     }
