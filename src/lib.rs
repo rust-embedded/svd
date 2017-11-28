@@ -14,7 +14,7 @@
 //!     File::open("STM32F30x.svd").unwrap().read_to_string(xml);
 //!
 //!     println!("{:?}", svd::parse(xml));
-//! }cro_use] extern crate failure_derive;u
+//! }
 //! ```
 //!
 //! # References
@@ -70,7 +70,7 @@ impl ElementExt for Element {
     {
        match self.get_child(k.clone()) {
             None => Ok(None),
-            Some(val) => Ok(Some(val.text.clone().ok_or(format_err!("Couldn't get `<{}>` tag", k))?)),
+            Some(val) => Ok(Some(val.text.clone().ok_or(format_err!("`<{}>` tag is empty", k))?)),
        } 
     }
     fn get_child_text<K>(&self, k: K) -> Result<String, Error>
@@ -89,7 +89,7 @@ impl ElementExt for Element {
         if let Some(res) = self.get_child(k.clone()) {
             return Ok(res)
         } else {
-            Err(err_msg(format!("Couldn't get a `<{}>` tag", k)))
+            Err(err_msg(format!("`<{}>` tag is empty", k)))
         }
     }
     
@@ -130,10 +130,11 @@ impl Device {
             // FIXME: Show peripheral number in error
             let res: Result<Vec<_>, _> = tree.get_child_res("peripherals")?.children
                 .iter()
-                .map(Peripheral::parse)
+                .enumerate()
+                .map(|(i,p)| Peripheral::parse(p).map_err(|e| (i+1,e)))
                 .collect();
             
-            res?
+            res.map_err(|err| err.1.context(format!("When parsing peripheral #{}", err.0)))?
         };
         Ok(Device {
             name: tree.get_child_text("name")?, // FIXME: Should capture the caused
