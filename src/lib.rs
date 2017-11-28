@@ -127,17 +127,13 @@ impl Device {
     pub fn parse(svd: &str) -> Result<Device,Error> {
         let tree = &Element::parse(svd.as_bytes())?;
         let peripherals = {
-            let p = tree.get_child_res("peripherals")?.children.iter().map(Peripheral::parse);
-            let mut peripheral_vec = vec![];
-
-            for (i,result) in p.enumerate() {
-                peripheral_vec.push(
-                    result.context(
-                        format!("Failed to parse peripheral #{}", i+1)
-                    )?
-                )
-            }
-            peripheral_vec
+            // FIXME: Show peripheral number in error
+            let res: Result<Vec<_>, _> = tree.get_child_res("peripherals")?.children
+                .iter()
+                .map(Peripheral::parse)
+                .collect();
+            
+            res?
         };
         Ok(Device {
             name: tree.get_child_text("name")?, // FIXME: Should capture the caused
@@ -243,24 +239,21 @@ impl Peripheral {
             group_name: tree.get_child_text_opt("groupName")?,
             description: tree.get_child_text_opt("description")?,
             base_address: parse::u32(tree.get_child_res("baseAddress")?)?,
-            interrupt: { // FIXME: MOve outside of sruct decl
-                let inter = tree.children
+            interrupt: {
+                let res: Result<Vec<_>, _> = tree.children
                     .iter()
                     .filter(|t| t.name == "interrupt")
-                    .map(Interrupt::parse);
-                let mut interrupt_vec = vec![];
-                for result in inter {
-                    interrupt_vec.push(result?)
-                }
-                interrupt_vec
+                    .map(Interrupt::parse)
+                    .collect();
+                res?
             },
-            registers: { // FIXME: MOve outside of sruct decl
+            registers: {
                 if let Some(rs) = tree.get_child("registers") {
-                    let mut vec = vec![];
-                    for child in &rs.children {
-                        vec.push(cluster_register_parse(child)?);
-                    }
-                    Some(vec)
+                    let res: Result<Vec<_>, _> = rs.children
+                        .iter()
+                        .map(cluster_register_parse)
+                        .collect();
+                    Some(res?)
                 } else {
                     None
                 }
@@ -413,16 +406,13 @@ impl ClusterInfo {
                 tree.get_child_res("resetValue").and_then(|t| parse::u32(t)).ok(), // FIXME: Silences parsing errors
             reset_mask:
                 tree.get_child_res("resetMask").and_then(|t| parse::u32(t)).ok(), // FIXME: Silences parsing errors
-            children: { // FIXME: Move outside of struct decl
-                let inter = tree.children
+            children: {
+                let res: Result<Vec<_>, _> = tree.children
                     .iter()
                     .filter(|t| t.name == "register" || t.name == "cluster")
-                    .map(cluster_register_parse);
-                let mut children_vec = vec![];
-                for result in inter {
-                    children_vec.push(result?)
-                }
-                children_vec
+                    .map(cluster_register_parse)
+                    .collect();
+                res?
             },
 
             _extensible: (),
@@ -450,11 +440,11 @@ impl RegisterInfo {
                 tree.get_child_res("resetMask").and_then(|t| parse::u32(t)).ok(), // FIXME: Silences parsing errors
             fields: {
                 if let Some(rs) = tree.get_child("fields") {
-                    let mut vec = vec![];
-                    for child in &rs.children {
-                        vec.push(Field::parse(child)?);
-                    }
-                    Some(vec)
+                    let res: Result<Vec<_>, _> = rs.children
+                        .iter()
+                        .map(Field::parse)
+                        .collect();
+                    Some(res?)
                 } else {
                     None
                 }
@@ -557,16 +547,13 @@ impl Field {
                     None
                 }
             },  
-            enumerated_values: { // FIXME: Move outside of struct decl
-                let inter = tree.children
+            enumerated_values: {
+                let res: Result<Vec<_>, _> = tree.children
                     .iter()
                     .filter(|t| t.name == "enumeratedValues")
-                    .map(EnumeratedValues::parse);
-                let mut enumerated_values_vec = vec![];
-                for result in inter {
-                    enumerated_values_vec.push(result?)
-                }
-                enumerated_values_vec
+                    .map(EnumeratedValues::parse)
+                    .collect();
+                res?
             },
             write_constraint: {
                 if let Some(write_constraint) = tree.get_child("writeConstraint") {
@@ -741,16 +728,12 @@ impl EnumeratedValues {
                 .get(&"derivedFrom".to_owned())
                 .map(|s| s.to_owned()),
             values: {
-                let values = tree.children.iter().map(EnumeratedValue::parse);
-                let mut values_vec = vec![];
-                for result in values {
-                    let result = result?;
-                    if result.is_none() {
-                        continue;
-                    }
-                    values_vec.push(result.unwrap()) // Unwrap is safe here
-                }
-                values_vec
+                let res: Result<Vec<_>, _> = tree.children
+                    .iter()
+                    .map(EnumeratedValue::parse)
+                    .collect();
+                // Unwrap is safe
+                res?.into_iter().filter(|r| r.is_some()).map(|s| s.unwrap()).collect()
             },
             _extensible: (),
         })
