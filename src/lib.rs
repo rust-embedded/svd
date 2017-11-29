@@ -1,4 +1,4 @@
-#![feature(try_trait)]
+#![feature(custom_attribute)]
 //! CMSIS-SVD file parser
 //!
 //! # Usage
@@ -39,6 +39,7 @@ use xmltree::Element;
 
 use failure::{Error,err_msg, ResultExt};
 mod parse;
+pub mod errors;
 
 
 /// Parses the contents of a SVD file (XML)
@@ -70,7 +71,15 @@ impl ElementExt for Element {
     {
        match self.get_child(k.clone()) {
             None => Ok(None),
-            Some(val) => Ok(Some(val.text.clone().ok_or(format_err!("`<{}>` tag is empty", k))?)),
+            Some(val) => Ok(Some(
+                    val.text.clone()
+                    .ok_or(
+                        errors::TagError::EmptyTag {
+                            name: format!("{}", k).to_owned(),
+                            content: errors::XmlContent::Text
+                        }
+                    )?
+            )),
        } 
     }
     fn get_child_text<K>(&self, k: K) -> Result<String, Error>
@@ -78,7 +87,10 @@ impl ElementExt for Element {
         String: PartialEq<K>,
         K: std::fmt::Display + Clone,
     {
-        self.get_child_text_opt(k.clone())?.ok_or(format_err!("Expected a `<{}>` tag but found none", k)) 
+        self.get_child_text_opt(k.clone())?
+            .ok_or(
+                errors::TagError::MissingTag { name: format!("{}", k).to_owned() }.into() 
+            ) 
     }
 
     fn get_child_res<K>(&self, k: K) -> Result<&Element, Error>
@@ -89,7 +101,10 @@ impl ElementExt for Element {
         if let Some(res) = self.get_child(k.clone()) {
             return Ok(res)
         } else {
-            Err(err_msg(format!("`<{}>` tag is empty", k)))
+            Err(errors::TagError::EmptyTag {
+                    name: format!("{}", k).to_owned(),
+                    content: errors::XmlContent::Unknown
+                }.into())
         }
     }
     
@@ -258,9 +273,14 @@ impl Peripheral {
                 if let Some(rs) = tree.get_child("registers") {
                     let res: Result<Vec<_>, _> = rs.children
                         .iter()
-                        .map(cluster_register_parse)
+                        .enumerate()
+                        .map(|(i,p)| cluster_register_parse(p).map_err(|e| (i+1,e)))
                         .collect();
-                    Some(res?)
+                    Some(
+                        res.map_err(|err|
+                                    errors::RegisterError::from_cause(err.1, err.0)
+                                    )?
+                        )
                 } else {
                     None
                 }
@@ -429,9 +449,14 @@ impl ClusterInfo {
 
 impl RegisterInfo {
     fn parse(tree: &Element) -> Result<RegisterInfo, Error> {
+        let name = tree.get_child_text("name")?;
+        RegisterInfo::_parse(tree, name.clone()).map_err(|e| errors::Named(name, e).into())
+    }
+    fn _parse(tree: &Element,name: String) -> Result<RegisterInfo, Error> {
+        let name = tree.get_child_text("name")?;
         Ok(RegisterInfo {
-            name: tree.get_child_text("name")?, // FIXME: Capture error
-            description: tree.get_child_text("description")?, // FIXME: Capture error
+            name: name,
+            description: tree.get_child_text("description")?,
             address_offset: parse::u32(tree.get_child_res("addressOffset")?)?,
             size: and_then_result(tree.get_child("size"), parse::u32)?,
             access: {
@@ -449,9 +474,14 @@ impl RegisterInfo {
                 if let Some(rs) = tree.get_child("fields") {
                     let res: Result<Vec<_>, _> = rs.children
                         .iter()
-                        .map(Field::parse)
+                        .enumerate()
+                        .map(|(i,p)| Field::parse(p).map_err(|e| (i+1,e)))
                         .collect();
-                    Some(res?)
+                    Some(
+                            res.map_err(|err|
+                                errors::FieldError::from_cause(err.1, err.0)
+                            )?
+                        )
                 } else {
                     None
                 }
@@ -473,14 +503,7 @@ impl RegisterClusterArrayInfo {
         Ok(RegisterClusterArrayInfo {
             dim: tree.get_child_text("dim")?.parse::<u32>()?, // FIXME: Capture error
             dim_increment: parse::u32(tree.get_child_res("dimIncrement")?)?, // FIXME: Capture error
-            dim_index: {
-                if let Some(res) = tree.get_child("dimIndex").map(|c| parse::dim_index(c.text.as_ref().ok_or(format_err!("couldnt get text"))?)) { 
-                    // FIXME: Capture error
-                    Some(res?)
-                } else {
-                    None
-                }
-            },
+            dim_index: and_then_result(tree.get_child("dimIndex"), parse::dim_index)?,
         })
     }
 }
@@ -542,11 +565,16 @@ pub struct Field {
 impl Field {
     fn parse(tree: &Element) -> Result<Field,Error> {
         assert_eq!(tree.name, "field"); // FIXME: Use if and ?
+        let name = tree.get_child_text("name")?;
+        Field::_parse(tree, name.clone()).map_err(|e| errors::Named(name, e).into())
+        
+    }
+    fn _parse(tree: &Element, name: String) -> Result<Field,Error> {
 
         Ok(Field {
-            name: tree.get_child_text("name")?, // FIXME: Capture error
+            name,
             description: tree.get_child_text_opt("description")?,
-            bit_range: BitRange::parse(tree).context(format!("While parsing <field>"))?,
+            bit_range: BitRange::parse(tree)?,
             access: {
                 if let Some(access) = tree.get_child("access") {
                     Some(Access::parse(access)?)
@@ -597,7 +625,7 @@ impl BitRange {
         } else if let (Some(lsb), Some(msb)) =
             (tree.get_child("lsb"), tree.get_child("msb")) {
             (parse::u32(msb)?, parse::u32(lsb)?)
-        } else {
+        } else { // FIXME: This branch should not be the end condition, an error should be.
             return Ok(BitRange {
                        offset: parse::u32(tree.get_child_res("bitOffset")?)?, // FIXME: Capture errors
                        width: parse::u32(tree.get_child_res("bitWidth")?)?, // FIXME: Capture errors

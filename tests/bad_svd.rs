@@ -70,6 +70,19 @@ fn field_name_missing() {
 
 #[test]
 #[should_panic]
+fn bitoffset_invalid() {
+    let xml = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/bad_svd/bitoffset-invalid.svd"));
+    match svd::parse(xml) {
+        Err(e) => {
+            print_causes(e.cause());
+            panic!()
+        },
+        _ => (),
+    }
+}
+
+#[test]
+#[should_panic]
 fn enumerated_value_name_missing() {
     let xml = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/bad_svd/enumerated-value-name-missing.svd"));
     match svd::parse(xml) {

@@ -1,0 +1,31 @@
+<device>
+    <name>field-name-missing</name>
+    <peripherals>
+        <peripheral>
+            <name>GPIOA</name>
+            <baseAddress>0xdeadbeef</baseAddress>
+            <registers>
+                <register>
+                    <name>BSRR</name>
+                    <description>GPIO port bit set/reset register</description>
+                    <addressOffset>0x0</addressOffset>
+                    <size>32</size>
+                    <resetValue>0x00000000</resetValue>
+                    <fields>
+                        <field>
+                            <name>BS0</name>
+                            <bitOffset>a</bitOffset>
+                            <bitWidth>1</bitWidth>
+                            <enumeratedValues>
+                                <enumeratedValue>
+                                    <name>SET</name>
+                                    <value>1</value>
+                                </enumeratedValue>
+                            </enumeratedValues>
+                        </field>
+                    </fields>
+                </register>
+            </registers>
+        </peripheral>
+    </peripherals>
+</device>
