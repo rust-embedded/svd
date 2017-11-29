@@ -37,7 +37,7 @@ use std::ops::Deref;
 use either::Either;
 use xmltree::Element;
 
-use failure::{Error,err_msg, ResultExt};
+use failure::{Error, err_msg};
 mod parse;
 pub mod errors;
 
@@ -449,11 +449,10 @@ impl ClusterInfo {
 
 impl RegisterInfo {
     fn parse(tree: &Element) -> Result<RegisterInfo, Error> {
-        let name = tree.get_child_text("name")?;
+        let name = tree.get_child_text("name")?; 
         RegisterInfo::_parse(tree, name.clone()).map_err(|e| errors::Named(name, e).into())
     }
     fn _parse(tree: &Element,name: String) -> Result<RegisterInfo, Error> {
-        let name = tree.get_child_text("name")?;
         Ok(RegisterInfo {
             name: name,
             description: tree.get_child_text("description")?,

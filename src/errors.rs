@@ -1,5 +1,5 @@
 use std::fmt;
-use failure::{Error, Fail};
+use failure::Error;
 
 #[derive(Debug, Fail)]
 pub enum TagError {
@@ -61,11 +61,6 @@ impl RegisterError {
 #[fail(display = "")]
 /// Internal, only to capture name
 pub(crate) struct Named(pub String, pub Error);
-impl Named {
-    fn new(s: &str, cause: Error) -> Named {
-        Named(s.to_string(), cause)
-    }
-}
 
 // TODO: Put all *Error that relates to inner levels of device (and device) into one enum
 
