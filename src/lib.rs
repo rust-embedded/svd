@@ -103,11 +103,18 @@ impl ElementExt for Element {
     }
 }
 
-/*impl std::convert::From<std::option::NoneError> for Error {
-    fn from(error: std::option::NoneError) -> Self {
-        NewNoneError
+/// Convenience function for elevating errors in optional fields
+fn and_then_result<U,E,L, F: std::ops::Fn(L) -> Result<U,E>>(opt: Option<L>, f: F) -> Result<Option<U>,E> {
+    if let Some(k) = opt {
+        match f(k) {    
+            Ok(u) => Ok(Some(u)),
+            Err(e) => Err(e),
+        }
+    } else {
+        Ok(None)
     }
-}*/
+}
+
 #[derive(Clone, Debug)]
 pub struct Device {
     pub name: String,
@@ -127,7 +134,6 @@ impl Device {
     pub fn parse(svd: &str) -> Result<Device,Error> {
         let tree = &Element::parse(svd.as_bytes())?;
         let peripherals = {
-            // FIXME: Show peripheral number in error
             let res: Result<Vec<_>, _> = tree.get_child_res("peripherals")?.children
                 .iter()
                 .enumerate()
@@ -137,7 +143,7 @@ impl Device {
             res.map_err(|err| err.1.context(format!("When parsing peripheral #{}", err.0)))?
         };
         Ok(Device {
-            name: tree.get_child_text("name")?, // FIXME: Should capture the caused
+            name: tree.get_child_text("name")?,
             cpu: {
                 if let Some(res) = tree.get_child("cpu").map(Cpu::parse) {
                     Some(res?)
@@ -146,7 +152,7 @@ impl Device {
                 }
             },
             peripherals,
-            defaults: Defaults::parse(tree),
+            defaults: Defaults::parse(tree)?,
             _extensible: (),
         })
     }
@@ -395,7 +401,7 @@ impl ClusterInfo {
             header_struct_name: tree.get_child_text_opt("headerStructName")?,
             address_offset:
                 parse::u32(tree.get_child_res("addressOffset")?)?, // FIXME: Capture errors
-            size: tree.get_child_res("size").and_then(|t| parse::u32(t)).ok(), // FIXME: Silences parsing errors
+            size: and_then_result(tree.get_child("size"), parse::u32)?,
             access: {
                 if let Some(access) = tree.get_child("access") {
                     Some(Access::parse(access)?)
@@ -404,9 +410,9 @@ impl ClusterInfo {
                 }
             },
             reset_value:
-                tree.get_child_res("resetValue").and_then(|t| parse::u32(t)).ok(), // FIXME: Silences parsing errors
+                and_then_result(tree.get_child("resetValue"), parse::u32)?,
             reset_mask:
-                tree.get_child_res("resetMask").and_then(|t| parse::u32(t)).ok(), // FIXME: Silences parsing errors
+                and_then_result(tree.get_child("resetMask"), parse::u32)?,
             children: {
                 let res: Result<Vec<_>, _> = tree.children
                     .iter()
@@ -427,7 +433,7 @@ impl RegisterInfo {
             name: tree.get_child_text("name")?, // FIXME: Capture error
             description: tree.get_child_text("description")?, // FIXME: Capture error
             address_offset: parse::u32(tree.get_child_res("addressOffset")?)?,
-            size: tree.get_child_res("size").and_then(|t| parse::u32(t)).ok(), // FIXME: Silences parsing errors
+            size: and_then_result(tree.get_child("size"), parse::u32)?,
             access: {
                 if let Some(access) = tree.get_child("access") {
                     Some(Access::parse(access)?)
@@ -436,9 +442,9 @@ impl RegisterInfo {
                 }
             }, 
             reset_value:
-                tree.get_child_res("resetValue").and_then(|t| parse::u32(t)).ok(), // FIXME: Silences parsing errors
+                and_then_result(tree.get_child("resetValue"), parse::u32)?,
             reset_mask:
-                tree.get_child_res("resetMask").and_then(|t| parse::u32(t)).ok(), // FIXME: Silences parsing errors
+                and_then_result(tree.get_child("resetMask"), parse::u32)?,
             fields: {
                 if let Some(rs) = tree.get_child("fields") {
                     let res: Result<Vec<_>, _> = rs.children
@@ -540,7 +546,7 @@ impl Field {
         Ok(Field {
             name: tree.get_child_text("name")?, // FIXME: Capture error
             description: tree.get_child_text_opt("description")?,
-            bit_range: BitRange::parse(tree)?,
+            bit_range: BitRange::parse(tree).context(format!("While parsing <field>"))?,
             access: {
                 if let Some(access) = tree.get_child("access") {
                     Some(Access::parse(access)?)
@@ -577,15 +583,17 @@ pub struct BitRange {
 impl BitRange {
     fn parse(tree: &Element) -> Result<BitRange, Error> {
         let (end, start): (u32, u32) = if let Some(range) =
-            tree.get_child("bitRange") {
+            tree.get_child_text_opt("bitRange")? {
 
-            let text = tree.text.as_ref().ok_or(err_msg("couldnt get bitrange"))?; // FIXME: BitRange::parse should really take a str
-            assert!(text.starts_with('[')); // FIXME: Use if and format_err!
-            assert!(text.ends_with(']')); // FIXME: Use if and format_err!
+            assert!(range.starts_with('[')); // FIXME: Use if and format_err!
+            assert!(range.ends_with(']')); // FIXME: Use if and format_err!
 
-            let mut parts = text[1..text.len() - 1].split(':');
+            let mut parts = range[1..range.len() - 1].split(':');
 
-            (parts.next().ok_or(err_msg("Couldn't get next"))?.parse()?, parts.next().ok_or(err_msg("Couldn't get next"))?.parse()?)
+            (
+                parts.next().ok_or(err_msg("Couldn't get next"))?.parse()?,
+                parts.next().ok_or(err_msg("Couldn't get next"))?.parse()?
+            )
         } else if let (Some(lsb), Some(msb)) =
             (tree.get_child("lsb"), tree.get_child("msb")) {
             (parse::u32(msb)?, parse::u32(lsb)?)
@@ -633,19 +641,16 @@ impl WriteConstraint {
             match field.as_ref() {
                 "writeAsRead" => {
                     Ok(WriteConstraint::WriteAsRead(
-                            tree.get_child(field.as_ref())
-                                .and_then(|t| parse::bool(t).ok()).ok_or(err_msg("writeAsRead"))? // FIXME: Capture errors, and fix silencing
+                            parse::bool(tree.get_child_res(field.as_ref())?)?
                     ))
                 }
                 "useEnumeratedValues" => {
                     Ok(WriteConstraint::UseEnumeratedValues(
-                            tree.get_child(field.as_ref())
-                                .and_then(|t| parse::bool(t).ok()).ok_or(err_msg("useEnumeratedValues"))? // FIXME: Capture errors, and fix silencing
+                            parse::bool(tree.get_child_res(field.as_ref())?)?
                     ))
                 }
                 "range" => {
                     Ok(WriteConstraint::Range(
-                        // FIXME: Capture error
                         WriteConstraintRange::parse(tree.get_child_res(field.as_ref())?)?
                     ))
                 }
@@ -669,16 +674,16 @@ pub struct Defaults {
 }
 
 impl Defaults {
-    fn parse(tree: &Element) -> Defaults {
-        Defaults {
-            size: tree.get_child_res("size").and_then(|t| parse::u32(t)).ok(), // FIXME: Silences parsing errors
+    fn parse(tree: &Element) -> Result<Defaults, Error> {
+        Ok(Defaults {
+            size: and_then_result(tree.get_child("size"), parse::u32)?,
             reset_value:
-                tree.get_child_res("resetValue").and_then(|t| parse::u32(t)).ok(), // FIXME: Silences parsing errors
+                and_then_result(tree.get_child("resetValue"),parse::u32)?,
             reset_mask:
-                tree.get_child_res("resetMask").and_then(|t| parse::u32(t)).ok(), // FIXME: Silences parsing errors
-            access: tree.get_child_res("access").and_then(Access::parse).ok(), // FIXME: Silences parsing errors
+                and_then_result(tree.get_child("resetMask"), parse::u32)?,
+            access: and_then_result(tree.get_child("access"), Access::parse)?,
             _extensible: (),
-        }
+        })
     }
 }
 
@@ -691,7 +696,7 @@ pub enum Usage {
 
 impl Usage {
     fn parse(tree: &Element) -> Result<Usage, Error> {
-        let text = tree.text.as_ref().ok_or(err_msg("couldnt get usage"))?; // FIXME: BitRange::parse should really take a str
+        let text = tree.text.as_ref().ok_or(err_msg("couldnt get usage"))?; // FIXME: Usage::parse should really take a str
 
         Ok(match &text[..] {
             "read" => Usage::Read,
@@ -761,12 +766,8 @@ impl EnumeratedValue {
             EnumeratedValue {
                 name: tree.get_child_text("name")?, // FIXME: Capture error
                 description: tree.get_child_text_opt("description")?,
-                value: tree.get_child_res("value").and_then(|t| parse::u32(t)).ok(), // FIXME: Silences parsing errors
-                is_default: tree.get_child_text_opt("isDefault")?.map( // Silences error
-                    |t| {
-                        t.parse().unwrap() // FIXME: Make into error
-                    },
-                ),
+                value: and_then_result(tree.get_child("value"), parse::u32)?,
+                is_default: tree.get_child_text_opt("isDefault")?.map(|t| t.parse().unwrap()),
                 _extensible: (),
             },
         ))
