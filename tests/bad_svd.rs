@@ -7,12 +7,9 @@ use failure::Fail;
 #[should_panic]
 fn peripheral_name_missing() {
     let xml = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/bad_svd/peripheral-name-missing.svd"));
-    match svd::parse(xml) {
-        Err(e) => {
-            print_causes(e.cause());
-            panic!()
-        },
-        _ => (),
+    if let Err(e) = svd::parse(xml) {
+        print_causes(e.cause());
+        panic!()
     }
 }
 
@@ -20,12 +17,9 @@ fn peripheral_name_missing() {
 #[should_panic]
 fn peripheral_name_empty() {
     let xml = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/bad_svd/peripheral-name-empty.svd"));
-    match svd::parse(xml) {
-        Err(e) => {
-            print_causes(e.cause());
-            panic!()
-        },
-        _ => (),
+    if let Err(e) = svd::parse(xml) {
+        print_causes(e.cause());
+        panic!()
     }
 }
 
@@ -33,12 +27,9 @@ fn peripheral_name_empty() {
 #[should_panic]
 fn peripherals_missing() {
     let xml = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/bad_svd/peripherals-missing.svd"));
-    match svd::parse(xml) {
-        Err(e) => {
-            print_causes(e.cause());
-            panic!()
-        },
-        _ => (),
+    if let Err(e) = svd::parse(xml) {
+        print_causes(e.cause());
+        panic!()
     }
 }
 
@@ -46,12 +37,9 @@ fn peripherals_missing() {
 #[should_panic]
 fn register_name_missing() {
     let xml = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/bad_svd/register-name-missing.svd"));
-    match svd::parse(xml) {
-        Err(e) => {
-            print_causes(e.cause());
-            panic!()
-        },
-        _ => (),
+    if let Err(e) = svd::parse(xml) {
+        print_causes(e.cause());
+        panic!()
     }
 }
 
@@ -59,12 +47,9 @@ fn register_name_missing() {
 #[should_panic]
 fn field_name_missing() {
     let xml = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/bad_svd/field-name-missing.svd"));
-    match svd::parse(xml) {
-        Err(e) => {
-            print_causes(e.cause());
-            panic!()
-        },
-        _ => (),
+    if let Err(e) = svd::parse(xml) {
+        print_causes(e.cause());
+        panic!()
     }
 }
 
@@ -72,12 +57,9 @@ fn field_name_missing() {
 #[should_panic]
 fn bitoffset_invalid() {
     let xml = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/bad_svd/bitoffset-invalid.svd"));
-    match svd::parse(xml) {
-        Err(e) => {
-            print_causes(e.cause());
-            panic!()
-        },
-        _ => (),
+    if let Err(e) = svd::parse(xml) {
+        print_causes(e.cause());
+        panic!()
     }
 }
 
@@ -85,12 +67,9 @@ fn bitoffset_invalid() {
 #[should_panic]
 fn enumerated_value_name_missing() {
     let xml = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/bad_svd/enumerated-value-name-missing.svd"));
-    match svd::parse(xml) {
-        Err(e) => {
-            print_causes(e.cause());
-            panic!()
-        },
-        _ => (),
+    if let Err(e) = svd::parse(xml) {
+        print_causes(e.cause());
+        panic!()
     }
 }
 
@@ -98,12 +77,9 @@ fn enumerated_value_name_missing() {
 #[should_panic]
 fn bad_register_size() {
     let xml = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/bad_svd/bad-register-size.svd"));
-    match svd::parse(xml) {
-        Err(e) => {
-            print_causes(e.cause());
-            panic!()
-        },
-        _ => (),
+    if let Err(e) = svd::parse(xml) {
+        print_causes(e.cause());
+        panic!()
     }
 }
 

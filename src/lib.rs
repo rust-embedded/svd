@@ -25,6 +25,7 @@
 
 // TEMP#![deny(warnings)]
 
+
 extern crate either;
 extern crate xmltree;
 #[macro_use]
@@ -492,6 +493,7 @@ impl RegisterInfo {
                     None
                 }
             },
+
             _extensible: (),
         })
     }
@@ -681,10 +683,10 @@ impl WriteConstraint {
                         WriteConstraintRange::parse(tree.get_child_res(field.as_ref())?)?
                     ))
                 }
-                v => return Err(format_err!("unknown <writeConstraint> variant: {}", v)),
+                v => Err(format_err!("unknown <writeConstraint> variant: {}", v)),
             }
         } else {
-            return Err(format_err!("found more than one <WriteConstraint> element"))
+            Err(format_err!("found more than one <WriteConstraint> element"))
         }
     }
 }

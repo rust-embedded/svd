@@ -39,7 +39,7 @@ pub fn bool(tree: &Element) -> Result<bool, Error> { // FIXME: Fix messages
 }
 fn _bool(text: &str) -> Result<bool,Error> {
     // FIXME: parse::bool should take a &str
-    match text.as_ref() {
+    match text {
         "0" => Ok(false),
         "1" => Ok(true),
         _ => Ok(text.parse::<bool>()?)
