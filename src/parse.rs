@@ -29,6 +29,16 @@ fn _u32(text: &str) -> Result<u32, Error> {
     }
 }
 
+pub fn u32_strict(tree: &Element) -> Result<u32, Error> { // FIXME: Fix messages
+    let name = tree.name.clone();
+    let text = tree.get_self_text()?;
+    Ok(text.parse::<u32>().with_context(|_| errors::ParseError {
+        tagname: name,
+        conv: errors::ConvType::U32,
+        text: text.clone(),
+    })?)
+}
+
 pub fn bool(tree: &Element) -> Result<bool, Error> { // FIXME: Fix messages
     let name = tree.name.clone();
     let text = tree.get_self_text()?;

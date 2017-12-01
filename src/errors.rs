@@ -59,12 +59,12 @@ impl PeripheralError {
 pub enum RegisterClusterError {
     #[fail(display = "Cluster #{} has no name", _0)]
     UnnamedCluster(usize, #[cause] TagError),
-    #[fail(display = "In cluster \"{}\"", _1)]
-    NamedCluster(usize, String),
+    #[fail(display = "In cluster \"{}\"", _0)]
+    NamedCluster(String),
     #[fail(display = "Register #{} has no name", _0)]
     UnnamedRegister(usize, #[cause] TagError),
-    #[fail(display = "In register \"{}\"", _1)]
-    NamedRegister(usize,String),
+    #[fail(display = "In register \"{}\"", _0)]
+    NamedRegister(String),
 }
 
 impl RegisterClusterError {
@@ -72,7 +72,7 @@ impl RegisterClusterError {
         let res = f.downcast::<Named>();
         if let Ok(regname) = res {
             let name = regname.0.clone();
-            return regname.1.context(RegisterClusterError::NamedRegister(i,name)).into()
+            return regname.1.context(RegisterClusterError::NamedRegister(name)).into()
         }
         let res = res.unwrap_err().downcast::<TagError>();
         if let Ok(tagerror) = res {
@@ -81,9 +81,9 @@ impl RegisterClusterError {
         let res = res.unwrap_err().downcast::<ClusterError>();
         if let Ok(clustererror) = res {
             let res = clustererror.1.downcast::<Named>();
-            if let Ok(regname) = res {
-                let name = regname.0.clone();
-                return regname.1.context(RegisterClusterError::NamedCluster(i,name)).into()
+            if let Ok(clusname) = res {
+                let name = clusname.0.clone();
+                return clusname.1.context(RegisterClusterError::NamedCluster(name)).into()
             }
             let res = res.unwrap_err().downcast::<TagError>();
             if let Ok(tagerror) = res {
@@ -93,15 +93,42 @@ impl RegisterClusterError {
         println!("\"{:?}\"", res.unwrap_err());
             unimplemented!("Unknown error on cluster")
         }
-        println!("\"{:?}\"", res.unwrap_err());
-        unimplemented!("Unknown error")
+        let res = res.unwrap_err().downcast::<RegisterClusterArrayParseError>();
+        if let Ok(dimerror) = res {
+            return dimerror.1.context(RegisterClusterError::NamedRegister(dimerror.0)).into()
+            //return RegisterClusterError::NamedRegister(dimerror.0).context(dimerror.1).into()
+        }
+        print_causes(res.unwrap_err().cause());
+        unimplemented!("Unknown error/Unhandled error on RegisterClusterError")
     }
 }
 
 #[derive(Debug, Fail)]
-#[fail(display = "cluster")]
+#[fail(display = "")]
 pub(crate) struct ClusterError(pub usize, pub Error);
 
+#[derive(Debug, Fail)]
+#[fail(display = "")]
+pub struct RegisterClusterArrayParseError(pub String, pub Error);
+
+impl RegisterClusterArrayParseError {
+    pub fn no_placeholder(name: String) -> Error {
+        RegisterClusterArrayParseError(name, DimensionError::NoPlaceHolder.into()).into()
+    }
+    pub fn dimensions_mismatch(name: String) -> Error {
+        RegisterClusterArrayParseError(name, DimensionError::DimensionsMismatch.into()).into()
+    }
+}
+
+#[derive(Debug,Fail)]
+pub enum DimensionError {
+    //#[fail(display = "An error occured while parsing `<dim>`")]
+    //ParseError(#[cause] ::std::num::ParseIntError),
+    #[fail(display = "<name> was expected to contain a [%s] placeholder, found none")]
+    NoPlaceHolder,
+    #[fail(display = "Dimensions of register/cluster doesn't match the specified dimensions")]
+    DimensionsMismatch,
+}
 #[derive(Debug, Fail)]
 #[fail(display = "")]
 /// Internal, only to capture name
@@ -253,5 +280,14 @@ impl fmt::Display for ConvType {
             &ConvType::U32 => write!(f, "u32"),
             &ConvType::DimIndex => write!(f, "dim indices"),
         }
+    }
+}
+
+/// Used for debugging errors
+fn print_causes(mut fail: &Fail) {
+    println!("{}", &fail);
+    while let Some(cause) = fail.cause() {
+        fail = cause;
+        println!("{}", &fail);
     }
 }

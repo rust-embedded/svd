@@ -218,9 +218,8 @@ pub struct Cpu {
 
 impl Cpu {
     fn parse(tree: &Element) -> Result<Cpu,Error> {
-        if tree.name != "cpu" {
-            return Err(format_err!("Expected cpu tag")) // FIXME: msg
-        }
+        ensure!(tree.name == "cpu", "Element is not a <cpu>"); // Only happens if manually called.
+        
 
         Ok(Cpu {
             name: tree.get_child_text("name")?, // FIXME: Capture error
@@ -372,15 +371,19 @@ fn cluster_register_parse(i: usize, tree: &Element) -> Result<Either<Register, C
 
 impl Cluster {
     fn parse(tree: &Element) -> Result<Cluster, Error> {
-        assert_eq!(tree.name, "cluster");
+        ensure!(tree.name == "cluster", "Element is not a <cluster>"); // FIXME: Not sure when this can happen, if it can, make an error for it.
 
         let info = ClusterInfo::parse(tree)?;
 
         if tree.get_child("dimIncrement").is_some() {
             let array_info = RegisterClusterArrayInfo::parse(tree)?;
-            assert!(info.name.contains("%s")); // FIXME: return as Result
+            if !info.name.contains("%s") {
+                return Err(errors::RegisterClusterArrayParseError::no_placeholder(info.name.clone()))
+            } // FIXME: return as Result
             if let Some(ref indices) = array_info.dim_index {
-                assert_eq!(array_info.dim as usize, indices.len()) // FIXME: Return as Result
+                if array_info.dim as usize != indices.len() {
+                    return Err(errors::RegisterClusterArrayParseError::dimensions_mismatch(info.name.clone()))
+                }
             }
             Ok(Cluster::Array(info, array_info))
         } else {
@@ -511,9 +514,13 @@ impl RegisterInfo {
 
 impl RegisterClusterArrayInfo {
     fn parse(tree: &Element) -> Result<RegisterClusterArrayInfo, Error> {
+        let name = tree.get_child_text("name")?; 
+        RegisterClusterArrayInfo::_parse(tree).map_err(|e| errors::Named(name, e).into())
+    }
+    fn _parse(tree: &Element) -> Result<RegisterClusterArrayInfo, Error> {
         Ok(RegisterClusterArrayInfo {
-            dim: tree.get_child_text("dim")?.parse::<u32>()?, // FIXME: Capture error
-            dim_increment: parse::u32(tree.get_child_res("dimIncrement")?)?, // FIXME: Capture error
+            dim: parse::u32_strict(tree.get_child_res("dim")?)?,
+            dim_increment: parse::u32(tree.get_child_res("dimIncrement")?)?,
             dim_index: and_then_result(tree.get_child("dimIndex"), parse::dim_index)?,
         })
     }
@@ -521,15 +528,19 @@ impl RegisterClusterArrayInfo {
 
 impl Register {
     fn parse(tree: &Element) -> Result<Register, Error> {
-        assert_eq!(tree.name, "register"); // FIXME: use if and ?
+        ensure!(tree.name == "register", "Element is not a <register>"); // FIXME: Not sure when this can happen, if it can, make an error for it.
 
         let info = RegisterInfo::parse(tree)?;
 
         if tree.get_child("dimIncrement").is_some() {
             let array_info = RegisterClusterArrayInfo::parse(tree)?;
-            assert!(info.name.contains("%s"));
+            if !info.name.contains("%s") {
+                return Err(errors::RegisterClusterArrayParseError::no_placeholder(info.name.clone()))
+            } // FIXME: return as Result
             if let Some(ref indices) = array_info.dim_index {
-                assert_eq!(array_info.dim as usize, indices.len())
+                if array_info.dim as usize != indices.len() {
+                    return Err(errors::RegisterClusterArrayParseError::dimensions_mismatch(info.name.clone()))
+                }
             }
             Ok(Register::Array(info, array_info))
         } else {
@@ -575,7 +586,8 @@ pub struct Field {
 
 impl Field {
     fn parse(tree: &Element) -> Result<Field,Error> {
-        assert_eq!(tree.name, "field"); // FIXME: Use if and ?
+        ensure!(tree.name == "field", "Element is not a <field>"); // FIXME: Not sure when this can happen, if it can, make an error for it.
+        
         let name = tree.get_child_text("name")?;
         Field::_parse(tree, name.clone()).map_err(|e| errors::Named(name, e).into())
         
@@ -667,8 +679,8 @@ pub struct WriteConstraintRange {
 impl WriteConstraintRange {
     fn parse(tree: &Element) -> Result<WriteConstraintRange, Error> {
         Ok(WriteConstraintRange {
-            min: tree.get_child_text("minimum")?.parse()?, // FIXME: Capture errors
-            max: tree.get_child_text("maximum")?.parse()?, // FIXME: Capture errors
+            min: parse::u32_strict(tree.get_child_res("minimum")?)?,
+            max: parse::u32_strict(tree.get_child_res("maximum")?)?,
         })
     }
 }
@@ -765,7 +777,7 @@ pub struct EnumeratedValues {
 
 impl EnumeratedValues {
     fn parse(tree: &Element) -> Result<EnumeratedValues,Error> {
-        assert_eq!(tree.name, "enumeratedValues");
+        ensure!(tree.name == "enumeratedValues", "Element is not a <enumeratedValues>"); // FIXME: Not sure when this can happen, if it can, make an error for it.
 
         Ok(EnumeratedValues {
             name: tree.get_child_text_opt("name")?,
