@@ -103,7 +103,7 @@ impl ElementExt for Element {
         } else {
             Err(errors::TagError::EmptyTag {
                     name: format!("{}", k).to_owned(),
-                    content: errors::XmlContent::Unknown
+                    content: errors::XmlContent::Element
                 }.into())
         }
     }

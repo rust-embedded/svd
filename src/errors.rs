@@ -1,7 +1,7 @@
 use std::fmt;
 use failure::{Error, Fail};
 
-#[derive(Debug, Fail)]
+#[derive(Debug, Fail, PartialEq, Eq)]
 pub enum TagError {
     #[fail(display = "Expected {} in `<{}>` element, found none",content, name)]
     EmptyTag {
@@ -14,7 +14,7 @@ pub enum TagError {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum XmlContent {
     Text,
     Element,
@@ -31,12 +31,12 @@ impl fmt::Display for XmlContent {
     }
 }
 
-#[derive(Debug, Fail)]
+#[derive(Debug, Fail, PartialEq, Eq)]
 pub enum PeripheralError {
     #[fail(display = "Peripheral #{} has no name", _0)]
     UnnamedPeripheral(usize, #[cause] TagError),
-    #[fail(display = "In peripheral \"{}\"", _1)]
-    NamedPeripheral(usize,String),
+    #[fail(display = "In peripheral \"{}\"", _0)]
+    NamedPeripheral(String),
 }
 
 impl PeripheralError {
@@ -44,7 +44,7 @@ impl PeripheralError {
         let res = f.downcast::<Named>();
         if let Ok(regname) = res {
             let name = regname.0.clone();
-            return regname.1.context(PeripheralError::NamedPeripheral(i,name)).into()
+            return regname.1.context(PeripheralError::NamedPeripheral(name)).into()
         }
         let res = res.unwrap_err().downcast::<TagError>();
         if let Ok(tagerror) = res {
@@ -104,11 +104,11 @@ impl RegisterClusterError {
 }
 
 #[derive(Debug, Fail)]
-#[fail(display = "")]
+#[fail(display = "ClusterError")]
 pub(crate) struct ClusterError(pub usize, pub Error);
 
 #[derive(Debug, Fail)]
-#[fail(display = "")]
+#[fail(display = "RegisterClusterArrayParseError")]
 pub struct RegisterClusterArrayParseError(pub String, pub Error);
 
 impl RegisterClusterArrayParseError {
