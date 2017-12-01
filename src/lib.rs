@@ -59,6 +59,7 @@ trait ElementExt {
     where
         String: PartialEq<K>,
         K: std::fmt::Display + Clone;
+    fn get_self_text(&self) -> Result<&String, Error>;
     fn debug(&self);
 }
 
@@ -107,6 +108,12 @@ impl ElementExt for Element {
         }
     }
     
+    fn get_self_text(&self) -> Result<&String, Error> {
+        self.text.as_ref().ok_or(errors::TagError::EmptyTag {
+            name: self.name.clone(),
+            content: errors::XmlContent::Text
+        }.into())
+    }
 
     fn debug(&self) {
         println!("<{}>", self.name);
@@ -182,15 +189,15 @@ pub enum Endian {
 
 impl Endian {
     fn parse(tree: &Element) -> Result<Endian,Error> {
-        let text = tree.text.as_ref().ok_or(err_msg("couldnt get endian"))?; // FIXME: Endian::parse should really take a str
+        let text = tree.get_self_text()?;
 
-        match &text[..] {
-            "little" => Ok(Endian::Little),
-            "big" => Ok(Endian::Big),
-            "selectable" => Ok(Endian::Selectable),
-            "other" => Ok(Endian::Other),
-            _ => Err(format_err!("unknown endian variant: {}", text)),
-        }
+        Ok(match &text[..] {
+            "little" => Endian::Little,
+            "big" => Endian::Big,
+            "selectable" => Endian::Selectable,
+            "other" => Endian::Other,
+            _ => return Err(errors::EndianVariantError(text.clone()).into()),
+        })
     }
 }
 
@@ -461,13 +468,7 @@ impl RegisterInfo {
             description: tree.get_child_text("description")?,
             address_offset: parse::u32(tree.get_child_res("addressOffset")?)?,
             size: and_then_result(tree.get_child("size"), parse::u32)?,
-            access: {
-                if let Some(access) = tree.get_child("access") {
-                    Some(Access::parse(access)?)
-                } else {
-                    None
-                }
-            }, 
+            access: and_then_result(tree.get_child("access"),Access::parse)?,
             reset_value:
                 and_then_result(tree.get_child("resetValue"), parse::u32)?,
             reset_mask:
@@ -541,14 +542,14 @@ pub enum Access {
 
 impl Access {
     fn parse(tree: &Element) -> Result<Access,Error> {
-        let text = tree.text.as_ref().ok_or(err_msg("couldnt get access"))?; // FIXME: Endian::parse should really take a str
+        let text = tree.get_self_text()?;
         Ok(match &text[..] {
             "read-only" => Access::ReadOnly,
             "read-write" => Access::ReadWrite,
             "read-writeOnce" => Access::ReadWriteOnce,
             "write-only" => Access::WriteOnly,
             "writeOnce" => Access::WriteOnce,
-            _ => panic!("unknown access variant: {}", text), // FIXME: use result
+            _ => return Err(errors::AccessVariantError(text.clone()).into()),
         })
     }
 }
@@ -693,10 +694,10 @@ impl WriteConstraint {
                         WriteConstraintRange::parse(tree.get_child_res(field.as_ref())?)?
                     ))
                 }
-                v => Err(format_err!("unknown <writeConstraint> variant: {}", v)),
+                _ => Err(errors::WriteConstraintError::Variant(field.clone()).into()),
             }
         } else {
-            Err(format_err!("found more than one <WriteConstraint> element"))
+            Err(errors::WriteConstraintError::TooManyElements.into())
         }
     }
 }
@@ -735,8 +736,7 @@ pub enum Usage {
 
 impl Usage {
     fn parse(tree: &Element) -> Result<Usage, Error> {
-        let text = tree.text.as_ref().ok_or(err_msg("couldnt get usage"))?; // FIXME: Usage::parse should really take a str
-
+        let text = tree.get_self_text()?;
         Ok(match &text[..] {
             "read" => Usage::Read,
             "write" => Usage::Write,

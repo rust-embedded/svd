@@ -149,6 +149,23 @@ impl BitRangeError {
     }
 }
 
+// TODO: Unite variant errors
+#[derive(Debug, Fail)]
+#[fail(display = "Unknown <access> variant: {}", _0)]
+pub struct AccessVariantError(pub String);
+
+#[derive(Debug, Fail)]
+#[fail(display = "Unknown <endian> variant: {}", _0)]
+pub struct EndianVariantError(pub String);
+
+#[derive(Debug, Fail)]
+pub enum WriteConstraintError {
+    #[fail(display = "Unknown <writeConstrain> variant: {}", _0)]
+    Variant(String),
+    #[fail(display = "found more than one <WriteConstraint> element")]
+    TooManyElements,
+}
+
 #[derive(Debug,Fail)]
 pub enum BitRangeParseError {
     #[fail(display = "Missing [")]
