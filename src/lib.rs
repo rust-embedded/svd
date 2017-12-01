@@ -38,7 +38,7 @@ use std::ops::Deref;
 use either::Either;
 use xmltree::Element;
 
-use failure::{Error, err_msg};
+use failure::{Error, err_msg, ResultExt};
 mod parse;
 pub mod errors;
 
@@ -156,7 +156,7 @@ impl Device {
                 .map(|(i,p)| Peripheral::parse(p).map_err(|e| (i+1,e)))
                 .collect();
             
-            res.map_err(|err| err.1.context(format!("When parsing peripheral #{}", err.0)))?
+            res.map_err(|err| errors::PeripheralError::from_cause(err.1, err.0))?
         };
         Ok(Device {
             name: tree.get_child_text("name")?,
@@ -253,12 +253,16 @@ pub struct Peripheral {
 
 impl Peripheral {
     fn parse(tree: &Element) -> Result<Peripheral,Error> {
+        let name = tree.get_child_text("name")?; 
+        Peripheral::_parse(tree, name.clone()).map_err(|e| errors::Named(name, e).into())
+    }
+    fn _parse(tree: &Element, name: String) -> Result<Peripheral,Error> {
         if tree.name != "peripheral" {
             return Err(format_err!("Expected perhipheral tag"))
         }
 
         Ok(Peripheral {
-            name: tree.get_child_text("name")?, // FIXME: Capture error
+            name,
             group_name: tree.get_child_text_opt("groupName")?,
             description: tree.get_child_text_opt("description")?,
             base_address: parse::u32(tree.get_child_res("baseAddress")?)?,
@@ -611,17 +615,24 @@ pub struct BitRange {
 
 impl BitRange {
     fn parse(tree: &Element) -> Result<BitRange, Error> {
+        BitRange::_parse(tree).map_err(|e| errors::BitRangeError::from_cause(e)).map_err(|e| e.into())
+    }
+    fn _parse(tree: &Element) -> Result<BitRange, Error> {
         let (end, start): (u32, u32) = if let Some(range) =
             tree.get_child_text_opt("bitRange")? {
 
-            assert!(range.starts_with('[')); // FIXME: Use if and format_err!
-            assert!(range.ends_with(']')); // FIXME: Use if and format_err!
+            if !range.starts_with('[') {
+                return Err(errors::BitRangeParseError::MissingOpen.into())
+            }
+            if !range.ends_with(']') {
+                return Err(errors::BitRangeParseError::MissingClose.into())
+            }
 
             let mut parts = range[1..range.len() - 1].split(':');
 
             (
-                parts.next().ok_or(err_msg("Couldn't get next"))?.parse()?,
-                parts.next().ok_or(err_msg("Couldn't get next"))?.parse()?
+                parts.next().ok_or(errors::BitRangeParseError::Other)?.parse::<u32>().map_err(|e| errors::BitRangeParseError::ParseError(e))?,
+                parts.next().ok_or(errors::BitRangeParseError::Other)?.parse::<u32>().map_err(|e| errors::BitRangeParseError::ParseError(e))?
             )
         } else if let (Some(lsb), Some(msb)) =
             (tree.get_child("lsb"), tree.get_child("msb")) {

@@ -1,5 +1,5 @@
 use std::fmt;
-use failure::Error;
+use failure::{Error, Fail};
 
 #[derive(Debug, Fail)]
 pub enum TagError {
@@ -31,7 +31,29 @@ impl fmt::Display for XmlContent {
     }
 }
 
-// TODO: ParseError
+#[derive(Debug, Fail)]
+pub enum PeripheralError {
+    #[fail(display = "Peripheral #{} has no name", _0)]
+    UnnamedPeripheral(usize, #[cause] TagError),
+    #[fail(display = "In peripheral \"{}\"", _1)]
+    NamedPeripheral(usize,String),
+}
+
+impl PeripheralError {
+    pub fn from_cause(f: Error, i: usize) -> Error {
+        let res = f.downcast::<Named>();
+        if let Ok(regname) = res {
+            let name = regname.0.clone();
+            return regname.1.context(PeripheralError::NamedPeripheral(i,name)).into()
+        }
+        let res = res.unwrap_err().downcast::<TagError>();
+        if let Ok(tagerror) = res {
+            return PeripheralError::UnnamedPeripheral(i,tagerror).into()
+        }
+        println!("\"{}\"", res.unwrap_err());
+        unimplemented!()
+    }
+}
 
 #[derive(Debug, Fail)]
 pub enum RegisterError {
@@ -43,14 +65,14 @@ pub enum RegisterError {
 
 impl RegisterError {
     pub fn from_cause(f: Error, i: usize) -> Error {
-        let res = f.downcast::<TagError>();
-        if let Ok(tagerror) = res {
-            return RegisterError::UnnamedRegister(i,tagerror).into()
-        }
-        let res = res.unwrap_err().downcast::<Named>();
+        let res = f.downcast::<Named>();
         if let Ok(regname) = res {
             let name = regname.0.clone();
             return regname.1.context(RegisterError::NamedRegister(i,name)).into()
+        }
+        let res = res.unwrap_err().downcast::<TagError>();
+        if let Ok(tagerror) = res {
+            return RegisterError::UnnamedRegister(i,tagerror).into()
         }
         println!("\"{}\"", res.unwrap_err());
         unimplemented!()
@@ -74,19 +96,66 @@ pub enum FieldError {
 
 impl FieldError {
     pub fn from_cause(f: Error, i: usize) -> Error {
-        let res = f.downcast::<TagError>();
-        if let Ok(tagerror) = res {
-            return FieldError::UnnamedField(i,tagerror).into()
-        }
-        let res = res.unwrap_err().downcast::<Named>();
+        let res = f.downcast::<Named>();
         if let Ok(regname) = res {
             let name = regname.0.clone();
             return regname.1.context(FieldError::NamedField(i,name)).into()
+        }
+        let res = res.unwrap_err().downcast::<TagError>();
+        if let Ok(tagerror) = res {
+            return FieldError::UnnamedField(i,tagerror).into()
         }
         println!("\"{}\"", res.unwrap_err());
         unimplemented!()
     }
 }
+
+#[derive(Debug, Fail)]
+pub enum BitRangeError {
+    #[fail(display = "While parsing `<bitRange>`")]
+    BitRange,
+    #[fail(display = "While parsing `<msb>` and `<lsb>`")]
+    MsbLsb,
+    #[fail(display = "While parsing `<bitOffset>` and `<bitWidth>`")]
+    BitOffsetWidth,
+}
+
+impl BitRangeError {
+    pub fn from_cause(f: Error) -> Error {
+        let res = f.downcast::<BitRangeParseError>();
+        if let Ok(err) = res {
+            return err.context(BitRangeError::BitRange).into()
+            //return regname.1.context(RegisterError::NamedRegister(i,name)).into()
+        }
+        let res = res.unwrap_err().downcast::<MsbLsbParseError>();
+        if let Ok(err) = res {
+            return err.context(BitRangeError::MsbLsb).into() // FIXME: Remove duplicate
+            //return regname.1.context(RegisterError::NamedRegister(i,name)).into()
+        }
+        //let res = f.unwrap_err().downcast::<TagError>();
+        //if let Ok(tagerror) = res {
+        //}
+        println!("\"{}\"", res.unwrap_err());
+        unimplemented!()
+    }
+}
+
+#[derive(Debug,Fail)]
+pub enum BitRangeParseError {
+    #[fail(display = "Missing [")]
+    MissingOpen,
+    #[fail(display = "Missing ]")]
+    MissingClose,
+    #[fail(display = "An error occured while parsing")]
+    ParseError(#[cause] ::std::num::ParseIntError),
+    #[fail(display = "Missing something")] // FIXME: proper msg
+    Other,
+}
+
+#[derive(Debug,Fail)]
+#[fail(display = "When parsing msb and lsb")]
+pub struct MsbLsbParseError;
+
 
 #[derive(Debug,Fail)]
 #[fail(display = "While parsing `<{}>` ({}) as {}", tagname, text, conv)]
