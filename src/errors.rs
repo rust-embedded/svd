@@ -56,28 +56,51 @@ impl PeripheralError {
 }
 
 #[derive(Debug, Fail)]
-pub enum RegisterError {
+pub enum RegisterClusterError {
+    #[fail(display = "Cluster #{} has no name", _0)]
+    UnnamedCluster(usize, #[cause] TagError),
+    #[fail(display = "In cluster \"{}\"", _1)]
+    NamedCluster(usize, String),
     #[fail(display = "Register #{} has no name", _0)]
     UnnamedRegister(usize, #[cause] TagError),
     #[fail(display = "In register \"{}\"", _1)]
     NamedRegister(usize,String),
 }
 
-impl RegisterError {
+impl RegisterClusterError {
     pub fn from_cause(f: Error, i: usize) -> Error {
         let res = f.downcast::<Named>();
         if let Ok(regname) = res {
             let name = regname.0.clone();
-            return regname.1.context(RegisterError::NamedRegister(i,name)).into()
+            return regname.1.context(RegisterClusterError::NamedRegister(i,name)).into()
         }
         let res = res.unwrap_err().downcast::<TagError>();
         if let Ok(tagerror) = res {
-            return RegisterError::UnnamedRegister(i,tagerror).into()
+            return RegisterClusterError::UnnamedRegister(i,tagerror).into()
         }
-        println!("\"{}\"", res.unwrap_err());
-        unimplemented!()
+        let res = res.unwrap_err().downcast::<ClusterError>();
+        if let Ok(clustererror) = res {
+            let res = clustererror.1.downcast::<Named>();
+            if let Ok(regname) = res {
+                let name = regname.0.clone();
+                return regname.1.context(RegisterClusterError::NamedCluster(i,name)).into()
+            }
+            let res = res.unwrap_err().downcast::<TagError>();
+            if let Ok(tagerror) = res {
+                return RegisterClusterError::UnnamedCluster(i,tagerror).into()
+            }
+            //return RegisterClusterError::UnnamedCluster(i).context(format_err!("e")).into()
+        println!("\"{:?}\"", res.unwrap_err());
+            unimplemented!("Unknown error on cluster")
+        }
+        println!("\"{:?}\"", res.unwrap_err());
+        unimplemented!("Unknown error")
     }
 }
+
+#[derive(Debug, Fail)]
+#[fail(display = "cluster")]
+pub(crate) struct ClusterError(pub usize, pub Error);
 
 #[derive(Debug, Fail)]
 #[fail(display = "")]

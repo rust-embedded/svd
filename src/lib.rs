@@ -284,11 +284,11 @@ impl Peripheral {
                     let res: Result<Vec<_>, _> = rs.children
                         .iter()
                         .enumerate()
-                        .map(|(i,p)| cluster_register_parse(p).map_err(|e| (i+1,e)))
+                        .map(|(i,p)| cluster_register_parse(i,p).map_err(|e| (i+1,e)))
                         .collect();
                     Some(
                         res.map_err(|err|
-                                    errors::RegisterError::from_cause(err.1, err.0)
+                                    errors::RegisterClusterError::from_cause(err.1, err.0)
                                     )?
                         )
                 } else {
@@ -360,13 +360,13 @@ pub struct RegisterClusterArrayInfo {
     pub dim_index: Option<Vec<String>>,
 }
 
-fn cluster_register_parse(tree: &Element) -> Result<Either<Register, Cluster>, Error> {
+fn cluster_register_parse(i: usize, tree: &Element) -> Result<Either<Register, Cluster>, Error> {
     if tree.name == "register" {
         Ok(Either::Left(Register::parse(tree)?))
     } else if tree.name == "cluster" {
-        Ok(Either::Right(Cluster::parse(tree)?))
+        Ok(Either::Right(Cluster::parse(tree).map_err(|e| errors::ClusterError(i,e))?))
     } else {
-        unreachable!()
+        unreachable!("got {}", tree.name)
     }
 }
 
@@ -425,8 +425,12 @@ impl Deref for Register {
 
 impl ClusterInfo {
     fn parse(tree: &Element) -> Result<ClusterInfo,Error> {
+        let name = tree.get_child_text("name")?; 
+        ClusterInfo::_parse(tree, name.clone()).map_err(|e| errors::Named(name, e).into())
+    }
+    fn _parse(tree: &Element, name: String) -> Result<ClusterInfo,Error> {
         Ok(ClusterInfo {
-            name: tree.get_child_text("name")?, // FIXME: Capture error
+            name, // FIXME: Capture error
             description: tree.get_child_text("description")?, // FIXME: Capture error
             header_struct_name: tree.get_child_text_opt("headerStructName")?,
             address_offset:
@@ -447,9 +451,12 @@ impl ClusterInfo {
                 let res: Result<Vec<_>, _> = tree.children
                     .iter()
                     .filter(|t| t.name == "register" || t.name == "cluster")
-                    .map(cluster_register_parse)
+                    .enumerate()
+                    .map(|(i,p)| cluster_register_parse(i,p).map_err(|e| (i+1,e)))
                     .collect();
-                res?
+                    res.map_err(|err|
+                                errors::RegisterClusterError::from_cause(err.1, err.0)
+                        )?
             },
 
             _extensible: (),
