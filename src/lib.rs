@@ -30,8 +30,6 @@ extern crate either;
 extern crate xmltree;
 #[macro_use]
 extern crate failure;
-#[macro_use]
-extern crate failure_derive;
 
 use std::ops::Deref;
 
@@ -630,13 +628,14 @@ impl BitRange {
 
             let mut parts = range[1..range.len() - 1].split(':');
 
+            // FIXME: This error can be much better
             (
-                parts.next().ok_or(errors::BitRangeParseError::Other)?.parse::<u32>().map_err(|e| errors::BitRangeParseError::ParseError(e))?,
-                parts.next().ok_or(errors::BitRangeParseError::Other)?.parse::<u32>().map_err(|e| errors::BitRangeParseError::ParseError(e))?
+                parts.next().ok_or(errors::BitRangeParseError::Syntax)?.parse::<u32>().map_err(|e| errors::BitRangeParseError::ParseError(e))?,
+                parts.next().ok_or(errors::BitRangeParseError::Syntax)?.parse::<u32>().map_err(|e| errors::BitRangeParseError::ParseError(e))?
             )
         } else if let (Some(lsb), Some(msb)) =
             (tree.get_child("lsb"), tree.get_child("msb")) {
-            (parse::u32(msb)?, parse::u32(lsb)?)
+            (parse::u32(msb).with_context(|e| errors::BitRangeError::MsbLsb)?, parse::u32(lsb).with_context(|e| errors::BitRangeError::MsbLsb)?)
         } else { // FIXME: This branch should not be the end condition, an error should be.
             return Ok(BitRange {
                        offset: parse::u32(tree.get_child_res("bitOffset")?)?, // FIXME: Capture errors

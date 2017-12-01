@@ -114,6 +114,7 @@ impl FieldError {
 pub enum BitRangeError {
     #[fail(display = "While parsing `<bitRange>`")]
     BitRange,
+    // No specific error needed since the only possible error is a parsing error
     #[fail(display = "While parsing `<msb>` and `<lsb>`")]
     MsbLsb,
     #[fail(display = "While parsing `<bitOffset>` and `<bitWidth>`")]
@@ -127,16 +128,24 @@ impl BitRangeError {
             return err.context(BitRangeError::BitRange).into()
             //return regname.1.context(RegisterError::NamedRegister(i,name)).into()
         }
-        let res = res.unwrap_err().downcast::<MsbLsbParseError>();
+        let res = res.unwrap_err().downcast::<BitRangeError>();
         if let Ok(err) = res {
-            return err.context(BitRangeError::MsbLsb).into() // FIXME: Remove duplicate
+            match err {
+                _ => unimplemented!("BitRangeError::from_cause self match")
+            }
             //return regname.1.context(RegisterError::NamedRegister(i,name)).into()
         }
         //let res = f.unwrap_err().downcast::<TagError>();
         //if let Ok(tagerror) = res {
         //}
-        println!("\"{}\"", res.unwrap_err());
-        unimplemented!()
+        let res = res.unwrap_err().downcast::<::std::num::ParseIntError>();
+        if let Ok(err) = res {
+            match err {
+                _ => unimplemented!("BitRangeError::from_cause unexpected error type")
+            }
+            //return regname.1.context(RegisterError::NamedRegister(i,name)).into()
+        }
+        res.unwrap_err()
     }
 }
 
@@ -148,14 +157,9 @@ pub enum BitRangeParseError {
     MissingClose,
     #[fail(display = "An error occured while parsing")]
     ParseError(#[cause] ::std::num::ParseIntError),
-    #[fail(display = "Missing something")] // FIXME: proper msg
-    Other,
+    #[fail(display = "Invalid Syntax")] // FIXME: proper msg
+    Syntax,
 }
-
-#[derive(Debug,Fail)]
-#[fail(display = "When parsing msb and lsb")]
-pub struct MsbLsbParseError;
-
 
 #[derive(Debug,Fail)]
 #[fail(display = "While parsing `<{}>` ({}) as {}", tagname, text, conv)]
