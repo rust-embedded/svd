@@ -741,7 +741,7 @@ impl Usage {
             "read" => Usage::Read,
             "write" => Usage::Write,
             "read-write" => Usage::ReadWrite,
-            _ => panic!("unknown usage variant: {}", text),
+            _ => return Err(errors::UsageVariantError(text.clone()).into()),
         })
     }
 }
@@ -775,10 +775,12 @@ impl EnumeratedValues {
             values: {
                 let res: Result<Vec<_>, _> = tree.children
                     .iter()
-                    .map(EnumeratedValue::parse)
+                    .enumerate()
+                    .map(|(i,v)| EnumeratedValue::parse(v).map_err(|e| (i+1,e)))
                     .collect();
-                // Unwrap is safe
-                res?.into_iter().filter(|r| r.is_some()).map(|s| s.unwrap()).collect()
+                // Unwrap is safe because we filtered all the None
+                res.map_err(|err|
+                            errors::EnumeratedValueError::from_cause(err.1,err.0))?.into_iter().filter(|r| r.is_some()).map(|s| s.unwrap()).collect()
             },
             _extensible: (),
         })
@@ -800,15 +802,19 @@ impl EnumeratedValue {
         if tree.name != "enumeratedValue" {
             return Ok(None);
         }
-
-        Ok(Some(
+        let name = tree.get_child_text("name")?;
+        EnumeratedValue::_parse(tree, name.clone()).map_err(|e| errors::Named(name, e).into()).map(|val| Some(val))
+        //Peripheral::_parse(tree, name.clone())
+    }
+    fn _parse(tree: &Element, name: String) -> Result<EnumeratedValue, Error> {
+        Ok(
             EnumeratedValue {
-                name: tree.get_child_text("name")?, // FIXME: Capture error
+                name, // FIXME: Capture error
                 description: tree.get_child_text_opt("description")?,
                 value: and_then_result(tree.get_child("value"), parse::u32)?,
                 is_default: tree.get_child_text_opt("isDefault")?.map(|t| t.parse().unwrap()),
                 _extensible: (),
             },
-        ))
+        )
     }
 }

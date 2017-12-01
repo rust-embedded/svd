@@ -149,6 +149,31 @@ impl BitRangeError {
     }
 }
 
+#[derive(Debug, Fail)]
+pub enum EnumeratedValueError {
+    // FIXME: error message is misleading, this displayed value is not necessarily the same as
+    // the one in the svd. It also doesn't dismiss non enumeratedValue tags 
+    #[fail(display = "Enumerated value at place #{} has no name", _0)]
+    UnnamedEnumeratedValue(usize, #[cause] TagError),
+    #[fail(display = "In enumerated value \"{}\"", _1)]
+    NamedEnumeratedValue(usize,String),
+}
+
+impl EnumeratedValueError {
+    pub fn from_cause(f: Error, i: usize) -> Error {
+        let res = f.downcast::<Named>();
+        if let Ok(regname) = res {
+            let name = regname.0.clone();
+            return regname.1.context(EnumeratedValueError::NamedEnumeratedValue(i,name)).into()
+        }
+        let res = res.unwrap_err().downcast::<TagError>();
+        if let Ok(tagerror) = res {
+            return EnumeratedValueError::UnnamedEnumeratedValue(i,tagerror).into()
+        }
+        println!("\"{}\"", res.unwrap_err());
+        unimplemented!()
+    }
+}
 // TODO: Unite variant errors
 #[derive(Debug, Fail)]
 #[fail(display = "Unknown <access> variant: {}", _0)]
@@ -157,6 +182,10 @@ pub struct AccessVariantError(pub String);
 #[derive(Debug, Fail)]
 #[fail(display = "Unknown <endian> variant: {}", _0)]
 pub struct EndianVariantError(pub String);
+
+#[derive(Debug, Fail)]
+#[fail(display = "Unknown <usage> variant: {}", _0)]
+pub struct UsageVariantError(pub String);
 
 #[derive(Debug, Fail)]
 pub enum WriteConstraintError {
