@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.6.0] - 2018-02-24
+
+### Changed
+
+- Accept both 'X' and 'x' as "don't care" bits in literals.
+
+- Parse clusters of registers
+
 ## [v0.5.2] - 2017-07-04
 
 ### Added
@@ -73,7 +81,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Initial SVD parser
 - A `parse` utility function to parse the contents of a SVD file (XML)
 
-[Unreleased]: https://github.com/japaric/svd/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/japaric/svd/compare/v0.6.0...HEAD
+[v0.6.0]: https://github.com/japaric/svd/compare/v0.5.2...v0.6.0
 [v0.5.2]: https://github.com/japaric/svd/compare/v0.5.1...v0.5.2
 [v0.5.1]: https://github.com/japaric/svd/compare/v0.5.0...v0.5.1
 [v0.5.0]: https://github.com/japaric/svd/compare/v0.4.0...v0.5.0
