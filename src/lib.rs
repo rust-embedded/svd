@@ -75,6 +75,16 @@ pub struct Device {
     pub cpu: Option<Cpu>,
     pub peripherals: Vec<Peripheral>,
     pub defaults: Defaults,
+    pub vendor: Option<String>,
+    pub vendor_id: Option<String>,
+    pub series: Option<String>,
+    pub version: Option<String>,
+    pub description: Option<String>,
+    pub license_text: Option<String>,
+    pub header_system_filename: Option<String>,
+    pub header_definitions_prefix: Option<String>,
+    pub address_unit_bits: u64,
+    pub width: u64,
     // Reserve the right to add more fields to this struct
     _extensible: (),
 }
@@ -97,6 +107,16 @@ impl Device {
                 .map(Peripheral::parse)
                 .collect(),
             defaults: Defaults::parse(tree),
+            vendor: tree.get_child_text("vendor"),
+            vendor_id: tree.get_child_text("vendorID"),
+            series: tree.get_child_text("series"),
+            version: tree.get_child_text("version"),
+            description: tree.get_child_text("description"),
+            license_text: tree.get_child_text("licenseText"),
+            header_system_filename: tree.get_child_text("headerSystemFilename"),
+            header_definitions_prefix: tree.get_child_text("headerDefinitionsPrefix"),
+            address_unit_bits: try!(tree.get_child_text("addressUnitBits").map(|x| x.parse::<u64>().unwrap())),
+            width: try!(tree.get_child_text("width").map(|x| x.parse::<u64>().unwrap())),
             _extensible: (),
         }
     }
