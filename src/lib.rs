@@ -1,3 +1,4 @@
+#![feature(custom_attribute)]
 //! CMSIS-SVD file parser
 //!
 //! # Usage
@@ -22,42 +23,96 @@
 //! - [SVD file database](https://github.com/posborne/cmsis-svd/tree/master/data)
 //! - [Sample SVD file](https://www.keil.com/pack/doc/CMSIS/SVD/html/svd_Example_pg.html)
 
-#![deny(warnings)]
+// TEMP#![deny(warnings)]
+
 
 extern crate either;
 extern crate xmltree;
+#[macro_use]
+extern crate failure;
 
 use std::ops::Deref;
 
 use either::Either;
 use xmltree::Element;
 
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
-
+use failure::{Error, err_msg, ResultExt};
 mod parse;
+pub mod errors;
+
 
 /// Parses the contents of a SVD file (XML)
-pub fn parse(xml: &str) -> Device {
+pub fn parse(xml: &str) -> Result<Device,Error> {
     Device::parse(xml)
 }
 
 trait ElementExt {
-    fn get_child_text<K>(&self, k: K) -> Option<String>
+    fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>, Error>
     where
-        String: PartialEq<K>;
+        String: PartialEq<K>,
+        K: std::fmt::Display + Clone;
+    fn get_child_text<K>(&self, k: K) -> Result<String, Error>
+    where
+        String: PartialEq<K>,
+        K: std::fmt::Display + Clone;
+    fn get_child_res<K>(&self, k: K) -> Result<&Element, Error>
+    where
+        String: PartialEq<K>,
+        K: std::fmt::Display + Clone;
+    fn get_self_text(&self) -> Result<&String, Error>;
     fn debug(&self);
 }
 
 impl ElementExt for Element {
-    fn get_child_text<K>(&self, k: K) -> Option<String>
+    fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>, Error>
     where
         String: PartialEq<K>,
+        K: std::fmt::Display + Clone,
     {
-        self.get_child(k).map(|c| try!(c.text.clone()))
+       match self.get_child(k.clone()) {
+            None => Ok(None),
+            Some(val) => Ok(Some(
+                    val.text.clone()
+                    .ok_or(
+                        errors::TagError::EmptyTag {
+                            name: format!("{}", k).to_owned(),
+                            content: errors::XmlContent::Text
+                        }
+                    )?
+            )),
+       } 
+    }
+    fn get_child_text<K>(&self, k: K) -> Result<String, Error>
+    where
+        String: PartialEq<K>,
+        K: std::fmt::Display + Clone,
+    {
+        self.get_child_text_opt(k.clone())?
+            .ok_or(
+                errors::TagError::MissingTag { name: format!("{}", k).to_owned() }.into() 
+            ) 
+    }
+
+    fn get_child_res<K>(&self, k: K) -> Result<&Element, Error>
+    where
+        String: PartialEq<K>,
+        K: std::fmt::Display + Clone,
+    {
+        if let Some(res) = self.get_child(k.clone()) {
+            return Ok(res)
+        } else {
+            Err(errors::TagError::EmptyTag {
+                    name: format!("{}", k).to_owned(),
+                    content: errors::XmlContent::Element
+                }.into())
+        }
+    }
+    
+    fn get_self_text(&self) -> Result<&String, Error> {
+        self.text.as_ref().ok_or(errors::TagError::EmptyTag {
+            name: self.name.clone(),
+            content: errors::XmlContent::Text
+        }.into())
     }
 
     fn debug(&self) {
@@ -66,6 +121,18 @@ impl ElementExt for Element {
             println!("{}: {:?}", c.name, c.text)
         }
         println!("</{}>", self.name);
+    }
+}
+
+/// Convenience function for elevating errors in optional fields
+fn and_then_result<U,E,L, F: std::ops::Fn(L) -> Result<U,E>>(opt: Option<L>, f: F) -> Result<Option<U>,E> {
+    if let Some(k) = opt {
+        match f(k) {    
+            Ok(u) => Ok(Some(u)),
+            Err(e) => Err(e),
+        }
+    } else {
+        Ok(None)
     }
 }
 
@@ -85,20 +152,30 @@ impl Device {
     /// # Panics
     ///
     /// If the input is an invalid SVD file (yay, no error handling)
-    pub fn parse(svd: &str) -> Device {
-        let tree = &try!(Element::parse(svd.as_bytes()));
-
-        Device {
-            name: try!(tree.get_child_text("name")),
-            cpu: tree.get_child("cpu").map(Cpu::parse),
-            peripherals: try!(tree.get_child("peripherals"))
-                .children
+    pub fn parse(svd: &str) -> Result<Device,Error> {
+        let tree = &Element::parse(svd.as_bytes())?;
+        let peripherals = {
+            let res: Result<Vec<_>, _> = tree.get_child_res("peripherals")?.children
                 .iter()
-                .map(Peripheral::parse)
-                .collect(),
-            defaults: Defaults::parse(tree),
+                .enumerate()
+                .map(|(i,p)| Peripheral::parse(p).map_err(|e| (i+1,e)))
+                .collect();
+            
+            res.map_err(|err| errors::PeripheralError::from_cause(err.1, err.0))?
+        };
+        Ok(Device {
+            name: tree.get_child_text("name")?,
+            cpu: {
+                if let Some(res) = tree.get_child("cpu").map(Cpu::parse) {
+                    Some(res?)
+                } else {
+                    None
+                }
+            },
+            peripherals,
+            defaults: Defaults::parse(tree)?,
             _extensible: (),
-        }
+        })
     }
 }
 
@@ -111,16 +188,16 @@ pub enum Endian {
 }
 
 impl Endian {
-    fn parse(tree: &Element) -> Endian {
-        let text = try!(tree.text.as_ref());
+    fn parse(tree: &Element) -> Result<Endian,Error> {
+        let text = tree.get_self_text()?;
 
-        match &text[..] {
+        Ok(match &text[..] {
             "little" => Endian::Little,
             "big" => Endian::Big,
             "selectable" => Endian::Selectable,
             "other" => Endian::Other,
-            _ => panic!("unknown endian variant: {}", text),
-        }
+            _ => return Err(errors::EndianVariantError(text.clone()).into()),
+        })
     }
 }
 
@@ -140,22 +217,23 @@ pub struct Cpu {
 }
 
 impl Cpu {
-    fn parse(tree: &Element) -> Cpu {
-        assert_eq!(tree.name, "cpu");
+    fn parse(tree: &Element) -> Result<Cpu,Error> {
+        ensure!(tree.name == "cpu", "Element is not a <cpu>"); // Only happens if manually called.
+        
 
-        Cpu {
-            name: try!(tree.get_child_text("name")),
-            revision: try!(tree.get_child_text("revision")),
-            endian: Endian::parse(try!(tree.get_child("endian"))),
-            mpu_present: try!(parse::bool(try!(tree.get_child("mpuPresent")))),
-            fpu_present: try!(parse::bool(try!(tree.get_child("fpuPresent")))),
+        Ok(Cpu {
+            name: tree.get_child_text("name")?, // FIXME: Capture error
+            revision: tree.get_child_text("revision")?, // FIXME: Capture error
+            endian: Endian::parse(tree.get_child_res("endian")?)?, // FIXME: Capture error
+            mpu_present: parse::bool(tree.get_child_res("mpuPresent")?)?, // FIXME: Capture errors
+            fpu_present: parse::bool(tree.get_child_res("fpuPresent")?)?, // FIXME: Capture errors
             nvic_priority_bits:
-                try!(parse::u32(try!(tree.get_child("nvicPrioBits")))),
+                parse::u32(tree.get_child_res("nvicPrioBits")?)?, // FIXME: Capture errors
             has_vendor_systick:
-                try!(parse::bool(try!(tree.get_child("vendorSystickConfig")))),
+                parse::bool(tree.get_child_res("vendorSystickConfig")?)?, // FIXME: Capture errors
 
             _extensible: (),
-        }
+        })
     }
 
     pub fn is_cortex_m(&self) -> bool {
@@ -178,29 +256,51 @@ pub struct Peripheral {
 }
 
 impl Peripheral {
-    fn parse(tree: &Element) -> Peripheral {
-        assert_eq!(tree.name, "peripheral");
+    fn parse(tree: &Element) -> Result<Peripheral,Error> {
+        let name = tree.get_child_text("name")?; 
+        Peripheral::_parse(tree, name.clone()).map_err(|e| errors::Named(name, e).into())
+    }
+    fn _parse(tree: &Element, name: String) -> Result<Peripheral,Error> {
+        if tree.name != "peripheral" {
+            return Err(format_err!("Expected perhipheral tag"))
+        }
 
-        Peripheral {
-            name: try!(tree.get_child_text("name")),
-            group_name: tree.get_child_text("groupName"),
-            description: tree.get_child_text("description"),
-            base_address: try!(parse::u32(try!(tree.get_child("baseAddress")))),
-            interrupt: tree.children
-                .iter()
-                .filter(|t| t.name == "interrupt")
-                .map(Interrupt::parse)
-                .collect::<Vec<_>>(),
-            registers: tree.get_child("registers").map(|rs| {
-                rs.children.iter().map(cluster_register_parse).collect()
-            }),
+        Ok(Peripheral {
+            name,
+            group_name: tree.get_child_text_opt("groupName")?,
+            description: tree.get_child_text_opt("description")?,
+            base_address: parse::u32(tree.get_child_res("baseAddress")?)?,
+            interrupt: {
+                let res: Result<Vec<_>, _> = tree.children
+                    .iter()
+                    .filter(|t| t.name == "interrupt")
+                    .map(Interrupt::parse)
+                    .collect();
+                res?
+            },
+            registers: {
+                if let Some(rs) = tree.get_child("registers") {
+                    let res: Result<Vec<_>, _> = rs.children
+                        .iter()
+                        .enumerate()
+                        .map(|(i,p)| cluster_register_parse(i,p).map_err(|e| (i+1,e)))
+                        .collect();
+                    Some(
+                        res.map_err(|err|
+                                    errors::RegisterClusterError::from_cause(err.1, err.0)
+                                    )?
+                        )
+                } else {
+                    None
+                }
+            },
             derived_from: tree.attributes.get("derivedFrom").map(
                 |s| {
                     s.to_owned()
                 },
             ),
             _extensible: (),
-        }
+        })
     }
 }
 
@@ -212,12 +312,12 @@ pub struct Interrupt {
 }
 
 impl Interrupt {
-    fn parse(tree: &Element) -> Interrupt {
-        Interrupt {
-            name: try!(tree.get_child_text("name")),
-            description: tree.get_child_text("description"),
-            value: try!(parse::u32(try!(tree.get_child("value")))),
-        }
+    fn parse(tree: &Element) -> Result<Interrupt, Error> {
+        Ok(Interrupt {
+            name: tree.get_child_text("name")?, // FIXME: Capture error
+            description: tree.get_child_text_opt("description")?,
+            value: parse::u32(tree.get_child_res("value")?)?,
+        })
     }
 }
 
@@ -259,31 +359,35 @@ pub struct RegisterClusterArrayInfo {
     pub dim_index: Option<Vec<String>>,
 }
 
-fn cluster_register_parse(tree: &Element) -> Either<Register, Cluster> {
+fn cluster_register_parse(i: usize, tree: &Element) -> Result<Either<Register, Cluster>, Error> {
     if tree.name == "register" {
-        Either::Left(Register::parse(tree))
+        Ok(Either::Left(Register::parse(tree)?))
     } else if tree.name == "cluster" {
-        Either::Right(Cluster::parse(tree))
+        Ok(Either::Right(Cluster::parse(tree).map_err(|e| errors::ClusterError(i,e))?))
     } else {
-        unreachable!()
+        unreachable!("got {}", tree.name)
     }
 }
 
 impl Cluster {
-    fn parse(tree: &Element) -> Cluster {
-        assert_eq!(tree.name, "cluster");
+    fn parse(tree: &Element) -> Result<Cluster, Error> {
+        ensure!(tree.name == "cluster", "Element is not a <cluster>"); // FIXME: Not sure when this can happen, if it can, make an error for it.
 
-        let info = ClusterInfo::parse(tree);
+        let info = ClusterInfo::parse(tree)?;
 
         if tree.get_child("dimIncrement").is_some() {
-            let array_info = RegisterClusterArrayInfo::parse(tree);
-            assert!(info.name.contains("%s"));
+            let array_info = RegisterClusterArrayInfo::parse(tree)?;
+            if !info.name.contains("%s") {
+                return Err(errors::RegisterClusterArrayParseError::no_placeholder(info.name.clone()))
+            } // FIXME: return as Result
             if let Some(ref indices) = array_info.dim_index {
-                assert_eq!(array_info.dim as usize, indices.len())
+                if array_info.dim as usize != indices.len() {
+                    return Err(errors::RegisterClusterArrayParseError::dimensions_mismatch(info.name.clone()))
+                }
             }
-            Cluster::Array(info, array_info)
+            Ok(Cluster::Array(info, array_info))
         } else {
-            Cluster::Single(info)
+            Ok(Cluster::Single(info))
         }
     }
 }
@@ -323,83 +427,124 @@ impl Deref for Register {
 }
 
 impl ClusterInfo {
-    fn parse(tree: &Element) -> ClusterInfo {
-        ClusterInfo {
-            name: try!(tree.get_child_text("name")),
-            description: try!(tree.get_child_text("description")),
-            header_struct_name: tree.get_child_text("headerStructName"),
-            address_offset: {
-                try!(parse::u32(try!(tree.get_child("addressOffset"))))
+    fn parse(tree: &Element) -> Result<ClusterInfo,Error> {
+        let name = tree.get_child_text("name")?; 
+        ClusterInfo::_parse(tree, name.clone()).map_err(|e| errors::Named(name, e).into())
+    }
+    fn _parse(tree: &Element, name: String) -> Result<ClusterInfo,Error> {
+        Ok(ClusterInfo {
+            name, // FIXME: Capture error
+            description: tree.get_child_text("description")?, // FIXME: Capture error
+            header_struct_name: tree.get_child_text_opt("headerStructName")?,
+            address_offset:
+                parse::u32(tree.get_child_res("addressOffset")?)?, // FIXME: Capture errors
+            size: and_then_result(tree.get_child("size"), parse::u32)?,
+            access: {
+                if let Some(access) = tree.get_child("access") {
+                    Some(Access::parse(access)?)
+                } else {
+                    None
+                }
             },
-            size: tree.get_child("size").map(|t| try!(parse::u32(t))),
-            access: tree.get_child("access").map(Access::parse),
             reset_value:
-                tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
+                and_then_result(tree.get_child("resetValue"), parse::u32)?,
             reset_mask:
-                tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
-            children: tree.children
-                .iter()
-                .filter(|t| t.name == "register" || t.name == "cluster")
-                .map(cluster_register_parse)
-                .collect(),
+                and_then_result(tree.get_child("resetMask"), parse::u32)?,
+            children: {
+                let res: Result<Vec<_>, _> = tree.children
+                    .iter()
+                    .filter(|t| t.name == "register" || t.name == "cluster")
+                    .enumerate()
+                    .map(|(i,p)| cluster_register_parse(i,p).map_err(|e| (i+1,e)))
+                    .collect();
+                    res.map_err(|err|
+                                errors::RegisterClusterError::from_cause(err.1, err.0)
+                        )?
+            },
+
             _extensible: (),
-        }
+        })
     }
 }
 
 impl RegisterInfo {
-    fn parse(tree: &Element) -> RegisterInfo {
-        RegisterInfo {
-            name: try!(tree.get_child_text("name")),
-            description: try!(tree.get_child_text("description")),
-            address_offset: {
-                try!(parse::u32(try!(tree.get_child("addressOffset"))))
-            },
-            size: tree.get_child("size").map(|t| try!(parse::u32(t))),
-            access: tree.get_child("access").map(Access::parse),
+    fn parse(tree: &Element) -> Result<RegisterInfo, Error> {
+        let name = tree.get_child_text("name")?; 
+        RegisterInfo::_parse(tree, name.clone()).map_err(|e| errors::Named(name, e).into())
+    }
+    fn _parse(tree: &Element,name: String) -> Result<RegisterInfo, Error> {
+        Ok(RegisterInfo {
+            name: name,
+            description: tree.get_child_text("description")?,
+            address_offset: parse::u32(tree.get_child_res("addressOffset")?)?,
+            size: and_then_result(tree.get_child("size"), parse::u32)?,
+            access: and_then_result(tree.get_child("access"),Access::parse)?,
             reset_value:
-                tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
+                and_then_result(tree.get_child("resetValue"), parse::u32)?,
             reset_mask:
-                tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
-            fields:
-                tree.get_child("fields")
-                    .map(|fs| fs.children.iter().map(Field::parse).collect()),
-            write_constraint: tree.get_child("writeConstraint")
-                .map(WriteConstraint::parse),
+                and_then_result(tree.get_child("resetMask"), parse::u32)?,
+            fields: {
+                if let Some(rs) = tree.get_child("fields") {
+                    let res: Result<Vec<_>, _> = rs.children
+                        .iter()
+                        .enumerate()
+                        .map(|(i,p)| Field::parse(p).map_err(|e| (i+1,e)))
+                        .collect();
+                    Some(
+                            res.map_err(|err|
+                                errors::FieldError::from_cause(err.1, err.0)
+                            )?
+                        )
+                } else {
+                    None
+                }
+            },
+            write_constraint: {
+                if let Some(write_constraint) = tree.get_child("writeConstraint") {
+                    Some(WriteConstraint::parse(write_constraint)?)
+                } else {
+                    None
+                }
+            },
+
             _extensible: (),
-        }
+        })
     }
 }
 
 impl RegisterClusterArrayInfo {
-    fn parse(tree: &Element) -> RegisterClusterArrayInfo {
-        RegisterClusterArrayInfo {
-            dim: try!(tree.get_child_text("dim").unwrap().parse::<u32>()),
-            dim_increment: try!(tree.get_child("dimIncrement").map(|t| {
-                try!(parse::u32(t))
-            })),
-            dim_index: tree.get_child("dimIndex").map(|c| {
-                parse::dim_index(try!(c.text.as_ref()))
-            }),
-        }
+    fn parse(tree: &Element) -> Result<RegisterClusterArrayInfo, Error> {
+        let name = tree.get_child_text("name")?; 
+        RegisterClusterArrayInfo::_parse(tree).map_err(|e| errors::Named(name, e).into())
+    }
+    fn _parse(tree: &Element) -> Result<RegisterClusterArrayInfo, Error> {
+        Ok(RegisterClusterArrayInfo {
+            dim: parse::u32_strict(tree.get_child_res("dim")?)?,
+            dim_increment: parse::u32(tree.get_child_res("dimIncrement")?)?,
+            dim_index: and_then_result(tree.get_child("dimIndex"), parse::dim_index)?,
+        })
     }
 }
 
 impl Register {
-    fn parse(tree: &Element) -> Register {
-        assert_eq!(tree.name, "register");
+    fn parse(tree: &Element) -> Result<Register, Error> {
+        ensure!(tree.name == "register", "Element is not a <register>"); // FIXME: Not sure when this can happen, if it can, make an error for it.
 
-        let info = RegisterInfo::parse(tree);
+        let info = RegisterInfo::parse(tree)?;
 
         if tree.get_child("dimIncrement").is_some() {
-            let array_info = RegisterClusterArrayInfo::parse(tree);
-            assert!(info.name.contains("%s"));
+            let array_info = RegisterClusterArrayInfo::parse(tree)?;
+            if !info.name.contains("%s") {
+                return Err(errors::RegisterClusterArrayParseError::no_placeholder(info.name.clone()))
+            } // FIXME: return as Result
             if let Some(ref indices) = array_info.dim_index {
-                assert_eq!(array_info.dim as usize, indices.len())
+                if array_info.dim as usize != indices.len() {
+                    return Err(errors::RegisterClusterArrayParseError::dimensions_mismatch(info.name.clone()))
+                }
             }
-            Register::Array(info, array_info)
+            Ok(Register::Array(info, array_info))
         } else {
-            Register::Single(info)
+            Ok(Register::Single(info))
         }
     }
 }
@@ -414,17 +559,16 @@ pub enum Access {
 }
 
 impl Access {
-    fn parse(tree: &Element) -> Access {
-        let text = try!(tree.text.as_ref());
-
-        match &text[..] {
+    fn parse(tree: &Element) -> Result<Access,Error> {
+        let text = tree.get_self_text()?;
+        Ok(match &text[..] {
             "read-only" => Access::ReadOnly,
             "read-write" => Access::ReadWrite,
             "read-writeOnce" => Access::ReadWriteOnce,
             "write-only" => Access::WriteOnly,
             "writeOnce" => Access::WriteOnce,
-            _ => panic!("unknown access variant: {}", text),
-        }
+            _ => return Err(errors::AccessVariantError(text.clone()).into()),
+        })
     }
 }
 
@@ -441,23 +585,43 @@ pub struct Field {
 }
 
 impl Field {
-    fn parse(tree: &Element) -> Field {
-        assert_eq!(tree.name, "field");
+    fn parse(tree: &Element) -> Result<Field,Error> {
+        ensure!(tree.name == "field", "Element is not a <field>"); // FIXME: Not sure when this can happen, if it can, make an error for it.
+        
+        let name = tree.get_child_text("name")?;
+        Field::_parse(tree, name.clone()).map_err(|e| errors::Named(name, e).into())
+        
+    }
+    fn _parse(tree: &Element, name: String) -> Result<Field,Error> {
 
-        Field {
-            name: try!(tree.get_child_text("name")),
-            description: tree.get_child_text("description"),
-            bit_range: BitRange::parse(tree),
-            access: tree.get_child("access").map(Access::parse),
-            enumerated_values: tree.children
-                .iter()
-                .filter(|t| t.name == "enumeratedValues")
-                .map(EnumeratedValues::parse)
-                .collect::<Vec<_>>(),
-            write_constraint: tree.get_child("writeConstraint")
-                .map(WriteConstraint::parse),
+        Ok(Field {
+            name,
+            description: tree.get_child_text_opt("description")?,
+            bit_range: BitRange::parse(tree)?,
+            access: {
+                if let Some(access) = tree.get_child("access") {
+                    Some(Access::parse(access)?)
+                } else {
+                    None
+                }
+            },  
+            enumerated_values: {
+                let res: Result<Vec<_>, _> = tree.children
+                    .iter()
+                    .filter(|t| t.name == "enumeratedValues")
+                    .map(EnumeratedValues::parse)
+                    .collect();
+                res?
+            },
+            write_constraint: {
+                if let Some(write_constraint) = tree.get_child("writeConstraint") {
+                    Some(WriteConstraint::parse(write_constraint)?)
+                } else {
+                    None
+                }
+            },  
             _extensible: (),
-        }
+        })
     }
 }
 
@@ -468,31 +632,41 @@ pub struct BitRange {
 }
 
 impl BitRange {
-    fn parse(tree: &Element) -> BitRange {
+    fn parse(tree: &Element) -> Result<BitRange, Error> {
+        BitRange::_parse(tree).map_err(|e| errors::BitRangeError::from_cause(e)).map_err(|e| e.into())
+    }
+    fn _parse(tree: &Element) -> Result<BitRange, Error> {
         let (end, start): (u32, u32) = if let Some(range) =
-            tree.get_child("bitRange") {
-            let text = try!(range.text.as_ref());
+            tree.get_child_text_opt("bitRange")? {
 
-            assert!(text.starts_with('['));
-            assert!(text.ends_with(']'));
+            if !range.starts_with('[') {
+                return Err(errors::BitRangeParseError::MissingOpen.into())
+            }
+            if !range.ends_with(']') {
+                return Err(errors::BitRangeParseError::MissingClose.into())
+            }
 
-            let mut parts = text[1..text.len() - 1].split(':');
+            let mut parts = range[1..range.len() - 1].split(':');
 
-            (try!(try!(parts.next()).parse()), try!(try!(parts.next()).parse()))
+            // FIXME: This error can be much better
+            (
+                parts.next().ok_or(errors::BitRangeParseError::Syntax)?.parse::<u32>().map_err(|e| errors::BitRangeParseError::ParseError(e))?,
+                parts.next().ok_or(errors::BitRangeParseError::Syntax)?.parse::<u32>().map_err(|e| errors::BitRangeParseError::ParseError(e))?
+            )
         } else if let (Some(lsb), Some(msb)) =
             (tree.get_child("lsb"), tree.get_child("msb")) {
-            (try!(parse::u32(msb)), try!(parse::u32(lsb)))
-        } else {
-            return BitRange {
-                       offset: try!(parse::u32(try!(tree.get_child("bitOffset")))),
-                       width: try!(parse::u32(try!(tree.get_child("bitWidth")))),
-                   };
+            (parse::u32(msb).with_context(|e| errors::BitRangeError::MsbLsb)?, parse::u32(lsb).with_context(|e| errors::BitRangeError::MsbLsb)?)
+        } else { // FIXME: This branch should not be the end condition, an error should be.
+            return Ok(BitRange {
+                       offset: parse::u32(tree.get_child_res("bitOffset")?)?, // FIXME: Capture errors
+                       width: parse::u32(tree.get_child_res("bitWidth")?)?, // FIXME: Capture errors
+                   });
         };
 
-        BitRange {
+        Ok(BitRange {
             offset: start,
             width: end - start + 1,
-        }
+        })
     }
 }
 
@@ -503,11 +677,11 @@ pub struct WriteConstraintRange {
 }
 
 impl WriteConstraintRange {
-    fn parse(tree: &Element) -> WriteConstraintRange {
-        WriteConstraintRange {
-            min: try!(try!(tree.get_child_text("minimum")).parse()),
-            max: try!(try!(tree.get_child_text("maximum")).parse()),
-        }
+    fn parse(tree: &Element) -> Result<WriteConstraintRange, Error> {
+        Ok(WriteConstraintRange {
+            min: parse::u32_strict(tree.get_child_res("minimum")?)?,
+            max: parse::u32_strict(tree.get_child_res("maximum")?)?,
+        })
     }
 }
 
@@ -519,39 +693,30 @@ pub enum WriteConstraint {
 }
 
 impl WriteConstraint {
-    fn parse(tree: &Element) -> WriteConstraint {
+    fn parse(tree: &Element) -> Result<WriteConstraint, Error> {
         if tree.children.len() == 1 {
             let ref field = tree.children[0].name;
             // Write constraint can only be one of the following
             match field.as_ref() {
                 "writeAsRead" => {
-                    WriteConstraint::WriteAsRead(
-                        try!(
-                            tree.get_child(field.as_ref())
-                                .map(|t| try!(parse::bool(t)))
-                        ),
-                    )
+                    Ok(WriteConstraint::WriteAsRead(
+                            parse::bool(tree.get_child_res(field.as_ref())?)?
+                    ))
                 }
                 "useEnumeratedValues" => {
-                    WriteConstraint::UseEnumeratedValues(
-                        try!(
-                            tree.get_child(field.as_ref())
-                                .map(|t| try!(parse::bool(t)))
-                        ),
-                    )
+                    Ok(WriteConstraint::UseEnumeratedValues(
+                            parse::bool(tree.get_child_res(field.as_ref())?)?
+                    ))
                 }
                 "range" => {
-                    WriteConstraint::Range(
-                        try!(
-                            tree.get_child(field.as_ref())
-                                .map(WriteConstraintRange::parse)
-                        ),
-                    )
+                    Ok(WriteConstraint::Range(
+                        WriteConstraintRange::parse(tree.get_child_res(field.as_ref())?)?
+                    ))
                 }
-                v => panic!("unknown <writeConstraint> variant: {}", v),
+                _ => Err(errors::WriteConstraintError::Variant(field.clone()).into()),
             }
         } else {
-            panic!("found more than one <WriteConstraint> element")
+            Err(errors::WriteConstraintError::TooManyElements.into())
         }
     }
 }
@@ -568,16 +733,16 @@ pub struct Defaults {
 }
 
 impl Defaults {
-    fn parse(tree: &Element) -> Defaults {
-        Defaults {
-            size: tree.get_child("size").map(|t| try!(parse::u32(t))),
+    fn parse(tree: &Element) -> Result<Defaults, Error> {
+        Ok(Defaults {
+            size: and_then_result(tree.get_child("size"), parse::u32)?,
             reset_value:
-                tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
+                and_then_result(tree.get_child("resetValue"),parse::u32)?,
             reset_mask:
-                tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
-            access: tree.get_child("access").map(Access::parse),
+                and_then_result(tree.get_child("resetMask"), parse::u32)?,
+            access: and_then_result(tree.get_child("access"), Access::parse)?,
             _extensible: (),
-        }
+        })
     }
 }
 
@@ -589,15 +754,14 @@ pub enum Usage {
 }
 
 impl Usage {
-    fn parse(tree: &Element) -> Usage {
-        let text = try!(tree.text.as_ref());
-
-        match &text[..] {
+    fn parse(tree: &Element) -> Result<Usage, Error> {
+        let text = tree.get_self_text()?;
+        Ok(match &text[..] {
             "read" => Usage::Read,
             "write" => Usage::Write,
             "read-write" => Usage::ReadWrite,
-            _ => panic!("unknown usage variant: {}", text),
-        }
+            _ => return Err(errors::UsageVariantError(text.clone()).into()),
+        })
     }
 }
 
@@ -612,21 +776,33 @@ pub struct EnumeratedValues {
 }
 
 impl EnumeratedValues {
-    fn parse(tree: &Element) -> EnumeratedValues {
-        assert_eq!(tree.name, "enumeratedValues");
+    fn parse(tree: &Element) -> Result<EnumeratedValues,Error> {
+        ensure!(tree.name == "enumeratedValues", "Element is not a <enumeratedValues>"); // FIXME: Not sure when this can happen, if it can, make an error for it.
 
-        EnumeratedValues {
-            name: tree.get_child_text("name"),
-            usage: tree.get_child("usage").map(Usage::parse),
+        Ok(EnumeratedValues {
+            name: tree.get_child_text_opt("name")?,
+            usage: {
+                if let Some(usage) = tree.get_child("usage") {
+                    Some(Usage::parse(usage)?)
+                } else {
+                    None
+                }
+            },
             derived_from: tree.attributes
                 .get(&"derivedFrom".to_owned())
                 .map(|s| s.to_owned()),
-            values: tree.children
-                .iter()
-                .filter_map(EnumeratedValue::parse)
-                .collect(),
+            values: {
+                let res: Result<Vec<_>, _> = tree.children
+                    .iter()
+                    .enumerate()
+                    .map(|(i,v)| EnumeratedValue::parse(v).map_err(|e| (i+1,e)))
+                    .collect();
+                // Unwrap is safe because we filtered all the None
+                res.map_err(|err|
+                            errors::EnumeratedValueError::from_cause(err.1,err.0))?.into_iter().filter(|r| r.is_some()).map(|s| s.unwrap()).collect()
+            },
             _extensible: (),
-        }
+        })
     }
 }
 
@@ -641,21 +817,21 @@ pub struct EnumeratedValue {
 }
 
 impl EnumeratedValue {
-    fn parse(tree: &Element) -> Option<EnumeratedValue> {
+    fn parse(tree: &Element) -> Result<Option<EnumeratedValue>, Error> {
         if tree.name != "enumeratedValue" {
-            return None;
+            return Ok(None);
         }
-
-        Some(
+        let name = tree.get_child_text("name")?;
+        EnumeratedValue::_parse(tree, name.clone()).map_err(|e| errors::Named(name, e).into()).map(|val| Some(val))
+        //Peripheral::_parse(tree, name.clone())
+    }
+    fn _parse(tree: &Element, name: String) -> Result<EnumeratedValue, Error> {
+        Ok(
             EnumeratedValue {
-                name: try!(tree.get_child_text("name")),
-                description: tree.get_child_text("description"),
-                value: tree.get_child("value").map(|t| try!(parse::u32(t))),
-                is_default: tree.get_child_text("isDefault").map(
-                    |t| {
-                        try!(t.parse())
-                    },
-                ),
+                name, // FIXME: Capture error
+                description: tree.get_child_text_opt("description")?,
+                value: and_then_result(tree.get_child("value"), parse::u32)?,
+                is_default: tree.get_child_text_opt("isDefault")?.map(|t| t.parse().unwrap()),
                 _extensible: (),
             },
         )

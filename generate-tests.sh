@@ -10,6 +10,7 @@ elementIn() {
 
 main() {
     local tests_dir=$(pwd)/tests
+    local cmsis_dir=$tests_dir/cmsis_tests
     local blacklist=(
         # These SVD files have some registers with a `resetValue` bigger than the register itself
         Toshiba/M365
@@ -20,13 +21,13 @@ main() {
         SiliconLabs/SIM3L1x8_SVD
     )
 
-    rm -rf tests
-    mkdir -p tests
+    rm -rf tests/cmsis_tests
+    mkdir -p tests/cmsis_tests
 
     local vendor_dir
     for vendor_dir in $(echo cmsis-svd/data/*); do
         local vendor=$(basename $vendor_dir)
-        cat >"$tests_dir/$vendor.rs" <<EOF
+        cat >"$cmsis_dir/$vendor.rs" <<EOF
 #![allow(non_snake_case)]
 
 extern crate svd_parser as svd;
@@ -44,16 +45,23 @@ EOF
 
             device=${device//./_}
 
-            cat >>"$tests_dir/$vendor.rs" <<EOF
+            cat >>"$cmsis_dir/$vendor.rs" <<EOF
 #[test]
 fn $device() {
     let xml = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/$device_path"));
 
-    svd::parse(xml);
+    svd::parse(xml).unwrap();
 }
 EOF
-        done
+	done
+	cat >>"$cmsis_dir/mod.rs" <<EOF
+pub mod $vendor;
+EOF
     done
+    cat >"$tests_dir/cmsis.rs"<<EOF
+pub mod cmsis_tests;
+use cmsis_tests::*;
+EOF
 }
 
 main
