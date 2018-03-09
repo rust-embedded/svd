@@ -3,21 +3,21 @@
 use std::collections::HashMap;
 use xmltree::Element;
 
-/// Parse trait allows SVD objects to be parsed from XML/SVD elements.
+/// Parse trait allows SVD objects to be parsed from XML elements.
 pub trait Parse {
     /// Object returned by parse method
     type Object;
     /// Parsing error
     type Error;
-    /// Parse an XML/SVD element into an SVD Object.
+    /// Parse an XML/SVD element into it's corresponding Object.
     fn parse(&Element) -> Result<Self::Object, Self::Error>;
 }
 
-/// Encode trait allows SVD objects to be encoded into XML/SVD elements.
+/// Encode trait allows SVD objects to be encoded into XML elements.
 pub trait Encode {
     /// Encoding error
     type Error;
-    /// Encode an SVD object into an XML element
+    /// Encode into an XML/SVD element
     fn encode(&self) -> Result<Element, Self::Error>;
 }
 
