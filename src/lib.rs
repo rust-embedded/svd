@@ -178,6 +178,23 @@ pub struct Peripheral {
 }
 
 impl Peripheral {
+    pub fn derive_from(&self, other: &Peripheral) -> Peripheral {
+        let mut derived = self.clone();
+        if derived.group_name.is_none() && other.group_name.is_some() {
+            derived.group_name = other.group_name.clone();
+        }
+        if derived.description.is_none() && other.description.is_some() {
+            derived.description = other.description.clone();
+        }
+        if derived.registers.is_none() && other.registers.is_some() {
+            derived.registers = other.registers.clone();
+        }
+        if derived.interrupt.is_empty() {
+            derived.interrupt = other.interrupt.clone();
+        }
+        derived
+    }
+
     fn parse(tree: &Element) -> Peripheral {
         assert_eq!(tree.name, "peripheral");
 
