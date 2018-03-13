@@ -239,6 +239,7 @@ pub struct ClusterInfo {
 #[derive(Clone, Debug)]
 pub struct RegisterInfo {
     pub name: String,
+    pub alternate_register: Option<String>,
     pub description: String,
     pub address_offset: u32,
     pub size: Option<u32>,
@@ -351,6 +352,7 @@ impl RegisterInfo {
     fn parse(tree: &Element) -> RegisterInfo {
         RegisterInfo {
             name: try!(tree.get_child_text("name")),
+            alternate_register: tree.get_child_text("alternateRegister"),
             description: try!(tree.get_child_text("description")),
             address_offset: {
                 try!(parse::u32(try!(tree.get_child("addressOffset"))))
