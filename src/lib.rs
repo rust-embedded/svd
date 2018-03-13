@@ -39,6 +39,7 @@ macro_rules! try {
 }
 
 mod parse;
+pub mod types;
 
 /// Parses the contents of a SVD file (XML)
 pub fn parse(xml: &str) -> Device {
