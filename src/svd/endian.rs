@@ -17,7 +17,7 @@ impl Parse for Endian {
     type Object = Endian;
     type Error = SVDError;
 
-    fn parse2(tree: &Element) -> Result<Endian, SVDError> {
+    fn parse(tree: &Element) -> Result<Endian, SVDError> {
         let text = parse::get_text(tree)?;
 
         match &text[..] {

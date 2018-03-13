@@ -42,13 +42,14 @@ macro_rules! try {
 }
 
 pub mod error;
+use error::SVDError;
 pub mod parse;
 pub mod types;
 use types::Parse;
 
 
 /// Parses the contents of a SVD file (XML)
-pub fn parse(xml: &str) -> Device {
+pub fn parse(xml: &str) -> Result<Device, SVDError> {
     Device::parse(xml)
 }
 
@@ -92,15 +93,12 @@ impl Device {
     /// # Panics
     ///
     /// If the input is an invalid SVD file (yay, no error handling)
-    pub fn parse(svd: &str) -> Device {
+    pub fn parse(svd: &str) -> Result<Device, SVDError> {
         let tree = &try!(Element::parse(svd.as_bytes()));
 
-        let t = parse::get_child_elem("cpu", tree);
-        let m = Cpu::parse2(tree.get_child("cpu").unwrap());
-
-        Device {
+        Ok(Device {
             name: try!(tree.get_child_text("name")),
-            cpu: Some(m),
+            cpu: Some(Cpu::parse(parse::get_child_elem("cpu", tree)?)?),
             peripherals: try!(tree.get_child("peripherals"))
                 .children
                 .iter()
@@ -108,7 +106,7 @@ impl Device {
                 .collect(),
             defaults: Defaults::parse(tree),
             _extensible: (),
-        }
+        })
     }
 }
 

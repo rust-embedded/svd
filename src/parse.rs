@@ -46,16 +46,16 @@ pub fn dim_index(text: &str) -> Vec<String> {
     }
 }
 
-pub fn get_text<'a>(e: &'a Element) -> Result<String, SVDError> {
-    match e.text {
-        Some(s) => Ok(String::from(s)),
+pub fn get_text<'a>(e: &'a Element) -> Result<&'a str, SVDError> {
+    match e.text.as_ref() {
+        Some(s) => Ok(s),
         None => Err(SVDError::MissingChildElement(e.clone())),
     }
 }
 
 pub fn get_child_elem<'a>(n: &str, e: &'a Element) -> Result<&'a Element, SVDError> {
     match e.get_child(n) {
-        Some(s) => Ok(e),
+        Some(s) => Ok(s),
         None => Err(SVDError::MissingChildElement(e.clone())),
     }
 }
