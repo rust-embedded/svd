@@ -9,7 +9,7 @@ pub trait Parse {
     type Object;
     /// Parsing error
     type Error;
-    /// Parse an XML/SVD element into it's corresponding Object.
+    /// Parse an XML/SVD element into it's corresponding `Object`.
     fn parse(&Element) -> Result<Self::Object, Self::Error>;
 }
 
