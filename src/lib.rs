@@ -32,14 +32,20 @@ use std::ops::Deref;
 use either::Either;
 use xmltree::Element;
 
+pub mod svd;
+use svd::cpu::Cpu;
+
 macro_rules! try {
     ($e:expr) => {
         $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
     }
 }
 
-mod parse;
+pub mod error;
+pub mod parse;
 pub mod types;
+use types::Parse;
+
 
 /// Parses the contents of a SVD file (XML)
 pub fn parse(xml: &str) -> Device {
@@ -89,9 +95,12 @@ impl Device {
     pub fn parse(svd: &str) -> Device {
         let tree = &try!(Element::parse(svd.as_bytes()));
 
+        let t = parse::get_child_elem("cpu", tree);
+        let m = Cpu::parse2(tree.get_child("cpu").unwrap());
+
         Device {
             name: try!(tree.get_child_text("name")),
-            cpu: tree.get_child("cpu").map(Cpu::parse),
+            cpu: Some(m),
             peripherals: try!(tree.get_child("peripherals"))
                 .children
                 .iter()
@@ -103,66 +112,6 @@ impl Device {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Endian {
-    Little,
-    Big,
-    Selectable,
-    Other
-}
-
-impl Endian {
-    fn parse(tree: &Element) -> Endian {
-        let text = try!(tree.text.as_ref());
-
-        match &text[..] {
-            "little" => Endian::Little,
-            "big" => Endian::Big,
-            "selectable" => Endian::Selectable,
-            "other" => Endian::Other,
-            _ => panic!("unknown endian variant: {}", text),
-        }
-    }
-}
-
-
-#[derive(Clone, Debug)]
-pub struct Cpu {
-    pub name: String,
-    pub revision: String,
-    pub endian: Endian,
-    pub mpu_present: bool,
-    pub fpu_present: bool,
-    pub nvic_priority_bits: u32,
-    pub has_vendor_systick: bool,
-
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
-
-impl Cpu {
-    fn parse(tree: &Element) -> Cpu {
-        assert_eq!(tree.name, "cpu");
-
-        Cpu {
-            name: try!(tree.get_child_text("name")),
-            revision: try!(tree.get_child_text("revision")),
-            endian: Endian::parse(try!(tree.get_child("endian"))),
-            mpu_present: try!(parse::bool(try!(tree.get_child("mpuPresent")))),
-            fpu_present: try!(parse::bool(try!(tree.get_child("fpuPresent")))),
-            nvic_priority_bits:
-                try!(parse::u32(try!(tree.get_child("nvicPrioBits")))),
-            has_vendor_systick:
-                try!(parse::bool(try!(tree.get_child("vendorSystickConfig")))),
-
-            _extensible: (),
-        }
-    }
-
-    pub fn is_cortex_m(&self) -> bool {
-        self.name.starts_with("CM")
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct Peripheral {

@@ -10,7 +10,7 @@ pub trait Parse {
     /// Parsing error
     type Error;
     /// Parse an XML/SVD element into it's corresponding `Object`.
-    fn parse(&Element) -> Result<Self::Object, Self::Error>;
+    fn parse2(&Element) -> Result<Self::Object, Self::Error>;
 }
 
 /// Encode trait allows SVD objects to be encoded into XML elements.
