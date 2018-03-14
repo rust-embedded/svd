@@ -1,13 +1,15 @@
 
+use std::collections::HashMap;
+
 use xmltree::Element;
 
 use ::parse;
-use ::types::Parse;
+use ::types::{Parse, Encode, new_element};
 use ::error::SVDError;
 use ::svd::endian::Endian;
 
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Cpu {
     pub name: String,
     pub revision: String,
@@ -43,8 +45,73 @@ impl Parse for Cpu {
     }
 }
 
+impl Encode for Cpu {
+    type Error = SVDError;
+
+    fn encode(&self) -> Result<Element, SVDError> {
+        Ok(Element {
+            name: String::from("cpu"),
+            attributes: HashMap::new(),
+            children: vec![
+                new_element("name", Some(self.name.clone())),
+                new_element("revision", Some(self.revision.clone())),
+                self.endian.encode()?,
+                new_element("mpuPresent", Some(format!("{}", self.mpu_present))),
+                new_element("fpuPresent", Some(format!("{}", self.fpu_present))),
+                new_element("nvicPrioBits", Some(format!("{}", self.nvic_priority_bits))),
+                new_element("vendorSystickConfig",Some(format!("{}", self.has_vendor_systick))),
+            ],
+            text: None,
+        })
+    }
+}
+
+
 impl Cpu {
     pub fn is_cortex_m(&self) -> bool {
         self.name.starts_with("CM")
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn decode_encode() {
+        let types = vec![
+            (
+                Cpu {
+                    name: String::from("EFM32JG12B500F512GM48"),
+                    revision: String::from("5.1.1"),
+                    endian: Endian::Little,
+                    mpu_present: true,
+                    fpu_present: true,
+                    nvic_priority_bits: 8,
+                    has_vendor_systick: false,
+                    _extensible: (),
+                },
+                String::from("
+                        <cpu>
+                            <name>EFM32JG12B500F512GM48</name>  
+                            <revision>5.1.1</revision>
+                            <endian>little</endian>
+                            <mpuPresent>true</mpuPresent>
+                            <fpuPresent>true</fpuPresent>
+                            <nvicPrioBits>8</nvicPrioBits>
+                            <vendorSystickConfig>false</vendorSystickConfig>
+                        </cpu>
+                ")
+            ),
+        ];
+
+        for (a, s) in types {
+            let tree1 = Element::parse(s.as_bytes()).unwrap();
+            let value = Cpu::parse(&tree1).unwrap();
+            assert_eq!(value, a, "Parsing `{}` expected `{:?}`", s, a);
+            let tree2 = value.encode().unwrap();
+            assert_eq!(tree1, tree2, "Encoding {:?} expected {}", a, s);
+        }
     }
 }
