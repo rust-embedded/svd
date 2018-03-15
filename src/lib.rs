@@ -34,6 +34,7 @@ use xmltree::Element;
 
 pub mod svd;
 use svd::cpu::Cpu;
+use svd::interrupt::Interrupt;
 
 macro_rules! try {
     ($e:expr) => {
@@ -137,7 +138,9 @@ impl Peripheral {
             interrupt: tree.children
                 .iter()
                 .filter(|t| t.name == "interrupt")
-                .map(Interrupt::parse)
+                .map(|i| Interrupt::parse(i).ok() )
+                .filter(|i| i.is_some() )
+                .map(|i| i.unwrap() )
                 .collect::<Vec<_>>(),
             registers: tree.get_child("registers").map(|rs| {
                 rs.children.iter().map(cluster_register_parse).collect()
@@ -152,22 +155,7 @@ impl Peripheral {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct Interrupt {
-    pub name: String,
-    pub description: Option<String>,
-    pub value: u32,
-}
 
-impl Interrupt {
-    fn parse(tree: &Element) -> Interrupt {
-        Interrupt {
-            name: try!(tree.get_child_text("name")),
-            description: tree.get_child_text("description"),
-            value: try!(parse::u32(try!(tree.get_child("value")))),
-        }
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct ClusterInfo {
