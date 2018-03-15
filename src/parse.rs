@@ -9,12 +9,16 @@ pub fn u32(tree: &Element) -> Option<u32> {
         // Handle strings in the binary form of:
         // #01101x1
         // along with don't care character x (replaced with 0)
-        u32::from_str_radix(&str::replace(&text.to_lowercase()["#".len()..], "x", "0"), 2).ok()
-    } else if text.starts_with("0b"){
+        u32::from_str_radix(
+            &str::replace(&text.to_lowercase()["#".len()..], "x", "0"),
+            2,
+        ).ok()
+    } else if text.starts_with("0b") {
         // Handle strings in the binary form of:
         // 0b01101x1
         // along with don't care character x (replaced with 0)
-        u32::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2).ok()
+        u32::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2)
+            .ok()
     } else {
         text.parse().ok()
     }
@@ -25,7 +29,7 @@ pub fn bool(tree: &Element) -> Option<bool> {
     match text.as_ref() {
         "0" => Some(false),
         "1" => Some(true),
-        _ => text.parse::<bool>().ok()
+        _ => text.parse::<bool>().ok(),
     }
 }
 

@@ -107,7 +107,7 @@ pub enum Endian {
     Little,
     Big,
     Selectable,
-    Other
+    Other,
 }
 
 impl Endian {
@@ -123,7 +123,6 @@ impl Endian {
         }
     }
 }
-
 
 #[derive(Clone, Debug)]
 pub struct Cpu {
@@ -149,10 +148,12 @@ impl Cpu {
             endian: Endian::parse(try!(tree.get_child("endian"))),
             mpu_present: try!(parse::bool(try!(tree.get_child("mpuPresent")))),
             fpu_present: try!(parse::bool(try!(tree.get_child("fpuPresent")))),
-            nvic_priority_bits:
-                try!(parse::u32(try!(tree.get_child("nvicPrioBits")))),
-            has_vendor_systick:
-                try!(parse::bool(try!(tree.get_child("vendorSystickConfig")))),
+            nvic_priority_bits: try!(parse::u32(try!(tree.get_child(
+                "nvicPrioBits"
+            )))),
+            has_vendor_systick: try!(parse::bool(try!(tree.get_child(
+                "vendorSystickConfig"
+            )))),
 
             _extensible: (),
         }
@@ -194,11 +195,9 @@ impl Peripheral {
             registers: tree.get_child("registers").map(|rs| {
                 rs.children.iter().map(cluster_register_parse).collect()
             }),
-            derived_from: tree.attributes.get("derivedFrom").map(
-                |s| {
-                    s.to_owned()
-                },
-            ),
+            derived_from: tree.attributes
+                .get("derivedFrom")
+                .map(|s| s.to_owned()),
             _extensible: (),
         }
     }
@@ -333,10 +332,10 @@ impl ClusterInfo {
             },
             size: tree.get_child("size").map(|t| try!(parse::u32(t))),
             access: tree.get_child("access").map(Access::parse),
-            reset_value:
-                tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
-            reset_mask:
-                tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
+            reset_value: tree.get_child("resetValue")
+                .map(|t| try!(parse::u32(t))),
+            reset_mask: tree.get_child("resetMask")
+                .map(|t| try!(parse::u32(t))),
             children: tree.children
                 .iter()
                 .filter(|t| t.name == "register" || t.name == "cluster")
@@ -357,13 +356,12 @@ impl RegisterInfo {
             },
             size: tree.get_child("size").map(|t| try!(parse::u32(t))),
             access: tree.get_child("access").map(Access::parse),
-            reset_value:
-                tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
-            reset_mask:
-                tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
-            fields:
-                tree.get_child("fields")
-                    .map(|fs| fs.children.iter().map(Field::parse).collect()),
+            reset_value: tree.get_child("resetValue")
+                .map(|t| try!(parse::u32(t))),
+            reset_mask: tree.get_child("resetMask")
+                .map(|t| try!(parse::u32(t))),
+            fields: tree.get_child("fields")
+                .map(|fs| fs.children.iter().map(Field::parse).collect()),
             write_constraint: tree.get_child("writeConstraint")
                 .map(WriteConstraint::parse),
             _extensible: (),
@@ -375,12 +373,11 @@ impl RegisterClusterArrayInfo {
     fn parse(tree: &Element) -> RegisterClusterArrayInfo {
         RegisterClusterArrayInfo {
             dim: try!(tree.get_child_text("dim").unwrap().parse::<u32>()),
-            dim_increment: try!(tree.get_child("dimIncrement").map(|t| {
-                try!(parse::u32(t))
-            })),
-            dim_index: tree.get_child("dimIndex").map(|c| {
-                parse::dim_index(try!(c.text.as_ref()))
-            }),
+            dim_increment: try!(
+                tree.get_child("dimIncrement").map(|t| try!(parse::u32(t)))
+            ),
+            dim_index: tree.get_child("dimIndex")
+                .map(|c| parse::dim_index(try!(c.text.as_ref()))),
         }
     }
 }
@@ -469,25 +466,29 @@ pub struct BitRange {
 
 impl BitRange {
     fn parse(tree: &Element) -> BitRange {
-        let (end, start): (u32, u32) = if let Some(range) =
-            tree.get_child("bitRange") {
-            let text = try!(range.text.as_ref());
+        let (end, start): (u32, u32) =
+            if let Some(range) = tree.get_child("bitRange") {
+                let text = try!(range.text.as_ref());
 
-            assert!(text.starts_with('['));
-            assert!(text.ends_with(']'));
+                assert!(text.starts_with('['));
+                assert!(text.ends_with(']'));
 
-            let mut parts = text[1..text.len() - 1].split(':');
+                let mut parts = text[1..text.len() - 1].split(':');
 
-            (try!(try!(parts.next()).parse()), try!(try!(parts.next()).parse()))
-        } else if let (Some(lsb), Some(msb)) =
-            (tree.get_child("lsb"), tree.get_child("msb")) {
-            (try!(parse::u32(msb)), try!(parse::u32(lsb)))
-        } else {
-            return BitRange {
-                       offset: try!(parse::u32(try!(tree.get_child("bitOffset")))),
-                       width: try!(parse::u32(try!(tree.get_child("bitWidth")))),
-                   };
-        };
+                (
+                    try!(try!(parts.next()).parse()),
+                    try!(try!(parts.next()).parse()),
+                )
+            } else if let (Some(lsb), Some(msb)) =
+                (tree.get_child("lsb"), tree.get_child("msb"))
+            {
+                (try!(parse::u32(msb)), try!(parse::u32(lsb)))
+            } else {
+                return BitRange {
+                    offset: try!(parse::u32(try!(tree.get_child("bitOffset")))),
+                    width: try!(parse::u32(try!(tree.get_child("bitWidth")))),
+                };
+            };
 
         BitRange {
             offset: start,
@@ -524,30 +525,20 @@ impl WriteConstraint {
             let ref field = tree.children[0].name;
             // Write constraint can only be one of the following
             match field.as_ref() {
-                "writeAsRead" => {
-                    WriteConstraint::WriteAsRead(
-                        try!(
-                            tree.get_child(field.as_ref())
-                                .map(|t| try!(parse::bool(t)))
-                        ),
-                    )
-                }
+                "writeAsRead" => WriteConstraint::WriteAsRead(try!(
+                    tree.get_child(field.as_ref())
+                        .map(|t| try!(parse::bool(t)))
+                )),
                 "useEnumeratedValues" => {
-                    WriteConstraint::UseEnumeratedValues(
-                        try!(
-                            tree.get_child(field.as_ref())
-                                .map(|t| try!(parse::bool(t)))
-                        ),
-                    )
+                    WriteConstraint::UseEnumeratedValues(try!(
+                        tree.get_child(field.as_ref())
+                            .map(|t| try!(parse::bool(t)))
+                    ))
                 }
-                "range" => {
-                    WriteConstraint::Range(
-                        try!(
-                            tree.get_child(field.as_ref())
-                                .map(WriteConstraintRange::parse)
-                        ),
-                    )
-                }
+                "range" => WriteConstraint::Range(try!(
+                    tree.get_child(field.as_ref())
+                        .map(WriteConstraintRange::parse)
+                )),
                 v => panic!("unknown <writeConstraint> variant: {}", v),
             }
         } else {
@@ -571,10 +562,10 @@ impl Defaults {
     fn parse(tree: &Element) -> Defaults {
         Defaults {
             size: tree.get_child("size").map(|t| try!(parse::u32(t))),
-            reset_value:
-                tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
-            reset_mask:
-                tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
+            reset_value: tree.get_child("resetValue")
+                .map(|t| try!(parse::u32(t))),
+            reset_mask: tree.get_child("resetMask")
+                .map(|t| try!(parse::u32(t))),
             access: tree.get_child("access").map(Access::parse),
             _extensible: (),
         }
@@ -646,18 +637,13 @@ impl EnumeratedValue {
             return None;
         }
 
-        Some(
-            EnumeratedValue {
-                name: try!(tree.get_child_text("name")),
-                description: tree.get_child_text("description"),
-                value: tree.get_child("value").map(|t| try!(parse::u32(t))),
-                is_default: tree.get_child_text("isDefault").map(
-                    |t| {
-                        try!(t.parse())
-                    },
-                ),
-                _extensible: (),
-            },
-        )
+        Some(EnumeratedValue {
+            name: try!(tree.get_child_text("name")),
+            description: tree.get_child_text("description"),
+            value: tree.get_child("value").map(|t| try!(parse::u32(t))),
+            is_default: tree.get_child_text("isDefault")
+                .map(|t| try!(t.parse())),
+            _extensible: (),
+        })
     }
 }
