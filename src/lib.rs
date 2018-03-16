@@ -36,6 +36,7 @@ pub mod svd;
 use svd::cpu::Cpu;
 use svd::interrupt::Interrupt;
 use svd::access::Access;
+use svd::bitrange::BitRange;
 
 macro_rules! try {
     ($e:expr) => {
@@ -363,7 +364,7 @@ impl Field {
         Field {
             name: try!(tree.get_child_text("name")),
             description: tree.get_child_text("description"),
-            bit_range: BitRange::parse(tree),
+            bit_range: BitRange::parse(tree).unwrap(),
             access: parse::optional("access", tree, Access::parse).unwrap(),
             enumerated_values: tree.children
                 .iter()
@@ -377,40 +378,7 @@ impl Field {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
-pub struct BitRange {
-    pub offset: u32,
-    pub width: u32,
-}
 
-impl BitRange {
-    fn parse(tree: &Element) -> BitRange {
-        let (end, start): (u32, u32) = if let Some(range) =
-            tree.get_child("bitRange") {
-            let text = try!(range.text.as_ref());
-
-            assert!(text.starts_with('['));
-            assert!(text.ends_with(']'));
-
-            let mut parts = text[1..text.len() - 1].split(':');
-
-            (try!(try!(parts.next()).parse()), try!(try!(parts.next()).parse()))
-        } else if let (Some(lsb), Some(msb)) =
-            (tree.get_child("lsb"), tree.get_child("msb")) {
-            (try!(parse::u32(msb)), try!(parse::u32(lsb)))
-        } else {
-            return BitRange {
-                       offset: try!(parse::u32(try!(tree.get_child("bitOffset")))),
-                       width: try!(parse::u32(try!(tree.get_child("bitWidth")))),
-                   };
-        };
-
-        BitRange {
-            offset: start,
-            width: end - start + 1,
-        }
-    }
-}
 
 #[derive(Clone, Copy, Debug)]
 pub struct WriteConstraintRange {

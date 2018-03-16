@@ -10,4 +10,5 @@ pub enum SVDError {
     NonBoolElement(Element),
     NameMismatch(Element),
     UnknownAccessType(Element),
+    InvalidBitRange(Element),
 }
