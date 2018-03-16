@@ -1,4 +1,5 @@
 *.rs.bk
+[._]*.sw[a-p]
 Cargo.lock
 target
 tests/
