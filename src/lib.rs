@@ -35,6 +35,7 @@ use xmltree::Element;
 pub mod svd;
 use svd::cpu::Cpu;
 use svd::interrupt::Interrupt;
+use svd::access::Access;
 
 macro_rules! try {
     ($e:expr) => {
@@ -268,7 +269,8 @@ impl ClusterInfo {
                 try!(parse::u32(try!(tree.get_child("addressOffset"))))
             },
             size: tree.get_child("size").map(|t| try!(parse::u32(t))),
-            access: tree.get_child("access").map(Access::parse),
+            //access: tree.get_child("access").map(|t| Access::parse(t).ok() ),
+            access: parse::optional("access", tree, Access::parse).unwrap(),
             reset_value:
                 tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
             reset_mask:
@@ -292,7 +294,7 @@ impl RegisterInfo {
                 try!(parse::u32(try!(tree.get_child("addressOffset"))))
             },
             size: tree.get_child("size").map(|t| try!(parse::u32(t))),
-            access: tree.get_child("access").map(Access::parse),
+            access: parse::optional("access", tree, Access::parse).unwrap(),
             reset_value:
                 tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
             reset_mask:
@@ -340,29 +342,7 @@ impl Register {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Access {
-    ReadOnly,
-    ReadWrite,
-    ReadWriteOnce,
-    WriteOnce,
-    WriteOnly,
-}
 
-impl Access {
-    fn parse(tree: &Element) -> Access {
-        let text = try!(tree.text.as_ref());
-
-        match &text[..] {
-            "read-only" => Access::ReadOnly,
-            "read-write" => Access::ReadWrite,
-            "read-writeOnce" => Access::ReadWriteOnce,
-            "write-only" => Access::WriteOnly,
-            "writeOnce" => Access::WriteOnce,
-            _ => panic!("unknown access variant: {}", text),
-        }
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct Field {
@@ -384,7 +364,7 @@ impl Field {
             name: try!(tree.get_child_text("name")),
             description: tree.get_child_text("description"),
             bit_range: BitRange::parse(tree),
-            access: tree.get_child("access").map(Access::parse),
+            access: parse::optional("access", tree, Access::parse).unwrap(),
             enumerated_values: tree.children
                 .iter()
                 .filter(|t| t.name == "enumeratedValues")
@@ -511,7 +491,7 @@ impl Defaults {
                 tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
             reset_mask:
                 tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
-            access: tree.get_child("access").map(Access::parse),
+            access: parse::optional("access", tree, Access::parse).unwrap(),
             _extensible: (),
         }
     }

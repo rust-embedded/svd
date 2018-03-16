@@ -9,4 +9,5 @@ pub enum SVDError {
     NonIntegerElement(Element),
     NonBoolElement(Element),
     NameMismatch(Element),
+    UnknownAccessType(Element),
 }
