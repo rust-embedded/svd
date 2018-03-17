@@ -11,4 +11,6 @@ pub enum SVDError {
     NameMismatch(Element),
     UnknownAccessType(Element),
     InvalidBitRange(Element),
+    UnknownWriteConstraint(Element),
+    MoreThanOneWriteConstraint(Element),
 }

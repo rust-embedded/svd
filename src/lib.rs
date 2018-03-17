@@ -37,6 +37,7 @@ use svd::cpu::Cpu;
 use svd::interrupt::Interrupt;
 use svd::access::Access;
 use svd::bitrange::BitRange;
+use svd::writeconstraint::{WriteConstraint};
 
 macro_rules! try {
     ($e:expr) => {
@@ -309,8 +310,7 @@ impl RegisterInfo {
             fields:
                 tree.get_child("fields")
                     .map(|fs| fs.children.iter().map(Field::parse).collect()),
-            write_constraint: tree.get_child("writeConstraint")
-                .map(WriteConstraint::parse),
+            write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse).unwrap(),
             _extensible: (),
         }
     }
@@ -377,8 +377,7 @@ impl Field {
                 .filter(|t| t.name == "enumeratedValues")
                 .map(EnumeratedValues::parse)
                 .collect::<Vec<_>>(),
-            write_constraint: tree.get_child("writeConstraint")
-                .map(WriteConstraint::parse),
+            write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse).unwrap(),
             _extensible: (),
         }
     }
@@ -386,65 +385,7 @@ impl Field {
 
 
 
-#[derive(Clone, Copy, Debug)]
-pub struct WriteConstraintRange {
-    pub min: u32,
-    pub max: u32,
-}
 
-impl WriteConstraintRange {
-    fn parse(tree: &Element) -> WriteConstraintRange {
-        WriteConstraintRange {
-            min: try!(try!(tree.get_child_text("minimum")).parse()),
-            max: try!(try!(tree.get_child_text("maximum")).parse()),
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug)]
-pub enum WriteConstraint {
-    WriteAsRead(bool),
-    UseEnumeratedValues(bool),
-    Range(WriteConstraintRange),
-}
-
-impl WriteConstraint {
-    fn parse(tree: &Element) -> WriteConstraint {
-        if tree.children.len() == 1 {
-            let ref field = tree.children[0].name;
-            // Write constraint can only be one of the following
-            match field.as_ref() {
-                "writeAsRead" => {
-                    WriteConstraint::WriteAsRead(
-                        try!(
-                            tree.get_child(field.as_ref())
-                                .map(|t| try!(parse::bool(t)))
-                        ),
-                    )
-                }
-                "useEnumeratedValues" => {
-                    WriteConstraint::UseEnumeratedValues(
-                        try!(
-                            tree.get_child(field.as_ref())
-                                .map(|t| try!(parse::bool(t)))
-                        ),
-                    )
-                }
-                "range" => {
-                    WriteConstraint::Range(
-                        try!(
-                            tree.get_child(field.as_ref())
-                                .map(WriteConstraintRange::parse)
-                        ),
-                    )
-                }
-                v => panic!("unknown <writeConstraint> variant: {}", v),
-            }
-        } else {
-            panic!("found more than one <WriteConstraint> element")
-        }
-    }
-}
 
 /// Register default properties
 #[derive(Clone, Copy, Debug)]
