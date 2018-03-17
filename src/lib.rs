@@ -180,15 +180,9 @@ pub struct Peripheral {
 impl Peripheral {
     pub fn derive_from(&self, other: &Peripheral) -> Peripheral {
         let mut derived = self.clone();
-        if derived.group_name.is_none() && other.group_name.is_some() {
-            derived.group_name = other.group_name.clone();
-        }
-        if derived.description.is_none() && other.description.is_some() {
-            derived.description = other.description.clone();
-        }
-        if derived.registers.is_none() && other.registers.is_some() {
-            derived.registers = other.registers.clone();
-        }
+        derived.group_name = derived.group_name.or(other.group_name.clone());
+        derived.description = derived.description.or(other.description.clone());
+        derived.registers = derived.registers.or(other.registers.clone());
         if derived.interrupt.is_empty() {
             derived.interrupt = other.interrupt.clone();
         }
