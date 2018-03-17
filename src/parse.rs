@@ -62,6 +62,7 @@ pub fn optional<'a, T, CB: 'static + Fn(&Element) -> Result<T, SVDError>>(n: &st
     }
 }
 
+
 /// Get text contained by an XML Element
 pub fn get_text<'a>(e: &'a Element) -> Result<&'a str, SVDError> {
     match e.text.as_ref() {

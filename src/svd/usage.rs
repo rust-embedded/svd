@@ -52,21 +52,16 @@ impl Encode for Usage {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use types::test;
 
     #[test]
     fn decode_encode() {
-        let types = vec![
-            (Usage::Read, String::from("<usage>read</usage>")),
-            (Usage::Write, String::from("<usage>write</usage>")),
-            (Usage::ReadWrite, String::from("<usage>read-write</usage>")),
+        let tests = vec![
+            (Usage::Read, "<usage>read</usage>"),
+            (Usage::Write, "<usage>write</usage>"),
+            (Usage::ReadWrite, "<usage>read-write</usage>"),
         ];
 
-        for (e, s) in types {
-            let tree1 = Element::parse(s.as_bytes()).unwrap();
-            let elem = Usage::parse(&tree1).unwrap();
-            assert_eq!(elem, e, "Parsing `{}` expected `{:?}`", s, e);
-            let tree2 = elem.encode().unwrap();
-            assert_eq!(tree1, tree2, "Encoding {:?} expected {}", e, s);
-        }
+        test::<Usage>(&tests[..]);
     }
 }

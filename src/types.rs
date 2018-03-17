@@ -1,5 +1,6 @@
 // Helper traits for rust-svd
 
+use std::fmt::Debug;
 use std::collections::HashMap;
 use xmltree::Element;
 
@@ -31,3 +32,15 @@ pub fn new_element(name: &str, text: Option<String>) -> Element {
     } 
 }
 
+use ::error::SVDError;
+
+// Generic test function
+pub fn test<T: Parse<Error=SVDError, Object=T> + Encode<Error=SVDError> + Debug + PartialEq>(tests: &[(T, &str)]) {
+    for t in tests {
+        let tree1 = Element::parse(t.1.as_bytes()).unwrap();
+        let elem = T::parse(&tree1).unwrap();
+        assert_eq!(elem, t.0, "Parsing `{:?}` expected `{:?}`", t.1, t.0);
+        let tree2 = elem.encode().unwrap();
+        assert_eq!(tree1, tree2, "Encoding {:?} expected {:?}", t.1, t.0);
+    };
+}

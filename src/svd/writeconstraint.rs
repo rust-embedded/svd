@@ -98,39 +98,25 @@ impl Encode for WriteConstraintRange {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use types::test;
 
     #[test]
     fn decode_encode() {
-        let examples = vec![
+        let tests = vec![
             (
-                String::from(
-                    "<WriteConstraint><writeAsRead>true</writeAsRead></WriteConstraint>",
-                ),
-                WriteConstraint::WriteAsRead(true)
+                WriteConstraint::WriteAsRead(true),
+                "<WriteConstraint><writeAsRead>true</writeAsRead></WriteConstraint>"
             ),
             (
-                String::from(
-                    "<WriteConstraint><useEnumeratedValues>true</useEnumeratedValues></WriteConstraint>",
-                ),
-                WriteConstraint::UseEnumeratedValues(true)
+                WriteConstraint::UseEnumeratedValues(true),
+                "<WriteConstraint><useEnumeratedValues>true</useEnumeratedValues></WriteConstraint>"
             ),
             (
-                String::from(
-                    "<WriteConstraint><range><minimum>0x00000001</minimum><maximum>0x0000000a</maximum></range></WriteConstraint>",
-                ),
-                WriteConstraint::Range(WriteConstraintRange{min: 1, max: 10})
+                WriteConstraint::Range(WriteConstraintRange{min: 1, max: 10}),
+                "<WriteConstraint><range><minimum>0x00000001</minimum><maximum>0x0000000a</maximum></range></WriteConstraint>"
             ),
         ];
-
-        for (example, expected) in examples {
-            let tree1 = Element::parse(example.as_bytes()).unwrap();
-
-            let parsed = WriteConstraint::parse(&tree1).unwrap();
-            assert_eq!(parsed, expected, "Parsing tree failed");
-
-            let tree2 = parsed.encode().unwrap();
-            assert_eq!(tree1, tree2, "Encoding value failed");
-        }
-
+        
+        test::<WriteConstraint>(&tests[..]);
     }
 }
