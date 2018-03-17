@@ -30,10 +30,11 @@ pub enum SVDErrorKind {
     UnknownWriteConstraint(Element),
     #[fail(display = "Multiple wc found")]
     MoreThanOneWriteConstraint(Element),
-    #[fail(display = "unknown usage variant")]
+    #[fail(display = "Unknown usage variant")]
     UnknownUsageVariant(Element),
-    #[fail(display = "Not enumerated value")]
-    NotEnumeratedValue(Element),
+    #[fail(display = "Expected a <{}>, found ...", _1)]
+    NotExpectedTag(Element, String),
+    // FIXME: Should not be used, only for prototyping
     #[fail(display = "{}", _0)]
     Other(String),
 }

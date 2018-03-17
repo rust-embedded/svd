@@ -35,6 +35,7 @@ use std::ops::Deref;
 
 use either::Either;
 use xmltree::Element;
+use failure::ResultExt;
 
 pub mod svd;
 use svd::cpu::Cpu;
@@ -51,7 +52,7 @@ macro_rules! try {
 }
 
 pub mod error;
-use error::SVDError;
+use error::*;
 pub mod parse;
 pub mod types;
 use types::Parse;
@@ -400,10 +401,15 @@ pub struct Field {
 
 impl Field {
     fn parse(tree: &Element) -> Result<Field, SVDError> {
-        assert_eq!(tree.name, "field");
-
+        if tree.name != "field" {
+            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("field")).into());
+        }
+        let name = tree.get_child_text("name").ok_or(SVDErrorKind::Other(format!("missing text")))?; // FIXME: get_child_text should return an Result
+        Field::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In field `{}`", name))).map_err(|e| e.into())
+    }
+    fn _parse(tree: &Element, name: String) -> Result<Field, SVDError> {
         Ok(Field {
-            name: try!(tree.get_child_text("name")),
+            name,
             description: tree.get_child_text("description"),
             bit_range: BitRange::parse(tree)?,
             access: parse::optional("access", tree, Access::parse).unwrap(),

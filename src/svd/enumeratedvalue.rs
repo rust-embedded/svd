@@ -26,7 +26,7 @@ impl Parse for EnumeratedValue {
 
     fn parse(tree: &Element) -> Result<EnumeratedValue, SVDError> {
         if tree.name != "enumeratedValue" {
-            return Err(SVDErrorKind::NotEnumeratedValue(tree.clone()).into());
+            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("enumeratedValue")).into());
         }
 
         Ok(
