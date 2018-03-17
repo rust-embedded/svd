@@ -107,7 +107,11 @@ impl Device {
 
         Ok(Device {
             name: try!(tree.get_child_text("name")),
-            cpu: Some(Cpu::parse(parse::get_child_elem("cpu", tree)?)?),
+            cpu: if let Some(res) = tree.get_child("cpu").map(Cpu::parse) {
+                Some(res?)
+            } else {
+                None
+            },
             peripherals: try!(tree.get_child("peripherals"))
                 .children
                 .iter()
