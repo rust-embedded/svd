@@ -64,18 +64,33 @@ pub fn parse(xml: &str) -> Result<Device, SVDError> {
 }
 
 trait ElementExt {
-    fn get_child_text<K>(&self, k: K) -> Option<String>
+    fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>, SVDError>
     where
         String: PartialEq<K>;
+    fn get_child_text<K>(&self, k: K) -> Result<String, SVDError>
+    where
+        String: PartialEq<K>,
+        K: ::std::fmt::Display + Clone;
     fn debug(&self);
 }
 
 impl ElementExt for Element {
-    fn get_child_text<K>(&self, k: K) -> Option<String>
+    fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>, SVDError>
     where
         String: PartialEq<K>,
     {
-        self.get_child(k).map(|c| try!(c.text.clone()))
+        if let Some(child) = self.get_child(k) {
+            Ok(Some(parse::get_text(child).map(|s| s.to_owned())?))
+        } else {
+            Ok(None)
+        }
+    }
+    fn get_child_text<K>(&self, k: K) -> Result<String, SVDError>
+    where
+        String: PartialEq<K>,
+        K: ::std::fmt::Display + Clone,
+    {
+        self.get_child_text_opt(k.clone())?.ok_or(SVDErrorKind::MissingTag(self.clone(), format!("{}", k)).into())
     }
 
     fn debug(&self) {
@@ -159,22 +174,24 @@ impl Peripheral {
         if tree.name != "peripheral" {
             return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("peripheral")).into());
         }
-        let name = tree.get_child_text("name").ok_or(SVDErrorKind::Other(format!("missing text")))?; // FIXME: get_child_text should return an Result
+        let name = tree.get_child_text("name")?;
         Peripheral::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In peripheral `{}`", name))).map_err(|e| e.into())
     }
     fn _parse(tree: &Element, name: String) -> Result<Peripheral, SVDError> {
         Ok(Peripheral {
             name,
-            group_name: tree.get_child_text("groupName"),
-            description: tree.get_child_text("description"),
+            group_name: tree.get_child_text_opt("groupName")?,
+            description: tree.get_child_text_opt("description")?,
             base_address: try!(parse::u32(try!(tree.get_child("baseAddress")))),
-            interrupt: tree.children
-                .iter()
-                .filter(|t| t.name == "interrupt")
-                .map(|i| Interrupt::parse(i).ok() )
-                .filter(|i| i.is_some() )
-                .map(|i| i.unwrap() )
-                .collect::<Vec<_>>(),
+            interrupt: {
+                let interrupt: Result<Vec<_>,_> = tree.children
+                    .iter()
+                    .filter(|t| t.name == "interrupt")
+                    .enumerate()
+                    .map(|(e,i)| Interrupt::parse(i).context(SVDErrorKind::Other(format!("Parsing interrupt #{}", e).into())))
+                    .collect();
+                interrupt?
+            },
             registers: if let Some(registers) = tree.get_child("registers") {
                 let rs: Result<Vec<_>, _> = registers.children.iter().map(cluster_register_parse).collect();
                 Some(rs?)
@@ -251,7 +268,7 @@ impl Cluster {
         let info = ClusterInfo::parse(tree)?;
 
         if tree.get_child("dimIncrement").is_some() {
-            let array_info = RegisterClusterArrayInfo::parse(tree);
+            let array_info = RegisterClusterArrayInfo::parse(tree)?;
             assert!(info.name.contains("%s"));
             if let Some(ref indices) = array_info.dim_index {
                 assert_eq!(array_info.dim as usize, indices.len())
@@ -300,19 +317,18 @@ impl Deref for Register {
 impl ClusterInfo {
     fn parse(tree: &Element) -> Result<ClusterInfo, SVDError> {
         Ok(ClusterInfo {
-            name: try!(tree.get_child_text("name")),
-            description: try!(tree.get_child_text("description")),
-            header_struct_name: tree.get_child_text("headerStructName"),
-            address_offset: {
-                try!(parse::u32(try!(tree.get_child("addressOffset"))))
-            },
+            name: tree.get_child_text("name")?, // TODO: Handle naming of cluster
+            description: tree.get_child_text("description")?,
+            header_struct_name: tree.get_child_text_opt("headerStructName")?,
+            address_offset: 
+                parse::get_child_u32("addressOffset", tree)?,
             size: tree.get_child("size").map(|t| try!(parse::u32(t))),
             //access: tree.get_child("access").map(|t| Access::parse(t).ok() ),
-            access: parse::optional("access", tree, Access::parse).unwrap(),
+            access: parse::optional("access", tree, Access::parse)?,
             reset_value:
-                tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
+                parse::optional("resetValue", tree, parse::u32)?,
             reset_mask:
-                tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
+                parse::optional("resetMask", tree, parse::u32)?,
             children: {
                 let children: Result<Vec<_>,_> = tree.children
                     .iter()
@@ -328,25 +344,24 @@ impl ClusterInfo {
 
 impl RegisterInfo {
     fn parse(tree: &Element) -> Result<RegisterInfo, SVDError> {
-        let name = tree.get_child_text("name").ok_or(SVDErrorKind::Other(format!("missing text")))?; // FIXME: get_child_text should return an Result
+        let name = tree.get_child_text("name")?;
         RegisterInfo::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In register `{}`", name))).map_err(|e| e.into())
     }
     fn _parse(tree: &Element, name: String) -> Result<RegisterInfo, SVDError> {
         Ok(RegisterInfo {
             name,
-            alternate_group: tree.get_child_text("alternateGroup"),
-            alternate_register: tree.get_child_text("alternateRegister"),
+            alternate_group: tree.get_child_text_opt("alternateGroup")?,
+            alternate_register: tree.get_child_text_opt("alternateRegister")?,
             derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
-            description: try!(tree.get_child_text("description")),
-            address_offset: {
-                try!(parse::u32(try!(tree.get_child("addressOffset"))))
-            },
+            description: tree.get_child_text("description")?,
+            address_offset:
+                parse::get_child_u32("addressOffset", tree)?,
             size: tree.get_child("size").map(|t| try!(parse::u32(t))),
-            access: parse::optional("access", tree, Access::parse).unwrap(),
+            access: parse::optional("access", tree, Access::parse)?,
             reset_value:
-                tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
+                parse::optional("resetValue", tree, parse::u32)?,
             reset_mask:
-                tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
+                parse::optional("resetMask", tree, parse::u32)?,
             fields: {
                 if let Some(fields) = tree.get_child("fields") {
                         let fs: Result<Vec<_>, _> =
@@ -356,23 +371,23 @@ impl RegisterInfo {
                     None
                 }
             },
-            write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse).unwrap(),
+            write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse)?,
             _extensible: (),
         })
     }
 }
 
 impl RegisterClusterArrayInfo {
-    fn parse(tree: &Element) -> RegisterClusterArrayInfo {
-        RegisterClusterArrayInfo {
-            dim: try!(tree.get_child_text("dim").unwrap().parse::<u32>()),
+    fn parse(tree: &Element) -> Result<RegisterClusterArrayInfo, SVDError> {
+        Ok(RegisterClusterArrayInfo {
+            dim: tree.get_child_text("dim")?.parse::<u32>().context(SVDErrorKind::Other(format!("<dim> invalid")))?,
             dim_increment: try!(tree.get_child("dimIncrement").map(|t| {
                 try!(parse::u32(t))
             })),
             dim_index: tree.get_child("dimIndex").map(|c| {
-                parse::dim_index(try!(c.text.as_ref()))
+                parse::dim_index(try!(c.text.as_ref())) // TODO: Use provided functions in ElementExt
             }),
-        }
+        })
     }
 }
 
@@ -383,7 +398,7 @@ impl Register {
         let info = RegisterInfo::parse(tree)?;
 
         if tree.get_child("dimIncrement").is_some() {
-            let array_info = RegisterClusterArrayInfo::parse(tree);
+            let array_info = RegisterClusterArrayInfo::parse(tree)?;
             assert!(info.name.contains("%s"));
             if let Some(ref indices) = array_info.dim_index {
                 assert_eq!(array_info.dim as usize, indices.len())
@@ -414,21 +429,24 @@ impl Field {
         if tree.name != "field" {
             return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("field")).into());
         }
-        let name = tree.get_child_text("name").ok_or(SVDErrorKind::Other(format!("missing text")))?; // FIXME: get_child_text should return an Result
+        let name = tree.get_child_text("name")?;
         Field::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In field `{}`", name))).map_err(|e| e.into())
     }
     fn _parse(tree: &Element, name: String) -> Result<Field, SVDError> {
         Ok(Field {
             name,
-            description: tree.get_child_text("description"),
+            description: tree.get_child_text_opt("description")?,
             bit_range: BitRange::parse(tree)?,
-            access: parse::optional("access", tree, Access::parse).unwrap(),
-            enumerated_values: tree.children
-                .iter()
-                .filter(|t| t.name == "enumeratedValues")
-                .filter_map(|t| EnumeratedValues::parse(t).ok() )
-                .collect::<Vec<_>>(),
-            write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse).unwrap(),
+            access: parse::optional("access", tree, Access::parse)?,
+            enumerated_values: {
+                let values: Result<Vec<_>,_> = tree.children
+                    .iter()
+                    .filter(|t| t.name == "enumeratedValues")
+                    .map(EnumeratedValues::parse)
+                    .collect();
+                values?
+            },
+            write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse)?,
             _extensible: (),
         })
     }

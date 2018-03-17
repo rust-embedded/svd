@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
 use xmltree::Element;
+use failure::ResultExt;
+
+use ElementExt;
 
 use parse;
 use types::{Parse, Encode, new_element};
@@ -14,18 +17,29 @@ pub struct Interrupt {
     pub value: u32,
 }
 
-impl Parse for Interrupt {
-    type Object = Interrupt;
-    type Error = SVDError;
-
-    fn parse(tree: &Element) -> Result<Interrupt, SVDError> {
+impl Interrupt {
+    fn _parse(tree: &Element, name: String) -> Result<Interrupt, SVDError> {
         Ok(Interrupt {
-            name: parse::get_child_string("name", tree)?,
-            description: parse::get_child_string("description", tree).ok(),
+            name,
+            description: tree.get_child_text_opt("description")?,
             value: parse::get_child_u32("value", tree)?,
         })
     }
 }
+
+impl Parse for Interrupt {
+    type Object = Interrupt;
+    type Error = SVDError;
+    fn parse(tree: &Element) -> Result<Interrupt, SVDError> {
+        if tree.name != "interrupt" {
+            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("interrupt")).into());
+        }
+        let name = tree.get_child_text("name")?;
+        Interrupt::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In interrupt `{}`", name))).map_err(|e| e.into())
+    }
+}
+
+
 
 impl Encode for Interrupt {
     type Error = SVDError;

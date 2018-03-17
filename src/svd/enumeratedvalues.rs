@@ -4,6 +4,7 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 use ElementExt;
+use failure::ResultExt;
 
 use parse;
 use types::{Parse, Encode, new_element};
@@ -29,17 +30,20 @@ impl Parse for EnumeratedValues {
         assert_eq!(tree.name, "enumeratedValues");
 
         Ok(EnumeratedValues {
-            name: tree.get_child_text("name"),
+            name: tree.get_child_text_opt("name")?,
             usage: parse::optional("usage", tree, Usage::parse)?,
             derived_from: tree.attributes
                 .get(&"derivedFrom".to_owned())
                 .map(|s| s.to_owned()),
-            values: tree.children
-                .iter()
-                .filter(|t| t.name == "enumeratedValue")
-                .map(EnumeratedValue::parse)
-                .filter_map(|t| t.ok() )
-                .collect(),
+            values: {
+                let values: Result<Vec<_>,_> = tree.children
+                    .iter()
+                    .filter(|t| t.name == "enumeratedValue")
+                    .enumerate()
+                    .map(|(e,t)| EnumeratedValue::parse(t).context(SVDErrorKind::Other(format!("Parsing enumerated value #{}", e).into())))
+                    .collect();
+                values?
+            },
             _extensible: (),
         })
     }

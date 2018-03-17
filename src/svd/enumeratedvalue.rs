@@ -4,6 +4,7 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 use ElementExt;
+use failure::ResultExt;
 
 use parse;
 use types::{Parse, Encode, new_element};
@@ -19,7 +20,22 @@ pub struct EnumeratedValue {
     // Reserve the right to add more fields to this struct
     pub (crate) _extensible: (),
 }
+impl EnumeratedValue {
+    fn _parse(tree: &Element, name: String) -> Result<EnumeratedValue, SVDError> {
+        Ok(
+            EnumeratedValue {
+                name,
+                description: tree.get_child_text_opt("description")?,
+                // TODO: this .ok() approach is simple, but does not expose errors parsing child objects.
+                // Suggest refactoring all parse::type methods to return result so parse::optional works.
+                value: parse::optional("value", tree, parse::u32)?,
+                is_default: parse::get_child_bool("isDefault", tree).ok(),
+                _extensible: (),
+            },
+        )
+    }
 
+}
 impl Parse for EnumeratedValue {
     type Object = EnumeratedValue;
     type Error = SVDError;
@@ -28,18 +44,8 @@ impl Parse for EnumeratedValue {
         if tree.name != "enumeratedValue" {
             return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("enumeratedValue")).into());
         }
-
-        Ok(
-            EnumeratedValue {
-                name: parse::get_child_string("name", tree)?,
-                description: tree.get_child_text("description"),
-                // TODO: this .ok() approach is simple, but does not expose errors parsing child objects.
-                // Suggest refactoring all parse::type methods to return result so parse::optional works.
-                value: parse::get_child_u32("value", tree).ok(),
-                is_default: parse::get_child_bool("isDefault", tree).ok(),
-                _extensible: (),
-            },
-        )
+        let name = tree.get_child_text("name")?;
+        EnumeratedValue::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In enumerated value `{}`", name))).map_err(|e| e.into())
     }
 }
 

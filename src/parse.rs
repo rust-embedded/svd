@@ -1,27 +1,28 @@
 use xmltree::Element;
-use ElementExt;
+use failure::ResultExt;
 
 use error::*;
 
 // TODO: Should work on &str not Element
 // TODO: `parse::u32` should not hide it's errors, see `BitRange::parse`
-pub fn u32(tree: &Element) -> Option<u32> {
-    let text = try!(tree.text.as_ref());
+pub fn u32(tree: &Element) -> Result<u32,SVDError> {
+    let text = get_text(tree)?;
 
     if text.starts_with("0x") || text.starts_with("0X") {
-        u32::from_str_radix(&text["0x".len()..], 16).ok()
+        u32::from_str_radix(&text["0x".len()..], 16).context(SVDErrorKind::Other(format!("{} invalid", text))).map_err(|e| e.into())
     } else if text.starts_with('#') {
         // Handle strings in the binary form of:
         // #01101x1
         // along with don't care character x (replaced with 0)
-        u32::from_str_radix(&str::replace(&text.to_lowercase()["#".len()..], "x", "0"), 2).ok()
+        u32::from_str_radix(&str::replace(&text.to_lowercase()["#".len()..], "x", "0"), 2).context(SVDErrorKind::Other(format!("{} invalid", text))).map_err(|e| e.into())
     } else if text.starts_with("0b"){
         // Handle strings in the binary form of:
         // 0b01101x1
         // along with don't care character x (replaced with 0)
-        u32::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2).ok()
+        u32::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2).context(SVDErrorKind::Other(format!("{} invalid", text))).map_err(|e| e.into())
+
     } else {
-        text.parse().ok()
+        text.parse::<u32>().context(SVDErrorKind::Other(format!("{} invalid", text))).map_err(|e| e.into())
     }
 }
 
@@ -52,7 +53,9 @@ pub fn dim_index(text: &str) -> Vec<String> {
 /// Returns an none if the child doesn't exist, Ok(Some(e)) if parsing succeeds,
 /// and Err() if parsing fails.
 /// TODO: suspect we should be able to use the Parse trait here
-pub fn optional<'a, T, CB: 'static + Fn(&Element) -> Result<T, SVDError>>(n: &str, e: &'a Element, f: CB) -> Result<Option<T>, SVDError>{
+pub fn optional<'a, T, CB>(n: &str, e: &'a Element, f: CB) -> Result<Option<T>, SVDError>
+    where CB: 'static + Fn(&Element) -> Result<T, SVDError>
+{
      let child = match e.get_child(n) {
         Some(c) => c,
         None => return Ok(None),
@@ -66,11 +69,13 @@ pub fn optional<'a, T, CB: 'static + Fn(&Element) -> Result<T, SVDError>>(n: &st
 
 
 /// Get text contained by an XML Element
-// TODO: This really means that the tag existed but was empty.
 pub fn get_text<'a>(e: &'a Element) -> Result<&'a str, SVDError> {
     match e.text.as_ref() {
         Some(s) => Ok(s),
-        None => Err(SVDErrorKind::MissingChildElement(e.clone(), e.name.clone()).into()),
+        // FIXME: Doesn't look good because SVDErrorKind doesn't format by itself. We already
+        // capture the element and this information can be used for getting the name
+        // This would fix ParseError
+        None => Err(SVDErrorKind::EmptyTag(e.clone(), e.name.clone()).into()),
     }
 }
 
@@ -78,25 +83,14 @@ pub fn get_text<'a>(e: &'a Element) -> Result<&'a str, SVDError> {
 pub fn get_child_elem<'a>(n: &str, e: &'a Element) -> Result<&'a Element, SVDError> {
     match e.get_child(n) {
         Some(s) => Ok(s),
-        None => Err(SVDErrorKind::MissingChildElement(e.clone(), e.name.clone()).into()),
-    }
-}
-
-/// Get the string value from a named child element
-pub fn get_child_string(n: &str, e: &Element) -> Result<String, SVDError> {
-    match e.get_child_text(n) {
-        Some(s) => Ok(String::from(s)),
-        None => Err(SVDErrorKind::MissingChildElement(e.clone(), e.name.clone()).into()),
+        None => Err(SVDErrorKind::MissingTag(e.clone(), e.name.clone()).into()),
     }
 }
 
 /// Get a u32 value from a named child element
 pub fn get_child_u32(n: &str, e: &Element) -> Result<u32, SVDError> {
     let s = get_child_elem(n, e)?;
-    match u32(&s) {
-        Some(u) => Ok(u),
-        None => Err(SVDErrorKind::NonIntegerElement(e.clone()).into())
-    }
+    u32(&s).context(SVDErrorKind::ParseError(e.clone())).map_err(|e| e.into())
 }
 
 /// Get a bool value from a named child element
@@ -104,6 +98,6 @@ pub fn get_child_bool(n: &str, e: &Element) -> Result<bool, SVDError> {
     let s = get_child_elem(n, e)?;
     match bool(s) {
         Some(u) => Ok(u),
-        None => Err(SVDErrorKind::NonBoolElement(e.clone()).into())
+        None => Err(SVDErrorKind::ParseError(e.clone()).into())
     }
 }

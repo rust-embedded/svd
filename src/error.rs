@@ -7,19 +7,20 @@ pub struct SVDError {
     inner: Context<SVDErrorKind>,
 }
 
-// TODO: Expand and make more complex output possible
+// TODO: Expand and make more complex output possible.
+// We can use the `Element` to output name (if available) and etc.
 #[derive(Clone, Debug, PartialEq, Eq, Fail)]
 pub enum SVDErrorKind {
     #[fail(display = "Unknown endianness `{}`", _0)]
     UnknownEndian(String),
     // TODO: Needs context
-    #[fail(display = "Missing or empty tag <{}>", _1)]
-    MissingChildElement(Element, String),
-    // Add TagEmpty error
-    #[fail(display = "Element not Integer")]
-    NonIntegerElement(Element),
-    #[fail(display = "Element not boolean")]
-    NonBoolElement(Element),
+    // TODO: Better name
+    #[fail(display = "Expected a <{}> tag, found none", _1)]
+    MissingTag(Element, String),
+    #[fail(display = "Expected content in <{}> tag, found none", _1)]
+    EmptyTag(Element, String),
+    #[fail(display = "ParseError")]
+    ParseError(Element),
     #[fail(display = "NameMismatch")]
     NameMismatch(Element),
     #[fail(display = "unknown access variant found")]

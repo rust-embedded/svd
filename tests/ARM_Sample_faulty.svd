@@ -61,7 +61,7 @@
             <field>
               <name>EN</name>
               <description>Enable</description>
-              <bitRange>[0:0 ]</bitRange>
+              <bitRange>[0:0]</bitRange>
               <access>read-write</access>
               <enumeratedValues>
                 <enumeratedValue>
