@@ -112,11 +112,14 @@ impl Device {
             } else {
                 None
             },
-            peripherals: try!(tree.get_child("peripherals"))
-                .children
-                .iter()
-                .map(Peripheral::parse)
-                .collect(),
+            peripherals: {
+                let ps: Result<Vec<_>, _> = parse::get_child_elem("peripherals", tree)?
+                    .children
+                    .iter()
+                    .map(Peripheral::parse)
+                    .collect();
+                ps?
+            },
             defaults: Defaults::parse(tree),
             _extensible: (),
         })
@@ -150,10 +153,10 @@ impl Peripheral {
         derived
     }
 
-    fn parse(tree: &Element) -> Peripheral {
+    fn parse(tree: &Element) -> Result<Peripheral, SVDError> {
         assert_eq!(tree.name, "peripheral");
 
-        Peripheral {
+        Ok(Peripheral {
             name: try!(tree.get_child_text("name")),
             group_name: tree.get_child_text("groupName"),
             description: tree.get_child_text("description"),
@@ -165,16 +168,19 @@ impl Peripheral {
                 .filter(|i| i.is_some() )
                 .map(|i| i.unwrap() )
                 .collect::<Vec<_>>(),
-            registers: tree.get_child("registers").map(|rs| {
-                rs.children.iter().map(cluster_register_parse).collect()
-            }),
+            registers: if let Some(registers) = tree.get_child("registers") {
+                let rs: Result<Vec<_>, _> = registers.children.iter().map(cluster_register_parse).collect();
+                Some(rs?)
+            } else {
+                None
+            },
             derived_from: tree.attributes.get("derivedFrom").map(
                 |s| {
                     s.to_owned()
                 },
             ),
             _extensible: (),
-        }
+        })
     }
 }
 
@@ -221,21 +227,21 @@ pub struct RegisterClusterArrayInfo {
     pub dim_index: Option<Vec<String>>,
 }
 
-fn cluster_register_parse(tree: &Element) -> Either<Register, Cluster> {
+fn cluster_register_parse(tree: &Element) -> Result<Either<Register, Cluster>, SVDError> {
     if tree.name == "register" {
-        Either::Left(Register::parse(tree))
+        Ok(Either::Left(Register::parse(tree)?))
     } else if tree.name == "cluster" {
-        Either::Right(Cluster::parse(tree))
+        Ok(Either::Right(Cluster::parse(tree)?))
     } else {
         unreachable!()
     }
 }
 
 impl Cluster {
-    fn parse(tree: &Element) -> Cluster {
+    fn parse(tree: &Element) -> Result<Cluster, SVDError> {
         assert_eq!(tree.name, "cluster");
 
-        let info = ClusterInfo::parse(tree);
+        let info = ClusterInfo::parse(tree)?;
 
         if tree.get_child("dimIncrement").is_some() {
             let array_info = RegisterClusterArrayInfo::parse(tree);
@@ -243,9 +249,9 @@ impl Cluster {
             if let Some(ref indices) = array_info.dim_index {
                 assert_eq!(array_info.dim as usize, indices.len())
             }
-            Cluster::Array(info, array_info)
+            Ok(Cluster::Array(info, array_info))
         } else {
-            Cluster::Single(info)
+            Ok(Cluster::Single(info))
         }
     }
 }
@@ -285,8 +291,8 @@ impl Deref for Register {
 }
 
 impl ClusterInfo {
-    fn parse(tree: &Element) -> ClusterInfo {
-        ClusterInfo {
+    fn parse(tree: &Element) -> Result<ClusterInfo, SVDError> {
+        Ok(ClusterInfo {
             name: try!(tree.get_child_text("name")),
             description: try!(tree.get_child_text("description")),
             header_struct_name: tree.get_child_text("headerStructName"),
@@ -300,19 +306,22 @@ impl ClusterInfo {
                 tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
             reset_mask:
                 tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
-            children: tree.children
-                .iter()
-                .filter(|t| t.name == "register" || t.name == "cluster")
-                .map(cluster_register_parse)
-                .collect(),
+            children: {
+                let children: Result<Vec<_>,_> = tree.children
+                    .iter()
+                    .filter(|t| t.name == "register" || t.name == "cluster")
+                    .map(cluster_register_parse)
+                    .collect();
+                children?
+            },
             _extensible: (),
-        }
+        })
     }
 }
 
 impl RegisterInfo {
-    fn parse(tree: &Element) -> RegisterInfo {
-        RegisterInfo {
+    fn parse(tree: &Element) -> Result<RegisterInfo, SVDError> {
+        Ok(RegisterInfo {
             name: try!(tree.get_child_text("name")),
             alternate_group: tree.get_child_text("alternateGroup"),
             alternate_register: tree.get_child_text("alternateRegister"),
@@ -327,12 +336,18 @@ impl RegisterInfo {
                 tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
             reset_mask:
                 tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
-            fields:
-                tree.get_child("fields")
-                    .map(|fs| fs.children.iter().map(Field::parse).collect()),
+            fields: {
+                if let Some(fields) = tree.get_child("fields") {
+                        let fs: Result<Vec<_>, _> =
+                            fields.children.iter().map(Field::parse).collect();
+                        Some(fs?)
+                } else {
+                    None
+                }
+            },
             write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse).unwrap(),
             _extensible: (),
-        }
+        })
     }
 }
 
@@ -351,10 +366,10 @@ impl RegisterClusterArrayInfo {
 }
 
 impl Register {
-    fn parse(tree: &Element) -> Register {
+    fn parse(tree: &Element) -> Result<Register, SVDError> {
         assert_eq!(tree.name, "register");
 
-        let info = RegisterInfo::parse(tree);
+        let info = RegisterInfo::parse(tree)?;
 
         if tree.get_child("dimIncrement").is_some() {
             let array_info = RegisterClusterArrayInfo::parse(tree);
@@ -362,9 +377,9 @@ impl Register {
             if let Some(ref indices) = array_info.dim_index {
                 assert_eq!(array_info.dim as usize, indices.len())
             }
-            Register::Array(info, array_info)
+            Ok(Register::Array(info, array_info))
         } else {
-            Register::Single(info)
+            Ok(Register::Single(info))
         }
     }
 }
@@ -384,13 +399,13 @@ pub struct Field {
 }
 
 impl Field {
-    fn parse(tree: &Element) -> Field {
+    fn parse(tree: &Element) -> Result<Field, SVDError> {
         assert_eq!(tree.name, "field");
 
-        Field {
+        Ok(Field {
             name: try!(tree.get_child_text("name")),
             description: tree.get_child_text("description"),
-            bit_range: BitRange::parse(tree).unwrap(),
+            bit_range: BitRange::parse(tree)?,
             access: parse::optional("access", tree, Access::parse).unwrap(),
             enumerated_values: tree.children
                 .iter()
@@ -399,7 +414,7 @@ impl Field {
                 .collect::<Vec<_>>(),
             write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse).unwrap(),
             _extensible: (),
-        }
+        })
     }
 }
 

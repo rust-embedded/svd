@@ -3,6 +3,8 @@ use ElementExt;
 
 use error::*;
 
+// TODO: Should work on &str not Element
+// TODO: `parse::u32` should not hide it's errors, see `BitRange::parse`
 pub fn u32(tree: &Element) -> Option<u32> {
     let text = try!(tree.text.as_ref());
 
@@ -68,7 +70,7 @@ pub fn optional<'a, T, CB: 'static + Fn(&Element) -> Result<T, SVDError>>(n: &st
 pub fn get_text<'a>(e: &'a Element) -> Result<&'a str, SVDError> {
     match e.text.as_ref() {
         Some(s) => Ok(s),
-        None => Err(SVDErrorKind::MissingChildElement(e.clone()).into()),
+        None => Err(SVDErrorKind::MissingChildElement(e.clone(), e.name.clone()).into()),
     }
 }
 
@@ -76,7 +78,7 @@ pub fn get_text<'a>(e: &'a Element) -> Result<&'a str, SVDError> {
 pub fn get_child_elem<'a>(n: &str, e: &'a Element) -> Result<&'a Element, SVDError> {
     match e.get_child(n) {
         Some(s) => Ok(s),
-        None => Err(SVDErrorKind::MissingChildElement(e.clone()).into()),
+        None => Err(SVDErrorKind::MissingChildElement(e.clone(), e.name.clone()).into()),
     }
 }
 
@@ -84,7 +86,7 @@ pub fn get_child_elem<'a>(n: &str, e: &'a Element) -> Result<&'a Element, SVDErr
 pub fn get_child_string(n: &str, e: &Element) -> Result<String, SVDError> {
     match e.get_child_text(n) {
         Some(s) => Ok(String::from(s)),
-        None => Err(SVDErrorKind::MissingChildElement(e.clone()).into()),
+        None => Err(SVDErrorKind::MissingChildElement(e.clone(), e.name.clone()).into()),
     }
 }
 

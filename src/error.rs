@@ -13,8 +13,8 @@ pub enum SVDErrorKind {
     #[fail(display = "Unknown endianness `{}`", _0)]
     UnknownEndian(String),
     // TODO: Needs context
-    #[fail(display = "Missing or empty tag <>")]
-    MissingChildElement(Element),
+    #[fail(display = "Missing or empty tag <{}>", _1)]
+    MissingChildElement(Element, String),
     // Add TagEmpty error
     #[fail(display = "Element not Integer")]
     NonIntegerElement(Element),
@@ -24,8 +24,8 @@ pub enum SVDErrorKind {
     NameMismatch(Element),
     #[fail(display = "unknown access variant found")]
     UnknownAccessType(Element),
-    #[fail(display = "Bit range invalid")]
-    InvalidBitRange(Element),
+    #[fail(display = "Bit range invalid, {:?}", _1)]
+    InvalidBitRange(Element, InvalidBitRange),
     #[fail(display = "Unknown write constraint")]
     UnknownWriteConstraint(Element),
     #[fail(display = "Multiple wc found")]
@@ -34,6 +34,16 @@ pub enum SVDErrorKind {
     UnknownUsageVariant(Element),
     #[fail(display = "Not enumerated value")]
     NotEnumeratedValue(Element),
+    #[fail(display = "{}", _0)]
+    Other(String),
+}
+
+// TODO: Consider making into an Error
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum InvalidBitRange {
+    Syntax,
+    ParseError,
+    MsbLsb,
 }
 
 impl Fail for SVDError {
