@@ -27,6 +27,7 @@
 extern crate either;
 extern crate xmltree;
 
+
 use std::ops::Deref;
 
 use either::Either;
@@ -37,7 +38,8 @@ use svd::cpu::Cpu;
 use svd::interrupt::Interrupt;
 use svd::access::Access;
 use svd::bitrange::BitRange;
-use svd::writeconstraint::{WriteConstraint};
+use svd::writeconstraint::WriteConstraint;
+use svd::enumeratedvalues::EnumeratedValues;
 
 macro_rules! try {
     ($e:expr) => {
@@ -375,7 +377,7 @@ impl Field {
             enumerated_values: tree.children
                 .iter()
                 .filter(|t| t.name == "enumeratedValues")
-                .map(EnumeratedValues::parse)
+                .filter_map(|t| EnumeratedValues::parse(t).ok() )
                 .collect::<Vec<_>>(),
             write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse).unwrap(),
             _extensible: (),
@@ -409,86 +411,5 @@ impl Defaults {
             access: parse::optional("access", tree, Access::parse).unwrap(),
             _extensible: (),
         }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Usage {
-    Read,
-    Write,
-    ReadWrite,
-}
-
-impl Usage {
-    fn parse(tree: &Element) -> Usage {
-        let text = try!(tree.text.as_ref());
-
-        match &text[..] {
-            "read" => Usage::Read,
-            "write" => Usage::Write,
-            "read-write" => Usage::ReadWrite,
-            _ => panic!("unknown usage variant: {}", text),
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct EnumeratedValues {
-    pub name: Option<String>,
-    pub usage: Option<Usage>,
-    pub derived_from: Option<String>,
-    pub values: Vec<EnumeratedValue>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
-
-impl EnumeratedValues {
-    fn parse(tree: &Element) -> EnumeratedValues {
-        assert_eq!(tree.name, "enumeratedValues");
-
-        EnumeratedValues {
-            name: tree.get_child_text("name"),
-            usage: tree.get_child("usage").map(Usage::parse),
-            derived_from: tree.attributes
-                .get(&"derivedFrom".to_owned())
-                .map(|s| s.to_owned()),
-            values: tree.children
-                .iter()
-                .filter_map(EnumeratedValue::parse)
-                .collect(),
-            _extensible: (),
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct EnumeratedValue {
-    pub name: String,
-    pub description: Option<String>,
-    pub value: Option<u32>,
-    pub is_default: Option<bool>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
-
-impl EnumeratedValue {
-    fn parse(tree: &Element) -> Option<EnumeratedValue> {
-        if tree.name != "enumeratedValue" {
-            return None;
-        }
-
-        Some(
-            EnumeratedValue {
-                name: try!(tree.get_child_text("name")),
-                description: tree.get_child_text("description"),
-                value: tree.get_child("value").map(|t| try!(parse::u32(t))),
-                is_default: tree.get_child_text("isDefault").map(
-                    |t| {
-                        try!(t.parse())
-                    },
-                ),
-                _extensible: (),
-            },
-        )
     }
 }
