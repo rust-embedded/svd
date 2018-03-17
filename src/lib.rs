@@ -154,11 +154,17 @@ impl Peripheral {
         derived
     }
 
+    
     fn parse(tree: &Element) -> Result<Peripheral, SVDError> {
-        assert_eq!(tree.name, "peripheral");
-
+        if tree.name != "peripheral" {
+            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("peripheral")).into());
+        }
+        let name = tree.get_child_text("name").ok_or(SVDErrorKind::Other(format!("missing text")))?; // FIXME: get_child_text should return an Result
+        Peripheral::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In peripheral `{}`", name))).map_err(|e| e.into())
+    }
+    fn _parse(tree: &Element, name: String) -> Result<Peripheral, SVDError> {
         Ok(Peripheral {
-            name: try!(tree.get_child_text("name")),
+            name,
             group_name: tree.get_child_text("groupName"),
             description: tree.get_child_text("description"),
             base_address: try!(parse::u32(try!(tree.get_child("baseAddress")))),
@@ -322,8 +328,12 @@ impl ClusterInfo {
 
 impl RegisterInfo {
     fn parse(tree: &Element) -> Result<RegisterInfo, SVDError> {
+        let name = tree.get_child_text("name").ok_or(SVDErrorKind::Other(format!("missing text")))?; // FIXME: get_child_text should return an Result
+        RegisterInfo::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In register `{}`", name))).map_err(|e| e.into())
+    }
+    fn _parse(tree: &Element, name: String) -> Result<RegisterInfo, SVDError> {
         Ok(RegisterInfo {
-            name: try!(tree.get_child_text("name")),
+            name,
             alternate_group: tree.get_child_text("alternateGroup"),
             alternate_register: tree.get_child_text("alternateRegister"),
             derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
