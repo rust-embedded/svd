@@ -2,9 +2,9 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use ::parse;
-use ::types::{Parse, Encode};
-use ::error::SVDError;
+use parse;
+use types::{Parse, Encode};
+use error::*;
 
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -25,7 +25,7 @@ impl Parse for Usage {
             "read" => Ok(Usage::Read),
             "write" => Ok(Usage::Write),
             "read-write" => Ok(Usage::ReadWrite),
-            _ => Err(SVDError::UnknownUsageVariant(tree.clone())),
+            _ => Err(SVDErrorKind::UnknownUsageVariant(tree.clone()).into()),
         }
     }
 }

@@ -1,9 +1,9 @@
 
 use xmltree::Element;
 
-use ::parse;
-use ::types::{Parse, new_element};
-use ::error::SVDError;
+use parse;
+use types::{Parse, new_element};
+use error::*;
 
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -56,7 +56,7 @@ impl Parse for BitRange {
                 })
             )
         } else {
-            return Err(SVDError::InvalidBitRange(tree.clone()))   
+            return Err(SVDErrorKind::InvalidBitRange(tree.clone()).into())   
         };
 
         Ok(BitRange {

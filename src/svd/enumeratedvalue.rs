@@ -5,9 +5,9 @@ use std::collections::HashMap;
 use xmltree::Element;
 use ElementExt;
 
-use ::parse;
-use ::types::{Parse, Encode, new_element};
-use ::error::SVDError;
+use parse;
+use types::{Parse, Encode, new_element};
+use error::*;
 
 
 #[derive(Clone, Debug, PartialEq)]
@@ -26,7 +26,7 @@ impl Parse for EnumeratedValue {
 
     fn parse(tree: &Element) -> Result<EnumeratedValue, SVDError> {
         if tree.name != "enumeratedValue" {
-            return Err(SVDError::NotEnumeratedValue(tree.clone()));
+            return Err(SVDErrorKind::NotEnumeratedValue(tree.clone()).into());
         }
 
         Ok(
@@ -53,7 +53,7 @@ impl Encode for EnumeratedValue {
             children: vec![new_element("name", Some(self.name.clone()))],
             text: None,
         };
-
+        // FIXME: Use if let some pattern here
         match self.description {
             Some(ref d) => {
                 let s = (*d).clone();

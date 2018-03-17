@@ -5,7 +5,7 @@ use xmltree::Element;
 
 use parse;
 use types::{Parse, Encode};
-use error::SVDError;
+use error::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Endian {
@@ -27,7 +27,7 @@ impl Parse for Endian {
             "big" => Ok(Endian::Big),
             "selectable" => Ok(Endian::Selectable),
             "other" => Ok(Endian::Other),
-            _ => Err(SVDError::UnknownEndian),
+            s => Err(SVDErrorKind::UnknownEndian(s.into()).into()),
         }
     }
 }

@@ -3,9 +3,9 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use ::parse;
-use ::types::{Parse, Encode, new_element};
-use ::error::SVDError;
+use parse;
+use types::{Parse, Encode, new_element};
+use error::*;
 
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -40,10 +40,10 @@ impl Parse for WriteConstraint {
                 "range" => {
                     Ok(WriteConstraint::Range(WriteConstraintRange::parse(parse::get_child_elem(field.as_ref(), tree)?)?))
                 }
-                _ => Err(SVDError::UnknownWriteConstraint(tree.clone())),
+                _ => Err(SVDErrorKind::UnknownWriteConstraint(tree.clone()).into()),
             }
         } else {
-            Err(SVDError::MoreThanOneWriteConstraint(tree.clone()))
+            Err(SVDErrorKind::MoreThanOneWriteConstraint(tree.clone()).into())
         }
     }
 }

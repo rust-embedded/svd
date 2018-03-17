@@ -2,9 +2,9 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use ::parse;
-use ::types::{Parse, Encode, new_element};
-use ::error::SVDError;
+use parse;
+use types::{Parse, Encode, new_element};
+use error::*;
 
 
 #[derive(Clone, Debug, PartialEq)]

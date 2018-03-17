@@ -26,7 +26,8 @@
 
 extern crate either;
 extern crate xmltree;
-
+#[macro_use]
+extern crate failure;
 
 
 

@@ -3,10 +3,10 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use ::parse;
-use ::types::{Parse, Encode, new_element};
-use ::error::SVDError;
-use ::svd::endian::Endian;
+use parse;
+use types::{Parse, Encode, new_element};
+use error::*;
+use svd::endian::Endian;
 
 
 #[derive(Clone, Debug, PartialEq)]
@@ -29,7 +29,7 @@ impl Parse for Cpu {
 
     fn parse(tree: &Element) -> Result<Cpu, SVDError> {
         if tree.name != "cpu" {
-            return Err(SVDError::NameMismatch(tree.clone()));
+            return Err(SVDErrorKind::NameMismatch(tree.clone()).into());
         }
 
         Ok(Cpu {

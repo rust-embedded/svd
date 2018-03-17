@@ -5,11 +5,11 @@ use std::collections::HashMap;
 use xmltree::Element;
 use ElementExt;
 
-use ::parse;
-use ::types::{Parse, Encode, new_element};
-use ::error::SVDError;
-use ::svd::usage::Usage;
-use ::svd::enumeratedvalue::EnumeratedValue;
+use parse;
+use types::{Parse, Encode, new_element};
+use error::*;
+use svd::usage::Usage;
+use svd::enumeratedvalue::EnumeratedValue;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnumeratedValues {

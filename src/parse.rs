@@ -1,7 +1,7 @@
 use xmltree::Element;
 use ElementExt;
 
-use error::SVDError;
+use error::*;
 
 pub fn u32(tree: &Element) -> Option<u32> {
     let text = try!(tree.text.as_ref());
@@ -64,10 +64,11 @@ pub fn optional<'a, T, CB: 'static + Fn(&Element) -> Result<T, SVDError>>(n: &st
 
 
 /// Get text contained by an XML Element
+// TODO: This really means that the tag existed but was empty.
 pub fn get_text<'a>(e: &'a Element) -> Result<&'a str, SVDError> {
     match e.text.as_ref() {
         Some(s) => Ok(s),
-        None => Err(SVDError::MissingChildElement(e.clone())),
+        None => Err(SVDErrorKind::MissingChildElement(e.clone()).into()),
     }
 }
 
@@ -75,7 +76,7 @@ pub fn get_text<'a>(e: &'a Element) -> Result<&'a str, SVDError> {
 pub fn get_child_elem<'a>(n: &str, e: &'a Element) -> Result<&'a Element, SVDError> {
     match e.get_child(n) {
         Some(s) => Ok(s),
-        None => Err(SVDError::MissingChildElement(e.clone())),
+        None => Err(SVDErrorKind::MissingChildElement(e.clone()).into()),
     }
 }
 
@@ -83,7 +84,7 @@ pub fn get_child_elem<'a>(n: &str, e: &'a Element) -> Result<&'a Element, SVDErr
 pub fn get_child_string(n: &str, e: &Element) -> Result<String, SVDError> {
     match e.get_child_text(n) {
         Some(s) => Ok(String::from(s)),
-        None => Err(SVDError::MissingChildElement(e.clone())),
+        None => Err(SVDErrorKind::MissingChildElement(e.clone()).into()),
     }
 }
 
@@ -92,7 +93,7 @@ pub fn get_child_u32(n: &str, e: &Element) -> Result<u32, SVDError> {
     let s = get_child_elem(n, e)?;
     match u32(&s) {
         Some(u) => Ok(u),
-        None => Err(SVDError::NonIntegerElement(e.clone()))
+        None => Err(SVDErrorKind::NonIntegerElement(e.clone()).into())
     }
 }
 
@@ -101,6 +102,6 @@ pub fn get_child_bool(n: &str, e: &Element) -> Result<bool, SVDError> {
     let s = get_child_elem(n, e)?;
     match bool(s) {
         Some(u) => Ok(u),
-        None => Err(SVDError::NonBoolElement(e.clone()))
+        None => Err(SVDErrorKind::NonBoolElement(e.clone()).into())
     }
 }

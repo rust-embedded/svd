@@ -1,9 +1,9 @@
 
 use xmltree::Element;
 
-use ::parse;
-use ::types::{Parse, Encode, new_element};
-use ::error::SVDError;
+use parse;
+use types::{Parse, Encode, new_element};
+use error::*;
 
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -28,7 +28,7 @@ impl Parse for Access {
             "read-writeOnce" => Ok(Access::ReadWriteOnce),
             "write-only" => Ok(Access::WriteOnly),
             "writeOnce" => Ok(Access::WriteOnce),
-            _ => Err(SVDError::UnknownAccessType(tree.clone())),
+            _ => Err(SVDErrorKind::UnknownAccessType(tree.clone()).into()),
         }
     }
 }
