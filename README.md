@@ -5,6 +5,8 @@
 
 > A CMSIS-SVD file parser
 
+japaric/svd is currently undergoing a major refactor (see: [#46](https://github.com/japaric/svd/issues/46) and the [refactor](https://github.com/japaric/svd/tree/refactor) branch for progress), please beware that any new PRs against master will probably have to be reimplemented once this is merged.
+
 ## ["Documentation"](https://docs.rs/svd-parser)
 
 ## License
