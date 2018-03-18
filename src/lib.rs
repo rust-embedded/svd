@@ -160,9 +160,9 @@ pub struct Peripheral {
 impl Peripheral {
     pub fn derive_from(&self, other: &Peripheral) -> Peripheral {
         let mut derived = self.clone();
-        derived.group_name = derived.group_name.or(other.group_name.clone());
-        derived.description = derived.description.or(other.description.clone());
-        derived.registers = derived.registers.or(other.registers.clone());
+        derived.group_name = derived.group_name.or_else(|| other.group_name.clone());
+        derived.description = derived.description.or_else(|| other.description.clone());
+        derived.registers = derived.registers.or_else(|| other.registers.clone());
         if derived.interrupt.is_empty() {
             derived.interrupt = other.interrupt.clone();
         }
