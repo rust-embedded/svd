@@ -39,8 +39,8 @@ pub fn test<T: Parse<Error=SVDError, Object=T> + Encode<Error=SVDError> + Debug 
     for t in tests {
         let tree1 = Element::parse(t.1.as_bytes()).unwrap();
         let elem = T::parse(&tree1).unwrap();
-        assert_eq!(elem, t.0, "Parsing `{:?}` expected `{:?}`", t.1, t.0);
+        assert_eq!(elem, t.0, "Error parsing xml` (mismatch between parsed and expected)");
         let tree2 = elem.encode().unwrap();
-        assert_eq!(tree1, tree2, "Encoding {:?} expected {:?}", t.1, t.0);
+        assert_eq!(tree1, tree2, "Error encoding xml (mismatch between encoded and original)");
     };
 }

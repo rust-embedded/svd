@@ -41,9 +41,11 @@ pub mod svd;
 use svd::cpu::Cpu;
 use svd::interrupt::Interrupt;
 use svd::access::Access;
-use svd::bitrange::BitRange;
-use svd::writeconstraint::WriteConstraint;
-use svd::enumeratedvalues::EnumeratedValues;
+//use svd::bitrange::BitRange;
+//use svd::writeconstraint::WriteConstraint;
+//use svd::enumeratedvalues::EnumeratedValues;
+use svd::registerinfo::RegisterInfo;
+use svd::defaults::Defaults;
 
 macro_rules! try {
     ($e:expr) => {
@@ -136,7 +138,7 @@ impl Device {
                     .collect();
                 ps?
             },
-            defaults: Defaults::parse(tree),
+            defaults: Defaults::parse(tree)?,
             _extensible: (),
         })
     }
@@ -225,24 +227,6 @@ pub struct ClusterInfo {
     _extensible: (),
 }
 
-#[derive(Clone, Debug)]
-pub struct RegisterInfo {
-    pub name: String,
-    pub alternate_group: Option<String>,
-    pub alternate_register: Option<String>,
-    pub derived_from: Option<String>,
-    pub description: String,
-    pub address_offset: u32,
-    pub size: Option<u32>,
-    pub access: Option<Access>,
-    pub reset_value: Option<u32>,
-    pub reset_mask: Option<u32>,
-    /// `None` indicates that the `<fields>` node is not present
-    pub fields: Option<Vec<Field>>,
-    pub write_constraint: Option<WriteConstraint>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
 
 #[derive(Clone, Debug)]
 pub struct RegisterClusterArrayInfo {
@@ -342,40 +326,6 @@ impl ClusterInfo {
     }
 }
 
-impl RegisterInfo {
-    fn parse(tree: &Element) -> Result<RegisterInfo, SVDError> {
-        let name = tree.get_child_text("name")?;
-        RegisterInfo::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In register `{}`", name))).map_err(|e| e.into())
-    }
-    fn _parse(tree: &Element, name: String) -> Result<RegisterInfo, SVDError> {
-        Ok(RegisterInfo {
-            name,
-            alternate_group: tree.get_child_text_opt("alternateGroup")?,
-            alternate_register: tree.get_child_text_opt("alternateRegister")?,
-            derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
-            description: tree.get_child_text("description")?,
-            address_offset:
-                parse::get_child_u32("addressOffset", tree)?,
-            size: tree.get_child("size").map(|t| try!(parse::u32(t))),
-            access: parse::optional("access", tree, Access::parse)?,
-            reset_value:
-                parse::optional("resetValue", tree, parse::u32)?,
-            reset_mask:
-                parse::optional("resetMask", tree, parse::u32)?,
-            fields: {
-                if let Some(fields) = tree.get_child("fields") {
-                        let fs: Result<Vec<_>, _> =
-                            fields.children.iter().map(Field::parse).collect();
-                        Some(fs?)
-                } else {
-                    None
-                }
-            },
-            write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse)?,
-            _extensible: (),
-        })
-    }
-}
 
 impl RegisterClusterArrayInfo {
     fn parse(tree: &Element) -> Result<RegisterClusterArrayInfo, SVDError> {
@@ -412,71 +362,4 @@ impl Register {
 
 
 
-#[derive(Clone, Debug)]
-pub struct Field {
-    pub name: String,
-    pub description: Option<String>,
-    pub bit_range: BitRange,
-    pub access: Option<Access>,
-    pub enumerated_values: Vec<EnumeratedValues>,
-    pub write_constraint: Option<WriteConstraint>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
 
-impl Field {
-    fn parse(tree: &Element) -> Result<Field, SVDError> {
-        if tree.name != "field" {
-            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("field")).into());
-        }
-        let name = tree.get_child_text("name")?;
-        Field::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In field `{}`", name))).map_err(|e| e.into())
-    }
-    fn _parse(tree: &Element, name: String) -> Result<Field, SVDError> {
-        Ok(Field {
-            name,
-            description: tree.get_child_text_opt("description")?,
-            bit_range: BitRange::parse(tree)?,
-            access: parse::optional("access", tree, Access::parse)?,
-            enumerated_values: {
-                let values: Result<Vec<_>,_> = tree.children
-                    .iter()
-                    .filter(|t| t.name == "enumeratedValues")
-                    .map(EnumeratedValues::parse)
-                    .collect();
-                values?
-            },
-            write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse)?,
-            _extensible: (),
-        })
-    }
-}
-
-
-
-
-
-/// Register default properties
-#[derive(Clone, Copy, Debug)]
-pub struct Defaults {
-    pub size: Option<u32>,
-    pub reset_value: Option<u32>,
-    pub reset_mask: Option<u32>,
-    pub access: Option<Access>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
-
-impl Defaults {
-    fn parse(tree: &Element) -> Defaults {
-        Defaults {
-            size: tree.get_child("size").map(|t| try!(parse::u32(t))),
-            reset_value:
-                tree.get_child("resetValue").map(|t| try!(parse::u32(t))),
-            reset_mask:
-                tree.get_child("resetMask").map(|t| try!(parse::u32(t))),
-            access: parse::optional("access", tree, Access::parse).unwrap(),
-            _extensible: (),
-        }
-    }
-}

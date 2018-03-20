@@ -5,7 +5,7 @@ use error::*;
 
 // TODO: Should work on &str not Element
 // TODO: `parse::u32` should not hide it's errors, see `BitRange::parse`
-pub fn u32(tree: &Element) -> Result<u32,SVDError> {
+pub fn u32(tree: &Element) -> Result<u32, SVDError> {
     let text = get_text(tree)?;
 
     if text.starts_with("0x") || text.starts_with("0X") {
