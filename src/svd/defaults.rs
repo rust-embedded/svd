@@ -85,7 +85,7 @@ mod tests {
             </mock>
         ",
         );
-
+        
         let expected = Defaults {
             size: Some(0xaabbccdd),
             reset_value: Some(0x11223344),

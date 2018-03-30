@@ -37,3 +37,5 @@ impl Encode for RegisterClusterArrayInfo {
         Err(SVDError::from(SVDErrorKind::EncodeNotImplemented(String::from("RegisterClusterArrayInfo"))))
     }
 }
+
+//TODO: tests

@@ -78,10 +78,11 @@ impl Cpu {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use types::test;
 
     #[test]
     fn decode_encode() {
-        let types = vec![
+        let tests = vec![
             (
                 Cpu {
                     name: String::from("EFM32JG12B500F512GM48"),
@@ -93,7 +94,7 @@ mod tests {
                     has_vendor_systick: false,
                     _extensible: (),
                 },
-                String::from("
+                "
                         <cpu>
                             <name>EFM32JG12B500F512GM48</name>  
                             <revision>5.1.1</revision>
@@ -103,16 +104,10 @@ mod tests {
                             <nvicPrioBits>8</nvicPrioBits>
                             <vendorSystickConfig>false</vendorSystickConfig>
                         </cpu>
-                ")
+                "
             ),
         ];
 
-        for (a, s) in types {
-            let tree1 = Element::parse(s.as_bytes()).unwrap();
-            let value = Cpu::parse(&tree1).unwrap();
-            assert_eq!(value, a, "Parsing `{}` expected `{:?}`", s, a);
-            let tree2 = value.encode().unwrap();
-            assert_eq!(tree1, tree2, "Encoding {:?} expected {}", a, s);
-        }
+        test::<Cpu>(&tests[..]);
     }
 }

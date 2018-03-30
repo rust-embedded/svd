@@ -55,22 +55,17 @@ impl Encode for Endian {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use types::test;
 
     #[test]
     fn decode_encode() {
-        let types = vec![
-            (Endian::Little, String::from("<endian>little</endian>")),
-            (Endian::Big, String::from("<endian>big</endian>")),
-            (Endian::Selectable,String::from("<endian>selectable</endian>")),
-            (Endian::Other, String::from("<endian>other</endian>")),
+        let tests = vec![
+            (Endian::Little, "<endian>little</endian>"),
+            (Endian::Big, "<endian>big</endian>"),
+            (Endian::Selectable,"<endian>selectable</endian>"),
+            (Endian::Other, "<endian>other</endian>"),
         ];
 
-        for (e, s) in types {
-            let tree1 = Element::parse(s.as_bytes()).unwrap();
-            let endian = Endian::parse(&tree1).unwrap();
-            assert_eq!(endian, e, "Parsing `{}` expected `{:?}`", s, e);
-            let tree2 = endian.encode().unwrap();
-            assert_eq!(tree1, tree2, "Encoding {:?} expected {}", e, s);
-        }
+        test::<Endian>(&tests[..]);
     }
 }

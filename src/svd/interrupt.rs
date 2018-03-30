@@ -61,32 +61,27 @@ impl Encode for Interrupt {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use types::test;    
 
     #[test]
     fn decode_encode() {
-        let types = vec![
+        let tests = vec![
             (
                 Interrupt {
                     name: String::from("test"),
                     description: Some(String::from("description")),
                     value: 14,
                 },
-                String::from("
+                "
                 <interrupt>
                     <name>test</name>
                     <description>description</description>
                     <value>14</value>
-                </interrupt>",
-                )
+                </interrupt>"
+                
             ),
         ];
 
-        for (a, s) in types {
-            let tree1 = Element::parse(s.as_bytes()).unwrap();
-            let v = Interrupt::parse(&tree1).unwrap();
-            assert_eq!(v, a, "Parsing `{}` expected `{:?}`", s, a);
-            let tree2 = v.encode().unwrap();
-            assert_eq!(tree1, tree2, "Encoding {:?} expected {}", a, s);
-        }
+        test::<Interrupt>(&tests[..]);
     }
 }

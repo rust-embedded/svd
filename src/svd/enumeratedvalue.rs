@@ -95,36 +95,31 @@ impl Encode for EnumeratedValue {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use types::test;
 
     #[test]
-    fn decode_encode() {
-        let example = String::from(
+    fn decode_encode() {          
+        let tests = vec![
+            (EnumeratedValue {
+                name: String::from("WS0"),
+                description: Some(String::from(
+                    "Zero wait-states inserted in fetch or read transfers",
+                )),
+                value: Some(0),
+                is_default: Some(true),
+                _extensible: (),
+            },
             "
-            <enumeratedValue>
-                <name>WS0</name>
-                <description>Zero wait-states inserted in fetch or read transfers</description>
-                <value>0x00000000</value>
-                <isDefault>true</isDefault>
-            </enumeratedValue>
-        ",
-        );
-        let expected = EnumeratedValue {
-            name: String::from("WS0"),
-            description: Some(String::from(
-                "Zero wait-states inserted in fetch or read transfers",
-            )),
-            value: Some(0),
-            is_default: Some(true),
-            _extensible: (),
-        };
+                <enumeratedValue>
+                    <name>WS0</name>
+                    <description>Zero wait-states inserted in fetch or read transfers</description>
+                    <value>0x00000000</value>
+                    <isDefault>true</isDefault>
+                </enumeratedValue>
+            ")
+        ];
 
-        let tree1 = Element::parse(example.as_bytes()).unwrap();
-
-        let parsed = EnumeratedValue::parse(&tree1).unwrap();
-        assert_eq!(parsed, expected, "Parsing tree failed");
-
-        let tree2 = parsed.encode().unwrap();
-        assert_eq!(tree1, tree2, "Encoding value failed");
+        test::<EnumeratedValue>(&tests[..]);
     }
 }
 

@@ -52,35 +52,33 @@ impl Encode for Access {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use types::test;
 
     #[test]
     fn decode_encode() {
-        let types = vec![
-            (Access::ReadOnly, String::from("<access>read-only</access>")),
+        let tests = vec![
+            (
+                Access::ReadOnly, 
+                "<access>read-only</access>"
+            ),
             (
                 Access::ReadWrite,
-                String::from("<access>read-write</access>")
+                "<access>read-write</access>"
             ),
             (
                 Access::ReadWriteOnce,
-                String::from("<access>read-writeOnce</access>")
+                "<access>read-writeOnce</access>"
             ),
             (
                 Access::WriteOnly,
-                String::from("<access>write-only</access>")
+                "<access>write-only</access>"
             ),
             (
                 Access::WriteOnce,
-                String::from("<access>writeOnce</access>")
+                "<access>writeOnce</access>"
             ),
         ];
 
-        for (a, s) in types {
-            let tree1 = Element::parse(s.as_bytes()).unwrap();
-            let access = Access::parse(&tree1).unwrap();
-            assert_eq!(access, a, "Parsing `{}` expected `{:?}`", s, a);
-            let tree2 = access.encode().unwrap();
-            assert_eq!(tree1, tree2, "Encoding {:?} expected {}", a, s);
-        }
+        test::<Access>(&tests[..]);
     }
 }

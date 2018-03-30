@@ -62,3 +62,5 @@ impl Encode for Register {
         }
     }
 }
+
+// TODO: tests 
