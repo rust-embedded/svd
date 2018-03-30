@@ -6,7 +6,6 @@ use ElementExt;
 
 use types::{Parse, Encode, new_element};
 use error::SVDError;
-use parse;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AddressBlock {
@@ -21,8 +20,8 @@ impl Parse for AddressBlock {
 
     fn parse(tree: &Element) -> Result<AddressBlock, SVDError> {
         Ok(AddressBlock {
-            offset: parse::get_child_u32("offset", tree)?,
-            size: parse::get_child_u32("size", tree)?,
+            offset: tree.get_child_u32("offset")?,
+            size: tree.get_child_u32("size")?,
             usage: tree.get_child_text("usage")?,
         })
     }

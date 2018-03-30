@@ -3,9 +3,8 @@ use std::collections::HashMap;
 use xmltree::Element;
 use ElementExt;
 
-use types::{Parse, Encode, new_element};
 use parse;
-
+use types::{Parse, Encode, new_element};
 use ::error::SVDError;
 use ::svd::cpu::Cpu;
 use ::svd::peripheral::Peripheral;
@@ -36,12 +35,12 @@ impl Parse for Device {
             name: tree.get_child_text("name")?,
             schema_version: tree.attributes.get("schemaVersion").unwrap().clone(),
             cpu: parse::optional("cpu", tree, Cpu::parse)?,
-            version: parse::optional("version", tree, parse::get_text)?,
-            description: parse::optional("description", tree, parse::get_text)?,
+            version: tree.get_child_text_opt("version")?,
+            description: tree.get_child_text_opt("description")?,
             address_unit_bits: parse::optional("addressUnitBits", tree, parse::u32)?,
             width: None,
             peripherals: {
-                let ps: Result<Vec<_>, _> = parse::get_child_elem("peripherals", tree)?
+                let ps: Result<Vec<_>, _> = tree.get_child_elem("peripherals")?
                     .children
                     .iter()
                     .map(Peripheral::parse)

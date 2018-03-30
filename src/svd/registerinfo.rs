@@ -52,7 +52,7 @@ impl RegisterInfo {
             derived_from: tree.get_child_text_opt("derivedFrom")?,
             description: tree.get_child_text("description")?,
             address_offset:
-                parse::get_child_u32("addressOffset", tree)?,
+                tree.get_child_u32("addressOffset")?,
             size: parse::optional("size", tree, parse::u32)?,
             access: parse::optional("access", tree, Access::parse)?,
             reset_value:

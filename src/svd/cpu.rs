@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use xmltree::Element;
 
 use ElementExt;
-use parse;
 use types::{Parse, Encode, new_element};
 use error::*;
 use svd::endian::Endian;
@@ -36,11 +35,11 @@ impl Parse for Cpu {
         Ok(Cpu {
             name: tree.get_child_text("name")?,
             revision: tree.get_child_text("revision")?,
-            endian: Endian::parse(parse::get_child_elem("endian", tree)?)?,
-            mpu_present: parse::get_child_bool("mpuPresent", tree)?,
-            fpu_present: parse::get_child_bool("fpuPresent", tree)?,
-            nvic_priority_bits: parse::get_child_u32("nvicPrioBits", tree)?,
-            has_vendor_systick: parse::get_child_bool("vendorSystickConfig", tree)?,
+            endian: Endian::parse(tree.get_child_elem("endian")?)?,
+            mpu_present: tree.get_child_bool("mpuPresent")?,
+            fpu_present: tree.get_child_bool("fpuPresent")?,
+            nvic_priority_bits: tree.get_child_u32("nvicPrioBits")?,
+            has_vendor_systick: tree.get_child_bool("vendorSystickConfig")?,
             _extensible: (),
         })
     }

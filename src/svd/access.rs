@@ -1,7 +1,7 @@
 
 use xmltree::Element;
 
-use parse;
+use ElementExt;
 use types::{Parse, Encode, new_element};
 use error::*;
 
@@ -20,7 +20,7 @@ impl Parse for Access {
     type Error = SVDError;
 
     fn parse(tree: &Element) -> Result<Access, SVDError> {
-        let text = parse::get_text(tree)?;
+        let text = tree.get_text()?;
 
         match &text[..] {
             "read-only" => Ok(Access::ReadOnly),

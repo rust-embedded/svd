@@ -1,5 +1,6 @@
 use xmltree::Element;
 use failure::ResultExt;
+use ElementExt;
 
 use error::*;
 
@@ -12,7 +13,7 @@ macro_rules! try {
 // TODO: Should work on &str not Element
 // TODO: `parse::u32` should not hide it's errors, see `BitRange::parse`
 pub fn u32(tree: &Element) -> Result<u32, SVDError> {
-    let text = get_text(tree)?;
+    let text = tree.get_text()?;
 
     if text.starts_with("0x") || text.starts_with("0X") {
         u32::from_str_radix(&text["0x".len()..], 16).context(SVDErrorKind::Other(format!("{} invalid", text))).map_err(|e| e.into())
@@ -73,37 +74,3 @@ pub fn optional<'a, T, CB>(n: &str, e: &'a Element, f: CB) -> Result<Option<T>, 
     }
 }
 
-
-/// Get text contained by an XML Element
-pub fn get_text(e: &Element) -> Result<String, SVDError> {
-    match e.text.as_ref() {
-        Some(s) => Ok(s.clone()),
-        // FIXME: Doesn't look good because SVDErrorKind doesn't format by itself. We already
-        // capture the element and this information can be used for getting the name
-        // This would fix ParseError
-        None => Err(SVDErrorKind::EmptyTag(e.clone(), e.name.clone()).into()),
-    }
-}
-
-/// Get a named child element from an XML Element
-pub fn get_child_elem<'a>(n: &str, e: &'a Element) -> Result<&'a Element, SVDError> {
-    match e.get_child(n) {
-        Some(s) => Ok(s),
-        None => Err(SVDErrorKind::MissingTag(e.clone(), e.name.clone()).into()),
-    }
-}
-
-/// Get a u32 value from a named child element
-pub fn get_child_u32(n: &str, e: &Element) -> Result<u32, SVDError> {
-    let s = get_child_elem(n, e)?;
-    u32(&s).context(SVDErrorKind::ParseError(e.clone())).map_err(|e| e.into())
-}
-
-/// Get a bool value from a named child element
-pub fn get_child_bool(n: &str, e: &Element) -> Result<bool, SVDError> {
-    let s = get_child_elem(n, e)?;
-    match bool(s) {
-        Some(u) => Ok(u),
-        None => Err(SVDErrorKind::ParseError(e.clone()).into())
-    }
-}

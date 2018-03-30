@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
 use xmltree::Element;
+use ElementExt;
 
-use parse;
 use types::{Parse, Encode};
 use error::*;
-
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Usage {
@@ -19,7 +18,7 @@ impl Parse for Usage {
     type Error = SVDError;
 
     fn parse(tree: &Element) -> Result<Usage, SVDError> {
-        let text = parse::get_text(tree)?;
+        let text = tree.get_text()?;
 
         match &text[..] {
             "read" => Ok(Usage::Read),

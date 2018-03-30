@@ -1,8 +1,9 @@
 
 use xmltree::Element;
 
-use types::{Parse, Encode, new_element};
 use parse;
+use types::{Parse, Encode, new_element};
+use ElementExt;
 
 use ::error::{SVDError, SVDErrorKind};
 
@@ -19,10 +20,10 @@ impl Parse for RegisterClusterArrayInfo {
 
     fn parse(tree: &Element) -> Result<RegisterClusterArrayInfo, SVDError> {
         Ok(RegisterClusterArrayInfo {
-            dim: parse::get_child_u32("dim", tree)?,
-            dim_increment: parse::get_child_u32("dimIncrement", tree)?,
+            dim: tree.get_child_u32("dim")?,
+            dim_increment: tree.get_child_u32("dimIncrement")?,
             dim_index: parse::optional("dimIndex", tree, |c| {
-                parse::dim_index(&parse::get_text(c)?)
+                parse::dim_index(&c.get_text()?)
             })?,
         })
     }

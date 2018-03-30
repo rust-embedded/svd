@@ -36,7 +36,7 @@ impl Parse for ClusterInfo {
             description: tree.get_child_text("description")?,
             header_struct_name: tree.get_child_text_opt("headerStructName")?,
             address_offset: 
-                parse::get_child_u32("addressOffset", tree)?,
+                tree.get_child_u32("addressOffset")?,
             size: parse::optional("size", tree, parse::u32)?,
             //access: tree.get_child("access").map(|t| Access::parse(t).ok() ),
             access: parse::optional("access", tree, Access::parse)?,

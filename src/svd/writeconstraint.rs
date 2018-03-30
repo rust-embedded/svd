@@ -2,8 +2,8 @@
 use std::collections::HashMap;
 
 use xmltree::Element;
+use ElementExt;
 
-use parse;
 use types::{Parse, Encode, new_element};
 use error::*;
 
@@ -32,13 +32,13 @@ impl Parse for WriteConstraint {
             // Write constraint can only be one of the following
             match field.as_ref() {
                 "writeAsRead" => {
-                    Ok(WriteConstraint::WriteAsRead(parse::get_child_bool(field.as_ref(), tree)?))
+                    Ok(WriteConstraint::WriteAsRead(tree.get_child_bool(field.as_ref())?))
                 }
                 "useEnumeratedValues" => {
-                    Ok(WriteConstraint::UseEnumeratedValues(parse::get_child_bool(field.as_ref(), tree)?))
+                    Ok(WriteConstraint::UseEnumeratedValues(tree.get_child_bool(field.as_ref())?))
                 }
                 "range" => {
-                    Ok(WriteConstraint::Range(WriteConstraintRange::parse(parse::get_child_elem(field.as_ref(), tree)?)?))
+                    Ok(WriteConstraint::Range(WriteConstraintRange::parse(tree.get_child_elem(field.as_ref())?)?))
                 }
                 _ => Err(SVDErrorKind::UnknownWriteConstraint(tree.clone()).into()),
             }
@@ -73,8 +73,8 @@ impl Parse for WriteConstraintRange {
 
     fn parse(tree: &Element) -> Result<WriteConstraintRange, SVDError> {
         Ok(WriteConstraintRange {  
-            min: parse::get_child_u32("minimum", tree)?,
-            max: parse::get_child_u32("maximum", tree)?,
+            min: tree.get_child_u32("minimum")?,
+            max: tree.get_child_u32("maximum")?,
         })
     }
 }

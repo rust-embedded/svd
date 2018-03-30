@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use parse;
+use ElementExt;
 use types::{Parse, Encode};
 use error::*;
 
@@ -20,7 +20,7 @@ impl Parse for Endian {
     type Error = SVDError;
 
     fn parse(tree: &Element) -> Result<Endian, SVDError> {
-        let text = parse::get_text(tree)?;
+        let text = tree.get_text()?;
 
         match &text[..] {
             "little" => Ok(Endian::Little),

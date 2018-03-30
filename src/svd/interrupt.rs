@@ -5,7 +5,6 @@ use failure::ResultExt;
 
 use ElementExt;
 
-use parse;
 use types::{Parse, Encode, new_element};
 use error::*;
 
@@ -22,7 +21,7 @@ impl Interrupt {
         Ok(Interrupt {
             name,
             description: tree.get_child_text_opt("description")?,
-            value: parse::get_child_u32("value", tree)?,
+            value: tree.get_child_u32("value")?,
         })
     }
 }
@@ -38,8 +37,6 @@ impl Parse for Interrupt {
         Interrupt::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In interrupt `{}`", name))).map_err(|e| e.into())
     }
 }
-
-
 
 impl Encode for Interrupt {
     type Error = SVDError;

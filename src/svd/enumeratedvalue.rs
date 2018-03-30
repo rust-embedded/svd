@@ -2,11 +2,11 @@
 
 use std::collections::HashMap;
 
+use parse;
 use xmltree::Element;
 use ElementExt;
 use failure::ResultExt;
 
-use parse;
 use types::{Parse, Encode, new_element};
 use error::*;
 
@@ -29,7 +29,7 @@ impl EnumeratedValue {
                 // TODO: this .ok() approach is simple, but does not expose errors parsing child objects.
                 // Suggest refactoring all parse::type methods to return result so parse::optional works.
                 value: parse::optional("value", tree, parse::u32)?,
-                is_default: parse::get_child_bool("isDefault", tree).ok(),
+                is_default: tree.get_child_bool("isDefault").ok(),
                 _extensible: (),
             },
         )
