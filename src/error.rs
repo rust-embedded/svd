@@ -39,6 +39,8 @@ pub enum SVDErrorKind {
     NotExpectedTag(Element, String),
     #[fail(display = "Invalid RegisterCluster (expected register or cluster), found {}", _1)]
     InvalidRegisterCluster(Element, String),
+    #[fail(display = "Invalid modifiedWriteValues variant, found {}", _1)]
+    InvalidModifiedWriteValues(Element, String),
     #[fail(display = "encoding method not implemented for svd object {}", _0)]
     EncodeNotImplemented(String),
     #[fail(display = "Error parsing SVD XML")]
