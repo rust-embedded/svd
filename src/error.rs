@@ -1,7 +1,9 @@
 
-use xmltree::Element;
+use xmltree::{Element, ParseError};
 use failure::{Backtrace, Context, Fail};
 use std::fmt::{self, Display};
+
+
 #[derive(Debug)]
 pub struct SVDError {
     inner: Context<SVDErrorKind>,
@@ -35,6 +37,10 @@ pub enum SVDErrorKind {
     UnknownUsageVariant(Element),
     #[fail(display = "Expected a <{}>, found ...", _1)]
     NotExpectedTag(Element, String),
+    #[fail(display = "encoding method not implemented for svd object {}", _0)]
+    EncodeNotImplemented(String),
+    #[fail(display = "Error parsing SVD XML")]
+    FileParseError,
     // FIXME: Should not be used, only for prototyping
     #[fail(display = "{}", _0)]
     Other(String),
@@ -79,5 +85,11 @@ impl From<SVDErrorKind> for SVDError {
 impl From<Context<SVDErrorKind>> for SVDError {
     fn from(inner: Context<SVDErrorKind>) -> SVDError {
         SVDError { inner }
+    }
+}
+
+impl From<ParseError> for SVDError {
+    fn from(e: ParseError) -> SVDError {
+        SVDError { inner: e.context(SVDErrorKind::FileParseError) }
     }
 }

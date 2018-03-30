@@ -29,32 +29,13 @@ extern crate xmltree;
 #[macro_use]
 extern crate failure;
 
-
-
-use std::ops::Deref;
-
-use either::Either;
 use xmltree::Element;
-use failure::ResultExt;
 
 pub mod svd;
-use svd::cpu::Cpu;
-use svd::interrupt::Interrupt;
-use svd::access::Access;
-//use svd::bitrange::BitRange;
-//use svd::writeconstraint::WriteConstraint;
-//use svd::enumeratedvalues::EnumeratedValues;
-use svd::registerinfo::RegisterInfo;
-use svd::defaults::Defaults;
-
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
-}
-
+use svd::device::Device;
 pub mod error;
-use error::*;
+use error::{SVDError, SVDErrorKind};
+
 pub mod parse;
 pub mod types;
 use types::Parse;
@@ -62,7 +43,8 @@ use types::Parse;
 
 /// Parses the contents of a SVD file (XML)
 pub fn parse(xml: &str) -> Result<Device, SVDError> {
-    Device::parse(xml)
+    let tree = Element::parse(xml.as_bytes())?;
+    Device::parse(&tree)
 }
 
 trait ElementExt {
@@ -104,261 +86,8 @@ impl ElementExt for Element {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct Device {
-    pub name: String,
-    pub cpu: Option<Cpu>,
-    pub peripherals: Vec<Peripheral>,
-    pub defaults: Defaults,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
-
-impl Device {
-    /// Parses a SVD file
-    ///
-    /// # Panics
-    ///
-    /// If the input is an invalid SVD file (yay, no error handling)
-    pub fn parse(svd: &str) -> Result<Device, SVDError> {
-        let tree = &try!(Element::parse(svd.as_bytes()));
-
-        Ok(Device {
-            name: try!(tree.get_child_text("name")),
-            cpu: if let Some(res) = tree.get_child("cpu").map(Cpu::parse) {
-                Some(res?)
-            } else {
-                None
-            },
-            peripherals: {
-                let ps: Result<Vec<_>, _> = parse::get_child_elem("peripherals", tree)?
-                    .children
-                    .iter()
-                    .map(Peripheral::parse)
-                    .collect();
-                ps?
-            },
-            defaults: Defaults::parse(tree)?,
-            _extensible: (),
-        })
-    }
-}
 
 
-#[derive(Clone, Debug)]
-pub struct Peripheral {
-    pub name: String,
-    pub group_name: Option<String>,
-    pub description: Option<String>,
-    pub base_address: u32,
-    pub interrupt: Vec<Interrupt>,
-    /// `None` indicates that the `<registers>` node is not present
-    pub registers: Option<Vec<Either<Register, Cluster>>>,
-    pub derived_from: Option<String>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
-
-impl Peripheral {
-    pub fn derive_from(&self, other: &Peripheral) -> Peripheral {
-        let mut derived = self.clone();
-        derived.group_name = derived.group_name.or_else(|| other.group_name.clone());
-        derived.description = derived.description.or_else(|| other.description.clone());
-        derived.registers = derived.registers.or_else(|| other.registers.clone());
-        if derived.interrupt.is_empty() {
-            derived.interrupt = other.interrupt.clone();
-        }
-        derived
-    }
-
-    
-    fn parse(tree: &Element) -> Result<Peripheral, SVDError> {
-        if tree.name != "peripheral" {
-            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("peripheral")).into());
-        }
-        let name = tree.get_child_text("name")?;
-        Peripheral::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In peripheral `{}`", name))).map_err(|e| e.into())
-    }
-    fn _parse(tree: &Element, name: String) -> Result<Peripheral, SVDError> {
-        Ok(Peripheral {
-            name,
-            group_name: tree.get_child_text_opt("groupName")?,
-            description: tree.get_child_text_opt("description")?,
-            base_address: try!(parse::u32(try!(tree.get_child("baseAddress")))),
-            interrupt: {
-                let interrupt: Result<Vec<_>,_> = tree.children
-                    .iter()
-                    .filter(|t| t.name == "interrupt")
-                    .enumerate()
-                    .map(|(e,i)| Interrupt::parse(i).context(SVDErrorKind::Other(format!("Parsing interrupt #{}", e).into())))
-                    .collect();
-                interrupt?
-            },
-            registers: if let Some(registers) = tree.get_child("registers") {
-                let rs: Result<Vec<_>, _> = registers.children.iter().map(cluster_register_parse).collect();
-                Some(rs?)
-            } else {
-                None
-            },
-            derived_from: tree.attributes.get("derivedFrom").map(
-                |s| {
-                    s.to_owned()
-                },
-            ),
-            _extensible: (),
-        })
-    }
-}
-
-
-
-#[derive(Clone, Debug)]
-pub struct ClusterInfo {
-    pub name: String,
-    pub description: String,
-    pub header_struct_name: Option<String>,
-    pub address_offset: u32,
-    pub size: Option<u32>,
-    pub access: Option<Access>,
-    pub reset_value: Option<u32>,
-    pub reset_mask: Option<u32>,
-    pub children: Vec<Either<Register, Cluster>>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
-}
-
-
-#[derive(Clone, Debug)]
-pub struct RegisterClusterArrayInfo {
-    pub dim: u32,
-    pub dim_increment: u32,
-    pub dim_index: Option<Vec<String>>,
-}
-
-fn cluster_register_parse(tree: &Element) -> Result<Either<Register, Cluster>, SVDError> {
-    if tree.name == "register" {
-        Ok(Either::Left(Register::parse(tree)?))
-    } else if tree.name == "cluster" {
-        Ok(Either::Right(Cluster::parse(tree)?))
-    } else {
-        unreachable!()
-    }
-}
-
-impl Cluster {
-    fn parse(tree: &Element) -> Result<Cluster, SVDError> {
-        assert_eq!(tree.name, "cluster");
-
-        let info = ClusterInfo::parse(tree)?;
-
-        if tree.get_child("dimIncrement").is_some() {
-            let array_info = RegisterClusterArrayInfo::parse(tree)?;
-            assert!(info.name.contains("%s"));
-            if let Some(ref indices) = array_info.dim_index {
-                assert_eq!(array_info.dim as usize, indices.len())
-            }
-            Ok(Cluster::Array(info, array_info))
-        } else {
-            Ok(Cluster::Single(info))
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub enum Cluster {
-    Single(ClusterInfo),
-    Array(ClusterInfo, RegisterClusterArrayInfo),
-}
-
-impl Deref for Cluster {
-    type Target = ClusterInfo;
-
-    fn deref(&self) -> &ClusterInfo {
-        match *self {
-            Cluster::Single(ref info) => info,
-            Cluster::Array(ref info, _) => info,
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub enum Register {
-    Single(RegisterInfo),
-    Array(RegisterInfo, RegisterClusterArrayInfo),
-}
-
-impl Deref for Register {
-    type Target = RegisterInfo;
-
-    fn deref(&self) -> &RegisterInfo {
-        match *self {
-            Register::Single(ref info) => info,
-            Register::Array(ref info, _) => info,
-        }
-    }
-}
-
-impl ClusterInfo {
-    fn parse(tree: &Element) -> Result<ClusterInfo, SVDError> {
-        Ok(ClusterInfo {
-            name: tree.get_child_text("name")?, // TODO: Handle naming of cluster
-            description: tree.get_child_text("description")?,
-            header_struct_name: tree.get_child_text_opt("headerStructName")?,
-            address_offset: 
-                parse::get_child_u32("addressOffset", tree)?,
-            size: tree.get_child("size").map(|t| try!(parse::u32(t))),
-            //access: tree.get_child("access").map(|t| Access::parse(t).ok() ),
-            access: parse::optional("access", tree, Access::parse)?,
-            reset_value:
-                parse::optional("resetValue", tree, parse::u32)?,
-            reset_mask:
-                parse::optional("resetMask", tree, parse::u32)?,
-            children: {
-                let children: Result<Vec<_>,_> = tree.children
-                    .iter()
-                    .filter(|t| t.name == "register" || t.name == "cluster")
-                    .map(cluster_register_parse)
-                    .collect();
-                children?
-            },
-            _extensible: (),
-        })
-    }
-}
-
-
-impl RegisterClusterArrayInfo {
-    fn parse(tree: &Element) -> Result<RegisterClusterArrayInfo, SVDError> {
-        Ok(RegisterClusterArrayInfo {
-            dim: tree.get_child_text("dim")?.parse::<u32>().context(SVDErrorKind::Other(format!("<dim> invalid")))?,
-            dim_increment: try!(tree.get_child("dimIncrement").map(|t| {
-                try!(parse::u32(t))
-            })),
-            dim_index: tree.get_child("dimIndex").map(|c| {
-                parse::dim_index(try!(c.text.as_ref())) // TODO: Use provided functions in ElementExt
-            }),
-        })
-    }
-}
-
-impl Register {
-    fn parse(tree: &Element) -> Result<Register, SVDError> {
-        assert_eq!(tree.name, "register");
-
-        let info = RegisterInfo::parse(tree)?;
-
-        if tree.get_child("dimIncrement").is_some() {
-            let array_info = RegisterClusterArrayInfo::parse(tree)?;
-            assert!(info.name.contains("%s"));
-            if let Some(ref indices) = array_info.dim_index {
-                assert_eq!(array_info.dim as usize, indices.len())
-            }
-            Ok(Register::Array(info, array_info))
-        } else {
-            Ok(Register::Single(info))
-        }
-    }
-}
 
 
 

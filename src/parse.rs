@@ -3,6 +3,12 @@ use failure::ResultExt;
 
 use error::*;
 
+macro_rules! try {
+    ($e:expr) => {
+        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
+    }
+}
+
 // TODO: Should work on &str not Element
 // TODO: `parse::u32` should not hide it's errors, see `BitRange::parse`
 pub fn u32(tree: &Element) -> Result<u32, SVDError> {
@@ -35,15 +41,15 @@ pub fn bool(tree: &Element) -> Option<bool> {
     }
 }
 
-pub fn dim_index(text: &str) -> Vec<String> {
+pub fn dim_index(text: &str) -> Result<Vec<String>, SVDError> {
     if text.contains('-') {
         let mut parts = text.splitn(2, '-');
         let start = try!(try!(parts.next()).parse::<u32>());
         let end = try!(try!(parts.next()).parse::<u32>()) + 1;
 
-        (start..end).map(|i| i.to_string()).collect()
+        Ok((start..end).map(|i| i.to_string()).collect())
     } else if text.contains(',') {
-        text.split(',').map(|s| s.to_string()).collect()
+        Ok(text.split(',').map(|s| s.to_string()).collect())
     } else {
         unreachable!()
     }
@@ -69,9 +75,9 @@ pub fn optional<'a, T, CB>(n: &str, e: &'a Element, f: CB) -> Result<Option<T>, 
 
 
 /// Get text contained by an XML Element
-pub fn get_text<'a>(e: &'a Element) -> Result<&'a str, SVDError> {
+pub fn get_text(e: &Element) -> Result<String, SVDError> {
     match e.text.as_ref() {
-        Some(s) => Ok(s),
+        Some(s) => Ok(s.clone()),
         // FIXME: Doesn't look good because SVDErrorKind doesn't format by itself. We already
         // capture the element and this information can be used for getting the name
         // This would fix ParseError
