@@ -1,17 +1,14 @@
 
 
 use xmltree::Element;
-use either::Either;
 use ElementExt;
 
 use types::{Parse, Encode, new_element};
 use parse;
 
 use ::error::{SVDError, SVDErrorKind};
-use ::svd::register::Register;
-use ::svd::cluster::Cluster;
 use ::svd::access::Access;
-use ::svd::registercluster::cluster_register_parse;
+use ::svd::registercluster::RegisterCluster;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ClusterInfo {
@@ -23,7 +20,7 @@ pub struct ClusterInfo {
     pub access: Option<Access>,
     pub reset_value: Option<u32>,
     pub reset_mask: Option<u32>,
-    pub children: Vec<Either<Register, Cluster>>,
+    pub children: Vec<RegisterCluster>,
     // Reserve the right to add more fields to this struct
     _extensible: (),
 }
@@ -51,7 +48,7 @@ impl Parse for ClusterInfo {
                 let children: Result<Vec<_>,_> = tree.children
                     .iter()
                     .filter(|t| t.name == "register" || t.name == "cluster")
-                    .map(cluster_register_parse)
+                    .map(RegisterCluster::parse)
                     .collect();
                 children?
             },

@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use xmltree::Element;
-use either::Either;
 
 use parse;
 use ElementExt;
@@ -10,11 +9,9 @@ use failure::ResultExt;
 use types::{Parse, Encode, new_element};
 
 use ::error::{SVDError, SVDErrorKind};
-use ::svd::register::Register;
 use ::svd::interrupt::Interrupt;
-use ::svd::cluster::Cluster;
 use ::svd::addressblock::AddressBlock;
-use ::svd::registercluster::cluster_register_parse;
+use ::svd::registercluster::RegisterCluster;
 
 #[derive(Clone, Debug)]
 pub struct Peripheral {
@@ -27,7 +24,7 @@ pub struct Peripheral {
     pub address_block: Option<AddressBlock>,
     pub interrupt: Vec<Interrupt>,
     /// `None` indicates that the `<registers>` node is not present
-    pub registers: Option<Vec<Either<Register, Cluster>>>,
+    pub registers: Option<Vec<RegisterCluster>>,
     pub derived_from: Option<String>,
     // Reserve the right to add more fields to this struct
     _extensible: (),
@@ -77,7 +74,7 @@ impl Peripheral {
                 interrupt?
             },
             registers: if let Some(registers) = tree.get_child("registers") {
-                let rs: Result<Vec<_>, _> = registers.children.iter().map(cluster_register_parse).collect();
+                let rs: Result<Vec<_>, _> = registers.children.iter().map(RegisterCluster::parse).collect();
                 Some(rs?)
             } else {
                 None
@@ -159,11 +156,7 @@ impl Encode for Peripheral {
         match self.registers {
             Some(ref v) => {
                 let children: Result<Vec<_>, _>= v.iter()
-                    .map(|&ref e| if e.is_left() {
-                        e.clone().left().unwrap().encode()
-                    } else {
-                        e.clone().right().unwrap().encode()
-                    }).collect();
+                    .map(|&ref e| e.encode() ).collect();
 
                 elem.children.push(Element {
                     name: String::from("registers"),
