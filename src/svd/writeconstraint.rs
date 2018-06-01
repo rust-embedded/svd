@@ -59,7 +59,7 @@ impl Encode for WriteConstraint {
         };
 
         Ok(Element {
-            name: String::from("WriteConstraint"),
+            name: String::from("writeConstraint"),
             attributes: HashMap::new(),
             children: vec![v],
             text: None,
@@ -105,15 +105,15 @@ mod tests {
         let tests = vec![
             (
                 WriteConstraint::WriteAsRead(true),
-                "<WriteConstraint><writeAsRead>true</writeAsRead></WriteConstraint>"
+                "<writeConstraint><writeAsRead>true</writeAsRead></writeConstraint>"
             ),
             (
                 WriteConstraint::UseEnumeratedValues(true),
-                "<WriteConstraint><useEnumeratedValues>true</useEnumeratedValues></WriteConstraint>"
+                "<writeConstraint><useEnumeratedValues>true</useEnumeratedValues></writeConstraint>"
             ),
             (
                 WriteConstraint::Range(WriteConstraintRange{min: 1, max: 10}),
-                "<WriteConstraint><range><minimum>0x00000001</minimum><maximum>0x0000000a</maximum></range></WriteConstraint>"
+                "<writeConstraint><range><minimum>0x00000001</minimum><maximum>0x0000000a</maximum></range></writeConstraint>"
             ),
         ];
         

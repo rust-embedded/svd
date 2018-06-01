@@ -41,9 +41,9 @@ pub mod parse;
 pub mod types;
 use types::Parse;
 
-
 /// Parses the contents of a SVD file (XML)
 pub fn parse(xml: &str) -> Result<Device, SVDError> {
+    let xml = trim_utf8_bom(xml);
     let tree = Element::parse(xml.as_bytes())?;
     Device::parse(&tree)
 }
@@ -128,9 +128,26 @@ impl ElementExt for Element {
     }
 }
 
+/// Return the &str trimmed UTF-8 BOM if the input &str contains the BOM.
+fn trim_utf8_bom(s: &str) -> &str {
+    if s.len() > 2 && s.as_bytes().starts_with(b"\xef\xbb\xbf") {
+        &s[3..]
+    } else {
+        s
+    }
+}
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::str;
 
-
-
-
+    #[test]
+    fn test_trim_utf8_bom_from_str() {
+        // UTF-8 BOM + "xyz"
+        let bom_str = str::from_utf8(b"\xef\xbb\xbfxyz").unwrap();
+        assert_eq!("xyz", trim_utf8_bom(bom_str));
+        assert_eq!("xyz", trim_utf8_bom("xyz"));
+    }
+}
 

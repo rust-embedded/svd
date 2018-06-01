@@ -19,3 +19,4 @@ pub mod registercluster;
 pub mod registerclusterarrayinfo;
 pub mod peripheral;
 pub mod device;
+pub mod modifiedwritevalues;

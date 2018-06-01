@@ -14,6 +14,7 @@ use ::svd::bitrange::BitRange;
 use ::svd::access::Access;
 use ::svd::enumeratedvalues::EnumeratedValues;
 use ::svd::writeconstraint::WriteConstraint;
+use ::svd::modifiedwritevalues::ModifiedWriteValues;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Field {
@@ -23,6 +24,7 @@ pub struct Field {
     pub access: Option<Access>,
     pub enumerated_values: Vec<EnumeratedValues>,
     pub write_constraint: Option<WriteConstraint>,
+    pub modified_write_values: Option<ModifiedWriteValues>,
     // Reserve the right to add more fields to this struct
     pub(crate) _extensible: (),
 }
@@ -55,6 +57,7 @@ impl Field {
                 values?
             },
             write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse)?,
+            modified_write_values: parse::optional("modifiedWriteValues", tree, ModifiedWriteValues::parse)?,
             _extensible: (),
         })
     }
@@ -88,6 +91,13 @@ impl Encode for Field {
         elem.children.append(&mut enumerated_values?);
 
         match self.write_constraint {
+            Some(ref v) => {
+                elem.children.push(v.encode()?);
+            }
+            None => (),
+        };
+
+        match self.modified_write_values {
             Some(ref v) => {
                 elem.children.push(v.encode()?);
             }
@@ -138,6 +148,7 @@ mod tests {
                         },
                     ],
                     write_constraint: None,
+                    modified_write_values: None,
                     _extensible: (),
                 },
                 "

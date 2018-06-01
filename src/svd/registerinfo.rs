@@ -11,6 +11,7 @@ use error::*;
 use ::svd::access::Access;
 use ::svd::field::Field;
 use ::svd::writeconstraint::WriteConstraint;
+use ::svd::modifiedwritevalues::ModifiedWriteValues;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RegisterInfo {
@@ -27,6 +28,7 @@ pub struct RegisterInfo {
     /// `None` indicates that the `<fields>` node is not present
     pub fields: Option<Vec<Field>>,
     pub write_constraint: Option<WriteConstraint>,
+    pub modified_write_values: Option<ModifiedWriteValues>,
     // Reserve the right to add more fields to this struct
     pub(crate) _extensible: (),
 }
@@ -62,13 +64,18 @@ impl RegisterInfo {
             fields: {
                 if let Some(fields) = tree.get_child("fields") {
                         let fs: Result<Vec<_>, _> =
-                            fields.children.iter().map(Field::parse).collect();
+                            fields.children
+                            .iter()
+                            .enumerate()
+                            .map(|(e,t)| Field::parse(t).context(SVDErrorKind::Other(format!("Parsing field #{}", e).into())))
+                            .collect();
                         Some(fs?)
                 } else {
                     None
                 }
             },
             write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse)?,
+            modified_write_values: parse::optional("modifiedWriteValues", tree, ModifiedWriteValues::parse)?,
             _extensible: (),
         })
     }
@@ -175,6 +182,13 @@ impl Encode for RegisterInfo {
             None => (),
         };
 
+        match self.modified_write_values {
+            Some(ref v) => {
+                elem.children.push(v.encode()?);
+            }
+            None => (),
+        };
+
         Ok(elem)
     }
 }
@@ -213,10 +227,12 @@ mod tests {
                             access: Some(Access::ReadWrite),
                             enumerated_values: Vec::new(),
                             write_constraint: None,
+                            modified_write_values: None,
                             _extensible: (),
                         },
                     ]),
                     write_constraint: None,
+                    modified_write_values: Some(ModifiedWriteValues::OneToToggle),
                     _extensible: (),
                 },"
             <register>
@@ -239,6 +255,7 @@ mod tests {
                         <access>read-write</access>
                     </field>
                 </fields>
+                <modifiedWriteValues>oneToToggle</modifiedWriteValues>
             </register>
             "
             ),
