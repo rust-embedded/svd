@@ -50,4 +50,4 @@ impl Encode for RegisterCluster {
     }
 }
 
-// TODO: tests
+// TODO: test RegisterCluster encode and decode

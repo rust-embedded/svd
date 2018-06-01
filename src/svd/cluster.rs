@@ -50,8 +50,10 @@ impl Parse for Cluster {
 
 impl Encode for Cluster {
     type Error = SVDError;
-    // TODO: encoding here
+    // TODO: support Cluster encoding
     fn encode(&self) -> Result<Element, SVDError> {
         Err(SVDError::from(SVDErrorKind::EncodeNotImplemented(String::from("RegisterClusterArrayInfo"))))
     }
 }
+
+// TODO: test Cluster encoding and decoding

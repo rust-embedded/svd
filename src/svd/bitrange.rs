@@ -78,8 +78,7 @@ impl Parse for BitRange {
 }
 
 impl BitRange {
-    // Encode method differs as it acts on a set of possible children
-    // TODO: create interface or decide how to better do this
+    // TODO: Encode method differs from Encode trait as it acts on a set of possible children, create an interface or decide how to better do this
     pub fn encode(&self) -> Result<Vec<Element>, SVDError> {
         match self.range_type {
             BitRangeType::BitRange => {

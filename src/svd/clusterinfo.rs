@@ -60,10 +60,11 @@ impl Parse for ClusterInfo {
 impl Encode for ClusterInfo {
     type Error = SVDError;
     fn encode(&self) -> Result<Element, SVDError> {
-        // TODO: encoding here
+        // TODO: support ClusterInfo encoding
         let _ = new_element("fake", None);
 
         Err(SVDError::from(SVDErrorKind::EncodeNotImplemented(String::from("RegisterClusterArrayInfo"))))
     }
 }
 
+// TODO: test ClusterInfo encode and decode

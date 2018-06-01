@@ -181,3 +181,5 @@ impl Encode for Peripheral {
         Ok(elem)
     }
 }
+
+// TODO: add Peripheral encode / decode tests

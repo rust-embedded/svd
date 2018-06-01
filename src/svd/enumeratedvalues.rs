@@ -143,6 +143,7 @@ mod tests {
             _extensible: (),
         };
 
+        // TODO: move to test! macro
         let tree1 = Element::parse(example.as_bytes()).unwrap();
 
         let parsed = EnumeratedValues::parse(&tree1).unwrap();

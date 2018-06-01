@@ -55,12 +55,12 @@ impl Encode for Register {
         match *self {
             Register::Single(ref info) => info.encode(),
             Register::Array(ref info, ref _array_info) => {
-                // TODO: fix this (does not encode array stuff)
-                // Not even slightly sure what to do here
+                // TODO: support Register array encoding
+                // This does not encode array stuff, and I'm not even slightly sure what to do here
                 info.encode()
             }
         }
     }
 }
 
-// TODO: tests 
+// TODO: add Register encode and decode tests

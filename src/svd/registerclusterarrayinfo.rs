@@ -32,11 +32,11 @@ impl Parse for RegisterClusterArrayInfo {
 impl Encode for RegisterClusterArrayInfo {
     type Error = SVDError;
     fn encode(&self) -> Result<Element, SVDError> {
-        // TODO: encoding here
+        // TODO: support RegisterClusterArrayInfo encoding
         let _ = new_element("fake", None);
 
         Err(SVDError::from(SVDErrorKind::EncodeNotImplemented(String::from("RegisterClusterArrayInfo"))))
     }
 }
 
-//TODO: tests
+//TODO: test RegisterClusterArrayInfo encode and decode

@@ -117,3 +117,5 @@ impl Encode for Device {
         Ok(elem)
     }
 }
+
+// TODO: test device encoding and decoding
