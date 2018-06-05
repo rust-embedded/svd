@@ -37,7 +37,7 @@ impl Parse for Device {
             cpu: parse::optional("cpu", tree, Cpu::parse)?,
             version: tree.get_child_text_opt("version")?,
             description: tree.get_child_text_opt("description")?,
-            address_unit_bits: parse::optional("addressUnitBits", tree, parse::u32)?,
+            address_unit_bits: parse::optional("addressUnitBits", tree, u32::parse)?,
             width: None,
             peripherals: {
                 let ps: Result<Vec<_>, _> = tree.get_child_elem("peripherals")?

@@ -2,7 +2,6 @@
 use xmltree::Element;
 use failure::ResultExt;
 
-use parse;
 use types::{Parse, new_element};
 use error::*;
 
@@ -48,9 +47,9 @@ impl Parse for BitRange {
         // TODO: Consider matching instead so we can say which of these tags are missing
         } else if let (Some(lsb), Some(msb)) = (tree.get_child("lsb"), tree.get_child("msb")) {
             (
-                // TODO: `parse::u32` should not hide it's errors
-                parse::u32(msb).context(SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::MsbLsb))?, 
-                parse::u32(lsb).context(SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::MsbLsb))?, 
+                // TODO: `u32::parse` should not hide it's errors
+                u32::parse(msb).context(SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::MsbLsb))?, 
+                u32::parse(lsb).context(SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::MsbLsb))?, 
                 BitRangeType::MsbLsb
             )
         } else if let (Some(offset), Some(width)) = (tree.get_child("bitOffset"), tree.get_child("bitWidth")) {
@@ -59,9 +58,9 @@ impl Parse for BitRange {
                 // (ie. do not need to be calculated as in the final step)
                 return Ok(BitRange {
                     // TODO: capture that error comes from offset/width tag
-                    // TODO: `parse::u32` should not hide it's errors
-                    offset: parse::u32(offset).context(SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::ParseError))?, 
-                    width: parse::u32(width).context(SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::ParseError))?, 
+                    // TODO: `u32::parse` should not hide it's errors
+                    offset: u32::parse(offset).context(SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::ParseError))?, 
+                    width: u32::parse(width).context(SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::ParseError))?, 
                     range_type: BitRangeType::OffsetWidth
                 })
             )

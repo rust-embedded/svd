@@ -23,9 +23,9 @@ impl Parse for Defaults {
 
     fn parse(tree: &Element) -> Result<Defaults, SVDError> {
         Ok(Defaults {
-            size: parse::optional("size", tree, parse::u32)?,
-            reset_value: parse::optional("resetValue", tree, parse::u32)?,
-            reset_mask: parse::optional("resetMask", tree, parse::u32)?,
+            size: parse::optional("size", tree, u32::parse)?,
+            reset_value: parse::optional("resetValue", tree, u32::parse)?,
+            reset_mask: parse::optional("resetMask", tree, u32::parse)?,
             access: parse::optional("access", tree, Access::parse).unwrap(),
             _extensible: (),
         })

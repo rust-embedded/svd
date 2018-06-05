@@ -3,6 +3,9 @@
 use std::fmt::Debug;
 use std::collections::HashMap;
 use xmltree::Element;
+use failure::ResultExt;
+use ElementExt;
+use error::SVDErrorKind;
 
 /// Parse trait allows SVD objects to be parsed from XML elements.
 pub trait Parse {
@@ -12,6 +15,32 @@ pub trait Parse {
     type Error;
     /// Parse an XML/SVD element into it's corresponding `Object`.
     fn parse(&Element) -> Result<Self::Object, Self::Error>;
+}
+
+impl Parse for u32 {
+    type Object = u32;
+    type Error = SVDError;
+
+    fn parse(tree: &Element) -> Result<u32, SVDError> {
+        let text = tree.get_text()?;
+
+        if text.starts_with("0x") || text.starts_with("0X") {
+            u32::from_str_radix(&text["0x".len()..], 16).context(SVDErrorKind::Other(format!("{} invalid", text))).map_err(|e| e.into())
+        } else if text.starts_with('#') {
+            // Handle strings in the binary form of:
+            // #01101x1
+            // along with don't care character x (replaced with 0)
+            u32::from_str_radix(&str::replace(&text.to_lowercase()["#".len()..], "x", "0"), 2).context(SVDErrorKind::Other(format!("{} invalid", text))).map_err(|e| e.into())
+        } else if text.starts_with("0b"){
+            // Handle strings in the binary form of:
+            // 0b01101x1
+            // along with don't care character x (replaced with 0)
+            u32::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2).context(SVDErrorKind::Other(format!("{} invalid", text))).map_err(|e| e.into())
+
+        } else {
+            text.parse::<u32>().context(SVDErrorKind::Other(format!("{} invalid", text))).map_err(|e| e.into())
+        }
+    }
 }
 
 /// Encode trait allows SVD objects to be encoded into XML elements.
