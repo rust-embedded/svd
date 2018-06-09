@@ -107,7 +107,7 @@ impl ElementExt for Element {
     /// Get a u32 value from a named child element
     fn get_child_u32(&self, n: &str) -> Result<u32, SVDError> {
         let s = self.get_child_elem(n)?;
-        parse::u32(&s).context(SVDErrorKind::ParseError(self.clone())).map_err(|e| e.into())
+        u32::parse(&s).context(SVDErrorKind::ParseError(self.clone())).map_err(|e| e.into())
     }
 
     /// Get a bool value from a named child element

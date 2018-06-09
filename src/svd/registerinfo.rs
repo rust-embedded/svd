@@ -55,12 +55,12 @@ impl RegisterInfo {
             description: tree.get_child_text("description")?,
             address_offset:
                 tree.get_child_u32("addressOffset")?,
-            size: parse::optional("size", tree, parse::u32)?,
+            size: parse::optional("size", tree, u32::parse)?,
             access: parse::optional("access", tree, Access::parse)?,
             reset_value:
-                parse::optional("resetValue", tree, parse::u32)?,
+                parse::optional("resetValue", tree, u32::parse)?,
             reset_mask:
-                parse::optional("resetMask", tree, parse::u32)?,
+                parse::optional("resetMask", tree, u32::parse)?,
             fields: {
                 if let Some(fields) = tree.get_child("fields") {
                         let fs: Result<Vec<_>, _> =
