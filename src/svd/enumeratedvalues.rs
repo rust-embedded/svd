@@ -31,7 +31,7 @@ impl Parse for EnumeratedValues {
 
         Ok(EnumeratedValues {
             name: tree.get_child_text_opt("name")?,
-            usage: parse::optional("usage", tree, Usage::parse)?,
+            usage: parse::optional::<Usage>("usage", tree)?,
             derived_from: tree.attributes
                 .get(&"derivedFrom".to_owned())
                 .map(|s| s.to_owned()),

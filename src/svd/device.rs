@@ -34,10 +34,10 @@ impl Parse for Device {
         Ok(Device {
             name: tree.get_child_text("name")?,
             schema_version: tree.attributes.get("schemaVersion").unwrap().clone(),
-            cpu: parse::optional("cpu", tree, Cpu::parse)?,
+            cpu: parse::optional::<Cpu>("cpu", tree)?,
             version: tree.get_child_text_opt("version")?,
             description: tree.get_child_text_opt("description")?,
-            address_unit_bits: parse::optional("addressUnitBits", tree, u32::parse)?,
+            address_unit_bits: parse::optional::<u32>("addressUnitBits", tree)?,
             width: None,
             peripherals: {
                 let ps: Result<Vec<_>, _> = tree.get_child_elem("peripherals")?

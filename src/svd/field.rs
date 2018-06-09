@@ -47,7 +47,7 @@ impl Field {
             name,
             description: tree.get_child_text_opt("description")?,
             bit_range: BitRange::parse(tree)?,
-            access: parse::optional("access", tree, Access::parse)?,
+            access: parse::optional::<Access>("access", tree)?,
             enumerated_values: {
                 let values: Result<Vec<_>,_> = tree.children
                     .iter()
@@ -56,8 +56,8 @@ impl Field {
                     .collect();
                 values?
             },
-            write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse)?,
-            modified_write_values: parse::optional("modifiedWriteValues", tree, ModifiedWriteValues::parse)?,
+            write_constraint: parse::optional::<WriteConstraint>("writeConstraint", tree)?,
+            modified_write_values: parse::optional::<ModifiedWriteValues>("modifiedWriteValues", tree)?,
             _extensible: (),
         })
     }

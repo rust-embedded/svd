@@ -1,7 +1,6 @@
 extern crate svd_parser as svd;
 extern crate failure;
 
-use svd::error as err;
 use failure::Fail;
 
 #[test]

@@ -39,6 +39,7 @@ use error::{SVDError, SVDErrorKind};
 
 pub mod parse;
 pub mod types;
+use parse::BoolParse;
 use types::Parse;
 
 /// Parses the contents of a SVD file (XML)
@@ -113,7 +114,7 @@ impl ElementExt for Element {
     /// Get a bool value from a named child element
     fn get_child_bool(&self, n: &str) -> Result<bool, SVDError> {
         let s = self.get_child_elem(n)?;
-        match parse::bool(s) {
+        match BoolParse::parse(s)? {
             Some(u) => Ok(u),
             None => Err(SVDErrorKind::ParseError(self.clone()).into())
         }

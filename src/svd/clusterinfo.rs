@@ -37,13 +37,13 @@ impl Parse for ClusterInfo {
             header_struct_name: tree.get_child_text_opt("headerStructName")?,
             address_offset: 
                 tree.get_child_u32("addressOffset")?,
-            size: parse::optional("size", tree, u32::parse)?,
+            size: parse::optional::<u32>("size", tree)?,
             //access: tree.get_child("access").map(|t| Access::parse(t).ok() ),
-            access: parse::optional("access", tree, Access::parse)?,
+            access: parse::optional::<Access>("access", tree)?,
             reset_value:
-                parse::optional("resetValue", tree, u32::parse)?,
+                parse::optional::<u32>("resetValue", tree)?,
             reset_mask:
-                parse::optional("resetMask", tree, u32::parse)?,
+                parse::optional::<u32>("resetMask", tree)?,
             children: {
                 let children: Result<Vec<_>,_> = tree.children
                     .iter()

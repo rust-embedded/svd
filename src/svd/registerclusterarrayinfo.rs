@@ -22,9 +22,7 @@ impl Parse for RegisterClusterArrayInfo {
         Ok(RegisterClusterArrayInfo {
             dim: tree.get_child_u32("dim")?,
             dim_increment: tree.get_child_u32("dimIncrement")?,
-            dim_index: parse::optional("dimIndex", tree, |c| {
-                parse::dim_index(&c.get_text()?)
-            })?,
+            dim_index: parse::optional::<parse::DimIndex>("dimIndex", tree)?,
         })
     }
 }
