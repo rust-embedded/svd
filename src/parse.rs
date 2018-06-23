@@ -13,14 +13,23 @@ macro_rules! try {
 pub struct BoolParse;
 
 impl Parse for BoolParse {
-    type Object = Option<bool>;
+    type Object = bool;
     type Error = SVDError;
-    fn parse(tree: &Element) -> Result<Option<bool>, SVDError> {
+    fn parse(tree: &Element) -> Result<bool, SVDError> {
         let text = try!(tree.text.as_ref());
         Ok(match text.as_ref() {
-            "0" => Some(false),
-            "1" => Some(true),
-            _ => text.parse::<bool>().ok()
+            "0" => false,
+            "1" => true,
+            _ => match text.parse() {
+                Ok(b) => b,
+                Err(e) => {
+                    return Err(SVDErrorKind::InvalidBooleanValue(
+                        tree.clone(),
+                        text.clone(),
+                        e,
+                    ).into())
+                }
+            },
         })
     }
 }
@@ -44,16 +53,16 @@ impl Parse for DimIndex {
         } else {
             unreachable!()
         }
-     }
- }
+    }
+}
 /// Parses an optional child element with the provided name and Parse function
 /// Returns an none if the child doesn't exist, Ok(Some(e)) if parsing succeeds,
 /// and Err() if parsing fails.
 /// TODO: suspect we should be able to use the Parse trait here
 pub fn optional<'a, T>(n: &str, e: &'a Element) -> Result<Option<T::Object>, SVDError>
-    where T: Parse<Error = SVDError>
+where T: Parse<Error = SVDError>
 {
-     let child = match e.get_child(n) {
+    let child = match e.get_child(n) {
         Some(c) => c,
         None => return Ok(None),
     };

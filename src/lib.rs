@@ -83,7 +83,7 @@ impl ElementExt for Element {
         String: PartialEq<K>,
         K: ::std::fmt::Display + Clone,
     {
-        self.get_child_text_opt(k.clone())?.ok_or(SVDErrorKind::MissingTag(self.clone(), format!("{}", k)).into())
+        self.get_child_text_opt(k.clone())?.ok_or(SVDErrorKind::MissingTag(self.clone(), format!("{}", k)).into(),)
     }
 
     /// Get text contained by an XML Element
@@ -93,7 +93,10 @@ impl ElementExt for Element {
             // FIXME: Doesn't look good because SVDErrorKind doesn't format by itself. We already
             // capture the element and this information can be used for getting the name
             // This would fix ParseError
-            None => Err(SVDErrorKind::EmptyTag(self.clone(), self.name.clone()).into()),
+            None => {
+                Err(SVDErrorKind::EmptyTag(self.clone(), self.name.clone())
+                    .into())
+            }
         }
     }
 
@@ -114,10 +117,7 @@ impl ElementExt for Element {
     /// Get a bool value from a named child element
     fn get_child_bool(&self, n: &str) -> Result<bool, SVDError> {
         let s = self.get_child_elem(n)?;
-        match BoolParse::parse(s)? {
-            Some(u) => Ok(u),
-            None => Err(SVDErrorKind::ParseError(self.clone()).into())
-        }
+        BoolParse::parse(s)
     }
 
     fn debug(&self) {
