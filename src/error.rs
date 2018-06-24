@@ -41,6 +41,8 @@ pub enum SVDErrorKind {
     InvalidRegisterCluster(Element, String),
     #[fail(display = "Invalid modifiedWriteValues variant, found {}", _1)]
     InvalidModifiedWriteValues(Element, String),
+    #[fail(display = "The content of the element could not be parsed to a boolean value {}: {}", _1, _2)]
+    InvalidBooleanValue(Element, String, ::std::str::ParseBoolError),
     #[fail(display = "encoding method not implemented for svd object {}", _0)]
     EncodeNotImplemented(String),
     #[fail(display = "Error parsing SVD XML")]
@@ -72,7 +74,7 @@ impl Display for SVDError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         Display::fmt(&self.inner, f)
     }
-} 
+}
 
 impl SVDError {
     pub fn kind(&self) -> SVDErrorKind {

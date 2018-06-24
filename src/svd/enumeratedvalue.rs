@@ -28,7 +28,7 @@ impl EnumeratedValue {
                 description: tree.get_child_text_opt("description")?,
                 // TODO: this .ok() approach is simple, but does not expose errors parsing child objects.
                 // Suggest refactoring all parse::type methods to return result so parse::optional works.
-                value: parse::optional("value", tree, u32::parse)?,
+                value: parse::optional::<u32>("value", tree)?,
                 is_default: tree.get_child_bool("isDefault").ok(),
                 _extensible: (),
             },

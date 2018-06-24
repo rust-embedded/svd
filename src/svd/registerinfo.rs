@@ -55,12 +55,12 @@ impl RegisterInfo {
             description: tree.get_child_text("description")?,
             address_offset:
                 tree.get_child_u32("addressOffset")?,
-            size: parse::optional("size", tree, u32::parse)?,
-            access: parse::optional("access", tree, Access::parse)?,
+            size: parse::optional::<u32>("size", tree)?,
+            access: parse::optional::<Access>("access", tree)?,
             reset_value:
-                parse::optional("resetValue", tree, u32::parse)?,
+                parse::optional::<u32>("resetValue", tree)?,
             reset_mask:
-                parse::optional("resetMask", tree, u32::parse)?,
+                parse::optional::<u32>("resetMask", tree)?,
             fields: {
                 if let Some(fields) = tree.get_child("fields") {
                         let fs: Result<Vec<_>, _> =
@@ -74,8 +74,8 @@ impl RegisterInfo {
                     None
                 }
             },
-            write_constraint: parse::optional("writeConstraint", tree, WriteConstraint::parse)?,
-            modified_write_values: parse::optional("modifiedWriteValues", tree, ModifiedWriteValues::parse)?,
+            write_constraint: parse::optional::<WriteConstraint>("writeConstraint", tree)?,
+            modified_write_values: parse::optional::<ModifiedWriteValues>("modifiedWriteValues", tree)?,
             _extensible: (),
         })
     }

@@ -63,7 +63,7 @@ impl Peripheral {
             group_name: tree.get_child_text_opt("groupName")?,
             description: tree.get_child_text_opt("description")?,
             base_address: tree.get_child_u32("baseAddress")?,
-            address_block: parse::optional("addressBlock", tree, AddressBlock::parse)?,
+            address_block: parse::optional::<AddressBlock>("addressBlock", tree)?,
             interrupt: {
                 let interrupt: Result<Vec<_>,_> = tree.children
                     .iter()
