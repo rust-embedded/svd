@@ -2,6 +2,8 @@
 use std::ops::Deref;
 use xmltree::Element;
 
+use ElementExt;
+
 use types::{Parse, Encode};
 use error::*;
 use ::svd::clusterinfo::ClusterInfo;
@@ -33,12 +35,17 @@ impl Parse for Cluster {
         let info = ClusterInfo::parse(tree)?;
 
         if tree.get_child("dimIncrement").is_some() {
-            // TODO: s/assert/errors/g
             let array_info = RegisterClusterArrayInfo::parse(tree)?;
-            assert!(info.name.contains("%s"));
+            if !info.name.contains("%s") {
+                // TODO: replace with real error
+                return Err(SVDError::from(SVDErrorKind::Other("Cluster name invalid".to_string())));
+            }
 
             if let Some(ref indices) = array_info.dim_index {
-                assert_eq!(array_info.dim as usize, indices.len())
+                if array_info.dim as usize != indices.len() {
+                    // TODO: replace with real error
+                    return Err(SVDError::from(SVDErrorKind::Other("Cluster index length mismatch".to_string())));
+                }
             }
 
             Ok(Cluster::Array(info, array_info))
@@ -52,7 +59,18 @@ impl Encode for Cluster {
     type Error = SVDError;
     // TODO: support Cluster encoding
     fn encode(&self) -> Result<Element, SVDError> {
-        Err(SVDError::from(SVDErrorKind::EncodeNotImplemented(String::from("RegisterClusterArrayInfo"))))
+        match self {
+            Cluster::Single(i) => {
+                let mut e = i.encode()?;
+                Ok(e)
+            },
+            Cluster::Array(i, a) => {
+                let mut e = i.encode()?;
+                e = e.merge(&a.encode()?);
+                Ok(e)
+            }
+        }
+        
     }
 }
 

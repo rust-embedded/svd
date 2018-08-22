@@ -6,7 +6,7 @@ use ElementExt;
 use types::{Parse, Encode, new_element};
 use parse;
 
-use ::error::{SVDError, SVDErrorKind};
+use ::error::{SVDError};
 use ::svd::access::Access;
 use ::svd::registercluster::RegisterCluster;
 
@@ -60,10 +60,37 @@ impl Parse for ClusterInfo {
 impl Encode for ClusterInfo {
     type Error = SVDError;
     fn encode(&self) -> Result<Element, SVDError> {
-        // TODO: support ClusterInfo encoding
-        let _ = new_element("fake", None);
+        let mut e = new_element("cluster", None);
 
-        Err(SVDError::from(SVDErrorKind::EncodeNotImplemented(String::from("RegisterClusterArrayInfo"))))
+        e.children.push(new_element("description", Some(self.description.clone())));
+
+        if let Some(ref v) = self.header_struct_name {
+            e.children.push(new_element("headerStructName", Some(v.clone())));
+        }
+
+        e.children.push(new_element("addressOffset", Some(format!("{}", self.address_offset))));
+
+        if let Some(ref v) = self.size {
+            e.children.push(new_element("size", Some(format!("{}", v))));
+        }
+
+        if let Some(ref v) = self.access {
+            e.children.push(v.encode()?);
+        }
+
+        if let Some(ref v) = self.reset_value {
+            e.children.push(new_element("resetValue", Some(format!("{}", v))));
+        }
+
+        if let Some(ref v) = self.reset_mask {
+            e.children.push(new_element("resetMask", Some(format!("{}", v))));
+        }
+
+        for c in &self.children {
+            e.children.push(c.encode()?);
+        }
+
+        Ok(e)
     }
 }
 

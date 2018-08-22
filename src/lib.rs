@@ -64,6 +64,8 @@ trait ElementExt {
     fn get_child_u32(&self, n: &str) -> Result<u32, SVDError>;
     fn get_child_bool(&self, n: &str) -> Result<bool, SVDError>;
 
+    fn merge(&self, n: &Self) -> Self;
+
     fn debug(&self);
 }
 
@@ -118,6 +120,15 @@ impl ElementExt for Element {
     fn get_child_bool(&self, n: &str) -> Result<bool, SVDError> {
         let s = self.get_child_elem(n)?;
         BoolParse::parse(s)
+    }
+
+    // Merges the children of two elements, maintaining the name and description of the first
+    fn merge(&self, r: &Self) -> Self {
+        let mut n = self.clone();
+        for c in  &r.children {
+            n.children.push(c.clone());
+        }
+        n
     }
 
     fn debug(&self) {
