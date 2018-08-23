@@ -1,10 +1,11 @@
 
 use std::collections::HashMap;
 use xmltree::Element;
-use ElementExt;
+use elementext::ElementExt;
 
 use parse;
-use types::{Parse, Encode, new_element};
+use types::{Parse, Encode};
+use new_element;
 use ::error::SVDError;
 use ::svd::cpu::Cpu;
 use ::svd::peripheral::Peripheral;

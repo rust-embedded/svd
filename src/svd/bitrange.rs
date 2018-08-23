@@ -2,9 +2,9 @@
 use xmltree::Element;
 use failure::ResultExt;
 
-use types::{Parse, new_element};
+use new_element;
+use types::{Parse};
 use error::*;
-
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct BitRange {

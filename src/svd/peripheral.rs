@@ -3,10 +3,11 @@ use std::collections::HashMap;
 use xmltree::Element;
 
 use parse;
-use ElementExt;
+use new_element;
+use elementext::ElementExt;
 use failure::ResultExt;
 
-use types::{Parse, Encode, new_element};
+use types::{Parse, Encode};
 
 use ::error::{SVDError, SVDErrorKind};
 use ::svd::interrupt::Interrupt;

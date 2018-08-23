@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use xmltree::Element;
-use ElementExt;
+use elementext::ElementExt;
 
 use types::{Parse, Encode};
 use error::*;
@@ -51,7 +51,7 @@ impl Encode for Usage {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use types::test;
+    use run_test;
 
     #[test]
     fn decode_encode() {
@@ -61,6 +61,6 @@ mod tests {
             (Usage::ReadWrite, "<usage>read-write</usage>"),
         ];
 
-        test::<Usage>(&tests[..]);
+        run_test::<Usage>(&tests[..]);
     }
 }

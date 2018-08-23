@@ -4,10 +4,11 @@ use std::collections::HashMap;
 
 use parse;
 use xmltree::Element;
-use ElementExt;
+use elementext::ElementExt;
 use failure::ResultExt;
 
-use types::{Parse, Encode, new_element};
+use types::{Parse, Encode};
+use new_element;
 use error::*;
 
 
@@ -95,7 +96,7 @@ impl Encode for EnumeratedValue {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use types::test;
+    use run_test;
 
     #[test]
     fn decode_encode() {          
@@ -119,7 +120,7 @@ mod tests {
             ")
         ];
 
-        test::<EnumeratedValue>(&tests[..]);
+        run_test::<EnumeratedValue>(&tests[..]);
     }
 }
 

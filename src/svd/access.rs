@@ -1,8 +1,9 @@
 
 use xmltree::Element;
 
-use ElementExt;
-use types::{Parse, Encode, new_element};
+use elementext::ElementExt;
+use types::{Parse, Encode};
+use new_element;
 use error::*;
 
 
@@ -52,7 +53,7 @@ impl Encode for Access {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use types::test;
+    use run_test;
 
     #[test]
     fn decode_encode() {
@@ -79,6 +80,6 @@ mod tests {
             ),
         ];
 
-        test::<Access>(&tests[..]);
+        run_test::<Access>(&tests[..]);
     }
 }

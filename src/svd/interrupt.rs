@@ -3,9 +3,10 @@ use std::collections::HashMap;
 use xmltree::Element;
 use failure::ResultExt;
 
-use ElementExt;
+use elementext::ElementExt;
 
-use types::{Parse, Encode, new_element};
+use types::{Parse, Encode};
+use new_element;
 use error::*;
 
 
@@ -58,7 +59,7 @@ impl Encode for Interrupt {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use types::test;    
+    use run_test;    
 
     #[test]
     fn decode_encode() {
@@ -79,6 +80,6 @@ mod tests {
             ),
         ];
 
-        test::<Interrupt>(&tests[..]);
+        run_test::<Interrupt>(&tests[..]);
     }
 }

@@ -1,9 +1,10 @@
 
 use xmltree::Element;
 
-use parse;
-use types::{Parse, Encode, new_element};
-use ElementExt;
+use types::DimIndex;
+use ::new_element;
+use types::{Parse, Encode, parse_optional};
+use elementext::ElementExt;
 
 use ::error::{SVDError};
 
@@ -24,7 +25,7 @@ impl Parse for RegisterClusterArrayInfo {
         Ok(RegisterClusterArrayInfo {
             dim: tree.get_child_u32("dim")?,
             dim_increment: tree.get_child_u32("dimIncrement")?,
-            dim_index: parse::optional::<parse::DimIndex>("dimIndex", tree)?,
+            dim_index: parse_optional::<DimIndex>("dimIndex", tree)?,
             _extensible: (),
         })
     }
@@ -51,7 +52,7 @@ impl Encode for RegisterClusterArrayInfo {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use types::test;
+    use run_test;
 
     #[test]
     fn decode_encode() {          
@@ -70,6 +71,6 @@ mod tests {
             ")
         ];
 
-        test::<RegisterClusterArrayInfo>(&tests[..]);
+        run_test::<RegisterClusterArrayInfo>(&tests[..]);
     }
 }

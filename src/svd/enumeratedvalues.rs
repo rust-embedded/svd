@@ -3,11 +3,12 @@
 use std::collections::HashMap;
 
 use xmltree::Element;
-use ElementExt;
+use elementext::ElementExt;
 use failure::ResultExt;
 
 use parse;
-use types::{Parse, Encode, new_element};
+use types::{Parse, Encode};
+use new_element;
 use error::*;
 use svd::usage::Usage;
 use svd::enumeratedvalue::EnumeratedValue;

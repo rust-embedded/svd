@@ -2,9 +2,10 @@
 use std::collections::HashMap;
 
 use xmltree::Element;
-use ElementExt;
+use elementext::ElementExt;
 
-use types::{Parse, Encode, new_element};
+use types::{Parse, Encode};
+use new_element;
 use error::SVDError;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -47,7 +48,7 @@ impl Encode for AddressBlock {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use types::test;
+    use run_test;
 
 
     #[test]
@@ -67,6 +68,6 @@ mod tests {
             ),
         ];
 
-        test::<AddressBlock>(&tests[..]);
+        run_test::<AddressBlock>(&tests[..]);
     }
 }

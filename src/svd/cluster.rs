@@ -2,7 +2,7 @@
 use std::ops::Deref;
 use xmltree::Element;
 
-use ElementExt;
+use elementext::ElementExt;
 
 use types::{Parse, Encode};
 use error::*;

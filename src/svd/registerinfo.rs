@@ -1,11 +1,12 @@
 use std::collections::HashMap;
 
 use xmltree::Element;
-use ElementExt;
+use elementext::ElementExt;
 use failure::ResultExt;
 
 use parse;
-use types::{Parse, Encode, new_element};
+use types::{Parse, Encode};
+use new_element;
 use error::*;
 
 use ::svd::access::Access;
@@ -198,7 +199,7 @@ impl Encode for RegisterInfo {
 mod tests {
     use super::*;
     use ::svd::bitrange::*;
-    use types::test;
+    use run_test;
 
     #[test]
     fn decode_encode() {
@@ -261,6 +262,6 @@ mod tests {
             ),
         ];
 
-        test::<RegisterInfo>(&tests[..]);
+        run_test::<RegisterInfo>(&tests[..]);
     }
 }

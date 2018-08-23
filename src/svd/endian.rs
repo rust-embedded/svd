@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use ElementExt;
+use elementext::ElementExt;
 use types::{Parse, Encode};
 use error::*;
 
@@ -55,7 +55,7 @@ impl Encode for Endian {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use types::test;
+    use run_test;
 
     #[test]
     fn decode_encode() {
@@ -66,6 +66,6 @@ mod tests {
             (Endian::Other, "<endian>other</endian>"),
         ];
 
-        test::<Endian>(&tests[..]);
+        run_test::<Endian>(&tests[..]);
     }
 }

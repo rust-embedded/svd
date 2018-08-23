@@ -28,116 +28,43 @@ extern crate either;
 extern crate xmltree;
 #[macro_use]
 extern crate failure;
-use failure::ResultExt;
+
+use std::collections::HashMap;
 
 use xmltree::Element;
 
+// ElementExt extends XML elements with useful methods
+pub mod elementext;
+// SVD contains svd primitives
 pub mod svd;
 use svd::device::Device;
+// Error defines SVD error types
 pub mod error;
-use error::{SVDError, SVDErrorKind};
+use error::{SVDError};
 
 pub mod parse;
-pub mod types;
-use parse::BoolParse;
-use types::Parse;
+use parse::Parse;
 
-/// Parses the contents of a SVD file (XML)
+pub mod encode;
+#[cfg(feature = "unproven")]
+use encode::Encode;
+
+pub mod types;
+
+/// Parses the contents of an SVD (XML) string
 pub fn parse(xml: &str) -> Result<Device, SVDError> {
     let xml = trim_utf8_bom(xml);
     let tree = Element::parse(xml.as_bytes())?;
     Device::parse(&tree)
 }
 
-trait ElementExt {
-    fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>, SVDError>
-    where
-        String: PartialEq<K>;
-    fn get_child_text<K>(&self, k: K) -> Result<String, SVDError>
-    where
-        String: PartialEq<K>,
-        K: ::std::fmt::Display + Clone;
-
-    fn get_text(&self) -> Result<String, SVDError>;
-
-    fn get_child_elem<'a>(&'a self, n: &str) -> Result<&'a Element, SVDError>;
-    fn get_child_u32(&self, n: &str) -> Result<u32, SVDError>;
-    fn get_child_bool(&self, n: &str) -> Result<bool, SVDError>;
-
-    fn merge(&self, n: &Self) -> Self;
-
-    fn debug(&self);
-}
-
-impl ElementExt for Element {
-    fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>, SVDError>
-    where
-        String: PartialEq<K>,
-    {
-        if let Some(child) = self.get_child(k) {
-            Ok(Some(child.get_text().map(|s| s.to_owned())?))
-        } else {
-            Ok(None)
-        }
-    }
-    fn get_child_text<K>(&self, k: K) -> Result<String, SVDError>
-    where
-        String: PartialEq<K>,
-        K: ::std::fmt::Display + Clone,
-    {
-        self.get_child_text_opt(k.clone())?.ok_or(SVDErrorKind::MissingTag(self.clone(), format!("{}", k)).into(),)
-    }
-
-    /// Get text contained by an XML Element
-    fn get_text(&self) -> Result<String, SVDError> {
-        match self.text.as_ref() {
-            Some(s) => Ok(s.clone()),
-            // FIXME: Doesn't look good because SVDErrorKind doesn't format by itself. We already
-            // capture the element and this information can be used for getting the name
-            // This would fix ParseError
-            None => {
-                Err(SVDErrorKind::EmptyTag(self.clone(), self.name.clone())
-                    .into())
-            }
-        }
-    }
-
-    /// Get a named child element from an XML Element
-    fn get_child_elem<'a>(&'a self, n: &str) -> Result<&'a Element, SVDError> {
-        match self.get_child(n) {
-            Some(s) => Ok(s),
-            None => Err(SVDErrorKind::MissingTag(self.clone(), n.to_string()).into()),
-        }
-    }
-
-    /// Get a u32 value from a named child element
-    fn get_child_u32(&self, n: &str) -> Result<u32, SVDError> {
-        let s = self.get_child_elem(n)?;
-        u32::parse(&s).context(SVDErrorKind::ParseError(self.clone())).map_err(|e| e.into())
-    }
-
-    /// Get a bool value from a named child element
-    fn get_child_bool(&self, n: &str) -> Result<bool, SVDError> {
-        let s = self.get_child_elem(n)?;
-        BoolParse::parse(s)
-    }
-
-    // Merges the children of two elements, maintaining the name and description of the first
-    fn merge(&self, r: &Self) -> Self {
-        let mut n = self.clone();
-        for c in  &r.children {
-            n.children.push(c.clone());
-        }
-        n
-    }
-
-    fn debug(&self) {
-        println!("<{}>", self.name);
-        for c in &self.children {
-            println!("{}: {:?}", c.name, c.text)
-        }
-        println!("</{}>", self.name);
-    }
+/// Encodes a device object to an SVD (XML) string
+#[cfg(feature = "unproven")]
+pub fn encode(d: &Device) -> Result<String, SVDError> {
+    let root = d.encode()?;
+    let mut wr = Vec::new();
+    root.write(&mut wr);
+    Ok(String::from_utf8(wr).unwrap())
 }
 
 /// Return the &str trimmed UTF-8 BOM if the input &str contains the BOM.
@@ -147,6 +74,35 @@ fn trim_utf8_bom(s: &str) -> &str {
     } else {
         s
     }
+}
+
+/// Helper to create new base xml elements
+pub (crate) fn new_element(name: &str, text: Option<String>) -> Element {
+    Element {
+        name: String::from(name),
+        attributes: HashMap::new(),
+        children: Vec::new(),
+        text: text,
+    } 
+}
+
+#[cfg(test)]
+use std::fmt::Debug;
+#[cfg(test)]
+use types::{Encode};
+
+/// Generic test helper function
+/// Takes an array of (item, xml) pairs where the item implements
+/// Parse and Encode and tests object encoding and decoding
+#[cfg(test)]
+pub fn run_test<T: Parse<Error=SVDError, Object=T> + Encode<Error=SVDError> + Debug + PartialEq>(tests: &[(T, &str)]) {
+    for t in tests {
+        let tree1 = Element::parse(t.1.as_bytes()).unwrap();
+        let elem = T::parse(&tree1).unwrap();
+        assert_eq!(elem, t.0, "Error parsing xml` (mismatch between parsed and expected)");
+        let tree2 = elem.encode().unwrap();
+        assert_eq!(tree1, tree2, "Error encoding xml (mismatch between encoded and original)");
+    };
 }
 
 #[cfg(test)]

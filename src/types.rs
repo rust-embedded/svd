@@ -1,20 +1,20 @@
 // Helper traits for rust-svd
 
-use std::fmt::Debug;
-use std::collections::HashMap;
+
 use xmltree::Element;
 use failure::ResultExt;
-use ElementExt;
-use error::SVDErrorKind;
 
-/// Parse trait allows SVD objects to be parsed from XML elements.
-pub trait Parse {
-    /// Object returned by parse method
-    type Object;
-    /// Parsing error
-    type Error;
-    /// Parse an XML/SVD element into it's corresponding `Object`.
-    fn parse(&Element) -> Result<Self::Object, Self::Error>;
+pub use parse::Parse;
+pub use parse::optional as parse_optional;
+pub use encode::Encode;
+
+use elementext::ElementExt;
+use error::{SVDError, SVDErrorKind};
+
+macro_rules! try {
+    ($e:expr) => {
+        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
+    }
 }
 
 impl Parse for u32 {
@@ -43,33 +43,52 @@ impl Parse for u32 {
     }
 }
 
-/// Encode trait allows SVD objects to be encoded into XML elements.
-pub trait Encode {
-    /// Encoding error
-    type Error;
-    /// Encode into an XML/SVD element
-    fn encode(&self) -> Result<Element, Self::Error>;
+
+pub struct BoolParse;
+
+impl Parse for BoolParse {
+    type Object = bool;
+    type Error = SVDError;
+    fn parse(tree: &Element) -> Result<bool, SVDError> {
+        let text = try!(tree.text.as_ref());
+        Ok(match text.as_ref() {
+            "0" => false,
+            "1" => true,
+            _ => match text.parse() {
+                Ok(b) => b,
+                Err(e) => {
+                    return Err(SVDErrorKind::InvalidBooleanValue(
+                        tree.clone(),
+                        text.clone(),
+                        e,
+                    ).into())
+                }
+            },
+        })
+    }
 }
 
-/// new_element helper to create new xml elements
-pub fn new_element(name: &str, text: Option<String>) -> Element {
-    Element {
-        name: String::from(name),
-        attributes: HashMap::new(),
-        children: Vec::new(),
-        text: text,
-    } 
+pub struct DimIndex;
+
+impl Parse for DimIndex {
+    type Object = Vec<String>;
+    type Error = SVDError;
+
+    fn parse(tree: &Element) -> Result<Vec<String>, SVDError> {
+        let text = tree.get_text()?;
+        if text.contains('-') {
+            let mut parts = text.splitn(2, '-');
+            let start = try!(try!(parts.next()).parse::<u32>());
+            let end = try!(try!(parts.next()).parse::<u32>()) + 1;
+
+            Ok((start..end).map(|i| i.to_string()).collect())
+        } else if text.contains(',') {
+            Ok(text.split(',').map(|s| s.to_string()).collect())
+        } else {
+            unreachable!()
+        }
+    }
 }
 
-use ::error::SVDError;
+//TODO: encode for DimIndex
 
-// Generic test function
-pub fn test<T: Parse<Error=SVDError, Object=T> + Encode<Error=SVDError> + Debug + PartialEq>(tests: &[(T, &str)]) {
-    for t in tests {
-        let tree1 = Element::parse(t.1.as_bytes()).unwrap();
-        let elem = T::parse(&tree1).unwrap();
-        assert_eq!(elem, t.0, "Error parsing xml` (mismatch between parsed and expected)");
-        let tree2 = elem.encode().unwrap();
-        assert_eq!(tree1, tree2, "Error encoding xml (mismatch between encoded and original)");
-    };
-}

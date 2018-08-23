@@ -1,9 +1,10 @@
 
 
 use xmltree::Element;
-use ElementExt;
+use elementext::ElementExt;
 
-use types::{Parse, Encode, new_element};
+use types::{Parse, Encode};
+use new_element;
 use parse;
 
 use ::error::{SVDError};

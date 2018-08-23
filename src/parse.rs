@@ -1,62 +1,16 @@
 use xmltree::Element;
 
 use error::*;
-use types::Parse;
-use ElementExt;
 
-macro_rules! try {
-    ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
+/// Parse trait allows SVD objects to be parsed from XML elements.
+pub trait Parse {
+    /// Object returned by parse method
+    type Object;
+    /// Parsing error
+    type Error;
+    /// Parse an XML/SVD element into it's corresponding `Object`.
+    fn parse(&Element) -> Result<Self::Object, Self::Error>;
 }
-
-pub struct BoolParse;
-
-impl Parse for BoolParse {
-    type Object = bool;
-    type Error = SVDError;
-    fn parse(tree: &Element) -> Result<bool, SVDError> {
-        let text = try!(tree.text.as_ref());
-        Ok(match text.as_ref() {
-            "0" => false,
-            "1" => true,
-            _ => match text.parse() {
-                Ok(b) => b,
-                Err(e) => {
-                    return Err(SVDErrorKind::InvalidBooleanValue(
-                        tree.clone(),
-                        text.clone(),
-                        e,
-                    ).into())
-                }
-            },
-        })
-    }
-}
-
-pub struct DimIndex;
-
-impl Parse for DimIndex {
-    type Object = Vec<String>;
-    type Error = SVDError;
-
-    fn parse(tree: &Element) -> Result<Vec<String>, SVDError> {
-        let text = tree.get_text()?;
-        if text.contains('-') {
-            let mut parts = text.splitn(2, '-');
-            let start = try!(try!(parts.next()).parse::<u32>());
-            let end = try!(try!(parts.next()).parse::<u32>()) + 1;
-
-            Ok((start..end).map(|i| i.to_string()).collect())
-        } else if text.contains(',') {
-            Ok(text.split(',').map(|s| s.to_string()).collect())
-        } else {
-            unreachable!()
-        }
-    }
-}
-
-//TODO: encode for DimIndex
 
 
 /// Parses an optional child element with the provided name and Parse function

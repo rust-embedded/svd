@@ -1,7 +1,8 @@
 use xmltree::Element;
 
 use parse;
-use types::{Parse, Encode, new_element};
+use types::{Parse, Encode};
+use new_element;
 use error::*;
 
 use svd::access::Access;

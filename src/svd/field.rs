@@ -4,10 +4,11 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 use failure::ResultExt;
-use ElementExt;
+use elementext::ElementExt;
 
 use parse;
-use types::{Parse, Encode, new_element};
+use types::{Parse, Encode};
+use new_element;
 use error::*;
 
 use ::svd::bitrange::BitRange;
@@ -113,7 +114,7 @@ mod tests {
     use super::*;
     use ::svd::bitrange::BitRangeType;
     use ::svd::enumeratedvalue::EnumeratedValue;
-    use types::test;
+    use run_test;
 
     #[test]
     fn decode_encode() {
@@ -170,6 +171,6 @@ mod tests {
             ),
         ];
 
-        test::<Field>(&tests[..]);
+        run_test::<Field>(&tests[..]);
     }
 }

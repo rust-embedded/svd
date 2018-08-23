@@ -3,8 +3,9 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use ElementExt;
-use types::{Parse, Encode, new_element};
+use elementext::ElementExt;
+use types::{Parse, Encode};
+use new_element;
 use error::*;
 use svd::endian::Endian;
 
@@ -77,7 +78,7 @@ impl Cpu {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use types::test;
+    use run_test;
 
     #[test]
     fn decode_encode() {
@@ -107,6 +108,6 @@ mod tests {
             ),
         ];
 
-        test::<Cpu>(&tests[..]);
+        run_test::<Cpu>(&tests[..]);
     }
 }

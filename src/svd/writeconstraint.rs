@@ -2,9 +2,10 @@
 use std::collections::HashMap;
 
 use xmltree::Element;
-use ElementExt;
+use elementext::ElementExt;
 
-use types::{Parse, Encode, new_element};
+use types::{Parse, Encode};
+use new_element;
 use error::*;
 
 
@@ -98,7 +99,7 @@ impl Encode for WriteConstraintRange {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use types::test;
+    use run_test;
 
     #[test]
     fn decode_encode() {
@@ -117,6 +118,6 @@ mod tests {
             ),
         ];
         
-        test::<WriteConstraint>(&tests[..]);
+        run_test::<WriteConstraint>(&tests[..]);
     }
 }
