@@ -1,6 +1,7 @@
 use std::ops::Deref;
 
 use xmltree::Element;
+use ElementExt;
 
 use types::{Parse, Encode};
 use ::error::{SVDError};
@@ -54,10 +55,11 @@ impl Encode for Register {
     fn encode(&self) -> Result<Element, SVDError> {
         match *self {
             Register::Single(ref info) => info.encode(),
-            Register::Array(ref info, ref _array_info) => {
-                // TODO: support Register array encoding
-                // This does not encode array stuff, and I'm not even slightly sure what to do here
-                info.encode()
+            Register::Array(ref info, ref array_info) => {
+                // TODO: is this correct? probably not, need tests
+                let mut base = info.encode()?;
+                base.merge(&array_info.encode()?);
+                Ok(base)
             }
         }
     }

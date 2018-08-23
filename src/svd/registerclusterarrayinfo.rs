@@ -40,8 +40,7 @@ impl Encode for RegisterClusterArrayInfo {
         e.children.push(new_element("dimIncrement", Some(format!("{}", self.dim_increment))));
 
         if let Some(ref di) = self.dim_index {
-            //TODO: this should be a join, but I don't have docs rn
-            e.children.push(new_element("dimIndex", Some(format!("{},{}", di[0], di[1]))));
+            e.children.push(new_element("dimIndex", Some(di.join(","))));
         }
 
         Ok(e)
