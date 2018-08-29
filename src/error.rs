@@ -1,3 +1,5 @@
+//! SVD Errors.
+//! This module defines error types and messages for SVD parsing and encoding
 
 use xmltree::{Element, ParseError};
 use failure::{Backtrace, Context, Fail};

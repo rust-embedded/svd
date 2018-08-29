@@ -1,4 +1,5 @@
-/// SVD Element Extensions
+//! SVD Element Extensions.
+//! This module is extends xmltree::Element objects with convenience methods
 
 use xmltree::Element;
 
@@ -7,6 +8,7 @@ use failure::ResultExt;
 
 use error::*;
 
+/// Defines extensions for implementation over xmltree::Element
 pub trait ElementExt {
     fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>, SVDError>
     where
@@ -27,6 +29,7 @@ pub trait ElementExt {
     fn debug(&self);
 }
 
+/// Implements extensions for xmltree::Element
 impl ElementExt for Element {
     fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>, SVDError>
     where

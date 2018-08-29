@@ -1,3 +1,5 @@
+//! Encode traits.
+//! These support encoding of SVD types to XML
 
 use xmltree::Element;
 

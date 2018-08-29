@@ -1,5 +1,4 @@
-// Helper traits for rust-svd
-
+//! Shared primitive types for use in SVD objects.
 
 use xmltree::Element;
 use failure::ResultExt;

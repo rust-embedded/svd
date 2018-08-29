@@ -1,3 +1,6 @@
+//! Parse traits.
+//! These support parsing of SVD types from XML
+
 use xmltree::Element;
 
 use error::*;

@@ -37,18 +37,18 @@ use xmltree::Element;
 pub mod elementext;
 // SVD contains svd primitives
 pub mod svd;
-use svd::device::Device;
+pub use svd::*;
 // Error defines SVD error types
 pub mod error;
 use error::{SVDError};
-
+// Parse defines parsing interfaces
 pub mod parse;
 use parse::Parse;
-
+// Encode defines encoding interfaces
 pub mod encode;
 #[cfg(feature = "unproven")]
 use encode::Encode;
-
+// Types defines simple types and parse/encode implementations
 pub mod types;
 
 /// Parses the contents of an SVD (XML) string
@@ -89,7 +89,7 @@ pub (crate) fn new_element(name: &str, text: Option<String>) -> Element {
 #[cfg(test)]
 use std::fmt::Debug;
 #[cfg(test)]
-use types::{Encode};
+use types::Encode;
 
 /// Generic test helper function
 /// Takes an array of (item, xml) pairs where the item implements
