@@ -5,6 +5,7 @@ use failure::ResultExt;
 
 pub use parse::Parse;
 pub use parse::optional as parse_optional;
+#[cfg(feature = "unproven")]
 pub use encode::Encode;
 
 use elementext::ElementExt;

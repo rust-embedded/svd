@@ -29,6 +29,7 @@ extern crate xmltree;
 #[macro_use]
 extern crate failure;
 
+#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use xmltree::Element;
@@ -45,6 +46,7 @@ use error::{SVDError};
 pub mod parse;
 use parse::Parse;
 // Encode defines encoding interfaces
+#[cfg(feature = "unproven")]
 pub mod encode;
 #[cfg(feature = "unproven")]
 use encode::Encode;
@@ -77,6 +79,7 @@ fn trim_utf8_bom(s: &str) -> &str {
 }
 
 /// Helper to create new base xml elements
+#[cfg(feature = "unproven")]
 pub (crate) fn new_element(name: &str, text: Option<String>) -> Element {
     Element {
         name: String::from(name),
@@ -86,16 +89,12 @@ pub (crate) fn new_element(name: &str, text: Option<String>) -> Element {
     } 
 }
 
-#[cfg(test)]
-use std::fmt::Debug;
-#[cfg(test)]
-use types::Encode;
-
 /// Generic test helper function
 /// Takes an array of (item, xml) pairs where the item implements
 /// Parse and Encode and tests object encoding and decoding
 #[cfg(test)]
-pub fn run_test<T: Parse<Error=SVDError, Object=T> + Encode<Error=SVDError> + Debug + PartialEq>(tests: &[(T, &str)]) {
+#[cfg(feature = "unproven")]
+pub fn run_test<T: Parse<Error=SVDError, Object=T> + Encode<Error=SVDError> + ::std::fmt::Debug + PartialEq>(tests: &[(T, &str)]) {
     for t in tests {
         let tree1 = Element::parse(t.1.as_bytes()).unwrap();
         let elem = T::parse(&tree1).unwrap();

@@ -1,10 +1,14 @@
 
+#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use xmltree::Element;
 
 use elementext::ElementExt;
-use types::{Parse, Encode};
+use types::Parse;
+#[cfg(feature = "unproven")]
+use encode::Encode;
+
 use error::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -32,6 +36,7 @@ impl Parse for Endian {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for Endian {
     type Error = SVDError;
 
@@ -53,6 +58,7 @@ impl Encode for Endian {
 }
 
 #[cfg(test)]
+#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use run_test;

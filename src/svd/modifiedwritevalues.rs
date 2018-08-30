@@ -1,8 +1,13 @@
+
+#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 use xmltree::Element;
 use elementext::ElementExt;
 
-use types::{Parse, Encode};
+use types::Parse;
+
+#[cfg(feature = "unproven")]
+use encode::Encode;
 use error::*;
 
 
@@ -40,6 +45,7 @@ impl Parse for ModifiedWriteValues {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for ModifiedWriteValues {
     type Error = SVDError;
 
@@ -66,6 +72,7 @@ impl Encode for ModifiedWriteValues {
 }
 
 #[cfg(test)]
+#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use run_test;

@@ -3,7 +3,11 @@
 use xmltree::Element;
 use elementext::ElementExt;
 
-use types::{Parse, Encode};
+use types::Parse;
+
+#[cfg(feature = "unproven")]
+use encode::Encode;
+#[cfg(feature = "unproven")]
 use new_element;
 use parse;
 
@@ -58,6 +62,7 @@ impl Parse for ClusterInfo {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for ClusterInfo {
     type Error = SVDError;
     fn encode(&self) -> Result<Element, SVDError> {

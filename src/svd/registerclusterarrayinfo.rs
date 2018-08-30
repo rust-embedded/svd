@@ -1,9 +1,12 @@
 
 use xmltree::Element;
 
-use types::DimIndex;
-use ::new_element;
-use types::{Parse, Encode, parse_optional};
+use types::{DimIndex, Parse, parse_optional};
+
+#[cfg(feature = "unproven")]
+use encode::Encode;
+#[cfg(feature = "unproven")]
+use new_element;
 use elementext::ElementExt;
 
 use ::error::{SVDError};
@@ -31,6 +34,7 @@ impl Parse for RegisterClusterArrayInfo {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for RegisterClusterArrayInfo {
     type Error = SVDError;
 
@@ -50,6 +54,7 @@ impl Encode for RegisterClusterArrayInfo {
 
 
 #[cfg(test)]
+#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use run_test;

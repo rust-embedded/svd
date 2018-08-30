@@ -1,13 +1,17 @@
+#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use xmltree::Element;
 
 use parse;
-use new_element;
 use elementext::ElementExt;
 use failure::ResultExt;
 
-use types::{Parse, Encode};
+use types::Parse;
+#[cfg(feature = "unproven")]
+use encode::Encode;
+#[cfg(feature = "unproven")]
+use new_element;
 
 use ::error::{SVDError, SVDErrorKind};
 use ::svd::interrupt::Interrupt;
@@ -90,6 +94,7 @@ impl Peripheral {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for Peripheral {
     type Error = SVDError;
 

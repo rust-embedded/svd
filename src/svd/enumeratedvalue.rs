@@ -1,5 +1,5 @@
 
-
+#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use parse;
@@ -7,7 +7,10 @@ use xmltree::Element;
 use elementext::ElementExt;
 use failure::ResultExt;
 
-use types::{Parse, Encode};
+use types::{Parse};
+#[cfg(feature = "unproven")]
+use encode::Encode;
+#[cfg(feature = "unproven")]
 use new_element;
 use error::*;
 
@@ -50,6 +53,7 @@ impl Parse for EnumeratedValue {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for EnumeratedValue {
     type Error = SVDError;
 
@@ -94,6 +98,7 @@ impl Encode for EnumeratedValue {
 }
 
 #[cfg(test)]
+#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use run_test;

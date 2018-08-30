@@ -1,7 +1,12 @@
 use xmltree::Element;
 
 use parse;
-use types::{Parse, Encode};
+use types::Parse;
+#[cfg(feature = "unproven")]
+use encode::EncodeChildren;
+#[cfg(feature = "unproven")]
+use encode::Encode;
+#[cfg(feature = "unproven")]
 use new_element;
 use error::*;
 
@@ -33,8 +38,10 @@ impl Parse for Defaults {
     }
 }
 
-impl Defaults {
-    pub fn encode_children(&self) -> Result<Vec<Element>, SVDError>  {
+#[cfg(feature = "unproven")]
+impl EncodeChildren for Defaults {
+    type Error = SVDError;
+    fn encode(&self) -> Result<Vec<Element>, SVDError>  {
         let mut children = Vec::new();
 
         match self.size {
@@ -71,6 +78,7 @@ impl Defaults {
 
 
 #[cfg(test)]
+#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
 
@@ -101,7 +109,7 @@ mod tests {
         assert_eq!(parsed, expected, "Parsing tree failed");
 
         let mut tree2 = new_element("mock", None);
-        tree2.children = parsed.encode_children().unwrap();
+        tree2.children = parsed.encode().unwrap();
         assert_eq!(tree1, tree2, "Encoding value failed");
     }
 }

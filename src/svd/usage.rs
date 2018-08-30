@@ -1,9 +1,12 @@
+#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use xmltree::Element;
 use elementext::ElementExt;
 
-use types::{Parse, Encode};
+use types::Parse;
+#[cfg(feature = "unproven")]
+use encode::Encode;
 use error::*;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -29,6 +32,7 @@ impl Parse for Usage {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for Usage {
     type Error = SVDError;
 
@@ -49,6 +53,7 @@ impl Encode for Usage {
 }
 
 #[cfg(test)]
+#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use run_test;

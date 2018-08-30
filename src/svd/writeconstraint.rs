@@ -1,10 +1,13 @@
-
+#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use xmltree::Element;
 use elementext::ElementExt;
 
-use types::{Parse, Encode};
+use types::Parse;
+#[cfg(feature = "unproven")]
+use encode::Encode;
+#[cfg(feature = "unproven")]
 use new_element;
 use error::*;
 
@@ -49,6 +52,7 @@ impl Parse for WriteConstraint {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for WriteConstraint {
     type Error = SVDError;
 
@@ -80,6 +84,7 @@ impl Parse for WriteConstraintRange {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for WriteConstraintRange {
     type Error = SVDError;
 
@@ -97,6 +102,7 @@ impl Encode for WriteConstraintRange {
 }
 
 #[cfg(test)]
+#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use run_test;

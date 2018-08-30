@@ -1,5 +1,6 @@
 
 
+#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use xmltree::Element;
@@ -7,15 +8,18 @@ use failure::ResultExt;
 use elementext::ElementExt;
 
 use parse;
-use types::{Parse, Encode};
+use types::Parse;
+#[cfg(feature = "unproven")]
+use encode::Encode;
+#[cfg(feature = "unproven")]
 use new_element;
 use error::*;
 
-use ::svd::bitrange::BitRange;
-use ::svd::access::Access;
-use ::svd::enumeratedvalues::EnumeratedValues;
-use ::svd::writeconstraint::WriteConstraint;
-use ::svd::modifiedwritevalues::ModifiedWriteValues;
+use svd::bitrange::BitRange;
+use svd::access::Access;
+use svd::enumeratedvalues::EnumeratedValues;
+use svd::writeconstraint::WriteConstraint;
+use svd::modifiedwritevalues::ModifiedWriteValues;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Field {
@@ -65,6 +69,7 @@ impl Field {
 }
 
 
+#[cfg(feature = "unproven")]
 impl Encode for Field {
     type Error = SVDError;
     fn encode(&self) -> Result<Element, SVDError> {
@@ -110,6 +115,7 @@ impl Encode for Field {
 }
 
 #[cfg(test)]
+#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use ::svd::bitrange::BitRangeType;

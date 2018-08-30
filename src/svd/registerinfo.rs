@@ -1,3 +1,4 @@
+#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use xmltree::Element;
@@ -5,14 +6,17 @@ use elementext::ElementExt;
 use failure::ResultExt;
 
 use parse;
-use types::{Parse, Encode};
+use types::Parse;
+#[cfg(feature = "unproven")]
+use encode::Encode;
+#[cfg(feature = "unproven")]
 use new_element;
 use error::*;
 
-use ::svd::access::Access;
-use ::svd::field::Field;
-use ::svd::writeconstraint::WriteConstraint;
-use ::svd::modifiedwritevalues::ModifiedWriteValues;
+use svd::access::Access;
+use svd::field::Field;
+use svd::writeconstraint::WriteConstraint;
+use svd::modifiedwritevalues::ModifiedWriteValues;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RegisterInfo {
@@ -82,6 +86,7 @@ impl RegisterInfo {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for RegisterInfo {
     type Error = SVDError;
     fn encode(&self) -> Result<Element, SVDError> {
@@ -196,6 +201,7 @@ impl Encode for RegisterInfo {
 
 
 #[cfg(test)]
+#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use ::svd::bitrange::*;

@@ -1,12 +1,16 @@
 use std::ops::Deref;
 
 use xmltree::Element;
-use elementext::ElementExt;
 
-use types::{Parse, Encode};
-use ::error::{SVDError};
-use ::svd::registerinfo::RegisterInfo;
-use ::svd::registerclusterarrayinfo::RegisterClusterArrayInfo;
+use types::Parse;
+
+#[cfg(feature = "unproven")]
+use encode::Encode;
+#[cfg(feature = "unproven")]
+use elementext::ElementExt;
+use error::SVDError;
+use svd::registerinfo::RegisterInfo;
+use svd::registerclusterarrayinfo::RegisterClusterArrayInfo;
 
 
 #[derive(Clone, Debug, PartialEq)]
@@ -49,6 +53,7 @@ impl Parse for Register {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for Register {
     type Error = SVDError;
 

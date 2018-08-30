@@ -2,8 +2,9 @@
 use xmltree::Element;
 use failure::ResultExt;
 
+#[cfg(feature = "unproven")]
 use new_element;
-use types::{Parse};
+use types::Parse;
 use error::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -75,7 +76,7 @@ impl Parse for BitRange {
         })
     }
 }
-
+#[cfg(feature = "unproven")]
 impl BitRange {
     // TODO: Encode method differs from Encode trait as it acts on a set of possible children, create an interface or decide how to better do this
     pub fn encode(&self) -> Result<Vec<Element>, SVDError> {
@@ -109,6 +110,7 @@ impl BitRange {
 }
 
 #[cfg(test)]
+#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
 

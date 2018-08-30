@@ -2,7 +2,10 @@
 use xmltree::Element;
 
 use elementext::ElementExt;
-use types::{Parse, Encode};
+use types::Parse;
+#[cfg(feature = "unproven")]
+use encode::Encode;
+#[cfg(feature = "unproven")]
 use new_element;
 use error::*;
 
@@ -34,6 +37,7 @@ impl Parse for Access {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for Access {
     type Error = SVDError;
 
@@ -51,6 +55,7 @@ impl Encode for Access {
 }
 
 #[cfg(test)]
+#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use run_test;

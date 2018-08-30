@@ -2,12 +2,16 @@
 use std::ops::Deref;
 use xmltree::Element;
 
-use elementext::ElementExt;
 
-use types::{Parse, Encode};
+use types::Parse;
+
+#[cfg(feature = "unproven")]
+use encode::Encode;
+#[cfg(feature = "unproven")]
+use elementext::ElementExt;
 use error::*;
-use ::svd::clusterinfo::ClusterInfo;
-use ::svd::registerclusterarrayinfo::RegisterClusterArrayInfo;
+use svd::clusterinfo::ClusterInfo;
+use svd::registerclusterarrayinfo::RegisterClusterArrayInfo;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Cluster {
@@ -55,6 +59,7 @@ impl Parse for Cluster {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for Cluster {
     type Error = SVDError;
     // TODO: support Cluster encoding

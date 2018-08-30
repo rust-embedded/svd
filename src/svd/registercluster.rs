@@ -2,11 +2,14 @@
 
 use xmltree::Element;
 
-use types::{Parse, Encode};
+use types::Parse;
 
-use ::error::{SVDError, SVDErrorKind};
-use ::svd::register::Register;
-use ::svd::cluster::Cluster;
+#[cfg(feature = "unproven")]
+use encode::Encode;
+
+use error::{SVDError, SVDErrorKind};
+use svd::register::Register;
+use svd::cluster::Cluster;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum RegisterCluster {
@@ -40,6 +43,7 @@ impl Parse for RegisterCluster {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for RegisterCluster {
     type Error = SVDError;
     fn encode(&self) -> Result<Element, SVDError> {

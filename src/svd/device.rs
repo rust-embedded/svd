@@ -1,10 +1,15 @@
 
+#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 use xmltree::Element;
 use elementext::ElementExt;
 
 use parse;
-use types::{Parse, Encode};
+use types::Parse;
+
+#[cfg(feature = "unproven")]
+use encode::Encode;
+#[cfg(feature = "unproven")]
 use new_element;
 use ::error::SVDError;
 use ::svd::cpu::Cpu;
@@ -54,6 +59,7 @@ impl Parse for Device {
     }
 }
 
+#[cfg(feature = "unproven")]
 impl Encode for Device {
     type Error = SVDError;
 
