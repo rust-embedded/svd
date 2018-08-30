@@ -1,13 +1,13 @@
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
-use xmltree::Element;
 use elementext::ElementExt;
+use xmltree::Element;
 
-use types::Parse;
 #[cfg(feature = "unproven")]
 use encode::Encode;
 use error::*;
+use types::Parse;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Usage {

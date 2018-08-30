@@ -15,12 +15,15 @@ pub trait Parse {
     fn parse(&Element) -> Result<Self::Object, Self::Error>;
 }
 
-
 /// Parses an optional child element with the provided name and Parse function
 /// Returns an none if the child doesn't exist, Ok(Some(e)) if parsing succeeds,
 /// and Err() if parsing fails.
-pub fn optional<'a, T>(n: &str, e: &'a Element) -> Result<Option<T::Object>, SVDError>
-where T: Parse<Error = SVDError>
+pub fn optional<'a, T>(
+    n: &str,
+    e: &'a Element,
+) -> Result<Option<T::Object>, SVDError>
+where
+    T: Parse<Error = SVDError>,
 {
     let child = match e.get_child(n) {
         Some(c) => c,
@@ -32,4 +35,3 @@ where T: Parse<Error = SVDError>
         Err(e) => Err(e),
     }
 }
-

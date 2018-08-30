@@ -1,14 +1,14 @@
 use xmltree::Element;
 
-use parse;
-use types::Parse;
-#[cfg(feature = "unproven")]
-use encode::EncodeChildren;
 #[cfg(feature = "unproven")]
 use encode::Encode;
 #[cfg(feature = "unproven")]
-use new_element;
+use encode::EncodeChildren;
 use error::*;
+#[cfg(feature = "unproven")]
+use new_element;
+use parse;
+use types::Parse;
 
 use svd::access::Access;
 
@@ -41,26 +41,35 @@ impl Parse for Defaults {
 #[cfg(feature = "unproven")]
 impl EncodeChildren for Defaults {
     type Error = SVDError;
-    fn encode(&self) -> Result<Vec<Element>, SVDError>  {
+    fn encode(&self) -> Result<Vec<Element>, SVDError> {
         let mut children = Vec::new();
 
         match self.size {
             Some(ref v) => {
-                children.push(new_element("size", Some(format!("0x{:08.x}", v))));
+                children.push(new_element(
+                    "size",
+                    Some(format!("0x{:08.x}", v)),
+                ));
             }
             None => (),
         };
 
         match self.reset_value {
             Some(ref v) => {
-                children.push(new_element("resetValue", Some(format!("0x{:08.x}", v))));
+                children.push(new_element(
+                    "resetValue",
+                    Some(format!("0x{:08.x}", v)),
+                ));
             }
             None => (),
         };
 
         match self.reset_mask {
             Some(ref v) => {
-                children.push(new_element("resetMask", Some(format!("0x{:08.x}", v))));
+                children.push(new_element(
+                    "resetMask",
+                    Some(format!("0x{:08.x}", v)),
+                ));
             }
             None => (),
         };
@@ -75,7 +84,6 @@ impl EncodeChildren for Defaults {
         Ok(children)
     }
 }
-
 
 #[cfg(test)]
 #[cfg(feature = "unproven")]
@@ -94,7 +102,7 @@ mod tests {
             </mock>
         ",
         );
-        
+
         let expected = Defaults {
             size: Some(0xaabbccdd),
             reset_value: Some(0x11223344),

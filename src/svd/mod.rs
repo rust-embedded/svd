@@ -63,4 +63,3 @@ pub use self::device::Device;
 
 pub mod modifiedwritevalues;
 pub use self::modifiedwritevalues::ModifiedWriteValues;
-

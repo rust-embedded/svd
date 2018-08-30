@@ -1,22 +1,22 @@
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
-use xmltree::Element;
 use elementext::ElementExt;
 use failure::ResultExt;
+use xmltree::Element;
 
-use parse;
-use types::Parse;
 #[cfg(feature = "unproven")]
 use encode::Encode;
+use error::*;
 #[cfg(feature = "unproven")]
 use new_element;
-use error::*;
+use parse;
+use types::Parse;
 
 use svd::access::Access;
 use svd::field::Field;
-use svd::writeconstraint::WriteConstraint;
 use svd::modifiedwritevalues::ModifiedWriteValues;
+use svd::writeconstraint::WriteConstraint;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RegisterInfo {
@@ -38,19 +38,22 @@ pub struct RegisterInfo {
     pub(crate) _extensible: (),
 }
 
-
 impl Parse for RegisterInfo {
     type Object = RegisterInfo;
     type Error = SVDError;
 
     fn parse(tree: &Element) -> Result<RegisterInfo, SVDError> {
         let name = tree.get_child_text("name")?;
-        RegisterInfo::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In register `{}`", name))).map_err(|e| e.into())
+        RegisterInfo::_parse(tree, name.clone())
+            .context(SVDErrorKind::Other(format!(
+                "In register `{}`",
+                name
+            )))
+            .map_err(|e| e.into())
     }
 }
 
-
-impl RegisterInfo {      
+impl RegisterInfo {
     fn _parse(tree: &Element, name: String) -> Result<RegisterInfo, SVDError> {
         Ok(RegisterInfo {
             name,
@@ -58,29 +61,36 @@ impl RegisterInfo {
             alternate_register: tree.get_child_text_opt("alternateRegister")?,
             derived_from: tree.get_child_text_opt("derivedFrom")?,
             description: tree.get_child_text("description")?,
-            address_offset:
-                tree.get_child_u32("addressOffset")?,
+            address_offset: tree.get_child_u32("addressOffset")?,
             size: parse::optional::<u32>("size", tree)?,
             access: parse::optional::<Access>("access", tree)?,
-            reset_value:
-                parse::optional::<u32>("resetValue", tree)?,
-            reset_mask:
-                parse::optional::<u32>("resetMask", tree)?,
+            reset_value: parse::optional::<u32>("resetValue", tree)?,
+            reset_mask: parse::optional::<u32>("resetMask", tree)?,
             fields: {
                 if let Some(fields) = tree.get_child("fields") {
-                        let fs: Result<Vec<_>, _> =
-                            fields.children
-                            .iter()
-                            .enumerate()
-                            .map(|(e,t)| Field::parse(t).context(SVDErrorKind::Other(format!("Parsing field #{}", e).into())))
-                            .collect();
-                        Some(fs?)
+                    let fs: Result<Vec<_>, _> = fields
+                        .children
+                        .iter()
+                        .enumerate()
+                        .map(|(e, t)| {
+                            Field::parse(t).context(SVDErrorKind::Other(
+                                format!("Parsing field #{}", e).into(),
+                            ))
+                        })
+                        .collect();
+                    Some(fs?)
                 } else {
                     None
                 }
             },
-            write_constraint: parse::optional::<WriteConstraint>("writeConstraint", tree)?,
-            modified_write_values: parse::optional::<ModifiedWriteValues>("modifiedWriteValues", tree)?,
+            write_constraint: parse::optional::<WriteConstraint>(
+                "writeConstraint",
+                tree,
+            )?,
+            modified_write_values: parse::optional::<ModifiedWriteValues>(
+                "modifiedWriteValues",
+                tree,
+            )?,
             _extensible: (),
         })
     }
@@ -98,7 +108,7 @@ impl Encode for RegisterInfo {
                 new_element("description", Some(self.description.clone())),
                 new_element(
                     "addressOffset",
-                    Some(format!("0x{:x}", self.address_offset))
+                    Some(format!("0x{:x}", self.address_offset)),
                 ),
             ],
             text: None,
@@ -106,36 +116,38 @@ impl Encode for RegisterInfo {
 
         match self.alternate_group {
             Some(ref v) => {
-                elem.children.push(
-                    new_element("alternateGroup", Some(format!("{}", v))),
-                );
+                elem.children.push(new_element(
+                    "alternateGroup",
+                    Some(format!("{}", v)),
+                ));
             }
-            None => ()
+            None => (),
         }
 
-         match self.alternate_register {
+        match self.alternate_register {
             Some(ref v) => {
-                elem.children.push(
-                    new_element("alternateRegister", Some(format!("{}", v))),
-                );
+                elem.children.push(new_element(
+                    "alternateRegister",
+                    Some(format!("{}", v)),
+                ));
             }
-            None => ()
+            None => (),
         }
 
-         match self.derived_from {
+        match self.derived_from {
             Some(ref v) => {
-                elem.children.push(
-                    new_element("derivedFrom", Some(format!("{}", v))),
-                );
+                elem.children.push(new_element(
+                    "derivedFrom",
+                    Some(format!("{}", v)),
+                ));
             }
-            None => ()
+            None => (),
         }
 
         match self.size {
             Some(ref v) => {
-                elem.children.push(
-                    new_element("size", Some(format!("{}", v))),
-                );
+                elem.children
+                    .push(new_element("size", Some(format!("{}", v))));
             }
             None => (),
         };
@@ -169,7 +181,8 @@ impl Encode for RegisterInfo {
 
         match self.fields {
             Some(ref v) => {
-                let children : Result<Vec<Element>, SVDError> = v.iter().map(Field::encode).collect();
+                let children: Result<Vec<Element>, SVDError> =
+                    v.iter().map(Field::encode).collect();
                 let fields = Element {
                     name: String::from("fields"),
                     attributes: HashMap::new(),
@@ -199,49 +212,48 @@ impl Encode for RegisterInfo {
     }
 }
 
-
 #[cfg(test)]
 #[cfg(feature = "unproven")]
 mod tests {
     use super::*;
-    use ::svd::bitrange::*;
     use run_test;
+    use svd::bitrange::*;
 
     #[test]
     fn decode_encode() {
-        let tests = vec![
-            (
-                RegisterInfo {
-                    name: String::from("WRITECTRL"),
-                    alternate_group: Some(String::from("alternate group")),
-                    alternate_register: Some(String::from("alternate register")),
-                    derived_from: Some(String::from("derived from")),
-                    description: String::from("Write Control Register"),
-                    address_offset: 8,
-                    size: Some(32),
+        let tests = vec![(
+            RegisterInfo {
+                name: String::from("WRITECTRL"),
+                alternate_group: Some(String::from("alternate group")),
+                alternate_register: Some(String::from("alternate register")),
+                derived_from: Some(String::from("derived from")),
+                description: String::from("Write Control Register"),
+                address_offset: 8,
+                size: Some(32),
+                access: Some(Access::ReadWrite),
+                reset_value: Some(0x00000000),
+                reset_mask: Some(0x00000023),
+                fields: Some(vec![Field {
+                    name: String::from("WREN"),
+                    description: Some(String::from(
+                        "Enable Write/Erase Controller",
+                    )),
+                    bit_range: BitRange {
+                        offset: 0,
+                        width: 1,
+                        range_type: BitRangeType::OffsetWidth,
+                    },
                     access: Some(Access::ReadWrite),
-                    reset_value: Some(0x00000000),
-                    reset_mask: Some(0x00000023),
-                    fields: Some(vec![
-                        Field {
-                            name: String::from("WREN"),
-                            description: Some(String::from("Enable Write/Erase Controller")),
-                            bit_range: BitRange {
-                                offset: 0,
-                                width: 1,
-                                range_type: BitRangeType::OffsetWidth,
-                            },
-                            access: Some(Access::ReadWrite),
-                            enumerated_values: Vec::new(),
-                            write_constraint: None,
-                            modified_write_values: None,
-                            _extensible: (),
-                        },
-                    ]),
+                    enumerated_values: Vec::new(),
                     write_constraint: None,
-                    modified_write_values: Some(ModifiedWriteValues::OneToToggle),
+                    modified_write_values: None,
                     _extensible: (),
-                },"
+                }]),
+                write_constraint: None,
+                modified_write_values: Some(ModifiedWriteValues::OneToToggle),
+                _extensible: (),
+            },
+            "
             <register>
                 <name>WRITECTRL</name>
                 <description>Write Control Register</description>
@@ -264,9 +276,8 @@ mod tests {
                 </fields>
                 <modifiedWriteValues>oneToToggle</modifiedWriteValues>
             </register>
-            "
-            ),
-        ];
+            ",
+        )];
 
         run_test::<RegisterInfo>(&tests[..]);
     }

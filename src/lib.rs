@@ -41,7 +41,7 @@ pub mod svd;
 pub use svd::*;
 // Error defines SVD error types
 pub mod error;
-use error::{SVDError};
+use error::SVDError;
 // Parse defines parsing interfaces
 pub mod parse;
 use parse::Parse;
@@ -80,13 +80,13 @@ fn trim_utf8_bom(s: &str) -> &str {
 
 /// Helper to create new base xml elements
 #[cfg(feature = "unproven")]
-pub (crate) fn new_element(name: &str, text: Option<String>) -> Element {
+pub(crate) fn new_element(name: &str, text: Option<String>) -> Element {
     Element {
         name: String::from(name),
         attributes: HashMap::new(),
         children: Vec::new(),
         text: text,
-    } 
+    }
 }
 
 /// Generic test helper function
@@ -94,14 +94,27 @@ pub (crate) fn new_element(name: &str, text: Option<String>) -> Element {
 /// Parse and Encode and tests object encoding and decoding
 #[cfg(test)]
 #[cfg(feature = "unproven")]
-pub fn run_test<T: Parse<Error=SVDError, Object=T> + Encode<Error=SVDError> + ::std::fmt::Debug + PartialEq>(tests: &[(T, &str)]) {
+pub fn run_test<
+    T: Parse<Error = SVDError, Object = T>
+        + Encode<Error = SVDError>
+        + ::std::fmt::Debug
+        + PartialEq,
+>(
+    tests: &[(T, &str)],
+) {
     for t in tests {
         let tree1 = Element::parse(t.1.as_bytes()).unwrap();
         let elem = T::parse(&tree1).unwrap();
-        assert_eq!(elem, t.0, "Error parsing xml` (mismatch between parsed and expected)");
+        assert_eq!(
+            elem, t.0,
+            "Error parsing xml` (mismatch between parsed and expected)"
+        );
         let tree2 = elem.encode().unwrap();
-        assert_eq!(tree1, tree2, "Error encoding xml (mismatch between encoded and original)");
-    };
+        assert_eq!(
+            tree1, tree2,
+            "Error encoding xml (mismatch between encoded and original)"
+        );
+    }
 }
 
 #[cfg(test)]
@@ -117,4 +130,3 @@ mod tests {
         assert_eq!("xyz", trim_utf8_bom("xyz"));
     }
 }
-

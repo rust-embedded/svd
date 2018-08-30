@@ -1,15 +1,13 @@
-
+use elementext::ElementExt;
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 use xmltree::Element;
-use elementext::ElementExt;
 
 use types::Parse;
 
 #[cfg(feature = "unproven")]
 use encode::Encode;
 use error::*;
-
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ModifiedWriteValues {
@@ -26,11 +24,11 @@ pub enum ModifiedWriteValues {
 impl Parse for ModifiedWriteValues {
     type Object = ModifiedWriteValues;
     type Error = SVDError;
-    
+
     fn parse(tree: &Element) -> Result<ModifiedWriteValues, SVDError> {
         use self::ModifiedWriteValues::*;
         let text = tree.get_text()?;
-        
+
         Ok(match text.as_ref() {
             "oneToClear" => OneToClear,
             "oneToSet" => OneToSet,
@@ -40,7 +38,12 @@ impl Parse for ModifiedWriteValues {
             "clear" => Clear,
             "set" => Set,
             "modify" => Modify,
-            s => return Err(SVDErrorKind::InvalidModifiedWriteValues(tree.clone(), s.into()).into())
+            s => {
+                return Err(SVDErrorKind::InvalidModifiedWriteValues(
+                    tree.clone(),
+                    s.into(),
+                ).into())
+            }
         })
     }
 }
@@ -80,13 +83,11 @@ mod tests {
     #[test]
     fn decode_encode() {
         // FIXME: Do we need a more extensive test?
-        let tests = vec![
-            (
-                ModifiedWriteValues::OneToToggle,
-                "<modifiedWriteValues>oneToToggle</modifiedWriteValues>"
-            ),
-        ];
-        
+        let tests = vec![(
+            ModifiedWriteValues::OneToToggle,
+            "<modifiedWriteValues>oneToToggle</modifiedWriteValues>",
+        )];
+
         run_test::<ModifiedWriteValues>(&tests[..]);
     }
 }

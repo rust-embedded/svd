@@ -5,13 +5,12 @@ use xmltree::Element;
 use types::Parse;
 
 #[cfg(feature = "unproven")]
-use encode::Encode;
-#[cfg(feature = "unproven")]
 use elementext::ElementExt;
+#[cfg(feature = "unproven")]
+use encode::Encode;
 use error::SVDError;
-use svd::registerinfo::RegisterInfo;
 use svd::registerclusterarrayinfo::RegisterClusterArrayInfo;
-
+use svd::registerinfo::RegisterInfo;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Register {
@@ -29,7 +28,6 @@ impl Deref for Register {
         }
     }
 }
-
 
 impl Parse for Register {
     type Object = Register;

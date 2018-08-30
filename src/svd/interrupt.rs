@@ -1,18 +1,17 @@
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
-use xmltree::Element;
 use failure::ResultExt;
+use xmltree::Element;
 
 use elementext::ElementExt;
 
-use types::Parse;
 #[cfg(feature = "unproven")]
 use encode::Encode;
+use error::*;
 #[cfg(feature = "unproven")]
 use new_element;
-use error::*;
-
+use types::Parse;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Interrupt {
@@ -36,10 +35,18 @@ impl Parse for Interrupt {
     type Error = SVDError;
     fn parse(tree: &Element) -> Result<Interrupt, SVDError> {
         if tree.name != "interrupt" {
-            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("interrupt")).into());
+            return Err(SVDErrorKind::NotExpectedTag(
+                tree.clone(),
+                format!("interrupt"),
+            ).into());
         }
         let name = tree.get_child_text("name")?;
-        Interrupt::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In interrupt `{}`", name))).map_err(|e| e.into())
+        Interrupt::_parse(tree, name.clone())
+            .context(SVDErrorKind::Other(format!(
+                "In interrupt `{}`",
+                name
+            )))
+            .map_err(|e| e.into())
     }
 }
 
@@ -65,26 +72,23 @@ impl Encode for Interrupt {
 #[cfg(feature = "unproven")]
 mod tests {
     use super::*;
-    use run_test;    
+    use run_test;
 
     #[test]
     fn decode_encode() {
-        let tests = vec![
-            (
-                Interrupt {
-                    name: String::from("test"),
-                    description: Some(String::from("description")),
-                    value: 14,
-                },
-                "
+        let tests = vec![(
+            Interrupt {
+                name: String::from("test"),
+                description: Some(String::from("description")),
+                value: 14,
+            },
+            "
                 <interrupt>
                     <name>test</name>
                     <description>description</description>
                     <value>14</value>
-                </interrupt>"
-                
-            ),
-        ];
+                </interrupt>",
+        )];
 
         run_test::<Interrupt>(&tests[..]);
     }

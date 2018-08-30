@@ -1,13 +1,12 @@
-
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use xmltree::Element;
 
 use elementext::ElementExt;
-use types::Parse;
 #[cfg(feature = "unproven")]
 use encode::Encode;
+use types::Parse;
 
 use error::*;
 
@@ -16,7 +15,7 @@ pub enum Endian {
     Little,
     Big,
     Selectable,
-    Other
+    Other,
 }
 
 impl Parse for Endian {
@@ -45,7 +44,7 @@ impl Encode for Endian {
             Endian::Little => String::from("little"),
             Endian::Big => String::from("big"),
             Endian::Selectable => String::from("selectable"),
-            Endian::Other => String::from("other")
+            Endian::Other => String::from("other"),
         };
 
         Ok(Element {
@@ -68,7 +67,10 @@ mod tests {
         let tests = vec![
             (Endian::Little, "<endian>little</endian>"),
             (Endian::Big, "<endian>big</endian>"),
-            (Endian::Selectable,"<endian>selectable</endian>"),
+            (
+                Endian::Selectable,
+                "<endian>selectable</endian>",
+            ),
             (Endian::Other, "<endian>other</endian>"),
         ];
 

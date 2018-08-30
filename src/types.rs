@@ -1,20 +1,26 @@
 //! Shared primitive types for use in SVD objects.
 
-use xmltree::Element;
 use failure::ResultExt;
+use xmltree::Element;
 
-pub use parse::Parse;
-pub use parse::optional as parse_optional;
 #[cfg(feature = "unproven")]
 pub use encode::Encode;
+pub use parse::optional as parse_optional;
+pub use parse::Parse;
 
 use elementext::ElementExt;
 use error::{SVDError, SVDErrorKind};
 
 macro_rules! try {
     ($e:expr) => {
-        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
-    }
+        $e.expect(concat!(
+            file!(),
+            ":",
+            line!(),
+            " ",
+            stringify!($e)
+        ))
+    };
 }
 
 impl Parse for u32 {
@@ -25,24 +31,32 @@ impl Parse for u32 {
         let text = tree.get_text()?;
 
         if text.starts_with("0x") || text.starts_with("0X") {
-            u32::from_str_radix(&text["0x".len()..], 16).context(SVDErrorKind::Other(format!("{} invalid", text))).map_err(|e| e.into())
+            u32::from_str_radix(&text["0x".len()..], 16)
+                .context(SVDErrorKind::Other(format!("{} invalid", text)))
+                .map_err(|e| e.into())
         } else if text.starts_with('#') {
             // Handle strings in the binary form of:
             // #01101x1
             // along with don't care character x (replaced with 0)
-            u32::from_str_radix(&str::replace(&text.to_lowercase()["#".len()..], "x", "0"), 2).context(SVDErrorKind::Other(format!("{} invalid", text))).map_err(|e| e.into())
-        } else if text.starts_with("0b"){
+            u32::from_str_radix(
+                &str::replace(&text.to_lowercase()["#".len()..], "x", "0"),
+                2,
+            ).context(SVDErrorKind::Other(format!("{} invalid", text)))
+                .map_err(|e| e.into())
+        } else if text.starts_with("0b") {
             // Handle strings in the binary form of:
             // 0b01101x1
             // along with don't care character x (replaced with 0)
-            u32::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2).context(SVDErrorKind::Other(format!("{} invalid", text))).map_err(|e| e.into())
-
+            u32::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2)
+                .context(SVDErrorKind::Other(format!("{} invalid", text)))
+                .map_err(|e| e.into())
         } else {
-            text.parse::<u32>().context(SVDErrorKind::Other(format!("{} invalid", text))).map_err(|e| e.into())
+            text.parse::<u32>()
+                .context(SVDErrorKind::Other(format!("{} invalid", text)))
+                .map_err(|e| e.into())
         }
     }
 }
-
 
 pub struct BoolParse;
 
@@ -91,4 +105,3 @@ impl Parse for DimIndex {
 }
 
 //TODO: encode for DimIndex
-

@@ -3,8 +3,8 @@
 
 use xmltree::Element;
 
-use types::{Parse, BoolParse};
 use failure::ResultExt;
+use types::{BoolParse, Parse};
 
 use error::*;
 
@@ -36,7 +36,9 @@ impl ElementExt for Element {
         String: PartialEq<K>,
     {
         if let Some(child) = self.get_child(k) {
-            Ok(Some(child.get_text().map(|s| s.to_owned())?))
+            Ok(Some(child
+                .get_text()
+                .map(|s| s.to_owned())?))
         } else {
             Ok(None)
         }
@@ -46,7 +48,9 @@ impl ElementExt for Element {
         String: PartialEq<K>,
         K: ::std::fmt::Display + Clone,
     {
-        self.get_child_text_opt(k.clone())?.ok_or(SVDErrorKind::MissingTag(self.clone(), format!("{}", k)).into(),)
+        self.get_child_text_opt(k.clone())?.ok_or(
+            SVDErrorKind::MissingTag(self.clone(), format!("{}", k)).into(),
+        )
     }
 
     /// Get text contained by an XML Element
@@ -56,10 +60,10 @@ impl ElementExt for Element {
             // FIXME: Doesn't look good because SVDErrorKind doesn't format by itself. We already
             // capture the element and this information can be used for getting the name
             // This would fix ParseError
-            None => {
-                Err(SVDErrorKind::EmptyTag(self.clone(), self.name.clone())
-                    .into())
-            }
+            None => Err(SVDErrorKind::EmptyTag(
+                self.clone(),
+                self.name.clone(),
+            ).into()),
         }
     }
 
@@ -67,14 +71,18 @@ impl ElementExt for Element {
     fn get_child_elem<'a>(&'a self, n: &str) -> Result<&'a Element, SVDError> {
         match self.get_child(n) {
             Some(s) => Ok(s),
-            None => Err(SVDErrorKind::MissingTag(self.clone(), n.to_string()).into()),
+            None => Err(
+                SVDErrorKind::MissingTag(self.clone(), n.to_string()).into(),
+            ),
         }
     }
 
     /// Get a u32 value from a named child element
     fn get_child_u32(&self, n: &str) -> Result<u32, SVDError> {
         let s = self.get_child_elem(n)?;
-        u32::parse(&s).context(SVDErrorKind::ParseError(self.clone())).map_err(|e| e.into())
+        u32::parse(&s)
+            .context(SVDErrorKind::ParseError(self.clone()))
+            .map_err(|e| e.into())
     }
 
     /// Get a bool value from a named child element
@@ -86,7 +94,7 @@ impl ElementExt for Element {
     // Merges the children of two elements, maintaining the name and description of the first
     fn merge(&self, r: &Self) -> Self {
         let mut n = self.clone();
-        for c in  &r.children {
+        for c in &r.children {
             n.children.push(c.clone());
         }
         n

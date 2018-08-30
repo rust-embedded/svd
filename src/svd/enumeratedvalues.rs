@@ -1,21 +1,19 @@
-
-
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
-use xmltree::Element;
 use elementext::ElementExt;
 use failure::ResultExt;
+use xmltree::Element;
 
-use parse;
-use types::Parse;
 #[cfg(feature = "unproven")]
 use encode::Encode;
+use error::*;
 #[cfg(feature = "unproven")]
 use new_element;
-use error::*;
-use svd::usage::Usage;
+use parse;
 use svd::enumeratedvalue::EnumeratedValue;
+use svd::usage::Usage;
+use types::Parse;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnumeratedValues {
@@ -24,7 +22,7 @@ pub struct EnumeratedValues {
     pub derived_from: Option<String>,
     pub values: Vec<EnumeratedValue>,
     // Reserve the right to add more fields to this struct
-    pub (crate) _extensible: (),
+    pub(crate) _extensible: (),
 }
 
 impl Parse for EnumeratedValues {
@@ -41,11 +39,15 @@ impl Parse for EnumeratedValues {
                 .get(&"derivedFrom".to_owned())
                 .map(|s| s.to_owned()),
             values: {
-                let values: Result<Vec<_>,_> = tree.children
+                let values: Result<Vec<_>, _> = tree.children
                     .iter()
                     .filter(|t| t.name == "enumeratedValue")
                     .enumerate()
-                    .map(|(e,t)| EnumeratedValue::parse(t).context(SVDErrorKind::Other(format!("Parsing enumerated value #{}", e).into())))
+                    .map(|(e, t)| {
+                        EnumeratedValue::parse(t).context(SVDErrorKind::Other(
+                            format!("Parsing enumerated value #{}", e).into(),
+                        ))
+                    })
                     .collect();
                 values?
             },
@@ -68,7 +70,8 @@ impl Encode for EnumeratedValues {
 
         match self.name {
             Some(ref d) => {
-                base.children.push(new_element("name", Some((*d).clone())));
+                base.children
+                    .push(new_element("name", Some((*d).clone())));
             }
             None => (),
         };
@@ -82,10 +85,8 @@ impl Encode for EnumeratedValues {
 
         match self.derived_from {
             Some(ref v) => {
-                base.attributes.insert(
-                    String::from("derivedFrom"),
-                    (*v).clone(),
-                );
+                base.attributes
+                    .insert(String::from("derivedFrom"), (*v).clone());
             }
             None => (),
         }

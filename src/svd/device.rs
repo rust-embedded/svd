@@ -1,20 +1,19 @@
-
+use elementext::ElementExt;
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 use xmltree::Element;
-use elementext::ElementExt;
 
 use parse;
 use types::Parse;
 
 #[cfg(feature = "unproven")]
 use encode::Encode;
+use error::SVDError;
 #[cfg(feature = "unproven")]
 use new_element;
-use ::error::SVDError;
-use ::svd::cpu::Cpu;
-use ::svd::peripheral::Peripheral;
-use ::svd::defaults::Defaults;
+use svd::cpu::Cpu;
+use svd::defaults::Defaults;
+use svd::peripheral::Peripheral;
 
 #[derive(Clone, Debug)]
 pub struct Device {
@@ -39,7 +38,10 @@ impl Parse for Device {
     fn parse(tree: &Element) -> Result<Device, SVDError> {
         Ok(Device {
             name: tree.get_child_text("name")?,
-            schema_version: tree.attributes.get("schemaVersion").unwrap().clone(),
+            schema_version: tree.attributes
+                .get("schemaVersion")
+                .unwrap()
+                .clone(),
             cpu: parse::optional::<Cpu>("cpu", tree)?,
             version: tree.get_child_text_opt("version")?,
             description: tree.get_child_text_opt("description")?,
@@ -63,13 +65,11 @@ impl Parse for Device {
 impl Encode for Device {
     type Error = SVDError;
 
-      fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element, SVDError> {
         let mut elem = Element {
             name: String::from("device"),
             attributes: HashMap::new(),
-            children: vec![
-                new_element("name", Some(self.name.clone())),
-            ],
+            children: vec![new_element("name", Some(self.name.clone()))],
             text: None,
         };
 
@@ -85,24 +85,30 @@ impl Encode for Device {
             String::from("xs:noNamespaceSchemaLocation"),
             format!("CMSIS-SVD_Schema_{}.xsd", self.schema_version),
         );
-        
+
         match self.version {
-            Some(ref v) => elem.children.push(new_element("version", Some(v.clone()))),
+            Some(ref v) => elem.children
+                .push(new_element("version", Some(v.clone()))),
             None => (),
         }
 
         match self.description {
-            Some(ref v) => elem.children.push(new_element("description", Some(v.clone()))),
+            Some(ref v) => elem.children
+                .push(new_element("description", Some(v.clone()))),
             None => (),
         }
 
-         match self.description {
-            Some(ref v) => elem.children.push(new_element("addressUnitBits", Some(format!("{}", v)))),
+        match self.description {
+            Some(ref v) => elem.children.push(new_element(
+                "addressUnitBits",
+                Some(format!("{}", v)),
+            )),
             None => (),
         }
 
-         match self.width {
-            Some(ref v) => elem.children.push(new_element("width", Some(format!("{}", v)))),
+        match self.width {
+            Some(ref v) => elem.children
+                .push(new_element("width", Some(format!("{}", v)))),
             None => (),
         }
 
@@ -113,7 +119,10 @@ impl Encode for Device {
             None => (),
         }
 
-        let peripherals: Result<Vec<_>, _> = self.peripherals.iter().map(Peripheral::encode).collect();
+        let peripherals: Result<Vec<_>, _> = self.peripherals
+            .iter()
+            .map(Peripheral::encode)
+            .collect();
         elem.children.push(Element {
             name: String::from("peripherals"),
             attributes: HashMap::new(),

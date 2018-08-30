@@ -1,15 +1,14 @@
-
 use xmltree::Element;
 
-use types::{DimIndex, Parse, parse_optional};
+use types::{parse_optional, DimIndex, Parse};
 
+use elementext::ElementExt;
 #[cfg(feature = "unproven")]
 use encode::Encode;
 #[cfg(feature = "unproven")]
 use new_element;
-use elementext::ElementExt;
 
-use ::error::{SVDError};
+use error::SVDError;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RegisterClusterArrayInfo {
@@ -41,17 +40,23 @@ impl Encode for RegisterClusterArrayInfo {
     fn encode(&self) -> Result<Element, SVDError> {
         let mut e = new_element("registerClusterArrayInfo", None);
 
-        e.children.push(new_element("dim", Some(format!("{}", self.dim))));
-        e.children.push(new_element("dimIncrement", Some(format!("{}", self.dim_increment))));
+        e.children.push(new_element(
+            "dim",
+            Some(format!("{}", self.dim)),
+        ));
+        e.children.push(new_element(
+            "dimIncrement",
+            Some(format!("{}", self.dim_increment)),
+        ));
 
         if let Some(ref di) = self.dim_index {
-            e.children.push(new_element("dimIndex", Some(di.join(","))));
+            e.children
+                .push(new_element("dimIndex", Some(di.join(","))));
         }
 
         Ok(e)
     }
 }
-
 
 #[cfg(test)]
 #[cfg(feature = "unproven")]
@@ -60,9 +65,9 @@ mod tests {
     use run_test;
 
     #[test]
-    fn decode_encode() {          
-        let tests = vec![
-            (RegisterClusterArrayInfo {
+    fn decode_encode() {
+        let tests = vec![(
+            RegisterClusterArrayInfo {
                 dim: 100,
                 dim_increment: 4,
                 dim_index: Some(vec!["10".to_owned(), "20".to_owned()]),
@@ -73,8 +78,8 @@ mod tests {
                 <dimIncrement>4</dimIncrement>
                 <dimIndex>10,20</dimIndex>
             </registerClusterArrayInfo>
-            ")
-        ];
+            ",
+        )];
 
         run_test::<RegisterClusterArrayInfo>(&tests[..]);
     }

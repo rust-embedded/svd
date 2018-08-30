@@ -3,20 +3,20 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use parse;
 use elementext::ElementExt;
 use failure::ResultExt;
+use parse;
 
-use types::Parse;
 #[cfg(feature = "unproven")]
 use encode::Encode;
 #[cfg(feature = "unproven")]
 use new_element;
+use types::Parse;
 
-use ::error::{SVDError, SVDErrorKind};
-use ::svd::interrupt::Interrupt;
-use ::svd::addressblock::AddressBlock;
-use ::svd::registercluster::RegisterCluster;
+use error::{SVDError, SVDErrorKind};
+use svd::addressblock::AddressBlock;
+use svd::interrupt::Interrupt;
+use svd::registercluster::RegisterCluster;
 
 #[derive(Clone, Debug)]
 pub struct Peripheral {
@@ -41,19 +41,33 @@ impl Parse for Peripheral {
 
     fn parse(tree: &Element) -> Result<Peripheral, SVDError> {
         if tree.name != "peripheral" {
-            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("peripheral")).into());
+            return Err(SVDErrorKind::NotExpectedTag(
+                tree.clone(),
+                format!("peripheral"),
+            ).into());
         }
         let name = tree.get_child_text("name")?;
-        Peripheral::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In peripheral `{}`", name))).map_err(|e| e.into())
+        Peripheral::_parse(tree, name.clone())
+            .context(SVDErrorKind::Other(format!(
+                "In peripheral `{}`",
+                name
+            )))
+            .map_err(|e| e.into())
     }
 }
 
 impl Peripheral {
     pub fn derive_from(&self, other: &Peripheral) -> Peripheral {
         let mut derived = self.clone();
-        derived.group_name = derived.group_name.or_else(|| other.group_name.clone());
-        derived.description = derived.description.or_else(|| other.description.clone());
-        derived.registers = derived.registers.or_else(|| other.registers.clone());
+        derived.group_name = derived
+            .group_name
+            .or_else(|| other.group_name.clone());
+        derived.description = derived
+            .description
+            .or_else(|| other.description.clone());
+        derived.registers = derived
+            .registers
+            .or_else(|| other.registers.clone());
         if derived.interrupt.is_empty() {
             derived.interrupt = other.interrupt.clone();
         }
@@ -68,27 +82,36 @@ impl Peripheral {
             group_name: tree.get_child_text_opt("groupName")?,
             description: tree.get_child_text_opt("description")?,
             base_address: tree.get_child_u32("baseAddress")?,
-            address_block: parse::optional::<AddressBlock>("addressBlock", tree)?,
+            address_block: parse::optional::<AddressBlock>(
+                "addressBlock",
+                tree,
+            )?,
             interrupt: {
-                let interrupt: Result<Vec<_>,_> = tree.children
+                let interrupt: Result<Vec<_>, _> = tree.children
                     .iter()
                     .filter(|t| t.name == "interrupt")
                     .enumerate()
-                    .map(|(e,i)| Interrupt::parse(i).context(SVDErrorKind::Other(format!("Parsing interrupt #{}", e).into())))
+                    .map(|(e, i)| {
+                        Interrupt::parse(i).context(SVDErrorKind::Other(
+                            format!("Parsing interrupt #{}", e).into(),
+                        ))
+                    })
                     .collect();
                 interrupt?
             },
             registers: if let Some(registers) = tree.get_child("registers") {
-                let rs: Result<Vec<_>, _> = registers.children.iter().map(RegisterCluster::parse).collect();
+                let rs: Result<Vec<_>, _> = registers
+                    .children
+                    .iter()
+                    .map(RegisterCluster::parse)
+                    .collect();
                 Some(rs?)
             } else {
                 None
             },
-            derived_from: tree.attributes.get("derivedFrom").map(
-                |s| {
-                    s.to_owned()
-                },
-            ),
+            derived_from: tree.attributes
+                .get("derivedFrom")
+                .map(|s| s.to_owned()),
             _extensible: (),
         })
     }
@@ -108,9 +131,8 @@ impl Encode for Peripheral {
 
         match self.version {
             Some(ref v) => {
-                elem.children.push(
-                    new_element("version", Some(format!("{}", v))),
-                );
+                elem.children
+                    .push(new_element("version", Some(format!("{}", v))));
             }
             None => (),
         };
@@ -125,10 +147,8 @@ impl Encode for Peripheral {
         };
         match self.group_name {
             Some(ref v) => {
-                elem.children.push(new_element(
-                    "groupName",
-                    Some(format!("{}", v)),
-                ));
+                elem.children
+                    .push(new_element("groupName", Some(format!("{}", v))));
             }
             None => (),
         };
@@ -161,8 +181,8 @@ impl Encode for Peripheral {
 
         match self.registers {
             Some(ref v) => {
-                let children: Result<Vec<_>, _>= v.iter()
-                    .map(|&ref e| e.encode() ).collect();
+                let children: Result<Vec<_>, _> =
+                    v.iter().map(|&ref e| e.encode()).collect();
 
                 elem.children.push(Element {
                     name: String::from("registers"),
@@ -176,10 +196,8 @@ impl Encode for Peripheral {
 
         match self.derived_from {
             Some(ref v) => {
-                elem.attributes.insert(
-                    String::from("derivedFrom"),
-                    format!("{}", v),
-                );
+                elem.attributes
+                    .insert(String::from("derivedFrom"), format!("{}", v));
             }
             None => (),
         }

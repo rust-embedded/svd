@@ -1,16 +1,15 @@
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
-use xmltree::Element;
 use elementext::ElementExt;
+use xmltree::Element;
 
-use types::Parse;
 #[cfg(feature = "unproven")]
 use encode::Encode;
+use error::*;
 #[cfg(feature = "unproven")]
 use new_element;
-use error::*;
-
+use types::Parse;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum WriteConstraint {
@@ -18,7 +17,6 @@ pub enum WriteConstraint {
     UseEnumeratedValues(bool),
     Range(WriteConstraintRange),
 }
-
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WriteConstraintRange {
@@ -29,22 +27,28 @@ pub struct WriteConstraintRange {
 impl Parse for WriteConstraint {
     type Object = WriteConstraint;
     type Error = SVDError;
-    
+
     fn parse(tree: &Element) -> Result<WriteConstraint, SVDError> {
         if tree.children.len() == 1 {
             let ref field = tree.children[0].name;
             // Write constraint can only be one of the following
             match field.as_ref() {
-                "writeAsRead" => {
-                    Ok(WriteConstraint::WriteAsRead(tree.get_child_bool(field.as_ref())?))
-                }
+                "writeAsRead" => Ok(WriteConstraint::WriteAsRead(
+                    tree.get_child_bool(field.as_ref())?,
+                )),
                 "useEnumeratedValues" => {
-                    Ok(WriteConstraint::UseEnumeratedValues(tree.get_child_bool(field.as_ref())?))
+                    Ok(WriteConstraint::UseEnumeratedValues(
+                        tree.get_child_bool(field.as_ref())?,
+                    ))
                 }
-                "range" => {
-                    Ok(WriteConstraint::Range(WriteConstraintRange::parse(tree.get_child_elem(field.as_ref())?)?))
-                }
-                _ => Err(SVDErrorKind::UnknownWriteConstraint(tree.clone()).into()),
+                "range" => Ok(WriteConstraint::Range(
+                    WriteConstraintRange::parse(tree.get_child_elem(
+                        field.as_ref(),
+                    )?)?,
+                )),
+                _ => Err(
+                    SVDErrorKind::UnknownWriteConstraint(tree.clone()).into(),
+                ),
             }
         } else {
             Err(SVDErrorKind::MoreThanOneWriteConstraint(tree.clone()).into())
@@ -58,8 +62,12 @@ impl Encode for WriteConstraint {
 
     fn encode(&self) -> Result<Element, SVDError> {
         let v = match *self {
-            WriteConstraint::WriteAsRead(v) => new_element("writeAsRead", Some(format!("{}", v))),
-            WriteConstraint::UseEnumeratedValues(v) => new_element("useEnumeratedValues", Some(format!("{}", v))),
+            WriteConstraint::WriteAsRead(v) => {
+                new_element("writeAsRead", Some(format!("{}", v)))
+            }
+            WriteConstraint::UseEnumeratedValues(v) => {
+                new_element("useEnumeratedValues", Some(format!("{}", v)))
+            }
             WriteConstraint::Range(v) => v.encode()?,
         };
 
@@ -77,7 +85,7 @@ impl Parse for WriteConstraintRange {
     type Error = SVDError;
 
     fn parse(tree: &Element) -> Result<WriteConstraintRange, SVDError> {
-        Ok(WriteConstraintRange {  
+        Ok(WriteConstraintRange {
             min: tree.get_child_u32("minimum")?,
             max: tree.get_child_u32("maximum")?,
         })
@@ -123,7 +131,7 @@ mod tests {
                 "<writeConstraint><range><minimum>0x00000001</minimum><maximum>0x0000000a</maximum></range></writeConstraint>"
             ),
         ];
-        
+
         run_test::<WriteConstraint>(&tests[..]);
     }
 }

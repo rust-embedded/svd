@@ -1,10 +1,9 @@
 //! SVD Errors.
 //! This module defines error types and messages for SVD parsing and encoding
 
-use xmltree::{Element, ParseError};
 use failure::{Backtrace, Context, Fail};
 use std::fmt::{self, Display};
-
+use xmltree::{Element, ParseError};
 
 #[derive(Debug)]
 pub struct SVDError {
@@ -39,11 +38,18 @@ pub enum SVDErrorKind {
     UnknownUsageVariant(Element),
     #[fail(display = "Expected a <{}>, found ...", _1)]
     NotExpectedTag(Element, String),
-    #[fail(display = "Invalid RegisterCluster (expected register or cluster), found {}", _1)]
+    #[fail(
+        display = "Invalid RegisterCluster (expected register or cluster), found {}",
+        _1
+    )]
     InvalidRegisterCluster(Element, String),
     #[fail(display = "Invalid modifiedWriteValues variant, found {}", _1)]
     InvalidModifiedWriteValues(Element, String),
-    #[fail(display = "The content of the element could not be parsed to a boolean value {}: {}", _1, _2)]
+    #[fail(
+        display = "The content of the element could not be parsed to a boolean value {}: {}",
+        _1,
+        _2
+    )]
     InvalidBooleanValue(Element, String, ::std::str::ParseBoolError),
     #[fail(display = "encoding method not implemented for svd object {}", _0)]
     EncodeNotImplemented(String),
@@ -86,7 +92,9 @@ impl SVDError {
 
 impl From<SVDErrorKind> for SVDError {
     fn from(kind: SVDErrorKind) -> SVDError {
-        SVDError { inner: Context::new(kind) }
+        SVDError {
+            inner: Context::new(kind),
+        }
     }
 }
 
@@ -98,6 +106,8 @@ impl From<Context<SVDErrorKind>> for SVDError {
 
 impl From<ParseError> for SVDError {
     fn from(e: ParseError) -> SVDError {
-        SVDError { inner: e.context(SVDErrorKind::FileParseError) }
+        SVDError {
+            inner: e.context(SVDErrorKind::FileParseError),
+        }
     }
 }

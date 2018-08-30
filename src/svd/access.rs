@@ -1,14 +1,12 @@
-
 use xmltree::Element;
 
 use elementext::ElementExt;
-use types::Parse;
 #[cfg(feature = "unproven")]
 use encode::Encode;
+use error::*;
 #[cfg(feature = "unproven")]
 use new_element;
-use error::*;
-
+use types::Parse;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Access {
@@ -63,26 +61,14 @@ mod tests {
     #[test]
     fn decode_encode() {
         let tests = vec![
-            (
-                Access::ReadOnly, 
-                "<access>read-only</access>"
-            ),
-            (
-                Access::ReadWrite,
-                "<access>read-write</access>"
-            ),
+            (Access::ReadOnly, "<access>read-only</access>"),
+            (Access::ReadWrite, "<access>read-write</access>"),
             (
                 Access::ReadWriteOnce,
-                "<access>read-writeOnce</access>"
+                "<access>read-writeOnce</access>",
             ),
-            (
-                Access::WriteOnly,
-                "<access>write-only</access>"
-            ),
-            (
-                Access::WriteOnce,
-                "<access>writeOnce</access>"
-            ),
+            (Access::WriteOnly, "<access>write-only</access>"),
+            (Access::WriteOnce, "<access>writeOnce</access>"),
         ];
 
         run_test::<Access>(&tests[..]);

@@ -1,25 +1,23 @@
-
-
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
-use xmltree::Element;
-use failure::ResultExt;
 use elementext::ElementExt;
+use failure::ResultExt;
+use xmltree::Element;
 
-use parse;
-use types::Parse;
 #[cfg(feature = "unproven")]
 use encode::Encode;
+use error::*;
 #[cfg(feature = "unproven")]
 use new_element;
-use error::*;
+use parse;
+use types::Parse;
 
-use svd::bitrange::BitRange;
 use svd::access::Access;
+use svd::bitrange::BitRange;
 use svd::enumeratedvalues::EnumeratedValues;
-use svd::writeconstraint::WriteConstraint;
 use svd::modifiedwritevalues::ModifiedWriteValues;
+use svd::writeconstraint::WriteConstraint;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Field {
@@ -39,10 +37,18 @@ impl Parse for Field {
     type Error = SVDError;
     fn parse(tree: &Element) -> Result<Field, SVDError> {
         if tree.name != "field" {
-            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("field")).into());
+            return Err(SVDErrorKind::NotExpectedTag(
+                tree.clone(),
+                format!("field"),
+            ).into());
         }
         let name = tree.get_child_text("name")?;
-        Field::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In field `{}`", name))).map_err(|e| e.into())
+        Field::_parse(tree, name.clone())
+            .context(SVDErrorKind::Other(format!(
+                "In field `{}`",
+                name
+            )))
+            .map_err(|e| e.into())
     }
 }
 
@@ -54,20 +60,25 @@ impl Field {
             bit_range: BitRange::parse(tree)?,
             access: parse::optional::<Access>("access", tree)?,
             enumerated_values: {
-                let values: Result<Vec<_>,_> = tree.children
+                let values: Result<Vec<_>, _> = tree.children
                     .iter()
                     .filter(|t| t.name == "enumeratedValues")
                     .map(EnumeratedValues::parse)
                     .collect();
                 values?
             },
-            write_constraint: parse::optional::<WriteConstraint>("writeConstraint", tree)?,
-            modified_write_values: parse::optional::<ModifiedWriteValues>("modifiedWriteValues", tree)?,
+            write_constraint: parse::optional::<WriteConstraint>(
+                "writeConstraint",
+                tree,
+            )?,
+            modified_write_values: parse::optional::<ModifiedWriteValues>(
+                "modifiedWriteValues",
+                tree,
+            )?,
             _extensible: (),
         })
     }
 }
-
 
 #[cfg(feature = "unproven")]
 impl Encode for Field {
@@ -84,7 +95,8 @@ impl Encode for Field {
         };
 
         // Add bit range
-        elem.children.append(&mut self.bit_range.encode()?);
+        elem.children
+            .append(&mut self.bit_range.encode()?);
 
         match self.access {
             Some(ref v) => {
@@ -93,7 +105,11 @@ impl Encode for Field {
             None => (),
         };
 
-        let enumerated_values: Result<Vec<Element>, SVDError> = self.enumerated_values.iter().map(|v| v.encode() ).collect();
+        let enumerated_values: Result<Vec<Element>, SVDError> =
+            self.enumerated_values
+                .iter()
+                .map(|v| v.encode())
+                .collect();
         elem.children.append(&mut enumerated_values?);
 
         match self.write_constraint {
@@ -118,9 +134,9 @@ impl Encode for Field {
 #[cfg(feature = "unproven")]
 mod tests {
     use super::*;
-    use ::svd::bitrange::BitRangeType;
-    use ::svd::enumeratedvalue::EnumeratedValue;
     use run_test;
+    use svd::bitrange::BitRangeType;
+    use svd::enumeratedvalue::EnumeratedValue;
 
     #[test]
     fn decode_encode() {

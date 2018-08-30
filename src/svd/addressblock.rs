@@ -1,17 +1,16 @@
-
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
-use xmltree::Element;
 use elementext::ElementExt;
+use xmltree::Element;
 
 use types::Parse;
 
 #[cfg(feature = "unproven")]
 use encode::Encode;
+use error::SVDError;
 #[cfg(feature = "unproven")]
 use new_element;
-use error::SVDError;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AddressBlock {
@@ -57,23 +56,20 @@ mod tests {
     use super::*;
     use run_test;
 
-
     #[test]
     fn decode_encode() {
-        let tests = vec![
-            (
-                AddressBlock {
-                    offset: 0,
-                    size: 0x00000800,
-                    usage: String::from("registers"),
-                },
-                "<addressBlock>
+        let tests = vec![(
+            AddressBlock {
+                offset: 0,
+                size: 0x00000800,
+                usage: String::from("registers"),
+            },
+            "<addressBlock>
                     <offset>0</offset>
                     <size>0x00000800</size>
                     <usage>registers</usage>
-                </addressBlock>"
-            ),
-        ];
+                </addressBlock>",
+        )];
 
         run_test::<AddressBlock>(&tests[..]);
     }

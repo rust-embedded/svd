@@ -1,19 +1,17 @@
-
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
-use parse;
-use xmltree::Element;
 use elementext::ElementExt;
 use failure::ResultExt;
+use parse;
+use xmltree::Element;
 
-use types::{Parse};
 #[cfg(feature = "unproven")]
 use encode::Encode;
+use error::*;
 #[cfg(feature = "unproven")]
 use new_element;
-use error::*;
-
+use types::Parse;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnumeratedValue {
@@ -22,23 +20,23 @@ pub struct EnumeratedValue {
     pub value: Option<u32>,
     pub is_default: Option<bool>,
     // Reserve the right to add more fields to this struct
-    pub (crate) _extensible: (),
+    pub(crate) _extensible: (),
 }
 impl EnumeratedValue {
-    fn _parse(tree: &Element, name: String) -> Result<EnumeratedValue, SVDError> {
-        Ok(
-            EnumeratedValue {
-                name,
-                description: tree.get_child_text_opt("description")?,
-                // TODO: this .ok() approach is simple, but does not expose errors parsing child objects.
-                // Suggest refactoring all parse::type methods to return result so parse::optional works.
-                value: parse::optional::<u32>("value", tree)?,
-                is_default: tree.get_child_bool("isDefault").ok(),
-                _extensible: (),
-            },
-        )
+    fn _parse(
+        tree: &Element,
+        name: String,
+    ) -> Result<EnumeratedValue, SVDError> {
+        Ok(EnumeratedValue {
+            name,
+            description: tree.get_child_text_opt("description")?,
+            // TODO: this .ok() approach is simple, but does not expose errors parsing child objects.
+            // Suggest refactoring all parse::type methods to return result so parse::optional works.
+            value: parse::optional::<u32>("value", tree)?,
+            is_default: tree.get_child_bool("isDefault").ok(),
+            _extensible: (),
+        })
     }
-
 }
 impl Parse for EnumeratedValue {
     type Object = EnumeratedValue;
@@ -46,10 +44,18 @@ impl Parse for EnumeratedValue {
 
     fn parse(tree: &Element) -> Result<EnumeratedValue, SVDError> {
         if tree.name != "enumeratedValue" {
-            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("enumeratedValue")).into());
+            return Err(SVDErrorKind::NotExpectedTag(
+                tree.clone(),
+                format!("enumeratedValue"),
+            ).into());
         }
         let name = tree.get_child_text("name")?;
-        EnumeratedValue::_parse(tree,name.clone()).context(SVDErrorKind::Other(format!("In enumerated value `{}`", name))).map_err(|e| e.into())
+        EnumeratedValue::_parse(tree, name.clone())
+            .context(SVDErrorKind::Other(format!(
+                "In enumerated value `{}`",
+                name
+            )))
+            .map_err(|e| e.into())
     }
 }
 
@@ -68,7 +74,8 @@ impl Encode for EnumeratedValue {
         match self.description {
             Some(ref d) => {
                 let s = (*d).clone();
-                base.children.push(new_element("description", Some(s)));
+                base.children
+                    .push(new_element("description", Some(s)));
             }
             None => (),
         };
@@ -85,10 +92,8 @@ impl Encode for EnumeratedValue {
 
         match self.is_default {
             Some(ref v) => {
-                base.children.push(new_element(
-                    "isDefault",
-                    Some(format!("{}", v)),
-                ));
+                base.children
+                    .push(new_element("isDefault", Some(format!("{}", v))));
             }
             None => (),
         };
@@ -104,7 +109,7 @@ mod tests {
     use run_test;
 
     #[test]
-    fn decode_encode() {          
+    fn decode_encode() {
         let tests = vec![
             (EnumeratedValue {
                 name: String::from("WS0"),
@@ -128,4 +133,3 @@ mod tests {
         run_test::<EnumeratedValue>(&tests[..]);
     }
 }
-

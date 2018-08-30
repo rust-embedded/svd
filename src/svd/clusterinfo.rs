@@ -1,7 +1,5 @@
-
-
-use xmltree::Element;
 use elementext::ElementExt;
+use xmltree::Element;
 
 use types::Parse;
 
@@ -11,9 +9,9 @@ use encode::Encode;
 use new_element;
 use parse;
 
-use ::error::{SVDError};
-use ::svd::access::Access;
-use ::svd::registercluster::RegisterCluster;
+use error::SVDError;
+use svd::access::Access;
+use svd::registercluster::RegisterCluster;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ClusterInfo {
@@ -30,7 +28,6 @@ pub struct ClusterInfo {
     _extensible: (),
 }
 
-
 impl Parse for ClusterInfo {
     type Object = ClusterInfo;
     type Error = SVDError;
@@ -40,17 +37,14 @@ impl Parse for ClusterInfo {
             name: tree.get_child_text("name")?, // TODO: Handle naming of cluster
             description: tree.get_child_text("description")?,
             header_struct_name: tree.get_child_text_opt("headerStructName")?,
-            address_offset: 
-                tree.get_child_u32("addressOffset")?,
+            address_offset: tree.get_child_u32("addressOffset")?,
             size: parse::optional::<u32>("size", tree)?,
             //access: tree.get_child("access").map(|t| Access::parse(t).ok() ),
             access: parse::optional::<Access>("access", tree)?,
-            reset_value:
-                parse::optional::<u32>("resetValue", tree)?,
-            reset_mask:
-                parse::optional::<u32>("resetMask", tree)?,
+            reset_value: parse::optional::<u32>("resetValue", tree)?,
+            reset_mask: parse::optional::<u32>("resetMask", tree)?,
             children: {
-                let children: Result<Vec<_>,_> = tree.children
+                let children: Result<Vec<_>, _> = tree.children
                     .iter()
                     .filter(|t| t.name == "register" || t.name == "cluster")
                     .map(RegisterCluster::parse)
@@ -68,16 +62,24 @@ impl Encode for ClusterInfo {
     fn encode(&self) -> Result<Element, SVDError> {
         let mut e = new_element("cluster", None);
 
-        e.children.push(new_element("description", Some(self.description.clone())));
+        e.children.push(new_element(
+            "description",
+            Some(self.description.clone()),
+        ));
 
         if let Some(ref v) = self.header_struct_name {
-            e.children.push(new_element("headerStructName", Some(v.clone())));
+            e.children
+                .push(new_element("headerStructName", Some(v.clone())));
         }
 
-        e.children.push(new_element("addressOffset", Some(format!("{}", self.address_offset))));
+        e.children.push(new_element(
+            "addressOffset",
+            Some(format!("{}", self.address_offset)),
+        ));
 
         if let Some(ref v) = self.size {
-            e.children.push(new_element("size", Some(format!("{}", v))));
+            e.children
+                .push(new_element("size", Some(format!("{}", v))));
         }
 
         if let Some(ref v) = self.access {
@@ -85,11 +87,15 @@ impl Encode for ClusterInfo {
         }
 
         if let Some(ref v) = self.reset_value {
-            e.children.push(new_element("resetValue", Some(format!("{}", v))));
+            e.children.push(new_element(
+                "resetValue",
+                Some(format!("{}", v)),
+            ));
         }
 
         if let Some(ref v) = self.reset_mask {
-            e.children.push(new_element("resetMask", Some(format!("{}", v))));
+            e.children
+                .push(new_element("resetMask", Some(format!("{}", v))));
         }
 
         for c in &self.children {
