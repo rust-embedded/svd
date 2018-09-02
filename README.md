@@ -1,7 +1,7 @@
 [![crates.io](https://img.shields.io/crates/d/svd-parser.svg)](https://crates.io/crates/svd-parser)
 [![crates.io](https://img.shields.io/crates/v/svd-parser.svg)](https://crates.io/crates/svd-parser)
 [![Build Status](https://travis-ci.org/japaric/svd.svg?branch=master)](https://travis-ci.org/japaric/svd)
-[![Documentation](https://img.shields.io/badge/docs-godoc-blue.svg)](https://docs.rs/svd-parser)
+[![Documentation](https://docs.rs/svd-parser/badge.svg)](https://docs.rs/svd-parser)
 
 # `svd-parser`
 
