@@ -179,15 +179,19 @@ impl Encode for RegisterInfo {
 
         match self.fields {
             Some(ref v) => {
-                let children: Result<Vec<Element>, SVDError> =
-                    v.iter().map(Field::encode).collect();
-                let fields = Element {
-                    name: String::from("fields"),
-                    attributes: HashMap::new(),
-                    children: children?,
-                    text: None,
-                };
-                elem.children.push(fields);
+                let children = v
+                    .iter()
+                    .map(Field::encode)
+                    .collect::<Result<Vec<Element>, SVDError>>()?;
+                if !children.is_empty() {
+                    let fields = Element {
+                        name: String::from("fields"),
+                        attributes: HashMap::new(),
+                        children,
+                        text: None,
+                    };
+                    elem.children.push(fields);
+                }
             }
             None => (),
         };
