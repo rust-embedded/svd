@@ -18,7 +18,7 @@ use svd::peripheral::Peripheral;
 #[derive(Clone, Debug)]
 pub struct Device {
     pub name: String,
-    schema_version: String,
+    schema_version: Option<String>,
     pub version: Option<String>,
     pub description: Option<String>,
     pub address_unit_bits: Option<u32>,
@@ -40,8 +40,7 @@ impl Parse for Device {
             name: tree.get_child_text("name")?,
             schema_version: tree.attributes
                 .get("schemaVersion")
-                .unwrap()
-                .clone(),
+                .map(|s| s.clone()),
             cpu: parse::optional::<Cpu>("cpu", tree)?,
             version: tree.get_child_text_opt("version")?,
             description: tree.get_child_text_opt("description")?,
@@ -77,14 +76,23 @@ impl Encode for Device {
             String::from("xmlns:xs"),
             String::from("http://www.w3.org/2001/XMLSchema-instance"),
         );
-        elem.attributes.insert(
-            String::from("schemaVersion"),
-            format!("{}", self.schema_version),
-        );
-        elem.attributes.insert(
-            String::from("xs:noNamespaceSchemaLocation"),
-            format!("CMSIS-SVD_Schema_{}.xsd", self.schema_version),
-        );
+        match self.schema_version {
+            Some(ref schema_version) => { 
+                elem.attributes.insert(
+                    String::from("schemaVersion"),
+                    format!("{}", schema_version));
+                },
+            None => (),
+        }
+        match self.schema_version {
+            Some(ref schema_version) => { 
+                elem.attributes.insert(
+                    String::from("xs:noNamespaceSchemaLocation"),
+                    format!("CMSIS-SVD_Schema_{}.xsd", schema_version));
+                },
+            None => (),
+        }
+
 
         match self.version {
             Some(ref v) => elem.children
