@@ -59,7 +59,7 @@ impl RegisterInfo {
             name,
             alternate_group: tree.get_child_text_opt("alternateGroup")?,
             alternate_register: tree.get_child_text_opt("alternateRegister")?,
-            derived_from: tree.get_child_text_opt("derivedFrom")?,
+            derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
             description: tree.get_child_text("description")?,
             address_offset: tree.get_child_u32("addressOffset")?,
             size: parse::optional::<u32>("size", tree)?,
@@ -136,10 +136,8 @@ impl Encode for RegisterInfo {
 
         match self.derived_from {
             Some(ref v) => {
-                elem.children.push(new_element(
-                    "derivedFrom",
-                    Some(format!("{}", v)),
-                ));
+                elem.attributes
+                    .insert(String::from("derivedFrom"), format!("{}", v));
             }
             None => (),
         }
@@ -254,13 +252,12 @@ mod tests {
                 _extensible: (),
             },
             "
-            <register>
+            <register derivedFrom=\"derived from\">
                 <name>WRITECTRL</name>
                 <description>Write Control Register</description>
                 <addressOffset>0x8</addressOffset>
                 <alternateGroup>alternate group</alternateGroup>
                 <alternateRegister>alternate register</alternateRegister>
-                <derivedFrom>derived from</derivedFrom>
                 <size>32</size>
                 <access>read-write</access>
                 <resetValue>0x00000000</resetValue>
