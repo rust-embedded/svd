@@ -102,13 +102,23 @@ pub fn run_test<
     tests: &[(T, &str)],
 ) {
     for t in tests {
-        let tree1 = Element::parse(t.1.as_bytes()).unwrap();
-        let elem = T::parse(&tree1).unwrap();
+        let mut tree1 = Element::parse(t.1.as_bytes()).unwrap();
+        let mut elem = T::parse(&tree1).unwrap();
+        // Hack to make assert be order agnostic
+        tree1.children.sort_by(|e1,e2| e1.name.cmp(&e2.name));
+        tree1.children.iter_mut().for_each(|e| { 
+            e.children.sort_by(|e1,e2| e1.name.cmp(&e2.name));
+        });
         assert_eq!(
             elem, t.0,
             "Error parsing xml` (mismatch between parsed and expected)"
         );
-        let tree2 = elem.encode().unwrap();
+        let  mut tree2 = elem.encode().unwrap();
+        // Hack to make assert be order agnostic
+        tree2.children.sort_by(|e1,e2| e1.name.cmp(&e2.name));
+        tree2.children.iter_mut().for_each(|e| { 
+            e.children.sort_by(|e1,e2| e1.name.cmp(&e2.name));
+        });
         assert_eq!(
             tree1, tree2,
             "Error encoding xml (mismatch between encoded and original)"

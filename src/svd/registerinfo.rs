@@ -24,7 +24,7 @@ pub struct RegisterInfo {
     pub alternate_group: Option<String>,
     pub alternate_register: Option<String>,
     pub derived_from: Option<String>,
-    pub description: String,
+    pub description: Option<String>,
     pub address_offset: u32,
     pub size: Option<u32>,
     pub access: Option<Access>,
@@ -59,8 +59,8 @@ impl RegisterInfo {
             name,
             alternate_group: tree.get_child_text_opt("alternateGroup")?,
             alternate_register: tree.get_child_text_opt("alternateRegister")?,
+            description: tree.get_child_text_opt("description")?,
             derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
-            description: tree.get_child_text("description")?,
             address_offset: tree.get_child_u32("addressOffset")?,
             size: parse::optional::<u32>("size", tree)?,
             access: parse::optional::<Access>("access", tree)?,
@@ -105,7 +105,6 @@ impl Encode for RegisterInfo {
             attributes: HashMap::new(),
             children: vec![
                 new_element("name", Some(self.name.clone())),
-                new_element("description", Some(self.description.clone())),
                 new_element(
                     "addressOffset",
                     Some(format!("0x{:x}", self.address_offset)),
@@ -113,7 +112,15 @@ impl Encode for RegisterInfo {
             ],
             text: None,
         };
-
+        match self.description {
+            Some(ref v) => {
+                elem.children.push(new_element(
+                    "description",
+                    Some(v.clone()),
+                ));
+            }
+            None => (),
+        }
         match self.alternate_group {
             Some(ref v) => {
                 elem.children.push(new_element(
@@ -225,7 +232,7 @@ mod tests {
                 alternate_group: Some(String::from("alternate group")),
                 alternate_register: Some(String::from("alternate register")),
                 derived_from: Some(String::from("derived from")),
-                description: String::from("Write Control Register"),
+                description: Some(String::from("Write Control Register")),
                 address_offset: 8,
                 size: Some(32),
                 access: Some(Access::ReadWrite),
