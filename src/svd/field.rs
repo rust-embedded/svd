@@ -84,13 +84,16 @@ impl Field {
 impl Encode for Field {
     type Error = SVDError;
     fn encode(&self) -> Result<Element, SVDError> {
+        let mut children = vec![new_element("name", Some(self.name.clone()))];
+
+        if let Some(ref description) = self.description {
+            children.push(new_element("description", Some(description.clone())))
+        }
+
         let mut elem = Element {
             name: String::from("field"),
             attributes: HashMap::new(),
-            children: vec![
-                new_element("name", Some(self.name.clone())),
-                new_element("description", self.description.clone()),
-            ],
+            children,
             text: None,
         };
 
@@ -189,7 +192,53 @@ mod tests {
                 </enumeratedValue>
               </enumeratedValues>
             </field>
-            "
+            ",
+            ),
+            // almost the same test but description info is missing
+            (
+                Field {
+                    name: String::from("MODE"),
+                    description: None,
+                    bit_range: BitRange {
+                        offset: 24,
+                        width: 2,
+                        range_type: BitRangeType::OffsetWidth,
+                    },
+                    access: Some(Access::ReadWrite),
+                    enumerated_values: vec![EnumeratedValues {
+                        name: None,
+                        usage: None,
+                        derived_from: None,
+                        values: vec![EnumeratedValue {
+                            name: String::from("WS0"),
+                            description: Some(String::from(
+                                "Zero wait-states inserted in fetch or read transfers",
+                            )),
+                            value: Some(0),
+                            is_default: None,
+                            _extensible: (),
+                        }],
+                        _extensible: (),
+                    }],
+                    write_constraint: None,
+                    modified_write_values: None,
+                    _extensible: (),
+                },
+                "
+            <field>
+              <name>MODE</name>
+              <bitOffset>24</bitOffset>
+              <bitWidth>2</bitWidth>
+              <access>read-write</access>
+              <enumeratedValues>
+                <enumeratedValue>
+                  <name>WS0</name>
+                  <description>Zero wait-states inserted in fetch or read transfers</description>
+                  <value>0x00000000</value>
+                </enumeratedValue>
+              </enumeratedValues>
+            </field>
+            ",
             ),
         ];
 
