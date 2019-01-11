@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.6.0] - 2019-01-11
+
+- [breaking-change] Major Refactor
+  - Split SVD components into modules
+  - Improved error handling
+  - Added `untested` encoding functions
+  - Added a bunch of missing fields
+- Added (and fixed) derivedFrom
+- Made register description optional
+
+
 ## [v0.6.0] - 2018-02-24
 
 ### Changed
@@ -81,8 +92,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Initial SVD parser
 - A `parse` utility function to parse the contents of a SVD file (XML)
 
-[Unreleased]: https://github.com/japaric/svd/compare/v0.6.0...HEAD
-[v0.6.0]: https://github.com/japaric/svd/compare/v0.5.2...v0.6.0
+[Unreleased]: https://github.com/japaric/svd/compare/v0.7.0...HEAD
+[v0.7.0]: https://github.com/japaric/svd/compare/v0.6.0...v0.7.0
 [v0.5.2]: https://github.com/japaric/svd/compare/v0.5.1...v0.5.2
 [v0.5.1]: https://github.com/japaric/svd/compare/v0.5.0...v0.5.1
 [v0.5.0]: https://github.com/japaric/svd/compare/v0.4.0...v0.5.0
