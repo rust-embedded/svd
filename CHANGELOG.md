@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [v0.6.0] - 2019-01-11
+## [v0.7.0] - 2019-01-11
 
 - [breaking-change] Major Refactor
   - Split SVD components into modules
@@ -94,6 +94,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 [Unreleased]: https://github.com/japaric/svd/compare/v0.7.0...HEAD
 [v0.7.0]: https://github.com/japaric/svd/compare/v0.6.0...v0.7.0
+[v0.6.0]: https://github.com/japaric/svd/compare/v0.5.2...v0.6.0
 [v0.5.2]: https://github.com/japaric/svd/compare/v0.5.1...v0.5.2
 [v0.5.1]: https://github.com/japaric/svd/compare/v0.5.0...v0.5.1
 [v0.5.0]: https://github.com/japaric/svd/compare/v0.4.0...v0.5.0
