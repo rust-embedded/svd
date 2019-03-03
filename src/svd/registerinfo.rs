@@ -278,7 +278,6 @@ mod tests {
                         <name>WREN</name>
                         <description>Enable Write/Erase Controller</description>
                         <bitOffset>0</bitOffset>
-                        <bitWidth>1</bitWidth>
                         <access>read-write</access>
                     </field>
                 </fields>

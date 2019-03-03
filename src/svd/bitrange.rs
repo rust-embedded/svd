@@ -91,21 +91,23 @@ impl Parse for BitRange {
                 ))?,
                 BitRangeType::MsbLsb,
             )
-        } else if let (Some(offset), Some(width)) = (
-            tree.get_child("bitOffset"),
-            tree.get_child("bitWidth"),
-        ) {
-            (
-                // Special case because offset and width are directly provided
-                // (ie. do not need to be calculated as in the final step)
-                return Ok(BitRange {
-                    // TODO: capture that error comes from offset/width tag
-                    // TODO: `u32::parse` should not hide it's errors
-                    offset: u32::parse(offset).context(SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::ParseError))?, 
-                    width: u32::parse(width).context(SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::ParseError))?, 
-                    range_type: BitRangeType::OffsetWidth
-                })
-            )
+        } else if let Some(offset) = tree.get_child("bitOffset")
+        {
+            let width = if let Some(width) = tree.get_child("bitWidth") {
+                u32::parse(width).context(SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::ParseError))?
+            } else {
+                1
+            };
+
+            // Special case because offset and width are directly provided
+            // (ie. do not need to be calculated as in the final step)
+            return Ok(BitRange {
+                // TODO: capture that error comes from offset/width tag
+                // TODO: `u32::parse` should not hide it's errors
+                offset: u32::parse(offset).context(SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::ParseError))?,
+                width,
+                range_type: BitRangeType::OffsetWidth
+            })
         } else {
             return Err(SVDErrorKind::InvalidBitRange(
                 tree.clone(),
@@ -140,10 +142,14 @@ impl BitRange {
                     Some(format!("{}", self.offset + self.width - 1)),
                 ),
             ]),
-            BitRangeType::OffsetWidth => Ok(vec![
-                new_element("bitOffset", Some(format!("{}", self.offset))),
-                new_element("bitWidth", Some(format!("{}", self.width))),
-            ]),
+            BitRangeType::OffsetWidth => {
+                let mut elements = Vec::new();
+                elements.push(new_element("bitOffset", Some(format!("{}", self.offset))));
+                if self.width != 1 {
+                    elements.push(new_element("bitWidth", Some(format!("{}", self.width))));
+                }
+                Ok(elements)
+            },
         }
     }
 }
@@ -177,6 +183,18 @@ mod tests {
                 String::from(
                     "
                 <fake><bitOffset>16</bitOffset><bitWidth>4</bitWidth></fake>
+            ",
+                ),
+            ),
+            (
+                BitRange {
+                    offset: 16,
+                    width: 1,
+                    range_type: BitRangeType::OffsetWidth,
+                },
+                String::from(
+                    "
+                <fake><bitOffset>16</bitOffset></fake>
             ",
                 ),
             ),
