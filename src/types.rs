@@ -98,6 +98,8 @@ impl Parse for DimIndex {
             Ok((start..end).map(|i| i.to_string()).collect())
         } else if text.contains(',') {
             Ok(text.split(',').map(|s| s.to_string()).collect())
+        } else if text.parse::<u32>().is_ok() {
+            Ok(vec![text])
         } else {
             unreachable!()
         }
