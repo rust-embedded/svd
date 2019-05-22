@@ -44,15 +44,29 @@ impl Parse for EnumeratedValues {
             values: {
                 let values: Result<Vec<_>, _> = tree.children
                     .iter()
-                    .filter(|t| t.name == "enumeratedValue")
+                    .filter(|t| ["name", "headerEnumName", "usage"].iter().all(|s| &t.name != s))
                     .enumerate()
                     .map(|(e, t)| {
-                        EnumeratedValue::parse(t).context(SVDErrorKind::Other(
-                            format!("Parsing enumerated value #{}", e).into(),
-                        ))
+                        if t.name == "enumeratedValue" {
+                            EnumeratedValue::parse(t).context(SVDErrorKind::Other(
+                                format!("Parsing enumerated value #{}", e).into(),
+                            ))
+                        } else {
+                            Err(SVDErrorKind::NotExpectedTag(
+                                t.clone(),
+                                format!("enumeratedValue"),
+                            ).into())
+                        }
                     })
                     .collect();
-                values?
+                let values = values?;
+                if values.is_empty() {
+                    return Err(SVDErrorKind::EmptyTag(
+                        tree.clone(),
+                        tree.name.clone(),
+                    ).into());
+                }
+                values
             },
             _extensible: (),
         })
@@ -165,5 +179,34 @@ mod tests {
 
         let tree2 = parsed.encode().unwrap();
         assert_eq!(tree1, tree2, "Encoding value failed");
+    }
+
+    #[test]
+    fn valid_children() {
+        fn parse(contents: String) -> Result<EnumeratedValues, SVDError> {
+            let example = String::from("<enumeratedValues>") + &contents + "</enumeratedValues>";
+            let tree = Element::parse(example.as_bytes()).unwrap();
+            EnumeratedValues::parse(&tree)
+        }
+
+        // `enumeratedValue` occurrence: 1..*
+        parse("".into()).expect_err("must contain at least one <enumeratedValue>");
+
+        let value = String::from("
+            <enumeratedValue>
+                <name>WS0</name>
+                <description>Zero wait-states inserted in fetch or read transfers</description>
+                <value>0x00000000</value>
+                <isDefault>true</isDefault>
+            </enumeratedValue>");
+
+        // Valid tags
+        parse(value.clone() + "<name>foo</name>").expect("<name> is valid");
+        parse(value.clone() + "<headerEnumName>foo</headerEnumName>").expect("<headerEnumName> is valid");
+        parse(value.clone() + "<usage>read</usage>").expect("<usage> is valid");
+
+        // Invalid tags
+        parse(value.clone() + "<enumerateValue></enumerateValue>").expect_err("<enumerateValue> in invalid here");
+        parse(value.clone() + "<enumeratedValues></enumeratedValues>").expect_err("<enumeratedValues> in invalid here");
     }
 }
