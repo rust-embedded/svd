@@ -42,7 +42,7 @@ impl ParseDefaults for RegisterInfo {
     type Object = RegisterInfo;
     type Error = SVDError;
 
-    fn parse(tree: &Element, defaults: Defaults) -> Result<RegisterInfo, SVDError> {
+    fn parse_defaults(tree: &Element, defaults: Defaults) -> Result<RegisterInfo, SVDError> {
         let name = tree.get_child_text("name")?;
         RegisterInfo::_parse(tree, name.clone(), defaults)
             .context(SVDErrorKind::Other(format!(
@@ -55,7 +55,7 @@ impl ParseDefaults for RegisterInfo {
 
 impl RegisterInfo {
     fn _parse(tree: &Element, name: String, defaults: Defaults) -> Result<RegisterInfo, SVDError> {
-        let defaults = Defaults::parse(tree, defaults)?;
+        let defaults = Defaults::parse_defaults(tree, defaults)?;
         Ok(RegisterInfo {
             name,
             alternate_group: tree.get_child_text_opt("alternateGroup")?,

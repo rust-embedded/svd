@@ -40,7 +40,7 @@ impl ParseDefaults for Peripheral {
     type Object = Peripheral;
     type Error = SVDError;
 
-    fn parse(tree: &Element, defaults: Defaults) -> Result<Peripheral, SVDError> {
+    fn parse_defaults(tree: &Element, defaults: Defaults) -> Result<Peripheral, SVDError> {
         if tree.name != "peripheral" {
             return Err(SVDErrorKind::NotExpectedTag(
                 tree.clone(),
@@ -76,7 +76,7 @@ impl Peripheral {
     }
 
     fn _parse(tree: &Element, name: String, defaults: Defaults) -> Result<Self, SVDError> {
-        let defaults = Defaults::parse(tree, defaults)?;
+        let defaults = Defaults::parse_defaults(tree, defaults)?;
         Ok(Peripheral {
             name,
             version: tree.get_child_text_opt("version")?,
@@ -106,7 +106,7 @@ impl Peripheral {
                 let rs: Result<Vec<_>, _> = registers
                     .children
                     .iter()
-                    .map(|rc| RegisterCluster::parse(rc, defaults))
+                    .map(|rc| RegisterCluster::parse_defaults(rc, defaults))
                     .collect();
                 Some(rs?)
             } else {

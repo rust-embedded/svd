@@ -35,7 +35,7 @@ impl Parse for Device {
 
     /// Parses a SVD file
     fn parse(tree: &Element) -> Result<Device, SVDError> {
-        let defaults = Defaults::parse(tree, Defaults::default())?;
+        let defaults = Defaults::parse(tree)?;
         Ok(Device {
             name: tree.get_child_text("name")?,
             schema_version: tree.attributes
@@ -50,7 +50,7 @@ impl Parse for Device {
                 let ps: Result<Vec<_>, _> = tree.get_child_elem("peripherals")?
                     .children
                     .iter()
-                    .map(|p| Peripheral::parse(p, defaults))
+                    .map(|p| Peripheral::parse_defaults(p, defaults))
                     .collect();
                 ps?
             },

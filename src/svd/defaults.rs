@@ -26,7 +26,7 @@ impl ParseDefaults for Defaults {
     type Object = Self;
     type Error = SVDError;
 
-    fn parse(tree: &Element, defaults: Self) -> Result<Self, SVDError> {
+    fn parse_defaults(tree: &Element, defaults: Self) -> Result<Self, SVDError> {
         Ok(Self {
             size: parse::optional::<u32>("size", tree)?.or(defaults.size),
             reset_value: parse::optional::<u32>("resetValue", tree)?.or(defaults.reset_value),

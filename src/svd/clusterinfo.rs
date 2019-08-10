@@ -27,8 +27,8 @@ impl ParseDefaults for ClusterInfo {
     type Object = ClusterInfo;
     type Error = SVDError;
 
-    fn parse(tree: &Element, defaults: Defaults) -> Result<ClusterInfo, SVDError> {
-        let defaults = Defaults::parse(tree, defaults)?;
+    fn parse_defaults(tree: &Element, defaults: Defaults) -> Result<ClusterInfo, SVDError> {
+        let defaults = Defaults::parse_defaults(tree, defaults)?;
         Ok(ClusterInfo {
             name: tree.get_child_text("name")?, // TODO: Handle naming of cluster
             description: tree.get_child_text("description")?,
@@ -39,7 +39,7 @@ impl ParseDefaults for ClusterInfo {
                 let children: Result<Vec<_>, _> = tree.children
                     .iter()
                     .filter(|t| t.name == "register" || t.name == "cluster")
-                    .map(|rc| RegisterCluster::parse(rc, defaults))
+                    .map(|rc| RegisterCluster::parse_defaults(rc, defaults))
                     .collect();
                 children?
             },

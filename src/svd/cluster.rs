@@ -32,10 +32,10 @@ impl Deref for Cluster {
 impl ParseDefaults for Cluster {
     type Object = Cluster;
     type Error = SVDError;
-    fn parse(tree: &Element, defaults: Defaults) -> Result<Cluster, SVDError> {
+    fn parse_defaults(tree: &Element, defaults: Defaults) -> Result<Cluster, SVDError> {
         assert_eq!(tree.name, "cluster");
 
-        let info = ClusterInfo::parse(tree, defaults)?;
+        let info = ClusterInfo::parse_defaults(tree, defaults)?;
 
         if tree.get_child("dimIncrement").is_some() {
             let array_info = RegisterClusterArrayInfo::parse(tree)?;

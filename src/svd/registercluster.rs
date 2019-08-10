@@ -31,14 +31,14 @@ impl From<Cluster> for RegisterCluster {
 impl ParseDefaults for RegisterCluster {
     type Object = RegisterCluster;
     type Error = SVDError;
-    fn parse(tree: &Element, defaults: Defaults) -> Result<RegisterCluster, SVDError> {
+    fn parse_defaults(tree: &Element, defaults: Defaults) -> Result<RegisterCluster, SVDError> {
         if tree.name == "register" {
-            Ok(RegisterCluster::Register(Register::parse(
+            Ok(RegisterCluster::Register(Register::parse_defaults(
                 tree,
                 defaults,
             )?))
         } else if tree.name == "cluster" {
-            Ok(RegisterCluster::Cluster(Cluster::parse(
+            Ok(RegisterCluster::Cluster(Cluster::parse_defaults(
                 tree,
                 defaults,
             )?))

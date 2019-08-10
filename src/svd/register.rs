@@ -34,10 +34,10 @@ impl ParseDefaults for Register {
     type Object = Register;
     type Error = SVDError;
 
-    fn parse(tree: &Element, defaults: Defaults) -> Result<Register, SVDError> {
+    fn parse_defaults(tree: &Element, defaults: Defaults) -> Result<Register, SVDError> {
         assert_eq!(tree.name, "register");
 
-        let info = RegisterInfo::parse(tree, defaults)?;
+        let info = RegisterInfo::parse_defaults(tree, defaults)?;
 
         if tree.get_child("dimIncrement").is_some() {
             let array_info = RegisterClusterArrayInfo::parse(tree)?;

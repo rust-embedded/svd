@@ -23,7 +23,15 @@ pub trait ParseDefaults {
     /// Parsing error
     type Error;
     /// Parse an XML/SVD element into it's corresponding `Object` with sending default register options.
-    fn parse(&Element, Defaults) -> Result<Self::Object, Self::Error>;
+    fn parse_defaults(&Element, Defaults) -> Result<Self::Object, Self::Error>;
+}
+
+impl<T> Parse for T where T: ParseDefaults {
+    type Object = T::Object;
+    type Error = T::Error;
+    fn parse(tree: &Element) -> Result<Self::Object, Self::Error> {
+        T::parse_defaults(tree, Defaults::default())
+    }
 }
 
 /// Parses an optional child element with the provided name and Parse function
