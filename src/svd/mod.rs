@@ -34,8 +34,8 @@ pub use self::field::Field;
 pub mod registerinfo;
 pub use self::registerinfo::RegisterInfo;
 
-pub mod defaults;
-pub use self::defaults::Defaults;
+pub mod registerproperties;
+pub use self::registerproperties::RegisterProperties;
 
 pub mod addressblock;
 pub use self::addressblock::AddressBlock;

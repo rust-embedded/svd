@@ -17,6 +17,7 @@ use svd::access::Access;
 use svd::field::Field;
 use svd::modifiedwritevalues::ModifiedWriteValues;
 use svd::writeconstraint::WriteConstraint;
+use svd::registerproperties::RegisterProperties;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RegisterInfo {
@@ -55,6 +56,7 @@ impl Parse for RegisterInfo {
 
 impl RegisterInfo {
     fn _parse(tree: &Element, name: String) -> Result<RegisterInfo, SVDError> {
+        let properties = RegisterProperties::parse(tree)?;
         Ok(RegisterInfo {
             name,
             alternate_group: tree.get_child_text_opt("alternateGroup")?,
@@ -62,10 +64,10 @@ impl RegisterInfo {
             description: tree.get_child_text_opt("description")?,
             derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
             address_offset: tree.get_child_u32("addressOffset")?,
-            size: parse::optional::<u32>("size", tree)?,
-            access: parse::optional::<Access>("access", tree)?,
-            reset_value: parse::optional::<u32>("resetValue", tree)?,
-            reset_mask: parse::optional::<u32>("resetMask", tree)?,
+            size: properties.size,
+            access: properties.access,
+            reset_value: properties.reset_value,
+            reset_mask: properties.reset_mask,
             fields: {
                 if let Some(fields) = tree.get_child("fields") {
                     let fs: Result<Vec<_>, _> = fields

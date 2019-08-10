@@ -17,6 +17,7 @@ use error::{SVDError, SVDErrorKind};
 use svd::addressblock::AddressBlock;
 use svd::interrupt::Interrupt;
 use svd::registercluster::RegisterCluster;
+use svd::registerproperties::RegisterProperties;
 
 #[derive(Clone, Debug)]
 pub struct Peripheral {
@@ -28,6 +29,7 @@ pub struct Peripheral {
     pub base_address: u32,
     pub address_block: Option<AddressBlock>,
     pub interrupt: Vec<Interrupt>,
+    pub default_register_properties: RegisterProperties,
     /// `None` indicates that the `<registers>` node is not present
     pub registers: Option<Vec<RegisterCluster>>,
     pub derived_from: Option<String>,
@@ -65,6 +67,9 @@ impl Peripheral {
         derived.description = derived
             .description
             .or_else(|| other.description.clone());
+        derived.default_register_properties = derived
+            .default_register_properties
+            .derive_from(&other.default_register_properties);
         derived.registers = derived
             .registers
             .or_else(|| other.registers.clone());
@@ -99,6 +104,7 @@ impl Peripheral {
                     .collect();
                 interrupt?
             },
+            default_register_properties: RegisterProperties::parse(tree)?,
             registers: if let Some(registers) = tree.get_child("registers") {
                 let rs: Result<Vec<_>, _> = registers
                     .children

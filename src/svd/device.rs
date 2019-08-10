@@ -12,7 +12,7 @@ use error::SVDError;
 #[cfg(feature = "unproven")]
 use new_element;
 use svd::cpu::Cpu;
-use svd::defaults::Defaults;
+use svd::registerproperties::RegisterProperties;
 use svd::peripheral::Peripheral;
 
 #[derive(Clone, Debug)]
@@ -25,7 +25,7 @@ pub struct Device {
     pub width: Option<u32>,
     pub cpu: Option<Cpu>,
     pub peripherals: Vec<Peripheral>,
-    pub defaults: Defaults,
+    pub default_register_properties: RegisterProperties,
     // Reserve the right to add more fields to this struct
     _extensible: (),
 }
@@ -54,7 +54,7 @@ impl Parse for Device {
                     .collect();
                 ps?
             },
-            defaults: Defaults::parse(tree)?,
+            default_register_properties: RegisterProperties::parse(tree)?,
             _extensible: (),
         })
     }
