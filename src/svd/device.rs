@@ -3,8 +3,7 @@ use elementext::ElementExt;
 use std::collections::HashMap;
 use xmltree::Element;
 
-use parse;
-use types::Parse;
+use parse::{self, Parse, ParseDefaults};
 
 #[cfg(feature = "unproven")]
 use encode::Encode;
@@ -36,6 +35,7 @@ impl Parse for Device {
 
     /// Parses a SVD file
     fn parse(tree: &Element) -> Result<Device, SVDError> {
+        let defaults = Defaults::parse(tree, Defaults::default())?;
         Ok(Device {
             name: tree.get_child_text("name")?,
             schema_version: tree.attributes
@@ -50,11 +50,11 @@ impl Parse for Device {
                 let ps: Result<Vec<_>, _> = tree.get_child_elem("peripherals")?
                     .children
                     .iter()
-                    .map(Peripheral::parse)
+                    .map(|p| Peripheral::parse(p, defaults))
                     .collect();
                 ps?
             },
-            defaults: Defaults::parse(tree)?,
+            defaults: defaults,
             _extensible: (),
         })
     }

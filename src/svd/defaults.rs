@@ -7,13 +7,12 @@ use encode::EncodeChildren;
 use error::*;
 #[cfg(feature = "unproven")]
 use new_element;
-use parse;
-use types::Parse;
+use parse::{self, ParseDefaults};
 
 use svd::access::Access;
 
 /// Register default properties
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub struct Defaults {
     pub size: Option<u32>,
     pub reset_value: Option<u32>,
@@ -23,16 +22,16 @@ pub struct Defaults {
     _extensible: (),
 }
 
-impl Parse for Defaults {
-    type Object = Defaults;
+impl ParseDefaults for Defaults {
+    type Object = Self;
     type Error = SVDError;
 
-    fn parse(tree: &Element) -> Result<Defaults, SVDError> {
-        Ok(Defaults {
-            size: parse::optional::<u32>("size", tree)?,
-            reset_value: parse::optional::<u32>("resetValue", tree)?,
-            reset_mask: parse::optional::<u32>("resetMask", tree)?,
-            access: parse::optional::<Access>("access", tree)?,
+    fn parse(tree: &Element, defaults: Self) -> Result<Self, SVDError> {
+        Ok(Self {
+            size: parse::optional::<u32>("size", tree)?.or(defaults.size),
+            reset_value: parse::optional::<u32>("resetValue", tree)?.or(defaults.reset_value),
+            reset_mask: parse::optional::<u32>("resetMask", tree)?.or(defaults.reset_mask),
+            access: parse::optional::<Access>("access", tree)?.or(defaults.access),
             _extensible: (),
         })
     }

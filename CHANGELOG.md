@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Take default register `size`, `access`, etc. from device, peripheral or cluster.
+
 ## [v0.7.0] - 2019-01-11
 
 - [breaking-change] Major Refactor

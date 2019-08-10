@@ -2,6 +2,7 @@
 //! These support parsing of SVD types from XML
 
 use xmltree::Element;
+use svd::Defaults;
 
 use error::*;
 
@@ -13,6 +14,16 @@ pub trait Parse {
     type Error;
     /// Parse an XML/SVD element into it's corresponding `Object`.
     fn parse(&Element) -> Result<Self::Object, Self::Error>;
+}
+
+/// Parse trait allows SVD objects that contain registers to be parsed from XML elements.
+pub trait ParseDefaults {
+    /// Object returned by parse method
+    type Object;
+    /// Parsing error
+    type Error;
+    /// Parse an XML/SVD element into it's corresponding `Object` with sending default register options.
+    fn parse(&Element, Defaults) -> Result<Self::Object, Self::Error>;
 }
 
 /// Parses an optional child element with the provided name and Parse function

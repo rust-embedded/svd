@@ -1,16 +1,14 @@
 use elementext::ElementExt;
 use xmltree::Element;
 
-use types::Parse;
-
 #[cfg(feature = "unproven")]
 use encode::Encode;
 #[cfg(feature = "unproven")]
 use new_element;
-use parse;
+use parse::ParseDefaults;
 
 use error::SVDError;
-use svd::access::Access;
+use svd::defaults::Defaults;
 use svd::registercluster::RegisterCluster;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -19,35 +17,29 @@ pub struct ClusterInfo {
     pub description: String,
     pub header_struct_name: Option<String>,
     pub address_offset: u32,
-    pub size: Option<u32>,
-    pub access: Option<Access>,
-    pub reset_value: Option<u32>,
-    pub reset_mask: Option<u32>,
+    pub defaults: Defaults,
     pub children: Vec<RegisterCluster>,
     // Reserve the right to add more fields to this struct
     _extensible: (),
 }
 
-impl Parse for ClusterInfo {
+impl ParseDefaults for ClusterInfo {
     type Object = ClusterInfo;
     type Error = SVDError;
 
-    fn parse(tree: &Element) -> Result<ClusterInfo, SVDError> {
+    fn parse(tree: &Element, defaults: Defaults) -> Result<ClusterInfo, SVDError> {
+        let defaults = Defaults::parse(tree, defaults)?;
         Ok(ClusterInfo {
             name: tree.get_child_text("name")?, // TODO: Handle naming of cluster
             description: tree.get_child_text("description")?,
             header_struct_name: tree.get_child_text_opt("headerStructName")?,
             address_offset: tree.get_child_u32("addressOffset")?,
-            size: parse::optional::<u32>("size", tree)?,
-            //access: tree.get_child("access").map(|t| Access::parse(t).ok() ),
-            access: parse::optional::<Access>("access", tree)?,
-            reset_value: parse::optional::<u32>("resetValue", tree)?,
-            reset_mask: parse::optional::<u32>("resetMask", tree)?,
+            defaults,
             children: {
                 let children: Result<Vec<_>, _> = tree.children
                     .iter()
                     .filter(|t| t.name == "register" || t.name == "cluster")
-                    .map(RegisterCluster::parse)
+                    .map(|rc| RegisterCluster::parse(rc, defaults))
                     .collect();
                 children?
             },

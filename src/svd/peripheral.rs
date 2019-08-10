@@ -5,15 +5,15 @@ use xmltree::Element;
 
 use elementext::ElementExt;
 use failure::ResultExt;
-use parse;
+use parse::{self, Parse, ParseDefaults};
 
 #[cfg(feature = "unproven")]
 use encode::Encode;
 #[cfg(feature = "unproven")]
 use new_element;
-use types::Parse;
 
 use error::{SVDError, SVDErrorKind};
+use svd::defaults::Defaults;
 use svd::addressblock::AddressBlock;
 use svd::interrupt::Interrupt;
 use svd::registercluster::RegisterCluster;
@@ -31,15 +31,16 @@ pub struct Peripheral {
     /// `None` indicates that the `<registers>` node is not present
     pub registers: Option<Vec<RegisterCluster>>,
     pub derived_from: Option<String>,
+    pub defaults: Defaults,
     // Reserve the right to add more fields to this struct
     _extensible: (),
 }
 
-impl Parse for Peripheral {
+impl ParseDefaults for Peripheral {
     type Object = Peripheral;
     type Error = SVDError;
 
-    fn parse(tree: &Element) -> Result<Peripheral, SVDError> {
+    fn parse(tree: &Element, defaults: Defaults) -> Result<Peripheral, SVDError> {
         if tree.name != "peripheral" {
             return Err(SVDErrorKind::NotExpectedTag(
                 tree.clone(),
@@ -47,7 +48,7 @@ impl Parse for Peripheral {
             ).into());
         }
         let name = tree.get_child_text("name")?;
-        Peripheral::_parse(tree, name.clone())
+        Peripheral::_parse(tree, name.clone(), defaults)
             .context(SVDErrorKind::Other(format!(
                 "In peripheral `{}`",
                 name
@@ -57,7 +58,7 @@ impl Parse for Peripheral {
 }
 
 impl Peripheral {
-    pub fn derive_from(&self, other: &Peripheral) -> Peripheral {
+    pub fn derive_from(&self, other: &Self) -> Self {
         let mut derived = self.clone();
         derived.group_name = derived
             .group_name
@@ -74,7 +75,8 @@ impl Peripheral {
         derived
     }
 
-    fn _parse(tree: &Element, name: String) -> Result<Peripheral, SVDError> {
+    fn _parse(tree: &Element, name: String, defaults: Defaults) -> Result<Self, SVDError> {
+        let defaults = Defaults::parse(tree, defaults)?;
         Ok(Peripheral {
             name,
             version: tree.get_child_text_opt("version")?,
@@ -82,6 +84,7 @@ impl Peripheral {
             group_name: tree.get_child_text_opt("groupName")?,
             description: tree.get_child_text_opt("description")?,
             base_address: tree.get_child_u32("baseAddress")?,
+            defaults,
             address_block: parse::optional::<AddressBlock>(
                 "addressBlock",
                 tree,
@@ -103,7 +106,7 @@ impl Peripheral {
                 let rs: Result<Vec<_>, _> = registers
                     .children
                     .iter()
-                    .map(RegisterCluster::parse)
+                    .map(|rc| RegisterCluster::parse(rc, defaults))
                     .collect();
                 Some(rs?)
             } else {

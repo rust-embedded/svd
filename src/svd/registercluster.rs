@@ -1,6 +1,7 @@
 use xmltree::Element;
 
-use types::Parse;
+use svd::defaults::Defaults;
+use parse::ParseDefaults;
 
 #[cfg(feature = "unproven")]
 use encode::Encode;
@@ -27,16 +28,20 @@ impl From<Cluster> for RegisterCluster {
     }
 }
 
-impl Parse for RegisterCluster {
+impl ParseDefaults for RegisterCluster {
     type Object = RegisterCluster;
     type Error = SVDError;
-    fn parse(tree: &Element) -> Result<RegisterCluster, SVDError> {
+    fn parse(tree: &Element, defaults: Defaults) -> Result<RegisterCluster, SVDError> {
         if tree.name == "register" {
             Ok(RegisterCluster::Register(Register::parse(
                 tree,
+                defaults,
             )?))
         } else if tree.name == "cluster" {
-            Ok(RegisterCluster::Cluster(Cluster::parse(tree)?))
+            Ok(RegisterCluster::Cluster(Cluster::parse(
+                tree,
+                defaults,
+            )?))
         } else {
             Err(SVDError::from(
                 SVDErrorKind::InvalidRegisterCluster(

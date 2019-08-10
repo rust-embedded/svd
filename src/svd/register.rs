@@ -2,7 +2,8 @@ use std::ops::Deref;
 
 use xmltree::Element;
 
-use types::Parse;
+use svd::defaults::Defaults;
+use parse::{Parse, ParseDefaults};
 
 #[cfg(feature = "unproven")]
 use elementext::ElementExt;
@@ -29,14 +30,14 @@ impl Deref for Register {
     }
 }
 
-impl Parse for Register {
+impl ParseDefaults for Register {
     type Object = Register;
     type Error = SVDError;
 
-    fn parse(tree: &Element) -> Result<Register, SVDError> {
+    fn parse(tree: &Element, defaults: Defaults) -> Result<Register, SVDError> {
         assert_eq!(tree.name, "register");
 
-        let info = RegisterInfo::parse(tree)?;
+        let info = RegisterInfo::parse(tree, defaults)?;
 
         if tree.get_child("dimIncrement").is_some() {
             let array_info = RegisterClusterArrayInfo::parse(tree)?;

@@ -10,9 +10,9 @@ use encode::Encode;
 use error::*;
 #[cfg(feature = "unproven")]
 use new_element;
-use parse;
-use types::Parse;
+use parse::{self, Parse, ParseDefaults};
 
+use svd::defaults::Defaults;
 use svd::access::Access;
 use svd::field::Field;
 use svd::modifiedwritevalues::ModifiedWriteValues;
@@ -38,13 +38,13 @@ pub struct RegisterInfo {
     pub(crate) _extensible: (),
 }
 
-impl Parse for RegisterInfo {
+impl ParseDefaults for RegisterInfo {
     type Object = RegisterInfo;
     type Error = SVDError;
 
-    fn parse(tree: &Element) -> Result<RegisterInfo, SVDError> {
+    fn parse(tree: &Element, defaults: Defaults) -> Result<RegisterInfo, SVDError> {
         let name = tree.get_child_text("name")?;
-        RegisterInfo::_parse(tree, name.clone())
+        RegisterInfo::_parse(tree, name.clone(), defaults)
             .context(SVDErrorKind::Other(format!(
                 "In register `{}`",
                 name
@@ -54,7 +54,8 @@ impl Parse for RegisterInfo {
 }
 
 impl RegisterInfo {
-    fn _parse(tree: &Element, name: String) -> Result<RegisterInfo, SVDError> {
+    fn _parse(tree: &Element, name: String, defaults: Defaults) -> Result<RegisterInfo, SVDError> {
+        let defaults = Defaults::parse(tree, defaults)?;
         Ok(RegisterInfo {
             name,
             alternate_group: tree.get_child_text_opt("alternateGroup")?,
@@ -62,10 +63,10 @@ impl RegisterInfo {
             description: tree.get_child_text_opt("description")?,
             derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
             address_offset: tree.get_child_u32("addressOffset")?,
-            size: parse::optional::<u32>("size", tree)?,
-            access: parse::optional::<Access>("access", tree)?,
-            reset_value: parse::optional::<u32>("resetValue", tree)?,
-            reset_mask: parse::optional::<u32>("resetMask", tree)?,
+            size: defaults.size,
+            access: defaults.access,
+            reset_value: defaults.reset_value,
+            reset_mask: defaults.reset_mask,
             fields: {
                 if let Some(fields) = tree.get_child("fields") {
                     let fs: Result<Vec<_>, _> = fields

@@ -1,7 +1,8 @@
 use std::ops::Deref;
 use xmltree::Element;
 
-use types::Parse;
+use svd::defaults::Defaults;
+use parse::{Parse, ParseDefaults};
 
 #[cfg(feature = "unproven")]
 use elementext::ElementExt;
@@ -28,13 +29,13 @@ impl Deref for Cluster {
     }
 }
 
-impl Parse for Cluster {
+impl ParseDefaults for Cluster {
     type Object = Cluster;
     type Error = SVDError;
-    fn parse(tree: &Element) -> Result<Cluster, SVDError> {
+    fn parse(tree: &Element, defaults: Defaults) -> Result<Cluster, SVDError> {
         assert_eq!(tree.name, "cluster");
 
-        let info = ClusterInfo::parse(tree)?;
+        let info = ClusterInfo::parse(tree, defaults)?;
 
         if tree.get_child("dimIncrement").is_some() {
             let array_info = RegisterClusterArrayInfo::parse(tree)?;
