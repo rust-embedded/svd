@@ -12,6 +12,10 @@ use crate::error::SVDError;
 #[cfg(feature = "unproven")]
 use crate::new_element;
 
+#[cfg(feature = "serde_svd")]
+use super::serde::{ Deserialize, Serialize };
+
+#[cfg_attr(feature = "serde_svd", derive(Deserialize, Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct AddressBlock {
     pub offset: u32,

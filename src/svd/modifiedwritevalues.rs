@@ -9,6 +9,10 @@ use crate::types::Parse;
 use crate::encode::Encode;
 use crate::error::*;
 
+#[cfg(feature = "serde_svd")]
+use super::serde::{ Deserialize, Serialize };
+
+#[cfg_attr(feature = "serde_svd", derive(Deserialize, Serialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ModifiedWriteValues {
     OneToClear,

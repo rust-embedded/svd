@@ -6,6 +6,10 @@ use crate::error::*;
 use crate::new_element;
 use crate::types::Parse;
 
+#[cfg(feature = "serde_svd")]
+use super::serde::{ Deserialize, Serialize };
+
+#[cfg_attr(feature = "serde_svd", derive(Deserialize, Serialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct BitRange {
     pub offset: u32,
@@ -13,6 +17,7 @@ pub struct BitRange {
     pub range_type: BitRangeType,
 }
 
+#[cfg_attr(feature = "serde_svd", derive(Deserialize, Serialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BitRangeType {
     BitRange,

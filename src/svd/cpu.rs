@@ -12,6 +12,10 @@ use crate::new_element;
 use crate::svd::endian::Endian;
 use crate::types::Parse;
 
+#[cfg(feature = "serde_svd")]
+use super::serde::{ Deserialize, Serialize };
+
+#[cfg_attr(feature = "serde_svd", derive(Deserialize, Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct Cpu {
     pub name: String,

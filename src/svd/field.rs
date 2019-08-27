@@ -21,6 +21,10 @@ use crate::svd::{
     writeconstraint::WriteConstraint,
 };
 
+#[cfg(feature = "serde_svd")]
+use super::serde::{ Deserialize, Serialize };
+
+#[cfg_attr(feature = "serde_svd", derive(Deserialize, Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct Field {
     pub name: String,

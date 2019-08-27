@@ -1,5 +1,7 @@
 //! SVD objects.
 //! This module defines components of an SVD along with parse and encode implementations
+#[cfg(feature = "serde_svd")]
+extern crate serde;
 
 pub mod endian;
 pub use self::endian::Endian;
