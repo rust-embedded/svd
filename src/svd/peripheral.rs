@@ -18,6 +18,10 @@ use svd::addressblock::AddressBlock;
 use svd::interrupt::Interrupt;
 use svd::registercluster::RegisterCluster;
 
+#[cfg(feature = "serde_svd")]
+use super::serde::{ Deserialize, Serialize };
+
+#[cfg_attr(feature = "serde_svd", derive(Deserialize, Serialize))]
 #[derive(Clone, Debug)]
 pub struct Peripheral {
     pub name: String,

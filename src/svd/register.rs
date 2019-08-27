@@ -12,6 +12,10 @@ use error::SVDError;
 use svd::registerclusterarrayinfo::RegisterClusterArrayInfo;
 use svd::registerinfo::RegisterInfo;
 
+#[cfg(feature = "serde_svd")]
+use super::serde::{ Deserialize, Serialize };
+
+#[cfg_attr(feature = "serde_svd", derive(Deserialize, Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub enum Register {
     Single(RegisterInfo),

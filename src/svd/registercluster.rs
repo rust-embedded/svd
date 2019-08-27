@@ -9,6 +9,10 @@ use error::{SVDError, SVDErrorKind};
 use svd::cluster::Cluster;
 use svd::register::Register;
 
+#[cfg(feature = "serde_svd")]
+use super::serde::{ Deserialize, Serialize };
+
+#[cfg_attr(feature = "serde_svd", derive(Deserialize, Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub enum RegisterCluster {
     Register(Register),

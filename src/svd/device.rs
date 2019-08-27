@@ -15,6 +15,10 @@ use svd::cpu::Cpu;
 use svd::defaults::Defaults;
 use svd::peripheral::Peripheral;
 
+#[cfg(feature = "serde_svd")]
+use super::serde::{ Deserialize, Serialize };
+
+#[cfg_attr(feature = "serde_svd", derive(Deserialize, Serialize))]
 #[derive(Clone, Debug)]
 pub struct Device {
     pub name: String,

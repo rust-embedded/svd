@@ -9,6 +9,10 @@ use encode::Encode;
 use error::*;
 use types::Parse;
 
+#[cfg(feature = "serde_svd")]
+use super::serde::{ Deserialize, Serialize };
+
+#[cfg_attr(feature = "serde_svd", derive(Deserialize, Serialize))]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Usage {
     Read,
