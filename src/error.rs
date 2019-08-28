@@ -69,7 +69,7 @@ pub enum InvalidBitRange {
 }
 
 impl Fail for SVDError {
-    fn cause(&self) -> Option<&Fail> {
+    fn cause(&self) -> Option<&(dyn Fail)> {
         self.inner.cause()
     }
 
