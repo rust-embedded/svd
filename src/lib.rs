@@ -103,7 +103,7 @@ pub fn run_test<
 ) {
     for t in tests {
         let mut tree1 = Element::parse(t.1.as_bytes()).unwrap();
-        let mut elem = T::parse(&tree1).unwrap();
+        let elem = T::parse(&tree1).unwrap();
         // Hack to make assert be order agnostic
         tree1.children.sort_by(|e1,e2| e1.name.cmp(&e2.name));
         tree1.children.iter_mut().for_each(|e| { 

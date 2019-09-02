@@ -14,7 +14,7 @@ use svd::access::Access;
 
 /// Register default properties
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Defaults {
+pub struct RegisterProperties {
     pub size: Option<u32>,
     pub reset_value: Option<u32>,
     pub reset_mask: Option<u32>,
@@ -23,12 +23,22 @@ pub struct Defaults {
     _extensible: (),
 }
 
-impl Parse for Defaults {
-    type Object = Defaults;
+impl RegisterProperties {
+    pub fn derive_from(mut self, other: &Self) -> Self {
+        self.size = self.size.or(other.size);
+        self.reset_value = self.reset_value.or(other.reset_value);
+        self.reset_mask = self.reset_mask.or(other.reset_mask);
+        self.access = self.access.or(other.access);
+        self
+    }
+}
+
+impl Parse for RegisterProperties {
+    type Object = RegisterProperties;
     type Error = SVDError;
 
-    fn parse(tree: &Element) -> Result<Defaults, SVDError> {
-        Ok(Defaults {
+    fn parse(tree: &Element) -> Result<RegisterProperties, SVDError> {
+        Ok(RegisterProperties {
             size: parse::optional::<u32>("size", tree)?,
             reset_value: parse::optional::<u32>("resetValue", tree)?,
             reset_mask: parse::optional::<u32>("resetMask", tree)?,
@@ -39,7 +49,7 @@ impl Parse for Defaults {
 }
 
 #[cfg(feature = "unproven")]
-impl EncodeChildren for Defaults {
+impl EncodeChildren for RegisterProperties {
     type Error = SVDError;
     fn encode(&self) -> Result<Vec<Element>, SVDError> {
         let mut children = Vec::new();
@@ -103,7 +113,7 @@ mod tests {
         ",
         );
 
-        let expected = Defaults {
+        let expected = RegisterProperties {
             size: Some(0xaabbccdd),
             reset_value: Some(0x11223344),
             reset_mask: Some(0x00000000),
@@ -113,7 +123,7 @@ mod tests {
 
         let tree1 = Element::parse(example.as_bytes()).unwrap();
 
-        let parsed = Defaults::parse(&tree1).unwrap();
+        let parsed = RegisterProperties::parse(&tree1).unwrap();
         assert_eq!(parsed, expected, "Parsing tree failed");
 
         let mut tree2 = new_element("mock", None);
