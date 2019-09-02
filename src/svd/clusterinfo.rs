@@ -4,7 +4,7 @@ use xmltree::Element;
 use types::Parse;
 
 #[cfg(feature = "unproven")]
-use encode::Encode;
+use encode::{Encode, EncodeChildren};
 #[cfg(feature = "unproven")]
 use new_element;
 
@@ -69,26 +69,7 @@ impl Encode for ClusterInfo {
             Some(format!("{}", self.address_offset)),
         ));
 
-        if let Some(ref v) = self.size {
-            e.children
-                .push(new_element("size", Some(format!("{}", v))));
-        }
-
-        if let Some(ref v) = self.access {
-            e.children.push(v.encode()?);
-        }
-
-        if let Some(ref v) = self.reset_value {
-            e.children.push(new_element(
-                "resetValue",
-                Some(format!("{}", v)),
-            ));
-        }
-
-        if let Some(ref v) = self.reset_mask {
-            e.children
-                .push(new_element("resetMask", Some(format!("{}", v))));
-        }
+        e.children.extend(self.default_register_properties.encode()?);
 
         for c in &self.children {
             e.children.push(c.encode()?);

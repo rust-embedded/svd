@@ -7,7 +7,7 @@ use parse;
 use types::Parse;
 
 #[cfg(feature = "unproven")]
-use encode::Encode;
+use encode::{Encode, EncodeChildren};
 use error::SVDError;
 #[cfg(feature = "unproven")]
 use new_element;
@@ -119,6 +119,8 @@ impl Encode for Device {
                 .push(new_element("width", Some(format!("{}", v)))),
             None => (),
         }
+
+        elem.children.extend(self.default_register_properties.encode()?);
 
         match self.cpu {
             Some(ref v) => {

@@ -60,7 +60,7 @@ impl Encode for Register {
             Register::Single(ref info) => info.encode(),
             Register::Array(ref info, ref array_info) => {
                 // TODO: is this correct? probably not, need tests
-                let mut base = info.encode()?;
+                let base = info.encode()?;
                 base.merge(&array_info.encode()?);
                 Ok(base)
             }

@@ -68,8 +68,7 @@ impl Encode for Cluster {
     fn encode(&self) -> Result<Element, SVDError> {
         match self {
             Cluster::Single(i) => {
-                let mut e = i.encode()?;
-                Ok(e)
+                i.encode()
             }
             Cluster::Array(i, a) => {
                 let mut e = i.encode()?;

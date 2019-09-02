@@ -8,7 +8,7 @@ use failure::ResultExt;
 use parse;
 
 #[cfg(feature = "unproven")]
-use encode::Encode;
+use encode::{Encode, EncodeChildren};
 #[cfg(feature = "unproven")]
 use new_element;
 use types::Parse;
@@ -171,6 +171,9 @@ impl Encode for Peripheral {
             "baseAddress",
             Some(format!("0x{:.08x}", self.base_address)),
         ));
+
+        elem.children.extend(self.default_register_properties.encode()?);
+
         match self.address_block {
             Some(ref v) => {
                 elem.children.push(v.encode()?);
