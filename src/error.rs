@@ -26,8 +26,8 @@ pub enum SVDErrorKind {
     ParseError(Element),
     #[fail(display = "NameMismatch")]
     NameMismatch(Element),
-    #[fail(display = "unknown access variant found")]
-    UnknownAccessType(Element),
+    #[fail(display = "unknown access variant '{}' found", _1)]
+    UnknownAccessType(Element, String),
     #[fail(display = "Bit range invalid, {:?}", _1)]
     InvalidBitRange(Element, InvalidBitRange),
     #[fail(display = "Unknown write constraint")]

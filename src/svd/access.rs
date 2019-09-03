@@ -30,7 +30,7 @@ impl Parse for Access {
             "read-writeOnce" => Ok(Access::ReadWriteOnce),
             "write-only" => Ok(Access::WriteOnly),
             "writeOnce" => Ok(Access::WriteOnce),
-            _ => Err(SVDErrorKind::UnknownAccessType(tree.clone()).into()),
+            _ => Err(SVDErrorKind::UnknownAccessType(tree.clone(), text).into()),
         }
     }
 }
