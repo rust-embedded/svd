@@ -21,6 +21,7 @@ use crate::svd::{
     registerproperties::RegisterProperties,
 };
 
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct RegisterInfo {
     pub name: String,

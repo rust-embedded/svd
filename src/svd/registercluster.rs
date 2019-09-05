@@ -11,6 +11,7 @@ use crate::svd::{
     register::Register,
 };
 
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub enum RegisterCluster {
     Register(Register),

@@ -11,6 +11,7 @@ use crate::error::*;
 use crate::new_element;
 use crate::types::Parse;
 
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum WriteConstraint {
     WriteAsRead(bool),
@@ -18,6 +19,7 @@ pub enum WriteConstraint {
     Range(WriteConstraintRange),
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WriteConstraintRange {
     pub min: u32,

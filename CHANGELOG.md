@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   and added into `Peripheral` and `ClusterInfo`
 - Updated dependencies, use `Edition 2018`
 - Added missing `zeroToToggle`
+- Added serializing/deserializing with `serde`
 
 ## [v0.7.0] - 2019-01-11
 

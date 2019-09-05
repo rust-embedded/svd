@@ -10,6 +10,7 @@ use crate::new_element;
 
 use crate::error::SVDError;
 
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct RegisterClusterArrayInfo {
     pub dim: u32,

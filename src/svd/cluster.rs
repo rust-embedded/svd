@@ -13,6 +13,7 @@ use crate::svd::{
     registerclusterarrayinfo::RegisterClusterArrayInfo,
 };
 
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub enum Cluster {
     Single(ClusterInfo),

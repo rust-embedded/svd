@@ -16,3 +16,15 @@ unproven = []
 either = "1.5"
 xmltree = "0.8"
 failure = "0.1"
+
+[dependencies.serde]
+version = "1.0"
+features = ["derive"]
+optional = true
+
+[dev-dependencies]
+serde_json = "1.0"
+
+[[example]]
+name = "svd2json"
+required-features = ["serde"]

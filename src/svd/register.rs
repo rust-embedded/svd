@@ -14,6 +14,7 @@ use crate::svd::{
     registerinfo::RegisterInfo,
 };
 
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub enum Register {
     Single(RegisterInfo),

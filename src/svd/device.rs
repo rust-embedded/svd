@@ -17,6 +17,7 @@ use crate::svd::{
     peripheral::Peripheral,
 };
 
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug)]
 pub struct Device {
     pub name: String,

@@ -17,6 +17,7 @@ use crate::svd::{
 };
 use crate::types::Parse;
 
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnumeratedValues {
     pub name: Option<String>,
