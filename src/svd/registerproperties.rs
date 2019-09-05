@@ -55,41 +55,29 @@ impl EncodeChildren for RegisterProperties {
     fn encode(&self) -> Result<Vec<Element>, SVDError> {
         let mut children = Vec::new();
 
-        match self.size {
-            Some(ref v) => {
-                children.push(new_element(
-                    "size",
-                    Some(format!("0x{:08.x}", v)),
-                ));
-            }
-            None => (),
+        if let Some(v) = &self.size {
+            children.push(new_element(
+                "size",
+                Some(format!("0x{:08.x}", v)),
+            ));
         };
 
-        match self.reset_value {
-            Some(ref v) => {
-                children.push(new_element(
-                    "resetValue",
-                    Some(format!("0x{:08.x}", v)),
-                ));
-            }
-            None => (),
+        if let Some(v) = &self.reset_value {
+            children.push(new_element(
+                "resetValue",
+                Some(format!("0x{:08.x}", v)),
+            ));
         };
 
-        match self.reset_mask {
-            Some(ref v) => {
-                children.push(new_element(
-                    "resetMask",
-                    Some(format!("0x{:08.x}", v)),
-                ));
-            }
-            None => (),
+        if let Some(v) = &self.reset_mask {
+            children.push(new_element(
+                "resetMask",
+                Some(format!("0x{:08.x}", v)),
+            ));
         };
 
-        match self.access {
-            Some(ref v) => {
-                children.push(v.encode()?);
-            }
-            None => (),
+        if let Some(v) = &self.access {
+            children.push(v.encode()?);
         };
 
         Ok(children)

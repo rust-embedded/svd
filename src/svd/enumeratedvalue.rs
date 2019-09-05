@@ -74,32 +74,22 @@ impl Encode for EnumeratedValue {
             children: vec![new_element("name", Some(self.name.clone()))],
             text: None,
         };
-        // FIXME: Use if let some pattern here
-        match self.description {
-            Some(ref d) => {
-                let s = (*d).clone();
-                base.children
-                    .push(new_element("description", Some(s)));
-            }
-            None => (),
+
+        if let Some(d) = &self.description {
+            let s = (*d).clone();
+            base.children
+                .push(new_element("description", Some(s)));
         };
 
-        match self.value {
-            Some(ref v) => {
-                base.children.push(new_element(
-                    "value",
-                    Some(format!("0x{:08.x}", *v)),
-                ));
-            }
-            None => (),
+        if let Some(v) = &self.value {
+            base.children.push(new_element(
+                "value",
+                Some(format!("0x{:08.x}", *v)),
+            ));
         };
 
-        match self.is_default {
-            Some(ref v) => {
-                base.children
-                    .push(new_element("isDefault", Some(format!("{}", v))));
-            }
-            None => (),
+        if let Some(v) = &self.is_default {
+            base.children.push(new_element("isDefault", Some(format!("{}", v))));
         };
 
         Ok(base)

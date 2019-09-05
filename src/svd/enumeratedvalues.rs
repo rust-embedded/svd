@@ -88,27 +88,16 @@ impl Encode for EnumeratedValues {
             text: None,
         };
 
-        match self.name {
-            Some(ref d) => {
-                base.children
-                    .push(new_element("name", Some((*d).clone())));
-            }
-            None => (),
+        if let Some(d) = &self.name {
+            base.children.push(new_element("name", Some((*d).clone())));
         };
 
-        match self.usage {
-            Some(ref v) => {
-                base.children.push(v.encode()?);
-            }
-            None => (),
+        if let Some(v) = &self.usage {
+            base.children.push(v.encode()?);
         };
 
-        match self.derived_from {
-            Some(ref v) => {
-                base.attributes
-                    .insert(String::from("derivedFrom"), (*v).clone());
-            }
-            None => (),
+        if let Some(v) = &self.derived_from {
+            base.attributes.insert(String::from("derivedFrom"), (*v).clone());
         }
 
         for v in &self.values {

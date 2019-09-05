@@ -56,8 +56,8 @@ impl Encode for RegisterCluster {
     type Error = SVDError;
     fn encode(&self) -> Result<Element, SVDError> {
         match self {
-            &RegisterCluster::Register(ref r) => r.encode(),
-            &RegisterCluster::Cluster(ref c) => c.encode(),
+            RegisterCluster::Register(r) => r.encode(),
+            RegisterCluster::Cluster(c) => c.encode(),
         }
     }
 }
