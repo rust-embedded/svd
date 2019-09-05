@@ -25,9 +25,9 @@ impl Deref for Register {
     type Target = RegisterInfo;
 
     fn deref(&self) -> &RegisterInfo {
-        match *self {
-            Register::Single(ref info) => info,
-            Register::Array(ref info, _) => info,
+        match self {
+            Register::Single(info) => info,
+            Register::Array(info, _) => info,
         }
     }
 }
@@ -44,7 +44,7 @@ impl Parse for Register {
         if tree.get_child("dimIncrement").is_some() {
             let array_info = RegisterClusterArrayInfo::parse(tree)?;
             assert!(info.name.contains("%s"));
-            if let Some(ref indices) = array_info.dim_index {
+            if let Some(indices) = &array_info.dim_index {
                 assert_eq!(array_info.dim as usize, indices.len())
             }
             Ok(Register::Array(info, array_info))
@@ -59,9 +59,9 @@ impl Encode for Register {
     type Error = SVDError;
 
     fn encode(&self) -> Result<Element, SVDError> {
-        match *self {
-            Register::Single(ref info) => info.encode(),
-            Register::Array(ref info, ref array_info) => {
+        match self {
+            Register::Single(info) => info.encode(),
+            Register::Array(info, array_info) => {
                 // TODO: is this correct? probably not, need tests
                 let base = info.encode()?;
                 base.merge(&array_info.encode()?);

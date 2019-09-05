@@ -82,57 +82,43 @@ impl Encode for Device {
             String::from("xmlns:xs"),
             String::from("http://www.w3.org/2001/XMLSchema-instance"),
         );
-        match self.schema_version {
-            Some(ref schema_version) => { 
-                elem.attributes.insert(
-                    String::from("schemaVersion"),
-                    format!("{}", schema_version));
-                },
-            None => (),
+        if let Some(schema_version) = &self.schema_version {
+            elem.attributes.insert(
+                String::from("schemaVersion"),
+                format!("{}", schema_version)
+            );
         }
-        match self.schema_version {
-            Some(ref schema_version) => { 
-                elem.attributes.insert(
-                    String::from("xs:noNamespaceSchemaLocation"),
-                    format!("CMSIS-SVD_Schema_{}.xsd", schema_version));
-                },
-            None => (),
+        if let Some(schema_version) = &self.schema_version {
+            elem.attributes.insert(
+                String::from("xs:noNamespaceSchemaLocation"),
+                format!("CMSIS-SVD_Schema_{}.xsd", schema_version)
+            );
         }
 
 
-        match self.version {
-            Some(ref v) => elem.children
-                .push(new_element("version", Some(v.clone()))),
-            None => (),
+        if let Some(v) = &self.version {
+            elem.children.push(new_element("version", Some(v.clone())));
         }
 
-        match self.description {
-            Some(ref v) => elem.children
-                .push(new_element("description", Some(v.clone()))),
-            None => (),
+        if let Some(v) = &self.description {
+            elem.children.push(new_element("description", Some(v.clone())));
         }
 
-        match self.description {
-            Some(ref v) => elem.children.push(new_element(
+        if let Some(v) = &self.description {
+            elem.children.push(new_element(
                 "addressUnitBits",
                 Some(format!("{}", v)),
-            )),
-            None => (),
+            ));
         }
 
-        match self.width {
-            Some(ref v) => elem.children
-                .push(new_element("width", Some(format!("{}", v)))),
-            None => (),
+        if let Some(v) = &self.width {
+            elem.children.push(new_element("width", Some(format!("{}", v))));
         }
 
         elem.children.extend(self.default_register_properties.encode()?);
 
-        match self.cpu {
-            Some(ref v) => {
-                elem.children.push(v.encode()?);
-            }
-            None => (),
+        if let Some(v) = &self.cpu {
+            elem.children.push(v.encode()?);
         }
 
         let peripherals: Result<Vec<_>, _> = self.peripherals

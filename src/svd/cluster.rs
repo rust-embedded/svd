@@ -24,9 +24,9 @@ impl Deref for Cluster {
     type Target = ClusterInfo;
 
     fn deref(&self) -> &ClusterInfo {
-        match *self {
-            Cluster::Single(ref info) => info,
-            Cluster::Array(ref info, _) => info,
+        match self {
+            Cluster::Single(info) => info,
+            Cluster::Array(info, _) => info,
         }
     }
 }
@@ -48,7 +48,7 @@ impl Parse for Cluster {
                 )));
             }
 
-            if let Some(ref indices) = array_info.dim_index {
+            if let Some(indices) = &array_info.dim_index {
                 if array_info.dim as usize != indices.len() {
                     // TODO: replace with real error
                     return Err(SVDError::from(SVDErrorKind::Other(

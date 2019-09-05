@@ -62,7 +62,7 @@ impl Encode for ClusterInfo {
             Some(self.description.clone()),
         ));
 
-        if let Some(ref v) = self.header_struct_name {
+        if let Some(v) = &self.header_struct_name {
             e.children
                 .push(new_element("headerStructName", Some(v.clone())));
         }

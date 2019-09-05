@@ -120,112 +120,77 @@ impl Encode for RegisterInfo {
             ],
             text: None,
         };
-        match self.description {
-            Some(ref v) => {
-                elem.children.push(new_element(
-                    "description",
-                    Some(v.clone()),
-                ));
-            }
-            None => (),
+        if let Some(v) = &self.description {
+            elem.children.push(new_element(
+                "description",
+                Some(v.clone()),
+            ));
         }
-        match self.alternate_group {
-            Some(ref v) => {
-                elem.children.push(new_element(
-                    "alternateGroup",
-                    Some(format!("{}", v)),
-                ));
-            }
-            None => (),
+        if let Some(v) = &self.alternate_group {
+            elem.children.push(new_element(
+                "alternateGroup",
+                Some(format!("{}", v)),
+            ));
         }
 
-        match self.alternate_register {
-            Some(ref v) => {
-                elem.children.push(new_element(
-                    "alternateRegister",
-                    Some(format!("{}", v)),
-                ));
-            }
-            None => (),
+        if let Some(v) = &self.alternate_register {
+            elem.children.push(new_element(
+                "alternateRegister",
+                Some(format!("{}", v)),
+            ));
         }
 
-        match self.derived_from {
-            Some(ref v) => {
-                elem.attributes
-                    .insert(String::from("derivedFrom"), format!("{}", v));
-            }
-            None => (),
+        if let Some(v) = &self.derived_from {
+            elem.attributes.insert(String::from("derivedFrom"), format!("{}", v));
         }
 
-        match self.size {
-            Some(ref v) => {
-                elem.children
-                    .push(new_element("size", Some(format!("{}", v))));
-            }
-            None => (),
+        if let Some(v) = &self.size {
+            elem.children.push(new_element("size", Some(format!("{}", v))));
         };
 
-        match self.access {
-            Some(ref v) => {
-                elem.children.push(v.encode()?);
-            }
-            None => (),
+        if let Some(v) = &self.access {
+            elem.children.push(v.encode()?);
         };
 
-        match self.reset_value {
-            Some(ref v) => {
-                elem.children.push(new_element(
-                    "resetValue",
-                    Some(format!("0x{:08.x}", v)),
-                ));
-            }
-            None => (),
+        if let Some(v) = &self.reset_value {
+            elem.children.push(new_element(
+                "resetValue",
+                Some(format!("0x{:08.x}", v)),
+            ));
         };
 
-        match self.reset_mask {
-            Some(ref v) => {
-                elem.children.push(new_element(
-                    "resetMask",
-                    Some(format!("0x{:08.x}", v)),
-                ));
-            }
-            None => (),
+        if let Some(v) = &self.reset_mask {
+            elem.children.push(new_element(
+                "resetMask",
+                Some(format!("0x{:08.x}", v)),
+            ));
         };
 
-        match self.fields {
-            Some(ref v) => {
-                let children = v
-                    .iter()
-                    .map(Field::encode)
-                    .collect::<Result<Vec<Element>, SVDError>>()?;
-                if !children.is_empty() {
-                    let fields = Element {
-                        prefix: None,
-                        namespace: None,
-                        namespaces: None,
-                        name: String::from("fields"),
-                        attributes: HashMap::new(),
-                        children,
-                        text: None,
-                    };
-                    elem.children.push(fields);
-                }
+        if let Some(v) = &self.fields {
+            let children = v
+                .iter()
+                .map(Field::encode)
+                .collect::<Result<Vec<Element>, SVDError>>()?;
+            if !children.is_empty() {
+                let fields = Element {
+                    prefix: None,
+                    namespace: None,
+                    namespaces: None,
+                    name: String::from("fields"),
+                    attributes: HashMap::new(),
+                    children,
+                    text: None,
+                };
+                elem.children.push(fields);
             }
-            None => (),
         };
 
-        match self.write_constraint {
-            Some(ref v) => {
-                elem.children.push(v.encode()?);
-            }
-            None => (),
+        if let Some(v) = &self.write_constraint {
+            elem.children.push(v.encode()?);
         };
 
-        match self.modified_write_values {
-            Some(ref v) => {
-                elem.children.push(v.encode()?);
-            }
-            None => (),
+        if let Some(v) = &self.modified_write_values {
+            elem.children.push(v.encode()?);
         };
 
         Ok(elem)

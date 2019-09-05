@@ -89,7 +89,7 @@ impl Encode for Field {
     fn encode(&self) -> Result<Element, SVDError> {
         let mut children = vec![new_element("name", Some(self.name.clone()))];
 
-        if let Some(ref description) = self.description {
+        if let Some(description) = &self.description {
             children.push(new_element("description", Some(description.clone())))
         }
 
@@ -107,11 +107,8 @@ impl Encode for Field {
         elem.children
             .append(&mut self.bit_range.encode()?);
 
-        match self.access {
-            Some(ref v) => {
-                elem.children.push(v.encode()?);
-            }
-            None => (),
+        if let Some(v) = &self.access {
+            elem.children.push(v.encode()?);
         };
 
         let enumerated_values: Result<Vec<Element>, SVDError> =
@@ -121,18 +118,12 @@ impl Encode for Field {
                 .collect();
         elem.children.append(&mut enumerated_values?);
 
-        match self.write_constraint {
-            Some(ref v) => {
-                elem.children.push(v.encode()?);
-            }
-            None => (),
+        if let Some(v) = &self.write_constraint {
+            elem.children.push(v.encode()?);
         };
 
-        match self.modified_write_values {
-            Some(ref v) => {
-                elem.children.push(v.encode()?);
-            }
-            None => (),
+        if let Some(v) = &self.modified_write_values {
+            elem.children.push(v.encode()?);
         };
 
         Ok(elem)

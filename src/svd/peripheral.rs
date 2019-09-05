@@ -141,37 +141,23 @@ impl Encode for Peripheral {
             text: None,
         };
 
-        match self.version {
-            Some(ref v) => {
-                elem.children
-                    .push(new_element("version", Some(format!("{}", v))));
-            }
-            None => (),
+        if let Some(v) = &self.version {
+            elem.children.push(new_element("version", Some(format!("{}", v))));
         };
-        match self.display_name {
-            Some(ref v) => {
-                elem.children.push(new_element(
-                    "displayName",
-                    Some(format!("{}", v)),
-                ));
-            }
-            None => (),
+        if let Some(v) = &self.display_name {
+            elem.children.push(new_element(
+                "displayName",
+                Some(format!("{}", v)),
+            ));
         };
-        match self.group_name {
-            Some(ref v) => {
-                elem.children
-                    .push(new_element("groupName", Some(format!("{}", v))));
-            }
-            None => (),
+        if let Some(v) = &self.group_name {
+            elem.children.push(new_element("groupName", Some(format!("{}", v))));
         };
-        match self.description {
-            Some(ref v) => {
-                elem.children.push(new_element(
-                    "description",
-                    Some(format!("{}", v)),
-                ));
-            }
-            None => (),
+        if let Some(v) = &self.description {
+            elem.children.push(new_element(
+                "description",
+                Some(format!("{}", v)),
+            ));
         };
         elem.children.push(new_element(
             "baseAddress",
@@ -180,11 +166,8 @@ impl Encode for Peripheral {
 
         elem.children.extend(self.default_register_properties.encode()?);
 
-        match self.address_block {
-            Some(ref v) => {
-                elem.children.push(v.encode()?);
-            }
-            None => (),
+        if let Some(v) = &self.address_block {
+            elem.children.push(v.encode()?);
         };
 
         let interrupts: Result<Vec<_>, _> = self.interrupt
@@ -194,30 +177,23 @@ impl Encode for Peripheral {
 
         elem.children.append(&mut interrupts?);
 
-        match self.registers {
-            Some(ref v) => {
-                let children: Result<Vec<_>, _> =
-                    v.iter().map(|&ref e| e.encode()).collect();
+        if let Some(v) = &self.registers {
+            let children: Result<Vec<_>, _> =
+                v.iter().map(|e| e.encode()).collect();
 
-                elem.children.push(Element {
-                    prefix: None,
-                    namespace: None,
-                    namespaces: None,
-                    name: String::from("registers"),
-                    attributes: HashMap::new(),
-                    children: children?,
-                    text: None,
-                });
-            }
-            None => (),
+            elem.children.push(Element {
+                prefix: None,
+                namespace: None,
+                namespaces: None,
+                name: String::from("registers"),
+                attributes: HashMap::new(),
+                children: children?,
+                text: None,
+            });
         };
 
-        match self.derived_from {
-            Some(ref v) => {
-                elem.attributes
-                    .insert(String::from("derivedFrom"), format!("{}", v));
-            }
-            None => (),
+        if let Some(v) = &self.derived_from {
+            elem.attributes.insert(String::from("derivedFrom"), format!("{}", v));
         }
 
         Ok(elem)
