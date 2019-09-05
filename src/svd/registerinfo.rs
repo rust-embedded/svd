@@ -103,6 +103,9 @@ impl Encode for RegisterInfo {
     type Error = SVDError;
     fn encode(&self) -> Result<Element, SVDError> {
         let mut elem = Element {
+            prefix: None,
+            namespace: None,
+            namespaces: None,
             name: String::from("register"),
             attributes: HashMap::new(),
             children: vec![
@@ -194,6 +197,9 @@ impl Encode for RegisterInfo {
                     .collect::<Result<Vec<Element>, SVDError>>()?;
                 if !children.is_empty() {
                     let fields = Element {
+                        prefix: None,
+                        namespace: None,
+                        namespaces: None,
                         name: String::from("fields"),
                         attributes: HashMap::new(),
                         children,

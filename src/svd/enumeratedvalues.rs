@@ -62,6 +62,9 @@ impl Encode for EnumeratedValues {
 
     fn encode(&self) -> Result<Element, SVDError> {
         let mut base = Element {
+            prefix: None,
+            namespace: None,
+            namespaces: None,
             name: String::from("enumeratedValues"),
             attributes: HashMap::new(),
             children: Vec::new(),

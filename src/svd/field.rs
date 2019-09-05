@@ -91,6 +91,9 @@ impl Encode for Field {
         }
 
         let mut elem = Element {
+            prefix: None,
+            namespace: None,
+            namespaces: None,
             name: String::from("field"),
             attributes: HashMap::new(),
             children,

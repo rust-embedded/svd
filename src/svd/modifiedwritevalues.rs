@@ -69,6 +69,9 @@ impl Encode for ModifiedWriteValues {
         };
 
         Ok(Element {
+            prefix: None,
+            namespace: None,
+            namespaces: None,
             name: String::from("modifiedWriteValues"),
             attributes: HashMap::new(),
             children: vec![],

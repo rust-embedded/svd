@@ -129,6 +129,9 @@ impl Encode for Peripheral {
 
     fn encode(&self) -> Result<Element, SVDError> {
         let mut elem = Element {
+            prefix: None,
+            namespace: None,
+            namespaces: None,
             name: String::from("peripheral"),
             attributes: HashMap::new(),
             children: vec![new_element("name", Some(self.name.clone()))],
@@ -194,6 +197,9 @@ impl Encode for Peripheral {
                     v.iter().map(|&ref e| e.encode()).collect();
 
                 elem.children.push(Element {
+                    prefix: None,
+                    namespace: None,
+                    namespaces: None,
                     name: String::from("registers"),
                     attributes: HashMap::new(),
                     children: children?,

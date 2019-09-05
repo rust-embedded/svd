@@ -12,6 +12,6 @@ version = "0.7.0"
 unproven = []
 
 [dependencies]
-either = "1.1.0"
-xmltree = "0.3.2"
-failure = "0.1.1"
+either = "1.5"
+xmltree = "0.8"
+failure = "0.1"

@@ -54,6 +54,9 @@ impl Encode for Cpu {
 
     fn encode(&self) -> Result<Element, SVDError> {
         Ok(Element {
+            prefix: None,
+            namespace: None,
+            namespaces: None,
             name: String::from("cpu"),
             attributes: HashMap::new(),
             children: vec![
