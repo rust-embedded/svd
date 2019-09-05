@@ -13,10 +13,7 @@ use crate::error::*;
 use crate::new_element;
 use crate::types::Parse;
 
-#[cfg(feature = "serde_svd")]
-use super::serde::{ Deserialize, Serialize };
-
-#[cfg_attr(feature = "serde_svd", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnumeratedValue {
     pub name: String,

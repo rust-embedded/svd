@@ -12,11 +12,8 @@ use crate::types::Parse;
 
 use crate::svd::access::Access;
 
-#[cfg(feature = "serde_svd")]
-use super::serde::{ Deserialize, Serialize };
-
 /// Register default properties
-#[cfg_attr(feature = "serde_svd", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct RegisterProperties {
     pub size: Option<u32>,

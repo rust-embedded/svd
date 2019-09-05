@@ -9,10 +9,7 @@ use crate::encode::Encode;
 use crate::error::*;
 use crate::types::Parse;
 
-#[cfg(feature = "serde_svd")]
-use super::serde::{ Deserialize, Serialize };
-
-#[cfg_attr(feature = "serde_svd", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Usage {
     Read,
