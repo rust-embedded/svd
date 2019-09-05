@@ -1,5 +1,4 @@
-extern crate failure;
-extern crate svd_parser as svd;
+use svd_parser as svd;
 
 use failure::Fail;
 

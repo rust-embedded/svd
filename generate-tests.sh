@@ -30,7 +30,7 @@ main() {
         cat >"$cmsis_dir/$vendor.rs" <<EOF
 #![allow(non_snake_case)]
 
-extern crate svd_parser as svd;
+use svd_parser as svd;
 
 EOF
 

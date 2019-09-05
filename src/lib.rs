@@ -3,7 +3,7 @@
 //! # Usage
 //!
 //! ``` no_run
-//! extern crate svd_parser as svd;
+//! use svd_parser as svd;
 //!
 //! use std::fs::File;
 //! use std::io::Read;
@@ -23,10 +23,6 @@
 //! - [Sample SVD file](https://www.keil.com/pack/doc/CMSIS/SVD/html/svd_Example_pg.html)
 
 #![deny(warnings)]
-
-extern crate either;
-extern crate xmltree;
-extern crate failure;
 
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
