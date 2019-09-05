@@ -1,16 +1,16 @@
 use xmltree::Element;
 
 #[cfg(feature = "unproven")]
-use encode::Encode;
+use crate::encode::Encode;
 #[cfg(feature = "unproven")]
-use encode::EncodeChildren;
-use error::*;
+use crate::encode::EncodeChildren;
+use crate::error::*;
 #[cfg(feature = "unproven")]
-use new_element;
-use parse;
-use types::Parse;
+use crate::new_element;
+use crate::parse;
+use crate::types::Parse;
 
-use svd::access::Access;
+use crate::svd::access::Access;
 
 /// Register default properties
 #[derive(Clone, Copy, Debug, PartialEq)]

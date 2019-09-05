@@ -1,19 +1,21 @@
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 use failure::ResultExt;
 use xmltree::Element;
 
 #[cfg(feature = "unproven")]
-use encode::Encode;
-use error::*;
+use crate::encode::Encode;
+use crate::error::*;
 #[cfg(feature = "unproven")]
-use new_element;
-use parse;
-use svd::enumeratedvalue::EnumeratedValue;
-use svd::usage::Usage;
-use types::Parse;
+use crate::new_element;
+use crate::parse;
+use crate::svd::{
+    enumeratedvalue::EnumeratedValue,
+    usage::Usage,
+};
+use crate::types::Parse;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnumeratedValues {

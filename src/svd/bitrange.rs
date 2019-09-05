@@ -1,10 +1,10 @@
 use failure::ResultExt;
 use xmltree::Element;
 
-use error::*;
+use crate::error::*;
 #[cfg(feature = "unproven")]
-use new_element;
-use types::Parse;
+use crate::new_element;
+use crate::types::Parse;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct BitRange {

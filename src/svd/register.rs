@@ -1,16 +1,18 @@
-use std::ops::Deref;
+use core::ops::Deref;
 
 use xmltree::Element;
 
-use types::Parse;
+use crate::types::Parse;
 
 #[cfg(feature = "unproven")]
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 #[cfg(feature = "unproven")]
-use encode::Encode;
-use error::SVDError;
-use svd::registerclusterarrayinfo::RegisterClusterArrayInfo;
-use svd::registerinfo::RegisterInfo;
+use crate::encode::Encode;
+use crate::error::SVDError;
+use crate::svd::{
+    registerclusterarrayinfo::RegisterClusterArrayInfo,
+    registerinfo::RegisterInfo,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Register {

@@ -4,9 +4,9 @@
 use xmltree::Element;
 
 use failure::ResultExt;
-use types::{BoolParse, Parse};
+use crate::types::{BoolParse, Parse};
 
-use error::*;
+use crate::error::*;
 
 /// Defines extensions for implementation over xmltree::Element
 pub trait ElementExt {
@@ -16,7 +16,7 @@ pub trait ElementExt {
     fn get_child_text<K>(&self, k: K) -> Result<String, SVDError>
     where
         String: PartialEq<K>,
-        K: ::std::fmt::Display + Clone;
+        K: core::fmt::Display + Clone;
 
     fn get_text(&self) -> Result<String, SVDError>;
 
@@ -46,7 +46,7 @@ impl ElementExt for Element {
     fn get_child_text<K>(&self, k: K) -> Result<String, SVDError>
     where
         String: PartialEq<K>,
-        K: ::std::fmt::Display + Clone,
+        K: core::fmt::Display + Clone,
     {
         self.get_child_text_opt(k.clone())?.ok_or(
             SVDErrorKind::MissingTag(self.clone(), format!("{}", k)).into(),

@@ -1,15 +1,17 @@
-use std::ops::Deref;
+use core::ops::Deref;
 use xmltree::Element;
 
-use types::Parse;
+use crate::types::Parse;
 
 #[cfg(feature = "unproven")]
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 #[cfg(feature = "unproven")]
-use encode::Encode;
-use error::*;
-use svd::clusterinfo::ClusterInfo;
-use svd::registerclusterarrayinfo::RegisterClusterArrayInfo;
+use crate::encode::Encode;
+use crate::error::*;
+use crate::svd::{
+    clusterinfo::ClusterInfo,
+    registerclusterarrayinfo::RegisterClusterArrayInfo,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Cluster {

@@ -3,14 +3,14 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 #[cfg(feature = "unproven")]
-use encode::Encode;
-use error::*;
+use crate::encode::Encode;
+use crate::error::*;
 #[cfg(feature = "unproven")]
-use new_element;
-use svd::endian::Endian;
-use types::Parse;
+use crate::new_element;
+use crate::svd::endian::Endian;
+use crate::types::Parse;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Cpu {
@@ -95,7 +95,7 @@ impl Cpu {
 #[cfg(feature = "unproven")]
 mod tests {
     use super::*;
-    use run_test;
+    use crate::run_test;
 
     #[test]
     fn decode_encode() {

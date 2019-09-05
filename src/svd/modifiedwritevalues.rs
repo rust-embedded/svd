@@ -1,13 +1,13 @@
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 use xmltree::Element;
 
-use types::Parse;
+use crate::types::Parse;
 
 #[cfg(feature = "unproven")]
-use encode::Encode;
-use error::*;
+use crate::encode::Encode;
+use crate::error::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ModifiedWriteValues {
@@ -84,7 +84,7 @@ impl Encode for ModifiedWriteValues {
 #[cfg(feature = "unproven")]
 mod tests {
     use super::*;
-    use run_test;
+    use crate::run_test;
 
     #[test]
     fn decode_encode() {

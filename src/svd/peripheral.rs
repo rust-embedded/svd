@@ -3,21 +3,23 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 use failure::ResultExt;
-use parse;
+use crate::parse;
 
 #[cfg(feature = "unproven")]
-use encode::{Encode, EncodeChildren};
+use crate::encode::{Encode, EncodeChildren};
 #[cfg(feature = "unproven")]
-use new_element;
-use types::Parse;
+use crate::new_element;
+use crate::types::Parse;
 
-use error::{SVDError, SVDErrorKind};
-use svd::addressblock::AddressBlock;
-use svd::interrupt::Interrupt;
-use svd::registercluster::RegisterCluster;
-use svd::registerproperties::RegisterProperties;
+use crate::error::{SVDError, SVDErrorKind};
+use crate::svd::{
+    addressblock::AddressBlock,
+    interrupt::Interrupt,
+    registercluster::RegisterCluster,
+    registerproperties::RegisterProperties,
+};
 
 #[derive(Clone, Debug)]
 pub struct Peripheral {

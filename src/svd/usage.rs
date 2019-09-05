@@ -1,13 +1,13 @@
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 use xmltree::Element;
 
 #[cfg(feature = "unproven")]
-use encode::Encode;
-use error::*;
-use types::Parse;
+use crate::encode::Encode;
+use crate::error::*;
+use crate::types::Parse;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Usage {
@@ -59,7 +59,7 @@ impl Encode for Usage {
 #[cfg(feature = "unproven")]
 mod tests {
     use super::*;
-    use run_test;
+    use crate::run_test;
 
     #[test]
     fn decode_encode() {

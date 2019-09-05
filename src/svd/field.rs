@@ -1,23 +1,25 @@
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 use failure::ResultExt;
 use xmltree::Element;
 
 #[cfg(feature = "unproven")]
-use encode::Encode;
-use error::*;
+use crate::encode::Encode;
+use crate::error::*;
 #[cfg(feature = "unproven")]
-use new_element;
-use parse;
-use types::Parse;
+use crate::new_element;
+use crate::parse;
+use crate::types::Parse;
 
-use svd::access::Access;
-use svd::bitrange::BitRange;
-use svd::enumeratedvalues::EnumeratedValues;
-use svd::modifiedwritevalues::ModifiedWriteValues;
-use svd::writeconstraint::WriteConstraint;
+use crate::svd::{
+    access::Access,
+    bitrange::BitRange,
+    enumeratedvalues::EnumeratedValues,
+    modifiedwritevalues::ModifiedWriteValues,
+    writeconstraint::WriteConstraint,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Field {
@@ -140,9 +142,11 @@ impl Encode for Field {
 #[cfg(feature = "unproven")]
 mod tests {
     use super::*;
-    use run_test;
-    use svd::bitrange::BitRangeType;
-    use svd::enumeratedvalue::EnumeratedValue;
+    use crate::run_test;
+    use crate::svd::{
+        bitrange::BitRangeType,
+        enumeratedvalue::EnumeratedValue,
+    };
 
     #[test]
     fn decode_encode() {

@@ -1,16 +1,18 @@
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 use xmltree::Element;
 
-use types::Parse;
+use crate::types::Parse;
 
 #[cfg(feature = "unproven")]
-use encode::{Encode, EncodeChildren};
+use crate::encode::{Encode, EncodeChildren};
 #[cfg(feature = "unproven")]
-use new_element;
+use crate::new_element;
 
-use error::SVDError;
-use svd::registercluster::RegisterCluster;
-use svd::registerproperties::RegisterProperties;
+use crate::error::SVDError;
+use crate::svd::{
+    registercluster::RegisterCluster,
+    registerproperties::RegisterProperties,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ClusterInfo {

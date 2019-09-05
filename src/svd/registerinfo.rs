@@ -1,23 +1,25 @@
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 use failure::ResultExt;
 use xmltree::Element;
 
 #[cfg(feature = "unproven")]
-use encode::Encode;
-use error::*;
+use crate::encode::Encode;
+use crate::error::*;
 #[cfg(feature = "unproven")]
-use new_element;
-use parse;
-use types::Parse;
+use crate::new_element;
+use crate::parse;
+use crate::types::Parse;
 
-use svd::access::Access;
-use svd::field::Field;
-use svd::modifiedwritevalues::ModifiedWriteValues;
-use svd::writeconstraint::WriteConstraint;
-use svd::registerproperties::RegisterProperties;
+use crate::svd::{
+    access::Access,
+    field::Field,
+    modifiedwritevalues::ModifiedWriteValues,
+    writeconstraint::WriteConstraint,
+    registerproperties::RegisterProperties,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RegisterInfo {
@@ -233,8 +235,8 @@ impl Encode for RegisterInfo {
 #[cfg(feature = "unproven")]
 mod tests {
     use super::*;
-    use run_test;
-    use svd::bitrange::*;
+    use crate::run_test;
+    use crate::svd::bitrange::*;
 
     #[test]
     fn decode_encode() {

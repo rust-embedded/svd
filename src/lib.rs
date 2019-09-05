@@ -99,7 +99,7 @@ pub(crate) fn new_element(name: &str, text: Option<String>) -> Element {
 pub fn run_test<
     T: Parse<Error = SVDError, Object = T>
         + Encode<Error = SVDError>
-        + ::std::fmt::Debug
+        + core::fmt::Debug
         + PartialEq,
 >(
     tests: &[(T, &str)],
@@ -132,7 +132,7 @@ pub fn run_test<
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::str;
+    use core::str;
 
     #[test]
     fn test_trim_utf8_bom_from_str() {

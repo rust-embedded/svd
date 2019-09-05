@@ -1,12 +1,12 @@
 use xmltree::Element;
 
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 #[cfg(feature = "unproven")]
-use encode::Encode;
-use error::*;
+use crate::encode::Encode;
+use crate::error::*;
 #[cfg(feature = "unproven")]
-use new_element;
-use types::Parse;
+use crate::new_element;
+use crate::types::Parse;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Access {
@@ -56,7 +56,7 @@ impl Encode for Access {
 #[cfg(feature = "unproven")]
 mod tests {
     use super::*;
-    use run_test;
+    use crate::run_test;
 
     #[test]
     fn decode_encode() {
