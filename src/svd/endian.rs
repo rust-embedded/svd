@@ -48,6 +48,9 @@ impl Encode for Endian {
         };
 
         Ok(Element {
+            prefix: None,
+            namespace: None,
+            namespaces: None,
             name: String::from("endian"),
             attributes: HashMap::new(),
             children: Vec::new(),

@@ -64,7 +64,7 @@ pub fn parse(xml: &str) -> Result<Device, SVDError> {
 pub fn encode(d: &Device) -> Result<String, SVDError> {
     let root = d.encode()?;
     let mut wr = Vec::new();
-    root.write(&mut wr);
+    root.write(&mut wr).unwrap();
     Ok(String::from_utf8(wr).unwrap())
 }
 
@@ -81,6 +81,9 @@ fn trim_utf8_bom(s: &str) -> &str {
 #[cfg(feature = "unproven")]
 pub(crate) fn new_element(name: &str, text: Option<String>) -> Element {
     Element {
+        prefix: None,
+        namespace: None,
+        namespaces: None,
         name: String::from(name),
         attributes: HashMap::new(),
         children: Vec::new(),

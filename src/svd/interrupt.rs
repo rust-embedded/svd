@@ -56,6 +56,9 @@ impl Encode for Interrupt {
 
     fn encode(&self) -> Result<Element, SVDError> {
         Ok(Element {
+            prefix: None,
+            namespace: None,
+            namespaces: None,
             name: String::from("interrupt"),
             attributes: HashMap::new(),
             children: vec![

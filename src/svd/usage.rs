@@ -44,6 +44,9 @@ impl Encode for Usage {
         };
 
         Ok(Element {
+            prefix: None,
+            namespace: None,
+            namespaces: None,
             name: String::from("usage"),
             attributes: HashMap::new(),
             children: Vec::new(),

@@ -66,6 +66,9 @@ impl Encode for Device {
 
     fn encode(&self) -> Result<Element, SVDError> {
         let mut elem = Element {
+            prefix: None,
+            namespace: None,
+            namespaces: None,
             name: String::from("device"),
             attributes: HashMap::new(),
             children: vec![new_element("name", Some(self.name.clone()))],
@@ -134,6 +137,9 @@ impl Encode for Device {
             .map(Peripheral::encode)
             .collect();
         elem.children.push(Element {
+            prefix: None,
+            namespace: None,
+            namespaces: None,
             name: String::from("peripherals"),
             attributes: HashMap::new(),
             children: peripherals?,

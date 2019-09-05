@@ -72,6 +72,9 @@ impl Encode for WriteConstraint {
         };
 
         Ok(Element {
+            prefix: None,
+            namespace: None,
+            namespaces: None,
             name: String::from("writeConstraint"),
             attributes: HashMap::new(),
             children: vec![v],
@@ -98,6 +101,9 @@ impl Encode for WriteConstraintRange {
 
     fn encode(&self) -> Result<Element, SVDError> {
         Ok(Element {
+            prefix: None,
+            namespace: None,
+            namespaces: None,
             name: String::from("range"),
             attributes: HashMap::new(),
             children: vec![

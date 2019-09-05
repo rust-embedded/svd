@@ -38,6 +38,9 @@ impl Encode for AddressBlock {
 
     fn encode(&self) -> Result<Element, SVDError> {
         Ok(Element {
+            prefix: None,
+            namespace: None,
+            namespaces: None,
             name: String::from("addressBlock"),
             attributes: HashMap::new(),
             children: vec![
