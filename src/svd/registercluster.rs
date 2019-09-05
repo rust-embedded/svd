@@ -1,13 +1,15 @@
 use xmltree::Element;
 
-use types::Parse;
+use crate::types::Parse;
 
 #[cfg(feature = "unproven")]
-use encode::Encode;
+use crate::encode::Encode;
 
-use error::{SVDError, SVDErrorKind};
-use svd::cluster::Cluster;
-use svd::register::Register;
+use crate::error::{SVDError, SVDErrorKind};
+use crate::svd::{
+    cluster::Cluster,
+    register::Register,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum RegisterCluster {

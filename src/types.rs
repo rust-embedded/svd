@@ -4,14 +4,14 @@ use failure::ResultExt;
 use xmltree::Element;
 
 #[cfg(feature = "unproven")]
-pub use encode::Encode;
-pub use parse::optional as parse_optional;
-pub use parse::Parse;
+pub use crate::encode::Encode;
+pub use crate::parse::optional as parse_optional;
+pub use crate::parse::Parse;
 
-use elementext::ElementExt;
-use error::{SVDError, SVDErrorKind};
+use crate::elementext::ElementExt;
+use crate::error::{SVDError, SVDErrorKind};
 
-macro_rules! try {
+macro_rules! unwrap {
     ($e:expr) => {
         $e.expect(concat!(
             file!(),
@@ -64,7 +64,7 @@ impl Parse for BoolParse {
     type Object = bool;
     type Error = SVDError;
     fn parse(tree: &Element) -> Result<bool, SVDError> {
-        let text = try!(tree.text.as_ref());
+        let text = unwrap!(tree.text.as_ref());
         Ok(match text.as_ref() {
             "0" => false,
             "1" => true,
@@ -92,8 +92,8 @@ impl Parse for DimIndex {
         let text = tree.get_text()?;
         if text.contains('-') {
             let mut parts = text.splitn(2, '-');
-            let start = try!(try!(parts.next()).parse::<u32>());
-            let end = try!(try!(parts.next()).parse::<u32>()) + 1;
+            let start = unwrap!(unwrap!(parts.next()).parse::<u32>());
+            let end = unwrap!(unwrap!(parts.next()).parse::<u32>()) + 1;
 
             Ok((start..end).map(|i| i.to_string()).collect())
         } else if text.contains(',') {

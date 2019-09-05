@@ -1,14 +1,14 @@
 use xmltree::Element;
 
-use types::{parse_optional, DimIndex, Parse};
+use crate::types::{parse_optional, DimIndex, Parse};
 
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 #[cfg(feature = "unproven")]
-use encode::Encode;
+use crate::encode::Encode;
 #[cfg(feature = "unproven")]
-use new_element;
+use crate::new_element;
 
-use error::SVDError;
+use crate::error::SVDError;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RegisterClusterArrayInfo {
@@ -62,7 +62,7 @@ impl Encode for RegisterClusterArrayInfo {
 #[cfg(feature = "unproven")]
 mod tests {
     use super::*;
-    use run_test;
+    use crate::run_test;
 
     #[test]
     fn decode_encode() {

@@ -3,12 +3,12 @@ use std::collections::HashMap;
 
 use xmltree::Element;
 
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 #[cfg(feature = "unproven")]
-use encode::Encode;
-use types::Parse;
+use crate::encode::Encode;
+use crate::types::Parse;
 
-use error::*;
+use crate::error::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Endian {
@@ -63,7 +63,7 @@ impl Encode for Endian {
 #[cfg(feature = "unproven")]
 mod tests {
     use super::*;
-    use run_test;
+    use crate::run_test;
 
     #[test]
     fn decode_encode() {

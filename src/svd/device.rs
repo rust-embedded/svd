@@ -1,19 +1,21 @@
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 use xmltree::Element;
 
-use parse;
-use types::Parse;
+use crate::parse;
+use crate::types::Parse;
 
 #[cfg(feature = "unproven")]
-use encode::{Encode, EncodeChildren};
-use error::SVDError;
+use crate::encode::{Encode, EncodeChildren};
+use crate::error::SVDError;
 #[cfg(feature = "unproven")]
-use new_element;
-use svd::cpu::Cpu;
-use svd::registerproperties::RegisterProperties;
-use svd::peripheral::Peripheral;
+use crate::new_element;
+use crate::svd::{
+    cpu::Cpu,
+    registerproperties::RegisterProperties,
+    peripheral::Peripheral,
+};
 
 #[derive(Clone, Debug)]
 pub struct Device {

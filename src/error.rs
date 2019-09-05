@@ -2,7 +2,7 @@
 //! This module defines error types and messages for SVD parsing and encoding
 
 use failure::{Backtrace, Context, Fail};
-use std::fmt::{self, Display};
+use core::fmt::{self, Display};
 use xmltree::{Element, ParseError};
 
 #[derive(Debug)]
@@ -50,7 +50,7 @@ pub enum SVDErrorKind {
         _1,
         _2
     )]
-    InvalidBooleanValue(Element, String, ::std::str::ParseBoolError),
+    InvalidBooleanValue(Element, String, core::str::ParseBoolError),
     #[fail(display = "encoding method not implemented for svd object {}", _0)]
     EncodeNotImplemented(String),
     #[fail(display = "Error parsing SVD XML")]

@@ -1,16 +1,16 @@
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
-use elementext::ElementExt;
+use crate::elementext::ElementExt;
 use xmltree::Element;
 
-use types::Parse;
+use crate::types::Parse;
 
 #[cfg(feature = "unproven")]
-use encode::Encode;
-use error::SVDError;
+use crate::encode::Encode;
+use crate::error::SVDError;
 #[cfg(feature = "unproven")]
-use new_element;
+use crate::new_element;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AddressBlock {
@@ -57,7 +57,7 @@ impl Encode for AddressBlock {
 #[cfg(feature = "unproven")]
 mod tests {
     use super::*;
-    use run_test;
+    use crate::run_test;
 
     #[test]
     fn decode_encode() {

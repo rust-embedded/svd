@@ -3,7 +3,7 @@
 
 use xmltree::Element;
 
-use error::*;
+use crate::error::*;
 
 /// Parse trait allows SVD objects to be parsed from XML elements.
 pub trait Parse {
@@ -12,7 +12,7 @@ pub trait Parse {
     /// Parsing error
     type Error;
     /// Parse an XML/SVD element into it's corresponding `Object`.
-    fn parse(&Element) -> Result<Self::Object, Self::Error>;
+    fn parse(elem: &Element) -> Result<Self::Object, Self::Error>;
 }
 
 /// Parses an optional child element with the provided name and Parse function

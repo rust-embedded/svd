@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- [breaking-change] `Defaults` field renamed on `RegisterProperties`
+  and added into `Peripheral` and `ClusterInfo`
+- Updated dependencies, use `Edition 2018`
+- Added missing `zeroToToggle`
+
 ## [v0.7.0] - 2019-01-11
 
 - [breaking-change] Major Refactor
