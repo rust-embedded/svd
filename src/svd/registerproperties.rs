@@ -24,16 +24,6 @@ pub struct RegisterProperties {
     _extensible: (),
 }
 
-impl RegisterProperties {
-    pub fn derive_from(mut self, other: &Self) -> Self {
-        self.size = self.size.or(other.size);
-        self.reset_value = self.reset_value.or(other.reset_value);
-        self.reset_mask = self.reset_mask.or(other.reset_mask);
-        self.access = self.access.or(other.access);
-        self
-    }
-}
-
 impl Parse for RegisterProperties {
     type Object = RegisterProperties;
     type Error = SVDError;

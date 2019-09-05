@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - [breaking-change] `Defaults` field renamed on `RegisterProperties`
   and added into `Peripheral` and `ClusterInfo`
 - Added `derived_from` into `Field` and `ClusterInfo`
+- [breaking-change] implement `DeriveFrom` for `ClusterInfo`,
+  `RegisterInfo` and `EnumeratedValues`
 - Updated dependencies, use `Edition 2018`
 - Added missing `zeroToToggle`
 - Added serializing/deserializing with `serde`
