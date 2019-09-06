@@ -18,6 +18,7 @@ use crate::svd::{
 #[derive(Clone, Debug, PartialEq)]
 pub struct ClusterInfo {
     pub name: String,
+    pub derived_from: Option<String>,
     pub description: String,
     pub header_struct_name: Option<String>,
     pub address_offset: u32,
@@ -34,6 +35,7 @@ impl Parse for ClusterInfo {
     fn parse(tree: &Element) -> Result<ClusterInfo, SVDError> {
         Ok(ClusterInfo {
             name: tree.get_child_text("name")?, // TODO: Handle naming of cluster
+            derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
             description: tree.get_child_text("description")?,
             header_struct_name: tree.get_child_text_opt("headerStructName")?,
             address_offset: tree.get_child_u32("addressOffset")?,
@@ -56,6 +58,10 @@ impl Encode for ClusterInfo {
     type Error = SVDError;
     fn encode(&self) -> Result<Element, SVDError> {
         let mut e = new_element("cluster", None);
+
+        if let Some(v) = &self.derived_from {
+            e.attributes.insert(String::from("derivedFrom"), format!("{}", v));
+        }
 
         e.children.push(new_element(
             "description",

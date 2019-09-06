@@ -220,6 +220,7 @@ mod tests {
                 reset_mask: Some(0x00000023),
                 fields: Some(vec![Field {
                     name: String::from("WREN"),
+                    derived_from: None,
                     description: Some(String::from(
                         "Enable Write/Erase Controller",
                     )),

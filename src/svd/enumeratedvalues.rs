@@ -38,9 +38,7 @@ impl Parse for EnumeratedValues {
         Ok(EnumeratedValues {
             name: tree.get_child_text_opt("name")?,
             usage: parse::optional::<Usage>("usage", tree)?,
-            derived_from: tree.attributes
-                .get(&"derivedFrom".to_owned())
-                .map(|s| s.to_owned()),
+            derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
             values: {
                 let values: Result<Vec<_>, _> = tree.children
                     .iter()

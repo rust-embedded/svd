@@ -25,6 +25,7 @@ use crate::svd::{
 #[derive(Clone, Debug, PartialEq)]
 pub struct Field {
     pub name: String,
+    pub derived_from: Option<String>,
     pub description: Option<String>,
     pub bit_range: BitRange,
     pub access: Option<Access>,
@@ -59,6 +60,7 @@ impl Field {
     fn _parse(tree: &Element, name: String) -> Result<Field, SVDError> {
         Ok(Field {
             name,
+            derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
             description: tree.get_child_text_opt("description")?,
             bit_range: BitRange::parse(tree)?,
             access: parse::optional::<Access>("access", tree)?,
@@ -103,6 +105,10 @@ impl Encode for Field {
             text: None,
         };
 
+        if let Some(v) = &self.derived_from {
+            elem.attributes.insert(String::from("derivedFrom"), format!("{}", v));
+        }
+
         // Add bit range
         elem.children
             .append(&mut self.bit_range.encode()?);
@@ -146,6 +152,7 @@ mod tests {
             (
                 Field {
                     name: String::from("MODE"),
+                    derived_from: None,
                     description: Some(String::from("Read Mode")),
                     bit_range: BitRange {
                         offset: 24,
@@ -193,49 +200,27 @@ mod tests {
             </field>
             ",
             ),
-            // almost the same test but description info is missing
             (
                 Field {
                     name: String::from("MODE"),
+                    derived_from: Some(String::from("other field")),
                     description: None,
                     bit_range: BitRange {
                         offset: 24,
                         width: 2,
                         range_type: BitRangeType::OffsetWidth,
                     },
-                    access: Some(Access::ReadWrite),
-                    enumerated_values: vec![EnumeratedValues {
-                        name: None,
-                        usage: None,
-                        derived_from: None,
-                        values: vec![EnumeratedValue {
-                            name: String::from("WS0"),
-                            description: Some(String::from(
-                                "Zero wait-states inserted in fetch or read transfers",
-                            )),
-                            value: Some(0),
-                            is_default: None,
-                            _extensible: (),
-                        }],
-                        _extensible: (),
-                    }],
+                    access: None,
+                    enumerated_values: vec![],
                     write_constraint: None,
                     modified_write_values: None,
                     _extensible: (),
                 },
                 "
-            <field>
+            <field derivedFrom=\"other field\">
               <name>MODE</name>
               <bitOffset>24</bitOffset>
               <bitWidth>2</bitWidth>
-              <access>read-write</access>
-              <enumeratedValues>
-                <enumeratedValue>
-                  <name>WS0</name>
-                  <description>Zero wait-states inserted in fetch or read transfers</description>
-                  <value>0x00000000</value>
-                </enumeratedValue>
-              </enumeratedValues>
             </field>
             ",
             ),
