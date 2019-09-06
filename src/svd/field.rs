@@ -25,6 +25,7 @@ use crate::svd::{
 #[derive(Clone, Debug, PartialEq)]
 pub struct Field {
     pub name: String,
+    pub derived_from: Option<String>,
     pub description: Option<String>,
     pub bit_range: BitRange,
     pub access: Option<Access>,
@@ -59,6 +60,7 @@ impl Field {
     fn _parse(tree: &Element, name: String) -> Result<Field, SVDError> {
         Ok(Field {
             name,
+            derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
             description: tree.get_child_text_opt("description")?,
             bit_range: BitRange::parse(tree)?,
             access: parse::optional::<Access>("access", tree)?,
@@ -103,6 +105,10 @@ impl Encode for Field {
             text: None,
         };
 
+        if let Some(v) = &self.derived_from {
+            elem.attributes.insert(String::from("derivedFrom"), format!("{}", v));
+        }
+
         // Add bit range
         elem.children
             .append(&mut self.bit_range.encode()?);
@@ -146,6 +152,7 @@ mod tests {
             (
                 Field {
                     name: String::from("MODE"),
+                    derived_from: None,
                     description: Some(String::from("Read Mode")),
                     bit_range: BitRange {
                         offset: 24,
@@ -197,6 +204,7 @@ mod tests {
             (
                 Field {
                     name: String::from("MODE"),
+                    derived_from: None,
                     description: None,
                     bit_range: BitRange {
                         offset: 24,
