@@ -9,10 +9,7 @@ use crate::encode::{Encode, EncodeChildren};
 use crate::new_element;
 
 use crate::error::SVDError;
-use crate::svd::{
-    registercluster::RegisterCluster,
-    registerproperties::RegisterProperties,
-};
+use crate::svd::{registercluster::RegisterCluster, registerproperties::RegisterProperties};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -41,7 +38,8 @@ impl Parse for ClusterInfo {
             address_offset: tree.get_child_u32("addressOffset")?,
             default_register_properties: RegisterProperties::parse(tree)?,
             children: {
-                let children: Result<Vec<_>, _> = tree.children
+                let children: Result<Vec<_>, _> = tree
+                    .children
                     .iter()
                     .filter(|t| t.name == "register" || t.name == "cluster")
                     .map(RegisterCluster::parse)
@@ -60,13 +58,12 @@ impl Encode for ClusterInfo {
         let mut e = new_element("cluster", None);
 
         if let Some(v) = &self.derived_from {
-            e.attributes.insert(String::from("derivedFrom"), format!("{}", v));
+            e.attributes
+                .insert(String::from("derivedFrom"), format!("{}", v));
         }
 
-        e.children.push(new_element(
-            "description",
-            Some(self.description.clone()),
-        ));
+        e.children
+            .push(new_element("description", Some(self.description.clone())));
 
         if let Some(v) = &self.header_struct_name {
             e.children
@@ -78,7 +75,8 @@ impl Encode for ClusterInfo {
             Some(format!("{}", self.address_offset)),
         ));
 
-        e.children.extend(self.default_register_properties.encode()?);
+        e.children
+            .extend(self.default_register_properties.encode()?);
 
         for c in &self.children {
             e.children.push(c.encode()?);

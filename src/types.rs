@@ -13,13 +13,7 @@ use crate::error::{SVDError, SVDErrorKind};
 
 macro_rules! unwrap {
     ($e:expr) => {
-        $e.expect(concat!(
-            file!(),
-            ":",
-            line!(),
-            " ",
-            stringify!($e)
-        ))
+        $e.expect(concat!(file!(), ":", line!(), " ", stringify!($e)))
     };
 }
 
@@ -41,8 +35,9 @@ impl Parse for u32 {
             u32::from_str_radix(
                 &str::replace(&text.to_lowercase()["#".len()..], "x", "0"),
                 2,
-            ).context(SVDErrorKind::Other(format!("{} invalid", text)))
-                .map_err(|e| e.into())
+            )
+            .context(SVDErrorKind::Other(format!("{} invalid", text)))
+            .map_err(|e| e.into())
         } else if text.starts_with("0b") {
             // Handle strings in the binary form of:
             // 0b01101x1
@@ -71,11 +66,9 @@ impl Parse for BoolParse {
             _ => match text.parse() {
                 Ok(b) => b,
                 Err(e) => {
-                    return Err(SVDErrorKind::InvalidBooleanValue(
-                        tree.clone(),
-                        text.clone(),
-                        e,
-                    ).into())
+                    return Err(
+                        SVDErrorKind::InvalidBooleanValue(tree.clone(), text.clone(), e).into(),
+                    )
                 }
             },
         })

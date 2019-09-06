@@ -14,11 +14,8 @@ use crate::parse;
 use crate::types::Parse;
 
 use crate::svd::{
-    access::Access,
-    field::Field,
-    modifiedwritevalues::ModifiedWriteValues,
-    writeconstraint::WriteConstraint,
-    registerproperties::RegisterProperties,
+    access::Access, field::Field, modifiedwritevalues::ModifiedWriteValues,
+    registerproperties::RegisterProperties, writeconstraint::WriteConstraint,
 };
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -49,10 +46,7 @@ impl Parse for RegisterInfo {
     fn parse(tree: &Element) -> Result<RegisterInfo, SVDError> {
         let name = tree.get_child_text("name")?;
         RegisterInfo::_parse(tree, name.clone())
-            .context(SVDErrorKind::Other(format!(
-                "In register `{}`",
-                name
-            )))
+            .context(SVDErrorKind::Other(format!("In register `{}`", name)))
             .map_err(|e| e.into())
     }
 }
@@ -88,10 +82,7 @@ impl RegisterInfo {
                     None
                 }
             },
-            write_constraint: parse::optional::<WriteConstraint>(
-                "writeConstraint",
-                tree,
-            )?,
+            write_constraint: parse::optional::<WriteConstraint>("writeConstraint", tree)?,
             modified_write_values: parse::optional::<ModifiedWriteValues>(
                 "modifiedWriteValues",
                 tree,
@@ -121,31 +112,27 @@ impl Encode for RegisterInfo {
             text: None,
         };
         if let Some(v) = &self.description {
-            elem.children.push(new_element(
-                "description",
-                Some(v.clone()),
-            ));
+            elem.children
+                .push(new_element("description", Some(v.clone())));
         }
         if let Some(v) = &self.alternate_group {
-            elem.children.push(new_element(
-                "alternateGroup",
-                Some(format!("{}", v)),
-            ));
+            elem.children
+                .push(new_element("alternateGroup", Some(format!("{}", v))));
         }
 
         if let Some(v) = &self.alternate_register {
-            elem.children.push(new_element(
-                "alternateRegister",
-                Some(format!("{}", v)),
-            ));
+            elem.children
+                .push(new_element("alternateRegister", Some(format!("{}", v))));
         }
 
         if let Some(v) = &self.derived_from {
-            elem.attributes.insert(String::from("derivedFrom"), format!("{}", v));
+            elem.attributes
+                .insert(String::from("derivedFrom"), format!("{}", v));
         }
 
         if let Some(v) = &self.size {
-            elem.children.push(new_element("size", Some(format!("{}", v))));
+            elem.children
+                .push(new_element("size", Some(format!("{}", v))));
         };
 
         if let Some(v) = &self.access {
@@ -153,17 +140,13 @@ impl Encode for RegisterInfo {
         };
 
         if let Some(v) = &self.reset_value {
-            elem.children.push(new_element(
-                "resetValue",
-                Some(format!("0x{:08.x}", v)),
-            ));
+            elem.children
+                .push(new_element("resetValue", Some(format!("0x{:08.x}", v))));
         };
 
         if let Some(v) = &self.reset_mask {
-            elem.children.push(new_element(
-                "resetMask",
-                Some(format!("0x{:08.x}", v)),
-            ));
+            elem.children
+                .push(new_element("resetMask", Some(format!("0x{:08.x}", v))));
         };
 
         if let Some(v) = &self.fields {
@@ -221,9 +204,7 @@ mod tests {
                 fields: Some(vec![Field {
                     name: String::from("WREN"),
                     derived_from: None,
-                    description: Some(String::from(
-                        "Enable Write/Erase Controller",
-                    )),
+                    description: Some(String::from("Enable Write/Erase Controller")),
                     bit_range: BitRange {
                         offset: 0,
                         width: 1,

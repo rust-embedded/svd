@@ -11,10 +11,7 @@ use crate::error::*;
 #[cfg(feature = "unproven")]
 use crate::new_element;
 use crate::parse;
-use crate::svd::{
-    enumeratedvalue::EnumeratedValue,
-    usage::Usage,
-};
+use crate::svd::{enumeratedvalue::EnumeratedValue, usage::Usage};
 use crate::types::Parse;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -40,9 +37,14 @@ impl Parse for EnumeratedValues {
             usage: parse::optional::<Usage>("usage", tree)?,
             derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
             values: {
-                let values: Result<Vec<_>, _> = tree.children
+                let values: Result<Vec<_>, _> = tree
+                    .children
                     .iter()
-                    .filter(|t| ["name", "headerEnumName", "usage"].iter().all(|s| &t.name != s))
+                    .filter(|t| {
+                        ["name", "headerEnumName", "usage"]
+                            .iter()
+                            .all(|s| &t.name != s)
+                    })
                     .enumerate()
                     .map(|(e, t)| {
                         if t.name == "enumeratedValue" {
@@ -50,19 +52,16 @@ impl Parse for EnumeratedValues {
                                 format!("Parsing enumerated value #{}", e).into(),
                             ))
                         } else {
-                            Err(SVDErrorKind::NotExpectedTag(
-                                t.clone(),
-                                format!("enumeratedValue"),
-                            ).into())
+                            Err(
+                                SVDErrorKind::NotExpectedTag(t.clone(), format!("enumeratedValue"))
+                                    .into(),
+                            )
                         }
                     })
                     .collect();
                 let values = values?;
                 if values.is_empty() {
-                    return Err(SVDErrorKind::EmptyTag(
-                        tree.clone(),
-                        tree.name.clone(),
-                    ).into());
+                    return Err(SVDErrorKind::EmptyTag(tree.clone(), tree.name.clone()).into());
                 }
                 values
             },
@@ -95,7 +94,8 @@ impl Encode for EnumeratedValues {
         };
 
         if let Some(v) = &self.derived_from {
-            base.attributes.insert(String::from("derivedFrom"), (*v).clone());
+            base.attributes
+                .insert(String::from("derivedFrom"), (*v).clone());
         }
 
         for v in &self.values {
@@ -179,21 +179,26 @@ mod tests {
         // `enumeratedValue` occurrence: 1..*
         parse("".into()).expect_err("must contain at least one <enumeratedValue>");
 
-        let value = String::from("
+        let value = String::from(
+            "
             <enumeratedValue>
                 <name>WS0</name>
                 <description>Zero wait-states inserted in fetch or read transfers</description>
                 <value>0x00000000</value>
                 <isDefault>true</isDefault>
-            </enumeratedValue>");
+            </enumeratedValue>",
+        );
 
         // Valid tags
         parse(value.clone() + "<name>foo</name>").expect("<name> is valid");
-        parse(value.clone() + "<headerEnumName>foo</headerEnumName>").expect("<headerEnumName> is valid");
+        parse(value.clone() + "<headerEnumName>foo</headerEnumName>")
+            .expect("<headerEnumName> is valid");
         parse(value.clone() + "<usage>read</usage>").expect("<usage> is valid");
 
         // Invalid tags
-        parse(value.clone() + "<enumerateValue></enumerateValue>").expect_err("<enumerateValue> in invalid here");
-        parse(value.clone() + "<enumeratedValues></enumeratedValues>").expect_err("<enumeratedValues> in invalid here");
+        parse(value.clone() + "<enumerateValue></enumerateValue>")
+            .expect_err("<enumerateValue> in invalid here");
+        parse(value.clone() + "<enumeratedValues></enumeratedValues>")
+            .expect_err("<enumeratedValues> in invalid here");
     }
 }

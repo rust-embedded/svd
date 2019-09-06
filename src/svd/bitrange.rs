@@ -27,9 +27,7 @@ impl Parse for BitRange {
     type Error = SVDError;
 
     fn parse(tree: &Element) -> Result<BitRange, SVDError> {
-        let (end, start, range_type): (u32, u32, BitRangeType) = if let Some(
-            range,
-        ) =
+        let (end, start, range_type): (u32, u32, BitRangeType) = if let Some(range) =
             tree.get_child("bitRange")
         {
             let text = range
@@ -39,16 +37,14 @@ impl Parse for BitRange {
                                                                        // TODO: If the `InvalidBitRange` enum was an error we could context into here somehow so that
                                                                        // the output would be similar to the parse error
             if !text.starts_with('[') {
-                return Err(SVDErrorKind::InvalidBitRange(
-                    tree.clone(),
-                    InvalidBitRange::Syntax,
-                ).into()); // TODO: Maybe have a MissingOpen/MissingClosing variant
+                return Err(
+                    SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax).into(),
+                ); // TODO: Maybe have a MissingOpen/MissingClosing variant
             }
             if !text.ends_with(']') {
-                return Err(SVDErrorKind::InvalidBitRange(
-                    tree.clone(),
-                    InvalidBitRange::Syntax,
-                ).into()); // TODO: Maybe have a MissingOpen/MissingClosing variant
+                return Err(
+                    SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax).into(),
+                ); // TODO: Maybe have a MissingOpen/MissingClosing variant
             }
 
             let mut parts = text[1..text.len() - 1].split(':');
@@ -78,9 +74,7 @@ impl Parse for BitRange {
                 BitRangeType::BitRange,
             )
         // TODO: Consider matching instead so we can say which of these tags are missing
-        } else if let (Some(lsb), Some(msb)) =
-            (tree.get_child("lsb"), tree.get_child("msb"))
-        {
+        } else if let (Some(lsb), Some(msb)) = (tree.get_child("lsb"), tree.get_child("msb")) {
             (
                 // TODO: `u32::parse` should not hide it's errors
                 u32::parse(msb).context(SVDErrorKind::InvalidBitRange(
@@ -93,26 +87,30 @@ impl Parse for BitRange {
                 ))?,
                 BitRangeType::MsbLsb,
             )
-        } else if let (Some(offset), Some(width)) = (
-            tree.get_child("bitOffset"),
-            tree.get_child("bitWidth"),
-        ) {
+        } else if let (Some(offset), Some(width)) =
+            (tree.get_child("bitOffset"), tree.get_child("bitWidth"))
+        {
             (
                 // Special case because offset and width are directly provided
                 // (ie. do not need to be calculated as in the final step)
                 return Ok(BitRange {
                     // TODO: capture that error comes from offset/width tag
                     // TODO: `u32::parse` should not hide it's errors
-                    offset: u32::parse(offset).context(SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::ParseError))?, 
-                    width: u32::parse(width).context(SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::ParseError))?, 
-                    range_type: BitRangeType::OffsetWidth
+                    offset: u32::parse(offset).context(SVDErrorKind::InvalidBitRange(
+                        tree.clone(),
+                        InvalidBitRange::ParseError,
+                    ))?,
+                    width: u32::parse(width).context(SVDErrorKind::InvalidBitRange(
+                        tree.clone(),
+                        InvalidBitRange::ParseError,
+                    ))?,
+                    range_type: BitRangeType::OffsetWidth,
                 })
             )
         } else {
-            return Err(SVDErrorKind::InvalidBitRange(
-                tree.clone(),
-                InvalidBitRange::Syntax,
-            ).into());
+            return Err(
+                SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax).into(),
+            );
         };
 
         Ok(BitRange {
@@ -137,10 +135,7 @@ impl BitRange {
             )]),
             BitRangeType::MsbLsb => Ok(vec![
                 new_element("lsb", Some(format!("{}", self.offset))),
-                new_element(
-                    "msb",
-                    Some(format!("{}", self.offset + self.width - 1)),
-                ),
+                new_element("msb", Some(format!("{}", self.offset + self.width - 1))),
             ]),
             BitRangeType::OffsetWidth => Ok(vec![
                 new_element("bitOffset", Some(format!("{}", self.offset))),

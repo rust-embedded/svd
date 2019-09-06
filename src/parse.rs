@@ -18,10 +18,7 @@ pub trait Parse {
 /// Parses an optional child element with the provided name and Parse function
 /// Returns an none if the child doesn't exist, Ok(Some(e)) if parsing succeeds,
 /// and Err() if parsing fails.
-pub fn optional<'a, T>(
-    n: &str,
-    e: &'a Element,
-) -> Result<Option<T::Object>, SVDError>
+pub fn optional<'a, T>(n: &str, e: &'a Element) -> Result<Option<T::Object>, SVDError>
 where
     T: Parse<Error = SVDError>,
 {

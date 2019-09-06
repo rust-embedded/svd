@@ -36,17 +36,11 @@ impl Parse for Interrupt {
     type Error = SVDError;
     fn parse(tree: &Element) -> Result<Interrupt, SVDError> {
         if tree.name != "interrupt" {
-            return Err(SVDErrorKind::NotExpectedTag(
-                tree.clone(),
-                format!("interrupt"),
-            ).into());
+            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("interrupt")).into());
         }
         let name = tree.get_child_text("name")?;
         Interrupt::_parse(tree, name.clone())
-            .context(SVDErrorKind::Other(format!(
-                "In interrupt `{}`",
-                name
-            )))
+            .context(SVDErrorKind::Other(format!("In interrupt `{}`", name)))
             .map_err(|e| e.into())
     }
 }

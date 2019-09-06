@@ -38,19 +38,13 @@ impl Parse for WriteConstraint {
                 "writeAsRead" => Ok(WriteConstraint::WriteAsRead(
                     tree.get_child_bool(field.as_ref())?,
                 )),
-                "useEnumeratedValues" => {
-                    Ok(WriteConstraint::UseEnumeratedValues(
-                        tree.get_child_bool(field.as_ref())?,
-                    ))
-                }
-                "range" => Ok(WriteConstraint::Range(
-                    WriteConstraintRange::parse(tree.get_child_elem(
-                        field.as_ref(),
-                    )?)?,
+                "useEnumeratedValues" => Ok(WriteConstraint::UseEnumeratedValues(
+                    tree.get_child_bool(field.as_ref())?,
                 )),
-                _ => Err(
-                    SVDErrorKind::UnknownWriteConstraint(tree.clone()).into(),
-                ),
+                "range" => Ok(WriteConstraint::Range(WriteConstraintRange::parse(
+                    tree.get_child_elem(field.as_ref())?,
+                )?)),
+                _ => Err(SVDErrorKind::UnknownWriteConstraint(tree.clone()).into()),
             }
         } else {
             Err(SVDErrorKind::MoreThanOneWriteConstraint(tree.clone()).into())
@@ -64,9 +58,7 @@ impl Encode for WriteConstraint {
 
     fn encode(&self) -> Result<Element, SVDError> {
         let v = match *self {
-            WriteConstraint::WriteAsRead(v) => {
-                new_element("writeAsRead", Some(format!("{}", v)))
-            }
+            WriteConstraint::WriteAsRead(v) => new_element("writeAsRead", Some(format!("{}", v))),
             WriteConstraint::UseEnumeratedValues(v) => {
                 new_element("useEnumeratedValues", Some(format!("{}", v)))
             }

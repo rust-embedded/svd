@@ -9,10 +9,7 @@ use crate::elementext::ElementExt;
 #[cfg(feature = "unproven")]
 use crate::encode::Encode;
 use crate::error::SVDError;
-use crate::svd::{
-    registerclusterarrayinfo::RegisterClusterArrayInfo,
-    registerinfo::RegisterInfo,
-};
+use crate::svd::{registerclusterarrayinfo::RegisterClusterArrayInfo, registerinfo::RegisterInfo};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]

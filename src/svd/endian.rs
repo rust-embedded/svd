@@ -71,10 +71,7 @@ mod tests {
         let tests = vec![
             (Endian::Little, "<endian>little</endian>"),
             (Endian::Big, "<endian>big</endian>"),
-            (
-                Endian::Selectable,
-                "<endian>selectable</endian>",
-            ),
+            (Endian::Selectable, "<endian>selectable</endian>"),
             (Endian::Other, "<endian>other</endian>"),
         ];
 

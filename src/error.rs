@@ -1,8 +1,8 @@
 //! SVD Errors.
 //! This module defines error types and messages for SVD parsing and encoding
 
-use failure::{Backtrace, Context, Fail};
 use core::fmt::{self, Display};
+use failure::{Backtrace, Context, Fail};
 use xmltree::{Element, ParseError};
 
 #[derive(Debug)]
@@ -47,8 +47,7 @@ pub enum SVDErrorKind {
     InvalidModifiedWriteValues(Element, String),
     #[fail(
         display = "The content of the element could not be parsed to a boolean value {}: {}",
-        _1,
-        _2
+        _1, _2
     )]
     InvalidBooleanValue(Element, String, core::str::ParseBoolError),
     #[fail(display = "encoding method not implemented for svd object {}", _0)]
