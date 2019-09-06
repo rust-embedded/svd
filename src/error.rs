@@ -12,6 +12,7 @@ pub struct SVDError {
 
 // TODO: Expand and make more complex output possible.
 // We can use the `Element` to output name (if available) and etc.
+#[allow(clippy::large_enum_variant)]
 #[derive(Clone, Debug, PartialEq, Eq, Fail)]
 pub enum SVDErrorKind {
     #[fail(display = "Unknown endianness `{}`", _0)]

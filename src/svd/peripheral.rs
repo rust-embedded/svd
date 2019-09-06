@@ -44,7 +44,9 @@ impl Parse for Peripheral {
 
     fn parse(tree: &Element) -> Result<Peripheral, SVDError> {
         if tree.name != "peripheral" {
-            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("peripheral")).into());
+            return Err(
+                SVDErrorKind::NotExpectedTag(tree.clone(), "peripheral".to_string()).into(),
+            );
         }
         let name = tree.get_child_text("name")?;
         Peripheral::_parse(tree, name.clone())
@@ -84,9 +86,8 @@ impl Peripheral {
                     .filter(|t| t.name == "interrupt")
                     .enumerate()
                     .map(|(e, i)| {
-                        Interrupt::parse(i).context(SVDErrorKind::Other(
-                            format!("Parsing interrupt #{}", e).into(),
-                        ))
+                        Interrupt::parse(i)
+                            .context(SVDErrorKind::Other(format!("Parsing interrupt #{}", e)))
                     })
                     .collect();
                 interrupt?

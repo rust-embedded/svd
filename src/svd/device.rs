@@ -37,7 +37,7 @@ impl Parse for Device {
     fn parse(tree: &Element) -> Result<Device, SVDError> {
         Ok(Device {
             name: tree.get_child_text("name")?,
-            schema_version: tree.attributes.get("schemaVersion").map(|s| s.clone()),
+            schema_version: tree.attributes.get("schemaVersion").cloned(),
             cpu: parse::optional::<Cpu>("cpu", tree)?,
             version: tree.get_child_text_opt("version")?,
             description: tree.get_child_text_opt("description")?,

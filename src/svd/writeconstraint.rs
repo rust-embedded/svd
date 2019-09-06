@@ -32,7 +32,7 @@ impl Parse for WriteConstraint {
 
     fn parse(tree: &Element) -> Result<WriteConstraint, SVDError> {
         if tree.children.len() == 1 {
-            let ref field = tree.children[0].name;
+            let field = &tree.children[0].name;
             // Write constraint can only be one of the following
             match field.as_ref() {
                 "writeAsRead" => Ok(WriteConstraint::WriteAsRead(

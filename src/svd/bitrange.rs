@@ -33,9 +33,9 @@ impl Parse for BitRange {
             let text = range
                 .text
                 .as_ref()
-                .ok_or(SVDErrorKind::Other(format!("text missing")))?; // TODO: Make into a proper error, text empty or something similar
-                                                                       // TODO: If the `InvalidBitRange` enum was an error we could context into here somehow so that
-                                                                       // the output would be similar to the parse error
+                .ok_or_else(|| SVDErrorKind::Other("text missing".to_string()))?; // TODO: Make into a proper error, text empty or something similar
+                                                                                  // TODO: If the `InvalidBitRange` enum was an error we could context into here somehow so that
+                                                                                  // the output would be similar to the parse error
             if !text.starts_with('[') {
                 return Err(
                     SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax).into(),
@@ -51,10 +51,9 @@ impl Parse for BitRange {
             (
                 parts
                     .next()
-                    .ok_or(SVDErrorKind::InvalidBitRange(
-                        tree.clone(),
-                        InvalidBitRange::Syntax,
-                    ))?
+                    .ok_or_else(|| {
+                        SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax)
+                    })?
                     .parse::<u32>()
                     .context(SVDErrorKind::InvalidBitRange(
                         tree.clone(),
@@ -62,10 +61,9 @@ impl Parse for BitRange {
                     ))?,
                 parts
                     .next()
-                    .ok_or(SVDErrorKind::InvalidBitRange(
-                        tree.clone(),
-                        InvalidBitRange::Syntax,
-                    ))?
+                    .ok_or_else(|| {
+                        SVDErrorKind::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax)
+                    })?
                     .parse::<u32>()
                     .context(SVDErrorKind::InvalidBitRange(
                         tree.clone(),
@@ -116,7 +114,7 @@ impl Parse for BitRange {
         Ok(BitRange {
             offset: start,
             width: end - start + 1,
-            range_type: range_type,
+            range_type,
         })
     }
 }

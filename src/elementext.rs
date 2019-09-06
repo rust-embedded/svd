@@ -47,7 +47,7 @@ impl ElementExt for Element {
         K: core::fmt::Display + Clone,
     {
         self.get_child_text_opt(k.clone())?
-            .ok_or(SVDErrorKind::MissingTag(self.clone(), format!("{}", k)).into())
+            .ok_or_else(|| SVDErrorKind::MissingTag(self.clone(), format!("{}", k)).into())
     }
 
     /// Get text contained by an XML Element

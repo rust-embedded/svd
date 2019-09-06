@@ -38,7 +38,7 @@ impl Parse for Field {
     type Error = SVDError;
     fn parse(tree: &Element) -> Result<Field, SVDError> {
         if tree.name != "field" {
-            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("field")).into());
+            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), "field".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
         Field::_parse(tree, name.clone())

@@ -36,7 +36,7 @@ impl Parse for Interrupt {
     type Error = SVDError;
     fn parse(tree: &Element) -> Result<Interrupt, SVDError> {
         if tree.name != "interrupt" {
-            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("interrupt")).into());
+            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), "interrupt".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
         Interrupt::_parse(tree, name.clone())
