@@ -200,50 +200,27 @@ mod tests {
             </field>
             ",
             ),
-            // almost the same test but description info is missing
             (
                 Field {
                     name: String::from("MODE"),
-                    derived_from: None,
+                    derived_from: Some(String::from("other field")),
                     description: None,
                     bit_range: BitRange {
                         offset: 24,
                         width: 2,
                         range_type: BitRangeType::OffsetWidth,
                     },
-                    access: Some(Access::ReadWrite),
-                    enumerated_values: vec![EnumeratedValues {
-                        name: None,
-                        usage: None,
-                        derived_from: None,
-                        values: vec![EnumeratedValue {
-                            name: String::from("WS0"),
-                            description: Some(String::from(
-                                "Zero wait-states inserted in fetch or read transfers",
-                            )),
-                            value: Some(0),
-                            is_default: None,
-                            _extensible: (),
-                        }],
-                        _extensible: (),
-                    }],
+                    access: None,
+                    enumerated_values: vec![],
                     write_constraint: None,
                     modified_write_values: None,
                     _extensible: (),
                 },
                 "
-            <field>
+            <field derivedFrom=\"other field\">
               <name>MODE</name>
               <bitOffset>24</bitOffset>
               <bitWidth>2</bitWidth>
-              <access>read-write</access>
-              <enumeratedValues>
-                <enumeratedValue>
-                  <name>WS0</name>
-                  <description>Zero wait-states inserted in fetch or read transfers</description>
-                  <value>0x00000000</value>
-                </enumeratedValue>
-              </enumeratedValues>
             </field>
             ",
             ),
