@@ -56,24 +56,15 @@ impl EncodeChildren for RegisterProperties {
         let mut children = Vec::new();
 
         if let Some(v) = &self.size {
-            children.push(new_element(
-                "size",
-                Some(format!("0x{:08.x}", v)),
-            ));
+            children.push(new_element("size", Some(format!("0x{:08.x}", v))));
         };
 
         if let Some(v) = &self.reset_value {
-            children.push(new_element(
-                "resetValue",
-                Some(format!("0x{:08.x}", v)),
-            ));
+            children.push(new_element("resetValue", Some(format!("0x{:08.x}", v))));
         };
 
         if let Some(v) = &self.reset_mask {
-            children.push(new_element(
-                "resetMask",
-                Some(format!("0x{:08.x}", v)),
-            ));
+            children.push(new_element("resetMask", Some(format!("0x{:08.x}", v))));
         };
 
         if let Some(v) = &self.access {

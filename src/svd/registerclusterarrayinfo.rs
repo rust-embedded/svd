@@ -41,18 +41,15 @@ impl Encode for RegisterClusterArrayInfo {
     fn encode(&self) -> Result<Element, SVDError> {
         let mut e = new_element("registerClusterArrayInfo", None);
 
-        e.children.push(new_element(
-            "dim",
-            Some(format!("{}", self.dim)),
-        ));
+        e.children
+            .push(new_element("dim", Some(format!("{}", self.dim))));
         e.children.push(new_element(
             "dimIncrement",
             Some(format!("{}", self.dim_increment)),
         ));
 
         if let Some(di) = &self.dim_index {
-            e.children
-                .push(new_element("dimIndex", Some(di.join(","))));
+            e.children.push(new_element("dimIndex", Some(di.join(","))));
         }
 
         Ok(e)

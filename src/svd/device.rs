@@ -11,11 +11,7 @@ use crate::encode::{Encode, EncodeChildren};
 use crate::error::SVDError;
 #[cfg(feature = "unproven")]
 use crate::new_element;
-use crate::svd::{
-    cpu::Cpu,
-    registerproperties::RegisterProperties,
-    peripheral::Peripheral,
-};
+use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug)]
@@ -41,16 +37,15 @@ impl Parse for Device {
     fn parse(tree: &Element) -> Result<Device, SVDError> {
         Ok(Device {
             name: tree.get_child_text("name")?,
-            schema_version: tree.attributes
-                .get("schemaVersion")
-                .map(|s| s.clone()),
+            schema_version: tree.attributes.get("schemaVersion").map(|s| s.clone()),
             cpu: parse::optional::<Cpu>("cpu", tree)?,
             version: tree.get_child_text_opt("version")?,
             description: tree.get_child_text_opt("description")?,
             address_unit_bits: parse::optional::<u32>("addressUnitBits", tree)?,
             width: None,
             peripherals: {
-                let ps: Result<Vec<_>, _> = tree.get_child_elem("peripherals")?
+                let ps: Result<Vec<_>, _> = tree
+                    .get_child_elem("peripherals")?
                     .children
                     .iter()
                     .map(Peripheral::parse)
@@ -83,48 +78,44 @@ impl Encode for Device {
             String::from("http://www.w3.org/2001/XMLSchema-instance"),
         );
         if let Some(schema_version) = &self.schema_version {
-            elem.attributes.insert(
-                String::from("schemaVersion"),
-                format!("{}", schema_version)
-            );
+            elem.attributes
+                .insert(String::from("schemaVersion"), format!("{}", schema_version));
         }
         if let Some(schema_version) = &self.schema_version {
             elem.attributes.insert(
                 String::from("xs:noNamespaceSchemaLocation"),
-                format!("CMSIS-SVD_Schema_{}.xsd", schema_version)
+                format!("CMSIS-SVD_Schema_{}.xsd", schema_version),
             );
         }
-
 
         if let Some(v) = &self.version {
             elem.children.push(new_element("version", Some(v.clone())));
         }
 
         if let Some(v) = &self.description {
-            elem.children.push(new_element("description", Some(v.clone())));
+            elem.children
+                .push(new_element("description", Some(v.clone())));
         }
 
         if let Some(v) = &self.description {
-            elem.children.push(new_element(
-                "addressUnitBits",
-                Some(format!("{}", v)),
-            ));
+            elem.children
+                .push(new_element("addressUnitBits", Some(format!("{}", v))));
         }
 
         if let Some(v) = &self.width {
-            elem.children.push(new_element("width", Some(format!("{}", v))));
+            elem.children
+                .push(new_element("width", Some(format!("{}", v))));
         }
 
-        elem.children.extend(self.default_register_properties.encode()?);
+        elem.children
+            .extend(self.default_register_properties.encode()?);
 
         if let Some(v) = &self.cpu {
             elem.children.push(v.encode()?);
         }
 
-        let peripherals: Result<Vec<_>, _> = self.peripherals
-            .iter()
-            .map(Peripheral::encode)
-            .collect();
+        let peripherals: Result<Vec<_>, _> =
+            self.peripherals.iter().map(Peripheral::encode).collect();
         elem.children.push(Element {
             prefix: None,
             namespace: None,

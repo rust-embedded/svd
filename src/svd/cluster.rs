@@ -8,10 +8,7 @@ use crate::elementext::ElementExt;
 #[cfg(feature = "unproven")]
 use crate::encode::Encode;
 use crate::error::*;
-use crate::svd::{
-    clusterinfo::ClusterInfo,
-    registerclusterarrayinfo::RegisterClusterArrayInfo,
-};
+use crate::svd::{clusterinfo::ClusterInfo, registerclusterarrayinfo::RegisterClusterArrayInfo};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -70,9 +67,7 @@ impl Encode for Cluster {
     // TODO: support Cluster encoding
     fn encode(&self) -> Result<Element, SVDError> {
         match self {
-            Cluster::Single(i) => {
-                i.encode()
-            }
+            Cluster::Single(i) => i.encode(),
             Cluster::Array(i, a) => {
                 let mut e = i.encode()?;
                 e = e.merge(&a.encode()?);

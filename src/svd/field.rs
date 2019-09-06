@@ -14,11 +14,8 @@ use crate::parse;
 use crate::types::Parse;
 
 use crate::svd::{
-    access::Access,
-    bitrange::BitRange,
-    enumeratedvalues::EnumeratedValues,
-    modifiedwritevalues::ModifiedWriteValues,
-    writeconstraint::WriteConstraint,
+    access::Access, bitrange::BitRange, enumeratedvalues::EnumeratedValues,
+    modifiedwritevalues::ModifiedWriteValues, writeconstraint::WriteConstraint,
 };
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -41,17 +38,11 @@ impl Parse for Field {
     type Error = SVDError;
     fn parse(tree: &Element) -> Result<Field, SVDError> {
         if tree.name != "field" {
-            return Err(SVDErrorKind::NotExpectedTag(
-                tree.clone(),
-                format!("field"),
-            ).into());
+            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), format!("field")).into());
         }
         let name = tree.get_child_text("name")?;
         Field::_parse(tree, name.clone())
-            .context(SVDErrorKind::Other(format!(
-                "In field `{}`",
-                name
-            )))
+            .context(SVDErrorKind::Other(format!("In field `{}`", name)))
             .map_err(|e| e.into())
     }
 }
@@ -65,17 +56,15 @@ impl Field {
             bit_range: BitRange::parse(tree)?,
             access: parse::optional::<Access>("access", tree)?,
             enumerated_values: {
-                let values: Result<Vec<_>, _> = tree.children
+                let values: Result<Vec<_>, _> = tree
+                    .children
                     .iter()
                     .filter(|t| t.name == "enumeratedValues")
                     .map(EnumeratedValues::parse)
                     .collect();
                 values?
             },
-            write_constraint: parse::optional::<WriteConstraint>(
-                "writeConstraint",
-                tree,
-            )?,
+            write_constraint: parse::optional::<WriteConstraint>("writeConstraint", tree)?,
             modified_write_values: parse::optional::<ModifiedWriteValues>(
                 "modifiedWriteValues",
                 tree,
@@ -106,22 +95,19 @@ impl Encode for Field {
         };
 
         if let Some(v) = &self.derived_from {
-            elem.attributes.insert(String::from("derivedFrom"), format!("{}", v));
+            elem.attributes
+                .insert(String::from("derivedFrom"), format!("{}", v));
         }
 
         // Add bit range
-        elem.children
-            .append(&mut self.bit_range.encode()?);
+        elem.children.append(&mut self.bit_range.encode()?);
 
         if let Some(v) = &self.access {
             elem.children.push(v.encode()?);
         };
 
         let enumerated_values: Result<Vec<Element>, SVDError> =
-            self.enumerated_values
-                .iter()
-                .map(|v| v.encode())
-                .collect();
+            self.enumerated_values.iter().map(|v| v.encode()).collect();
         elem.children.append(&mut enumerated_values?);
 
         if let Some(v) = &self.write_constraint {
@@ -141,10 +127,7 @@ impl Encode for Field {
 mod tests {
     use super::*;
     use crate::run_test;
-    use crate::svd::{
-        bitrange::BitRangeType,
-        enumeratedvalue::EnumeratedValue,
-    };
+    use crate::svd::{bitrange::BitRangeType, enumeratedvalue::EnumeratedValue};
 
     #[test]
     fn decode_encode() {
@@ -160,25 +143,21 @@ mod tests {
                         range_type: BitRangeType::OffsetWidth,
                     },
                     access: Some(Access::ReadWrite),
-                    enumerated_values: vec![
-                        EnumeratedValues {
-                            name: None,
-                            usage: None,
-                            derived_from: None,
-                            values: vec![
-                                EnumeratedValue {
-                                    name: String::from("WS0"),
-                                    description: Some(String::from(
-                                        "Zero wait-states inserted in fetch or read transfers",
-                                    )),
-                                    value: Some(0),
-                                    is_default: None,
-                                    _extensible: (),
-                                },
-                            ],
+                    enumerated_values: vec![EnumeratedValues {
+                        name: None,
+                        usage: None,
+                        derived_from: None,
+                        values: vec![EnumeratedValue {
+                            name: String::from("WS0"),
+                            description: Some(String::from(
+                                "Zero wait-states inserted in fetch or read transfers",
+                            )),
+                            value: Some(0),
+                            is_default: None,
                             _extensible: (),
-                        },
-                    ],
+                        }],
+                        _extensible: (),
+                    }],
                     write_constraint: None,
                     modified_write_values: None,
                     _extensible: (),
