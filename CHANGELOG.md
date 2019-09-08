@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.8.0] - 2019-11-03
+
+- [breaking-change]  `RegisterClusterArrayInfo` renamed on `DimElement`
 - [breaking-change] `Defaults` field renamed on `RegisterProperties`
   and added into `Peripheral` and `ClusterInfo`
 - [breaking-change] `Field` splitted on `Field` enum and `FieldInfo` struct
@@ -101,14 +104,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Initial SVD parser
 - A `parse` utility function to parse the contents of a SVD file (XML)
 
-[Unreleased]: https://github.com/japaric/svd/compare/v0.7.0...HEAD
-[v0.7.0]: https://github.com/japaric/svd/compare/v0.6.0...v0.7.0
-[v0.6.0]: https://github.com/japaric/svd/compare/v0.5.2...v0.6.0
-[v0.5.2]: https://github.com/japaric/svd/compare/v0.5.1...v0.5.2
-[v0.5.1]: https://github.com/japaric/svd/compare/v0.5.0...v0.5.1
-[v0.5.0]: https://github.com/japaric/svd/compare/v0.4.0...v0.5.0
-[v0.4.0]: https://github.com/japaric/svd/compare/v0.3.0...v0.4.0
-[v0.3.0]: https://github.com/japaric/svd/compare/v0.2.0...v0.3.0
-[v0.2.0]: https://github.com/japaric/svd/compare/v0.1.2...v0.2.0
-[v0.1.2]: https://github.com/japaric/svd/compare/v0.1.1...v0.1.2
-[v0.1.1]: https://github.com/japaric/svd/compare/v0.1.0...v0.1.1
+[Unreleased]: https://github.com/rust-embedded/svd/compare/v0.8.0...HEAD
+[v0.8.0]: https://github.com/rust-embedded/svd/compare/v0.7.0...v0.8.0
+[v0.7.0]: https://github.com/rust-embedded/svd/compare/v0.6.0...v0.7.0
+[v0.6.0]: https://github.com/rust-embedded/svd/compare/v0.5.2...v0.6.0
+[v0.5.2]: https://github.com/rust-embedded/svd/compare/v0.5.1...v0.5.2
+[v0.5.1]: https://github.com/rust-embedded/svd/compare/v0.5.0...v0.5.1
+[v0.5.0]: https://github.com/rust-embedded/svd/compare/v0.4.0...v0.5.0
+[v0.4.0]: https://github.com/rust-embedded/svd/compare/v0.3.0...v0.4.0
+[v0.3.0]: https://github.com/rust-embedded/svd/compare/v0.2.0...v0.3.0
+[v0.2.0]: https://github.com/rust-embedded/svd/compare/v0.1.2...v0.2.0
+[v0.1.2]: https://github.com/rust-embedded/svd/compare/v0.1.1...v0.1.2
+[v0.1.1]: https://github.com/rust-embedded/svd/compare/v0.1.0...v0.1.1
