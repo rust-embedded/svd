@@ -8,13 +8,13 @@ use crate::elementext::ElementExt;
 #[cfg(feature = "unproven")]
 use crate::encode::Encode;
 use crate::error::*;
-use crate::svd::{clusterinfo::ClusterInfo, registerclusterarrayinfo::RegisterClusterArrayInfo};
+use crate::svd::{clusterinfo::ClusterInfo, dimelement::DimElement};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub enum Cluster {
     Single(ClusterInfo),
-    Array(ClusterInfo, RegisterClusterArrayInfo),
+    Array(ClusterInfo, DimElement),
 }
 
 impl Deref for Cluster {
@@ -37,7 +37,7 @@ impl Parse for Cluster {
         let info = ClusterInfo::parse(tree)?;
 
         if tree.get_child("dimIncrement").is_some() {
-            let array_info = RegisterClusterArrayInfo::parse(tree)?;
+            let array_info = DimElement::parse(tree)?;
             if !info.name.contains("%s") {
                 // TODO: replace with real error
                 return Err(SVDError::from(SVDErrorKind::Other(
