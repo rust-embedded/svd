@@ -14,6 +14,15 @@ pub struct BitRange {
     pub range_type: BitRangeType,
 }
 
+impl BitRange {
+    pub fn lsb(&self) -> u32 {
+        self.offset
+    }
+    pub fn msb(&self) -> u32 {
+        self.offset + self.width - 1
+    }
+}
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BitRangeType {
@@ -125,15 +134,11 @@ impl BitRange {
         match self.range_type {
             BitRangeType::BitRange => Ok(vec![new_element(
                 "bitRange",
-                Some(format!(
-                    "[{}:{}]",
-                    self.offset + self.width - 1,
-                    self.offset
-                )),
+                Some(format!("[{}:{}]", self.msb(), self.lsb())),
             )]),
             BitRangeType::MsbLsb => Ok(vec![
-                new_element("lsb", Some(format!("{}", self.offset))),
-                new_element("msb", Some(format!("{}", self.offset + self.width - 1))),
+                new_element("lsb", Some(format!("{}", self.lsb()))),
+                new_element("msb", Some(format!("{}", self.msb()))),
             ]),
             BitRangeType::OffsetWidth => Ok(vec![
                 new_element("bitOffset", Some(format!("{}", self.offset))),
