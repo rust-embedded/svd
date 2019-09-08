@@ -48,14 +48,16 @@ impl Parse for EnumeratedValues {
                     .enumerate()
                     .map(|(e, t)| {
                         if t.name == "enumeratedValue" {
-                            EnumeratedValue::parse(t).context(SVDErrorKind::Other(
-                                format!("Parsing enumerated value #{}", e).into(),
-                            ))
+                            EnumeratedValue::parse(t).context(SVDErrorKind::Other(format!(
+                                "Parsing enumerated value #{}",
+                                e
+                            )))
                         } else {
-                            Err(
-                                SVDErrorKind::NotExpectedTag(t.clone(), format!("enumeratedValue"))
-                                    .into(),
+                            Err(SVDErrorKind::NotExpectedTag(
+                                t.clone(),
+                                "enumeratedValue".to_string(),
                             )
+                            .into())
                         }
                     })
                     .collect();

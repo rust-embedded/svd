@@ -72,9 +72,8 @@ impl RegisterInfo {
                         .iter()
                         .enumerate()
                         .map(|(e, t)| {
-                            Field::parse(t).context(SVDErrorKind::Other(
-                                format!("Parsing field #{}", e).into(),
-                            ))
+                            Field::parse(t)
+                                .context(SVDErrorKind::Other(format!("Parsing field #{}", e)))
                         })
                         .collect();
                     Some(fs?)

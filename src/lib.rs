@@ -83,7 +83,7 @@ pub(crate) fn new_element(name: &str, text: Option<String>) -> Element {
         name: String::from(name),
         attributes: HashMap::new(),
         children: Vec::new(),
-        text: text,
+        text,
     }
 }
 
