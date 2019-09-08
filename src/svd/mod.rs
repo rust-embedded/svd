@@ -52,8 +52,8 @@ pub use self::register::Register;
 pub mod registercluster;
 pub use self::registercluster::RegisterCluster;
 
-pub mod registerclusterarrayinfo;
-pub use self::registerclusterarrayinfo::RegisterClusterArrayInfo;
+pub mod dimelement;
+pub use self::dimelement::DimElement;
 
 pub mod peripheral;
 pub use self::peripheral::Peripheral;

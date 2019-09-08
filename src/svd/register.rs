@@ -9,13 +9,13 @@ use crate::elementext::ElementExt;
 #[cfg(feature = "unproven")]
 use crate::encode::Encode;
 use crate::error::SVDError;
-use crate::svd::{registerclusterarrayinfo::RegisterClusterArrayInfo, registerinfo::RegisterInfo};
+use crate::svd::{dimelement::DimElement, registerinfo::RegisterInfo};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub enum Register {
     Single(RegisterInfo),
-    Array(RegisterInfo, RegisterClusterArrayInfo),
+    Array(RegisterInfo, DimElement),
 }
 
 impl Deref for Register {
@@ -39,7 +39,7 @@ impl Parse for Register {
         let info = RegisterInfo::parse(tree)?;
 
         if tree.get_child("dimIncrement").is_some() {
-            let array_info = RegisterClusterArrayInfo::parse(tree)?;
+            let array_info = DimElement::parse(tree)?;
             assert!(info.name.contains("%s"));
             if let Some(indices) = &array_info.dim_index {
                 assert_eq!(array_info.dim as usize, indices.len())
