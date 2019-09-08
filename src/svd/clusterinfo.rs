@@ -21,8 +21,6 @@ pub struct ClusterInfo {
     pub address_offset: u32,
     pub default_register_properties: RegisterProperties,
     pub children: Vec<RegisterCluster>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
 }
 
 impl Parse for ClusterInfo {
@@ -46,7 +44,6 @@ impl Parse for ClusterInfo {
                     .collect();
                 children?
             },
-            _extensible: (),
         })
     }
 }

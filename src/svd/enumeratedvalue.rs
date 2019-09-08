@@ -20,8 +20,6 @@ pub struct EnumeratedValue {
     pub description: Option<String>,
     pub value: Option<u32>,
     pub is_default: Option<bool>,
-    // Reserve the right to add more fields to this struct
-    pub(crate) _extensible: (),
 }
 impl EnumeratedValue {
     fn _parse(tree: &Element, name: String) -> Result<EnumeratedValue, SVDError> {
@@ -32,7 +30,6 @@ impl EnumeratedValue {
             // Suggest refactoring all parse::type methods to return result so parse::optional works.
             value: parse::optional::<u32>("value", tree)?,
             is_default: tree.get_child_bool("isDefault").ok(),
-            _extensible: (),
         })
     }
 }
@@ -106,7 +103,6 @@ mod tests {
                 )),
                 value: Some(0),
                 is_default: Some(true),
-                _extensible: (),
             },
             "
                 <enumeratedValue>

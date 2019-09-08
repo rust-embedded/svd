@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Updated dependencies, use `Edition 2018`
 - Added missing `zeroToToggle`
 - Added serializing/deserializing with `serde`
+- Remove `_extensible` field from structs
 
 ## [v0.7.0] - 2019-01-11
 

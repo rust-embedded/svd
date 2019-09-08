@@ -22,9 +22,6 @@ pub struct Cpu {
     pub fpu_present: bool,
     pub nvic_priority_bits: u32,
     pub has_vendor_systick: bool,
-
-    // Reserve the right to add more fields to this struct
-    pub(crate) _extensible: (),
 }
 
 impl Parse for Cpu {
@@ -44,7 +41,6 @@ impl Parse for Cpu {
             fpu_present: tree.get_child_bool("fpuPresent")?,
             nvic_priority_bits: tree.get_child_u32("nvicPrioBits")?,
             has_vendor_systick: tree.get_child_bool("vendorSystickConfig")?,
-            _extensible: (),
         })
     }
 }
@@ -100,7 +96,6 @@ mod tests {
                 fpu_present: true,
                 nvic_priority_bits: 8,
                 has_vendor_systick: false,
-                _extensible: (),
             },
             "
                     <cpu>

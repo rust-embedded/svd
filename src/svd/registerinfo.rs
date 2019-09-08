@@ -35,8 +35,6 @@ pub struct RegisterInfo {
     pub fields: Option<Vec<Field>>,
     pub write_constraint: Option<WriteConstraint>,
     pub modified_write_values: Option<ModifiedWriteValues>,
-    // Reserve the right to add more fields to this struct
-    pub(crate) _extensible: (),
 }
 
 impl Parse for RegisterInfo {
@@ -86,7 +84,6 @@ impl RegisterInfo {
                 "modifiedWriteValues",
                 tree,
             )?,
-            _extensible: (),
         })
     }
 }
@@ -214,11 +211,9 @@ mod tests {
                     enumerated_values: Vec::new(),
                     write_constraint: None,
                     modified_write_values: None,
-                    _extensible: (),
                 })]),
                 write_constraint: None,
                 modified_write_values: Some(ModifiedWriteValues::OneToToggle),
-                _extensible: (),
             },
             "
             <register derivedFrom=\"derived from\">

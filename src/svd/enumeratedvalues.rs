@@ -21,8 +21,6 @@ pub struct EnumeratedValues {
     pub usage: Option<Usage>,
     pub derived_from: Option<String>,
     pub values: Vec<EnumeratedValue>,
-    // Reserve the right to add more fields to this struct
-    pub(crate) _extensible: (),
 }
 
 impl Parse for EnumeratedValues {
@@ -67,7 +65,6 @@ impl Parse for EnumeratedValues {
                 }
                 values
             },
-            _extensible: (),
         })
     }
 }
@@ -145,7 +142,6 @@ mod tests {
                     )),
                     value: Some(0),
                     is_default: Some(true),
-                    _extensible: (),
                 },
                 EnumeratedValue {
                     name: String::from("WS1"),
@@ -154,10 +150,8 @@ mod tests {
                     )),
                     value: Some(1),
                     is_default: None,
-                    _extensible: (),
                 },
             ],
-            _extensible: (),
         };
 
         // TODO: move to test! macro

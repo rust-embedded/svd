@@ -20,8 +20,6 @@ pub struct RegisterProperties {
     pub reset_value: Option<u32>,
     pub reset_mask: Option<u32>,
     pub access: Option<Access>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
 }
 
 impl RegisterProperties {
@@ -44,7 +42,6 @@ impl Parse for RegisterProperties {
             reset_value: parse::optional::<u32>("resetValue", tree)?,
             reset_mask: parse::optional::<u32>("resetMask", tree)?,
             access: parse::optional::<Access>("access", tree)?,
-            _extensible: (),
         })
     }
 }
@@ -98,7 +95,6 @@ mod tests {
             reset_value: Some(0x11223344),
             reset_mask: Some(0x00000000),
             access: Some(Access::ReadOnly),
-            _extensible: (),
         };
 
         let tree1 = Element::parse(example.as_bytes()).unwrap();
