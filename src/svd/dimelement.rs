@@ -20,6 +20,19 @@ pub struct DimElement {
     _extensible: (),
 }
 
+impl DimElement {
+    /// Produce vector of names of elements (fields/registers/clusters) in array
+    pub fn array_item_names(&self, name: &str) -> Vec<String> {
+        if let Some(dim_index) = &self.dim_index {
+            dim_index.iter().map(|i| name.replace("%s", &i)).collect()
+        } else {
+            (0..self.dim)
+                .map(|i| name.replace("%s", &format!("{}", i)))
+                .collect()
+        }
+    }
+}
+
 impl Parse for DimElement {
     type Object = DimElement;
     type Error = SVDError;
