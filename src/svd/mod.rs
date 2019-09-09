@@ -31,6 +31,9 @@ pub use self::enumeratedvalues::EnumeratedValues;
 pub mod field;
 pub use self::field::Field;
 
+pub mod fieldinfo;
+pub use self::fieldinfo::FieldInfo;
+
 pub mod registerinfo;
 pub use self::registerinfo::RegisterInfo;
 
