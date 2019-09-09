@@ -185,6 +185,7 @@ mod tests {
     use super::*;
     use crate::run_test;
     use crate::svd::bitrange::*;
+    use crate::svd::fieldinfo::FieldInfo;
 
     #[test]
     fn decode_encode() {
@@ -200,7 +201,7 @@ mod tests {
                 access: Some(Access::ReadWrite),
                 reset_value: Some(0x00000000),
                 reset_mask: Some(0x00000023),
-                fields: Some(vec![Field {
+                fields: Some(vec![Field::Single(FieldInfo {
                     name: String::from("WREN"),
                     derived_from: None,
                     description: Some(String::from("Enable Write/Erase Controller")),
@@ -214,7 +215,7 @@ mod tests {
                     write_constraint: None,
                     modified_write_values: None,
                     _extensible: (),
-                }]),
+                })]),
                 write_constraint: None,
                 modified_write_values: Some(ModifiedWriteValues::OneToToggle),
                 _extensible: (),

@@ -1,210 +1,71 @@
-#[cfg(feature = "unproven")]
-use std::collections::HashMap;
+use core::ops::Deref;
 
-use crate::elementext::ElementExt;
-use failure::ResultExt;
 use xmltree::Element;
 
-#[cfg(feature = "unproven")]
-use crate::encode::Encode;
-use crate::error::*;
-#[cfg(feature = "unproven")]
-use crate::new_element;
-use crate::parse;
 use crate::types::Parse;
 
-use crate::svd::{
-    access::Access, bitrange::BitRange, enumeratedvalues::EnumeratedValues,
-    modifiedwritevalues::ModifiedWriteValues, writeconstraint::WriteConstraint,
-};
+#[cfg(feature = "unproven")]
+use crate::elementext::ElementExt;
+#[cfg(feature = "unproven")]
+use crate::encode::Encode;
+use crate::error::SVDError;
+use crate::svd::{dimelement::DimElement, fieldinfo::FieldInfo};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
-pub struct Field {
-    pub name: String,
-    pub derived_from: Option<String>,
-    pub description: Option<String>,
-    pub bit_range: BitRange,
-    pub access: Option<Access>,
-    pub enumerated_values: Vec<EnumeratedValues>,
-    pub write_constraint: Option<WriteConstraint>,
-    pub modified_write_values: Option<ModifiedWriteValues>,
-    // Reserve the right to add more fields to this struct
-    pub(crate) _extensible: (),
+pub enum Field {
+    Single(FieldInfo),
+    Array(FieldInfo, DimElement),
+}
+
+impl Deref for Field {
+    type Target = FieldInfo;
+
+    fn deref(&self) -> &FieldInfo {
+        match self {
+            Field::Single(info) => info,
+            Field::Array(info, _) => info,
+        }
+    }
 }
 
 impl Parse for Field {
     type Object = Field;
     type Error = SVDError;
-    fn parse(tree: &Element) -> Result<Field, SVDError> {
-        if tree.name != "field" {
-            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), "field".to_string()).into());
-        }
-        let name = tree.get_child_text("name")?;
-        Field::_parse(tree, name.clone())
-            .context(SVDErrorKind::Other(format!("In field `{}`", name)))
-            .map_err(|e| e.into())
-    }
-}
 
-impl Field {
-    fn _parse(tree: &Element, name: String) -> Result<Field, SVDError> {
-        Ok(Field {
-            name,
-            derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
-            description: tree.get_child_text_opt("description")?,
-            bit_range: BitRange::parse(tree)?,
-            access: parse::optional::<Access>("access", tree)?,
-            enumerated_values: {
-                let values: Result<Vec<_>, _> = tree
-                    .children
-                    .iter()
-                    .filter(|t| t.name == "enumeratedValues")
-                    .map(EnumeratedValues::parse)
-                    .collect();
-                values?
-            },
-            write_constraint: parse::optional::<WriteConstraint>("writeConstraint", tree)?,
-            modified_write_values: parse::optional::<ModifiedWriteValues>(
-                "modifiedWriteValues",
-                tree,
-            )?,
-            _extensible: (),
-        })
+    fn parse(tree: &Element) -> Result<Field, SVDError> {
+        assert_eq!(tree.name, "field");
+
+        let info = FieldInfo::parse(tree)?;
+
+        if tree.get_child("dimIncrement").is_some() {
+            let array_info = DimElement::parse(tree)?;
+            assert!(info.name.contains("%s"));
+            if let Some(indices) = &array_info.dim_index {
+                assert_eq!(array_info.dim as usize, indices.len())
+            }
+            Ok(Field::Array(info, array_info))
+        } else {
+            Ok(Field::Single(info))
+        }
     }
 }
 
 #[cfg(feature = "unproven")]
 impl Encode for Field {
     type Error = SVDError;
+
     fn encode(&self) -> Result<Element, SVDError> {
-        let mut children = vec![new_element("name", Some(self.name.clone()))];
-
-        if let Some(description) = &self.description {
-            children.push(new_element("description", Some(description.clone())))
+        match self {
+            Field::Single(info) => info.encode(),
+            Field::Array(info, array_info) => {
+                // TODO: is this correct? probably not, need tests
+                let base = info.encode()?;
+                base.merge(&array_info.encode()?);
+                Ok(base)
+            }
         }
-
-        let mut elem = Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("field"),
-            attributes: HashMap::new(),
-            children,
-            text: None,
-        };
-
-        if let Some(v) = &self.derived_from {
-            elem.attributes
-                .insert(String::from("derivedFrom"), format!("{}", v));
-        }
-
-        // Add bit range
-        elem.children.append(&mut self.bit_range.encode()?);
-
-        if let Some(v) = &self.access {
-            elem.children.push(v.encode()?);
-        };
-
-        let enumerated_values: Result<Vec<Element>, SVDError> =
-            self.enumerated_values.iter().map(|v| v.encode()).collect();
-        elem.children.append(&mut enumerated_values?);
-
-        if let Some(v) = &self.write_constraint {
-            elem.children.push(v.encode()?);
-        };
-
-        if let Some(v) = &self.modified_write_values {
-            elem.children.push(v.encode()?);
-        };
-
-        Ok(elem)
     }
 }
 
-#[cfg(test)]
-#[cfg(feature = "unproven")]
-mod tests {
-    use super::*;
-    use crate::run_test;
-    use crate::svd::{bitrange::BitRangeType, enumeratedvalue::EnumeratedValue};
-
-    #[test]
-    fn decode_encode() {
-        let tests = vec![
-            (
-                Field {
-                    name: String::from("MODE"),
-                    derived_from: None,
-                    description: Some(String::from("Read Mode")),
-                    bit_range: BitRange {
-                        offset: 24,
-                        width: 2,
-                        range_type: BitRangeType::OffsetWidth,
-                    },
-                    access: Some(Access::ReadWrite),
-                    enumerated_values: vec![EnumeratedValues {
-                        name: None,
-                        usage: None,
-                        derived_from: None,
-                        values: vec![EnumeratedValue {
-                            name: String::from("WS0"),
-                            description: Some(String::from(
-                                "Zero wait-states inserted in fetch or read transfers",
-                            )),
-                            value: Some(0),
-                            is_default: None,
-                            _extensible: (),
-                        }],
-                        _extensible: (),
-                    }],
-                    write_constraint: None,
-                    modified_write_values: None,
-                    _extensible: (),
-                },
-                "
-            <field>
-              <name>MODE</name>
-              <description>Read Mode</description>
-              <bitOffset>24</bitOffset>
-              <bitWidth>2</bitWidth>
-              <access>read-write</access>
-              <enumeratedValues>
-                <enumeratedValue>
-                  <name>WS0</name>
-                  <description>Zero wait-states inserted in fetch or read transfers</description>
-                  <value>0x00000000</value>
-                </enumeratedValue>
-              </enumeratedValues>
-            </field>
-            ",
-            ),
-            (
-                Field {
-                    name: String::from("MODE"),
-                    derived_from: Some(String::from("other field")),
-                    description: None,
-                    bit_range: BitRange {
-                        offset: 24,
-                        width: 2,
-                        range_type: BitRangeType::OffsetWidth,
-                    },
-                    access: None,
-                    enumerated_values: vec![],
-                    write_constraint: None,
-                    modified_write_values: None,
-                    _extensible: (),
-                },
-                "
-            <field derivedFrom=\"other field\">
-              <name>MODE</name>
-              <bitOffset>24</bitOffset>
-              <bitWidth>2</bitWidth>
-            </field>
-            ",
-            ),
-        ];
-
-        run_test::<Field>(&tests[..]);
-    }
-}
+// TODO: add Field encode and decode tests
