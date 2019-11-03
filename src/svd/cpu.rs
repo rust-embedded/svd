@@ -13,6 +13,7 @@ use crate::svd::endian::Endian;
 use crate::types::Parse;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "builder", derive(derive_builder::Builder))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct Cpu {
     pub name: String,

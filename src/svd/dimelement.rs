@@ -11,6 +11,7 @@ use crate::new_element;
 use crate::error::SVDError;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "builder", derive(derive_builder::Builder))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct DimElement {
     pub dim: u32,

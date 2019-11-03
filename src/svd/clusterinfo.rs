@@ -12,6 +12,8 @@ use crate::error::SVDError;
 use crate::svd::{registercluster::RegisterCluster, registerproperties::RegisterProperties};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "builder", derive(derive_builder::Builder))]
+#[cfg_attr(feature = "builder", builder(build_fn(validate = "Self::validate")))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct ClusterInfo {
     pub name: String,
@@ -23,6 +25,21 @@ pub struct ClusterInfo {
     pub children: Vec<RegisterCluster>,
     // Reserve the right to add more fields to this struct
     _extensible: (),
+}
+
+#[cfg(feature = "builder")]
+impl ClusterInfoBuilder {
+    fn validate(&self) -> Result<(), String> {
+        if let Some(ref name) = self.name {
+            if crate::is_valid_name(&name) {
+                Ok(())
+            } else {
+                Err("Name is invalid".to_string())
+            }
+        } else {
+            Err("ClusterInfo must have name".to_string())
+        }
+    }
 }
 
 impl Parse for ClusterInfo {

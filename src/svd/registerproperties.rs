@@ -14,6 +14,7 @@ use crate::svd::access::Access;
 
 /// Register default properties
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "builder", derive(derive_builder::Builder))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct RegisterProperties {
     pub size: Option<u32>,
