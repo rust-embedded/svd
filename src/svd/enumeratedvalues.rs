@@ -31,11 +31,13 @@ impl Parse for EnumeratedValues {
 
     fn parse(tree: &Element) -> Result<EnumeratedValues, SVDError> {
         assert_eq!(tree.name, "enumeratedValues");
+        let derived_from = tree.attributes.get("derivedFrom").map(|s| s.to_owned());
+        let is_derived = derived_from.is_some();
 
         Ok(EnumeratedValues {
             name: tree.get_child_text_opt("name")?,
             usage: parse::optional::<Usage>("usage", tree)?,
-            derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
+            derived_from,
             values: {
                 let values: Result<Vec<_>, _> = tree
                     .children
@@ -62,7 +64,7 @@ impl Parse for EnumeratedValues {
                     })
                     .collect();
                 let values = values?;
-                if values.is_empty() {
+                if values.is_empty() && !is_derived {
                     return Err(SVDErrorKind::EmptyTag(tree.clone(), tree.name.clone()).into());
                 }
                 values

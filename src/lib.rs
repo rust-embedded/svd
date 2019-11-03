@@ -49,7 +49,7 @@ use encode::Encode;
 pub mod types;
 
 #[cfg(feature = "derive-from")]
-mod derive_from;
+pub mod derive_from;
 #[cfg(feature = "derive-from")]
 pub use derive_from::DeriveFrom;
 
