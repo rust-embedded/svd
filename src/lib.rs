@@ -92,6 +92,23 @@ pub(crate) fn new_element(name: &str, text: Option<String>) -> Element {
     }
 }
 
+fn is_valid_name(name: &str) -> bool {
+    let mut chars = name.chars();
+    if let Some(first) = chars.next() {
+        if !(first.is_ascii_alphabetic() || first == '_') {
+            return false;
+        }
+        for c in chars {
+            if !(c.is_ascii_alphanumeric() || c == '_') {
+                return false;
+            }
+        }
+        true
+    } else {
+        false
+    }
+}
+
 /// Generic test helper function
 /// Takes an array of (item, xml) pairs where the item implements
 /// Parse and Encode and tests object encoding and decoding

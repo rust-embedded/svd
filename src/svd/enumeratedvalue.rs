@@ -13,33 +13,67 @@ use crate::new_element;
 use crate::types::Parse;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, derive_builder::Builder)]
+#[builder(build_fn(validate = "Self::validate"))]
 pub struct EnumeratedValue {
+    /// String describing the semantics of the value. Can be displayed instead of the value
     pub name: String,
+
+    /// Extended string describing the value
+    #[builder(default)]
     pub description: Option<String>,
+
+    /// Defines the constant for the bit-field as decimal, hexadecimal or binary number
+    #[builder(default)]
     pub value: Option<u32>,
+
+    /// Defines the name and description for all other values that are not listed explicitly
+    #[builder(default)]
     pub is_default: Option<bool>,
+
     // Reserve the right to add more fields to this struct
-    pub(crate) _extensible: (),
+    #[builder(default)]
+    _extensible: (),
 }
+
+impl EnumeratedValueBuilder {
+    fn validate(&self) -> Result<(), String> {
+        match &self.name {
+            Some(name) if crate::is_valid_name(name) => Ok(()),
+            Some(name) => Err(format!("EnumeratedValue name `{}` is invalid", name)),
+            None => Err("EnumeratedValue must have name".to_string()),
+        }?;
+        match (&self.value, &self.is_default) {
+            (Some(Some(_)), None)
+            | (Some(Some(_)), Some(None))
+            | (None, Some(Some(_)))
+            | (Some(None), Some(Some(_))) => Ok(()),
+            _ => Err(format!(
+                "EnumeratedValue must contain one of `value` ({:?}) or `is_default` ({:?}) tags",
+                self.value, self.is_default
+            )),
+        }
+    }
+}
+
 impl EnumeratedValue {
-    fn _parse(tree: &Element, name: String) -> Result<EnumeratedValue> {
-        Ok(EnumeratedValue {
-            name,
-            description: tree.get_child_text_opt("description")?,
+    fn _parse(tree: &Element, name: String) -> Result<Self> {
+        EnumeratedValueBuilder::default()
+            .name(name)
+            .description(tree.get_child_text_opt("description")?)
             // TODO: this .ok() approach is simple, but does not expose errors parsing child objects.
             // Suggest refactoring all parse::type methods to return result so parse::optional works.
-            value: parse::optional::<u32>("value", tree)?,
-            is_default: tree.get_child_bool("isDefault").ok(),
-            _extensible: (),
-        })
+            .value(parse::optional::<u32>("value", tree)?)
+            .is_default(tree.get_child_bool("isDefault").ok())
+            .build()
+            .map_err(|e| anyhow::anyhow!(e))
     }
 }
 impl Parse for EnumeratedValue {
     type Object = EnumeratedValue;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<EnumeratedValue> {
+    fn parse(tree: &Element) -> Result<Self> {
         if tree.name != "enumeratedValue" {
             return Err(
                 ParseError::NotExpectedTag(tree.clone(), "enumeratedValue".to_string()).into(),
@@ -94,21 +128,19 @@ mod tests {
     #[test]
     fn decode_encode() {
         let tests = vec![(
-            EnumeratedValue {
-                name: String::from("WS0"),
-                description: Some(String::from(
-                    "Zero wait-states inserted in fetch or read transfers",
-                )),
-                value: Some(0),
-                is_default: Some(true),
-                _extensible: (),
-            },
+            EnumeratedValueBuilder::default()
+                .name("WS0".to_string())
+                .description(Some(
+                    "Zero wait-states inserted in fetch or read transfers".to_string(),
+                ))
+                .value(Some(0))
+                .build()
+                .unwrap(),
             "
                 <enumeratedValue>
                     <name>WS0</name>
                     <description>Zero wait-states inserted in fetch or read transfers</description>
                     <value>0x00000000</value>
-                    <isDefault>true</isDefault>
                 </enumeratedValue>
             ",
         )];

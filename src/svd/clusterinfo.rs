@@ -12,17 +12,46 @@ use crate::error::*;
 use crate::svd::{registercluster::RegisterCluster, registerproperties::RegisterProperties};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, derive_builder::Builder)]
+#[builder(build_fn(validate = "Self::validate"))]
 pub struct ClusterInfo {
+    /// String to identify the cluster.
+    /// Cluster names are required to be unique within the scope of a peripheral
     pub name: String,
+
+    /// Specify the cluster name from which to inherit data.
+    /// Elements specified subsequently override inherited values
+    #[builder(default)]
     pub derived_from: Option<String>,
+
+    /// String describing the details of the register cluster
     pub description: String,
+
+    /// Specify the struct type name created in the device header file
+    #[builder(default)]
     pub header_struct_name: Option<String>,
+
+    /// Cluster address relative to the `baseAddress` of the peripheral
     pub address_offset: u32,
+
+    #[builder(default)]
     pub default_register_properties: RegisterProperties,
+
     pub children: Vec<RegisterCluster>,
+
     // Reserve the right to add more fields to this struct
+    #[builder(default)]
     _extensible: (),
+}
+
+impl ClusterInfoBuilder {
+    fn validate(&self) -> Result<(), String> {
+        match &self.name {
+            Some(name) if crate::is_valid_name(name) => Ok(()),
+            Some(name) => Err(format!("Cluster name `{}` is invalid", name)),
+            None => Err("ClusterInfo must have name".to_string()),
+        }
+    }
 }
 
 impl Parse for ClusterInfo {
@@ -30,14 +59,14 @@ impl Parse for ClusterInfo {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<ClusterInfo> {
-        Ok(ClusterInfo {
-            name: tree.get_child_text("name")?, // TODO: Handle naming of cluster
-            derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
-            description: tree.get_child_text("description")?,
-            header_struct_name: tree.get_child_text_opt("headerStructName")?,
-            address_offset: tree.get_child_u32("addressOffset")?,
-            default_register_properties: RegisterProperties::parse(tree)?,
-            children: {
+        ClusterInfoBuilder::default()
+            .name(tree.get_child_text("name")?)
+            .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
+            .description(tree.get_child_text("description")?)
+            .header_struct_name(tree.get_child_text_opt("headerStructName")?)
+            .address_offset(tree.get_child_u32("addressOffset")?)
+            .default_register_properties(RegisterProperties::parse(tree)?)
+            .children({
                 let children: Result<Vec<_>, _> = tree
                     .children
                     .iter()
@@ -45,9 +74,9 @@ impl Parse for ClusterInfo {
                     .map(RegisterCluster::parse)
                     .collect();
                 children?
-            },
-            _extensible: (),
-        })
+            })
+            .build()
+            .map_err(|e| anyhow::anyhow!(e))
     }
 }
 

@@ -18,18 +18,40 @@ use crate::svd::{
 };
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, derive_builder::Builder)]
 pub struct FieldInfo {
+    /// Name string used to identify the field.
+    /// Field names must be unique within a register
     pub name: String,
+
+    /// Specify the field name from which to inherit data.
+    /// Elements specified subsequently override inherited values
+    #[builder(default)]
     pub derived_from: Option<String>,
+
+    /// String describing the details of the register
+    #[builder(default)]
     pub description: Option<String>,
+
     pub bit_range: BitRange,
+
+    /// Predefined strings set the access type.
+    /// The element can be omitted if access rights get inherited from parent elements
+    #[builder(default)]
     pub access: Option<Access>,
+
+    #[builder(default)]
     pub enumerated_values: Vec<EnumeratedValues>,
+
+    #[builder(default)]
     pub write_constraint: Option<WriteConstraint>,
+
+    #[builder(default)]
     pub modified_write_values: Option<ModifiedWriteValues>,
+
     // Reserve the right to add more fields to this struct
-    pub(crate) _extensible: (),
+    #[builder(default)]
+    _extensible: (),
 }
 
 impl Parse for FieldInfo {
@@ -47,13 +69,13 @@ impl Parse for FieldInfo {
 
 impl FieldInfo {
     fn _parse(tree: &Element, name: String) -> Result<FieldInfo> {
-        Ok(FieldInfo {
-            name,
-            derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
-            description: tree.get_child_text_opt("description")?,
-            bit_range: BitRange::parse(tree)?,
-            access: parse::optional::<Access>("access", tree)?,
-            enumerated_values: {
+        FieldInfoBuilder::default()
+            .name(name)
+            .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
+            .description(tree.get_child_text_opt("description")?)
+            .bit_range(BitRange::parse(tree)?)
+            .access(parse::optional::<Access>("access", tree)?)
+            .enumerated_values({
                 let values: Result<Vec<_>, _> = tree
                     .children
                     .iter()
@@ -61,14 +83,14 @@ impl FieldInfo {
                     .map(EnumeratedValues::parse)
                     .collect();
                 values?
-            },
-            write_constraint: parse::optional::<WriteConstraint>("writeConstraint", tree)?,
-            modified_write_values: parse::optional::<ModifiedWriteValues>(
+            })
+            .write_constraint(parse::optional::<WriteConstraint>("writeConstraint", tree)?)
+            .modified_write_values(parse::optional::<ModifiedWriteValues>(
                 "modifiedWriteValues",
                 tree,
-            )?,
-            _extensible: (),
-        })
+            )?)
+            .build()
+            .map_err(|e| anyhow::anyhow!(e))
     }
 }
 
@@ -126,41 +148,38 @@ impl Encode for FieldInfo {
 mod tests {
     use super::*;
     use crate::run_test;
-    use crate::svd::{bitrange::BitRangeType, enumeratedvalue::EnumeratedValue};
+    use crate::svd::{
+        bitrange::BitRangeType, enumeratedvalue::EnumeratedValueBuilder,
+        enumeratedvalues::EnumeratedValuesBuilder,
+    };
 
     #[test]
     fn decode_encode() {
         let tests = vec![
             (
-                FieldInfo {
-                    name: String::from("MODE"),
-                    derived_from: None,
-                    description: Some(String::from("Read Mode")),
-                    bit_range: BitRange {
+                FieldInfoBuilder::default()
+                    .name("MODE".to_string())
+                    .description(Some("Read Mode".to_string()))
+                    .bit_range(BitRange {
                         offset: 24,
                         width: 2,
                         range_type: BitRangeType::OffsetWidth,
-                    },
-                    access: Some(Access::ReadWrite),
-                    enumerated_values: vec![EnumeratedValues {
-                        name: None,
-                        usage: None,
-                        derived_from: None,
-                        values: vec![EnumeratedValue {
-                            name: String::from("WS0"),
-                            description: Some(String::from(
-                                "Zero wait-states inserted in fetch or read transfers",
-                            )),
-                            value: Some(0),
-                            is_default: None,
-                            _extensible: (),
-                        }],
-                        _extensible: (),
-                    }],
-                    write_constraint: None,
-                    modified_write_values: None,
-                    _extensible: (),
-                },
+                    })
+                    .access(Some(Access::ReadWrite))
+                    .enumerated_values(vec![EnumeratedValuesBuilder::default()
+                        .values(vec![EnumeratedValueBuilder::default()
+                            .name("WS0".to_string())
+                            .description(Some(
+                                "Zero wait-states inserted in fetch or read transfers".to_string(),
+                            ))
+                            .value(Some(0))
+                            .is_default(None)
+                            .build()
+                            .unwrap()])
+                        .build()
+                        .unwrap()])
+                    .build()
+                    .unwrap(),
                 "
             <field>
               <name>MODE</name>
@@ -179,21 +198,16 @@ mod tests {
             ",
             ),
             (
-                FieldInfo {
-                    name: String::from("MODE"),
-                    derived_from: Some(String::from("other field")),
-                    description: None,
-                    bit_range: BitRange {
+                FieldInfoBuilder::default()
+                    .name("MODE".to_string())
+                    .derived_from(Some("other field".to_string()))
+                    .bit_range(BitRange {
                         offset: 24,
                         width: 2,
                         range_type: BitRangeType::OffsetWidth,
-                    },
-                    access: None,
-                    enumerated_values: vec![],
-                    write_constraint: None,
-                    modified_write_values: None,
-                    _extensible: (),
-                },
+                    })
+                    .build()
+                    .unwrap(),
                 "
             <field derivedFrom=\"other field\">
               <name>MODE</name>

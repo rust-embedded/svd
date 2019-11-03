@@ -14,14 +14,46 @@ use crate::svd::{enumeratedvalue::EnumeratedValue, usage::Usage};
 use crate::types::Parse;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, derive_builder::Builder)]
+#[builder(build_fn(validate = "Self::validate"))]
 pub struct EnumeratedValues {
+    /// Identifier for the whole enumeration section
+    #[builder(default)]
     pub name: Option<String>,
+
+    #[builder(default)]
     pub usage: Option<Usage>,
+
+    /// Makes a copy from a previously defined enumeratedValues section.
+    /// No modifications are allowed
+    #[builder(default)]
     pub derived_from: Option<String>,
+
     pub values: Vec<EnumeratedValue>,
+
     // Reserve the right to add more fields to this struct
-    pub(crate) _extensible: (),
+    #[builder(default)]
+    _extensible: (),
+}
+
+impl EnumeratedValuesBuilder {
+    fn validate(&self) -> Result<(), String> {
+        match &self.derived_from {
+            Some(Some(dname)) if crate::is_valid_name(dname) => Ok(()),
+            Some(Some(dname)) => Err(format!("Derive name `{}` is invalid", dname)),
+            Some(None) | None => {
+                if match &self.values {
+                    Some(values) if values.is_empty() => true,
+                    None => true,
+                    _ => false,
+                } {
+                    Err("Empty enumerated values".to_string())
+                } else {
+                    Ok(())
+                }
+            }
+        }
+    }
 }
 
 impl Parse for EnumeratedValues {
@@ -30,14 +62,11 @@ impl Parse for EnumeratedValues {
 
     fn parse(tree: &Element) -> Result<EnumeratedValues> {
         assert_eq!(tree.name, "enumeratedValues");
-        let derived_from = tree.attributes.get("derivedFrom").map(|s| s.to_owned());
-        let is_derived = derived_from.is_some();
-
-        Ok(EnumeratedValues {
-            name: tree.get_child_text_opt("name")?,
-            usage: parse::optional::<Usage>("usage", tree)?,
-            derived_from,
-            values: {
+        EnumeratedValuesBuilder::default()
+            .name(tree.get_child_text_opt("name")?)
+            .usage(parse::optional::<Usage>("usage", tree)?)
+            .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
+            .values({
                 let values: Result<Vec<_>, _> = tree
                     .children
                     .iter()
@@ -60,16 +89,10 @@ impl Parse for EnumeratedValues {
                         }
                     })
                     .collect();
-                let values = values?;
-                if values.is_empty() && !is_derived {
-                    return Err(
-                        EnumeratedValuesError::Empty(tree.clone(), tree.name.clone()).into(),
-                    );
-                }
-                values
-            },
-            _extensible: (),
-        })
+                values?
+            })
+            .build()
+            .map_err(|e| anyhow::anyhow!(e))
     }
 }
 
@@ -113,16 +136,16 @@ impl Encode for EnumeratedValues {
 #[cfg(feature = "unproven")]
 mod tests {
     use super::*;
+    use crate::svd::enumeratedvalue::EnumeratedValueBuilder;
 
     #[test]
     fn decode_encode() {
         let example = String::from(
             "
-            <enumeratedValues derivedFrom=\"fake-derivation.png\">
+            <enumeratedValues derivedFrom=\"fake_derivation\">
                 <enumeratedValue>
                     <name>WS0</name>
                     <description>Zero wait-states inserted in fetch or read transfers</description>
-                    <value>0x00000000</value>
                     <isDefault>true</isDefault>
                 </enumeratedValue>
                 <enumeratedValue>
@@ -134,32 +157,28 @@ mod tests {
         ",
         );
 
-        let expected = EnumeratedValues {
-            name: None,
-            usage: None,
-            derived_from: Some(String::from("fake-derivation.png")),
-            values: vec![
-                EnumeratedValue {
-                    name: String::from("WS0"),
-                    description: Some(String::from(
-                        "Zero wait-states inserted in fetch or read transfers",
-                    )),
-                    value: Some(0),
-                    is_default: Some(true),
-                    _extensible: (),
-                },
-                EnumeratedValue {
-                    name: String::from("WS1"),
-                    description: Some(String::from(
-                        "One wait-state inserted for each fetch or read transfer. See Flash Wait-States table for details",
-                    )),
-                    value: Some(1),
-                    is_default: None,
-                    _extensible: (),
-                },
-            ],
-            _extensible: (),
-        };
+        let expected = EnumeratedValuesBuilder::default()
+            .derived_from(Some("fake_derivation".to_string()))
+            .values(vec![
+                EnumeratedValueBuilder::default()
+                    .name("WS0".to_string())
+                    .description(Some(
+                        "Zero wait-states inserted in fetch or read transfers".to_string()
+                    ))
+                    .is_default(Some(true))
+                    .build()
+                    .unwrap(),
+                EnumeratedValueBuilder::default()
+                    .name("WS1".to_string())
+                    .description(Some(
+                        "One wait-state inserted for each fetch or read transfer. See Flash Wait-States table for details".to_string()
+                    ))
+                    .value(Some(1))
+                    .build()
+                    .unwrap(),
+            ])
+            .build()
+            .unwrap();
 
         // TODO: move to test! macro
         let tree1 = Element::parse(example.as_bytes()).unwrap();
@@ -188,7 +207,6 @@ mod tests {
                 <name>WS0</name>
                 <description>Zero wait-states inserted in fetch or read transfers</description>
                 <value>0x00000000</value>
-                <isDefault>true</isDefault>
             </enumeratedValue>",
         );
 

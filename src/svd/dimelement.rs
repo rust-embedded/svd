@@ -11,12 +11,21 @@ use crate::new_element;
 use crate::error::*;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, derive_builder::Builder)]
 pub struct DimElement {
+    /// Defines the number of elements in an array or list
     pub dim: u32,
+
+    /// Specify the address increment between two neighboring array or list members in the address map
     pub dim_increment: u32,
+
+    /// Specify the strings that substitue the placeholder `%s` within `name` and `displayName`.
+    /// By default, <dimIndex> is a value starting with 0
+    #[builder(default)]
     pub dim_index: Option<Vec<String>>,
+
     // Reserve the right to add more fields to this struct
+    #[builder(default)]
     _extensible: (),
 }
 
@@ -25,12 +34,12 @@ impl Parse for DimElement {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<DimElement> {
-        Ok(DimElement {
-            dim: tree.get_child_u32("dim")?,
-            dim_increment: tree.get_child_u32("dimIncrement")?,
-            dim_index: parse_optional::<DimIndex>("dimIndex", tree)?,
-            _extensible: (),
-        })
+        DimElementBuilder::default()
+            .dim(tree.get_child_u32("dim")?)
+            .dim_increment(tree.get_child_u32("dimIncrement")?)
+            .dim_index(parse_optional::<DimIndex>("dimIndex", tree)?)
+            .build()
+            .map_err(|e| anyhow::anyhow!(e))
     }
 }
 
@@ -65,12 +74,12 @@ mod tests {
     #[test]
     fn decode_encode() {
         let tests = vec![(
-            DimElement {
-                dim: 100,
-                dim_increment: 4,
-                dim_index: Some(vec!["10".to_owned(), "20".to_owned()]),
-                _extensible: (),
-            },
+            DimElementBuilder::default()
+                .dim(100)
+                .dim_increment(4)
+                .dim_index(Some(vec!["10".to_string(), "20".to_string()]))
+                .build()
+                .unwrap(),
             "<dimElement>
                 <dim>100</dim>
                 <dimIncrement>4</dimIncrement>

@@ -14,18 +14,43 @@ use crate::new_element;
 use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, derive_builder::Builder)]
 pub struct Device {
+    /// The string identifies the device or device series. Device names are required to be unique
     pub name: String,
+
+    /// Specify the compliant CMSIS-SVD schema version
+    #[builder(default)]
     schema_version: Option<String>,
+
+    /// Define the version of the SVD file
+    #[builder(default)]
     pub version: Option<String>,
+
+    /// Describe the main features of the device (for example CPU, clock frequency, peripheral overview)
+    #[builder(default)]
     pub description: Option<String>,
+
+    /// Define the number of data bits uniquely selected by each address
+    #[builder(default)]
     pub address_unit_bits: Option<u32>,
+
+    /// Define the number of data bit-width of the maximum single data transfer supported by the bus infrastructure
+    #[builder(default)]
     pub width: Option<u32>,
+
+    /// Describe the processor included in the device
+    #[builder(default)]
     pub cpu: Option<Cpu>,
+
+    /// Group to define peripherals
     pub peripherals: Vec<Peripheral>,
+
+    #[builder(default)]
     pub default_register_properties: RegisterProperties,
+
     // Reserve the right to add more fields to this struct
+    #[builder(default)]
     _extensible: (),
 }
 
@@ -35,15 +60,15 @@ impl Parse for Device {
 
     /// Parses a SVD file
     fn parse(tree: &Element) -> Result<Device> {
-        Ok(Device {
-            name: tree.get_child_text("name")?,
-            schema_version: tree.attributes.get("schemaVersion").cloned(),
-            cpu: parse::optional::<Cpu>("cpu", tree)?,
-            version: tree.get_child_text_opt("version")?,
-            description: tree.get_child_text_opt("description")?,
-            address_unit_bits: parse::optional::<u32>("addressUnitBits", tree)?,
-            width: None,
-            peripherals: {
+        DeviceBuilder::default()
+            .name(tree.get_child_text("name")?)
+            .schema_version(tree.attributes.get("schemaVersion").cloned())
+            .cpu(parse::optional::<Cpu>("cpu", tree)?)
+            .version(tree.get_child_text_opt("version")?)
+            .description(tree.get_child_text_opt("description")?)
+            .address_unit_bits(parse::optional::<u32>("addressUnitBits", tree)?)
+            .width(None)
+            .peripherals({
                 let ps: Result<Vec<_>, _> = tree
                     .get_child_elem("peripherals")?
                     .children
@@ -51,10 +76,10 @@ impl Parse for Device {
                     .map(Peripheral::parse)
                     .collect();
                 ps?
-            },
-            default_register_properties: RegisterProperties::parse(tree)?,
-            _extensible: (),
-        })
+            })
+            .default_register_properties(RegisterProperties::parse(tree)?)
+            .build()
+            .map_err(|e| anyhow::anyhow!(e))
     }
 }
 

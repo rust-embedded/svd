@@ -14,13 +14,26 @@ use crate::svd::access::Access;
 
 /// Register default properties
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, derive_builder::Builder)]
 pub struct RegisterProperties {
+    /// Default bit-width of any register
+    #[builder(default)]
     pub size: Option<u32>,
+
+    /// Default value for all registers at RESET
+    #[builder(default)]
     pub reset_value: Option<u32>,
+
+    /// Define which register bits have a defined reset value
+    #[builder(default)]
     pub reset_mask: Option<u32>,
+
+    /// Default access rights for all registers
+    #[builder(default)]
     pub access: Option<Access>,
+
     // Reserve the right to add more fields to this struct
+    #[builder(default)]
     _extensible: (),
 }
 
@@ -29,13 +42,13 @@ impl Parse for RegisterProperties {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<RegisterProperties> {
-        Ok(RegisterProperties {
-            size: parse::optional::<u32>("size", tree)?,
-            reset_value: parse::optional::<u32>("resetValue", tree)?,
-            reset_mask: parse::optional::<u32>("resetMask", tree)?,
-            access: parse::optional::<Access>("access", tree)?,
-            _extensible: (),
-        })
+        RegisterPropertiesBuilder::default()
+            .size(parse::optional::<u32>("size", tree)?)
+            .reset_value(parse::optional::<u32>("resetValue", tree)?)
+            .reset_mask(parse::optional::<u32>("resetMask", tree)?)
+            .access(parse::optional::<Access>("access", tree)?)
+            .build()
+            .map_err(|e| anyhow::anyhow!(e))
     }
 }
 
@@ -84,13 +97,13 @@ mod tests {
         ",
         );
 
-        let expected = RegisterProperties {
-            size: Some(0xaabbccdd),
-            reset_value: Some(0x11223344),
-            reset_mask: Some(0x00000000),
-            access: Some(Access::ReadOnly),
-            _extensible: (),
-        };
+        let expected = RegisterPropertiesBuilder::default()
+            .size(Some(0xaabbccdd))
+            .reset_value(Some(0x11223344))
+            .reset_mask(Some(0x00000000))
+            .access(Some(Access::ReadOnly))
+            .build()
+            .unwrap();
 
         let tree1 = Element::parse(example.as_bytes()).unwrap();
 
