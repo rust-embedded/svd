@@ -56,20 +56,6 @@ impl Parse for Peripheral {
 }
 
 impl Peripheral {
-    pub fn derive_from(&self, other: &Peripheral) -> Peripheral {
-        let mut derived = self.clone();
-        derived.group_name = derived.group_name.or_else(|| other.group_name.clone());
-        derived.description = derived.description.or_else(|| other.description.clone());
-        derived.default_register_properties = derived
-            .default_register_properties
-            .derive_from(&other.default_register_properties);
-        derived.registers = derived.registers.or_else(|| other.registers.clone());
-        if derived.interrupt.is_empty() {
-            derived.interrupt = other.interrupt.clone();
-        }
-        derived
-    }
-
     fn _parse(tree: &Element, name: String) -> Result<Peripheral, SVDError> {
         Ok(Peripheral {
             name,

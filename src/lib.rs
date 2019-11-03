@@ -48,6 +48,11 @@ use encode::Encode;
 // Types defines simple types and parse/encode implementations
 pub mod types;
 
+#[cfg(feature = "derive-from")]
+mod derive_from;
+#[cfg(feature = "derive-from")]
+pub use derive_from::DeriveFrom;
+
 /// Parses the contents of an SVD (XML) string
 pub fn parse(xml: &str) -> Result<Device, SVDError> {
     let xml = trim_utf8_bom(xml);

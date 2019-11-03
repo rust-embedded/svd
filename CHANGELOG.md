@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - [breaking-change] `Field` splitted on `Field` enum and `FieldInfo` struct
   to support field arrays
 - Added `derived_from` into `Field` and `ClusterInfo`
+- [breaking-change] implement `DeriveFrom` for `ClusterInfo`,
+  `RegisterInfo` and `EnumeratedValues`
 - Updated dependencies, use `Edition 2018`
 - Added missing `zeroToToggle`
 - Added serializing/deserializing with `serde`
