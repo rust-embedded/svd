@@ -1,13 +1,16 @@
 [package]
-authors = ["Jorge Aparicio <japaricious@gmail.com>"]
+authors = [
+    "The Tools Team <tools@teams.rust-embedded.org>",
+    "Jorge Aparicio <jorge@japaric.io>",
+]
 description = "A CMSIS-SVD file parser"
 documentation = "https://docs.rs/svd-parser"
 keywords = ["CMSIS", "SVD", "parser"]
 license = "MIT OR Apache-2.0"
 name = "svd-parser"
-repository = "https://github.com/japaric/svd"
+repository = "https://github.com/rust-embedded/svd"
 edition = "2018"
-version = "0.7.0"
+version = "0.8.0"
 
 [features]
 derive-from = []
