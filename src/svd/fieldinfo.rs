@@ -49,18 +49,21 @@ impl Parse for FieldInfo {
 
 impl FieldInfo {
     fn _parse(tree: &Element, name: String) -> Result<FieldInfo, SVDError> {
+        let bit_range = BitRange::parse(tree)?;
         Ok(FieldInfo {
             name,
             derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
             description: tree.get_child_text_opt("description")?,
-            bit_range: BitRange::parse(tree)?,
+            bit_range,
             access: parse::optional::<Access>("access", tree)?,
             enumerated_values: {
                 let values: Result<Vec<_>, _> = tree
                     .children
                     .iter()
                     .filter(|t| t.name == "enumeratedValues")
-                    .map(EnumeratedValues::parse)
+                    .map(|t| EnumeratedValues::parse(t)
+                        .and_then(|ev| ev.check_range(0..2_u32.pow(bit_range.width)))
+                    )
                     .collect();
                 values?
             },

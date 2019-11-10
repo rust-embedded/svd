@@ -25,16 +25,32 @@ pub struct EnumeratedValues {
     pub(crate) _extensible: (),
 }
 
+impl EnumeratedValues {
+    pub(crate) fn check_range(self, range: core::ops::Range<u32>) -> Result<Self, SVDError> {
+        if self.values.iter().all(|v|
+            match (v.value, v.is_default) {
+                (Some(x), None) if range.contains(&x) => true,
+                (None, Some(_)) => true,
+                _ => false
+            }
+        ) {
+            Ok(self)
+        } else {
+            Err(SVDErrorKind::Other("Enumerated value out of range".to_string()).into())
+        }
+    }
+}
+
 impl Parse for EnumeratedValues {
-    type Object = EnumeratedValues;
+    type Object = Self;
     type Error = SVDError;
 
-    fn parse(tree: &Element) -> Result<EnumeratedValues, SVDError> {
+    fn parse(tree: &Element) -> Result<Self, SVDError> {
         assert_eq!(tree.name, "enumeratedValues");
         let derived_from = tree.attributes.get("derivedFrom").map(|s| s.to_owned());
         let is_derived = derived_from.is_some();
 
-        Ok(EnumeratedValues {
+        Ok(Self {
             name: tree.get_child_text_opt("name")?,
             usage: parse::optional::<Usage>("usage", tree)?,
             derived_from,
