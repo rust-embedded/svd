@@ -8,7 +8,7 @@ use crate::encode::{Encode, EncodeChildren};
 #[cfg(feature = "unproven")]
 use crate::new_element;
 
-use crate::error::SVDError;
+use crate::error::*;
 use crate::svd::{registercluster::RegisterCluster, registerproperties::RegisterProperties};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -27,9 +27,9 @@ pub struct ClusterInfo {
 
 impl Parse for ClusterInfo {
     type Object = ClusterInfo;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<ClusterInfo, SVDError> {
+    fn parse(tree: &Element) -> Result<ClusterInfo> {
         Ok(ClusterInfo {
             name: tree.get_child_text("name")?, // TODO: Handle naming of cluster
             derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
@@ -53,8 +53,9 @@ impl Parse for ClusterInfo {
 
 #[cfg(feature = "unproven")]
 impl Encode for ClusterInfo {
-    type Error = SVDError;
-    fn encode(&self) -> Result<Element, SVDError> {
+    type Error = anyhow::Error;
+
+    fn encode(&self) -> Result<Element> {
         let mut e = new_element("cluster", None);
 
         if let Some(v) = &self.derived_from {

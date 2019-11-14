@@ -28,9 +28,9 @@ pub struct WriteConstraintRange {
 
 impl Parse for WriteConstraint {
     type Object = WriteConstraint;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<WriteConstraint, SVDError> {
+    fn parse(tree: &Element) -> Result<WriteConstraint> {
         if tree.children.len() == 1 {
             let field = &tree.children[0].name;
             // Write constraint can only be one of the following
@@ -44,19 +44,19 @@ impl Parse for WriteConstraint {
                 "range" => Ok(WriteConstraint::Range(WriteConstraintRange::parse(
                     tree.get_child_elem(field.as_ref())?,
                 )?)),
-                _ => Err(SVDErrorKind::UnknownWriteConstraint(tree.clone()).into()),
+                _ => Err(SVDError::UnknownWriteConstraint(tree.clone()).into()),
             }
         } else {
-            Err(SVDErrorKind::MoreThanOneWriteConstraint(tree.clone()).into())
+            Err(SVDError::MoreThanOneWriteConstraint(tree.clone()).into())
         }
     }
 }
 
 #[cfg(feature = "unproven")]
 impl Encode for WriteConstraint {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         let v = match *self {
             WriteConstraint::WriteAsRead(v) => new_element("writeAsRead", Some(format!("{}", v))),
             WriteConstraint::UseEnumeratedValues(v) => {
@@ -79,9 +79,9 @@ impl Encode for WriteConstraint {
 
 impl Parse for WriteConstraintRange {
     type Object = WriteConstraintRange;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<WriteConstraintRange, SVDError> {
+    fn parse(tree: &Element) -> Result<WriteConstraintRange> {
         Ok(WriteConstraintRange {
             min: tree.get_child_u32("minimum")?,
             max: tree.get_child_u32("maximum")?,
@@ -91,9 +91,9 @@ impl Parse for WriteConstraintRange {
 
 #[cfg(feature = "unproven")]
 impl Encode for WriteConstraintRange {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         Ok(Element {
             prefix: None,
             namespace: None,

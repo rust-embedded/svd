@@ -8,7 +8,7 @@ use crate::types::Parse;
 
 #[cfg(feature = "unproven")]
 use crate::encode::{Encode, EncodeChildren};
-use crate::error::SVDError;
+use crate::error::*;
 #[cfg(feature = "unproven")]
 use crate::new_element;
 use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties};
@@ -31,10 +31,10 @@ pub struct Device {
 
 impl Parse for Device {
     type Object = Device;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
     /// Parses a SVD file
-    fn parse(tree: &Element) -> Result<Device, SVDError> {
+    fn parse(tree: &Element) -> Result<Device> {
         Ok(Device {
             name: tree.get_child_text("name")?,
             schema_version: tree.attributes.get("schemaVersion").cloned(),
@@ -60,9 +60,9 @@ impl Parse for Device {
 
 #[cfg(feature = "unproven")]
 impl Encode for Device {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         let mut elem = Element {
             prefix: None,
             namespace: None,

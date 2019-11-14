@@ -2,7 +2,6 @@
 use std::collections::HashMap;
 
 use crate::elementext::ElementExt;
-use failure::ResultExt;
 use xmltree::Element;
 
 #[cfg(feature = "unproven")]
@@ -35,20 +34,19 @@ pub struct FieldInfo {
 
 impl Parse for FieldInfo {
     type Object = FieldInfo;
-    type Error = SVDError;
-    fn parse(tree: &Element) -> Result<FieldInfo, SVDError> {
+    type Error = anyhow::Error;
+
+    fn parse(tree: &Element) -> Result<FieldInfo> {
         if tree.name != "field" {
-            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), "field".to_string()).into());
+            return Err(SVDError::NotExpectedTag(tree.clone(), "field".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
-        FieldInfo::_parse(tree, name.clone())
-            .context(SVDErrorKind::Other(format!("In field `{}`", name)))
-            .map_err(|e| e.into())
+        FieldInfo::_parse(tree, name.clone()).context(format!("In field `{}`", name))
     }
 }
 
 impl FieldInfo {
-    fn _parse(tree: &Element, name: String) -> Result<FieldInfo, SVDError> {
+    fn _parse(tree: &Element, name: String) -> Result<FieldInfo> {
         Ok(FieldInfo {
             name,
             derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
@@ -76,8 +74,9 @@ impl FieldInfo {
 
 #[cfg(feature = "unproven")]
 impl Encode for FieldInfo {
-    type Error = SVDError;
-    fn encode(&self) -> Result<Element, SVDError> {
+    type Error = anyhow::Error;
+
+    fn encode(&self) -> Result<Element> {
         let mut children = vec![new_element("name", Some(self.name.clone()))];
 
         if let Some(description) = &self.description {
@@ -106,7 +105,7 @@ impl Encode for FieldInfo {
             elem.children.push(v.encode()?);
         };
 
-        let enumerated_values: Result<Vec<Element>, SVDError> =
+        let enumerated_values: Result<Vec<Element>> =
             self.enumerated_values.iter().map(|v| v.encode()).collect();
         elem.children.append(&mut enumerated_values?);
 

@@ -20,9 +20,9 @@ pub enum Access {
 
 impl Parse for Access {
     type Object = Access;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Access, SVDError> {
+    fn parse(tree: &Element) -> Result<Access> {
         let text = tree.get_text()?;
 
         match &text[..] {
@@ -31,16 +31,16 @@ impl Parse for Access {
             "read-writeOnce" => Ok(Access::ReadWriteOnce),
             "write-only" => Ok(Access::WriteOnly),
             "writeOnce" => Ok(Access::WriteOnce),
-            _ => Err(SVDErrorKind::UnknownAccessType(tree.clone(), text).into()),
+            _ => Err(SVDError::UnknownAccessType(tree.clone(), text).into()),
         }
     }
 }
 
 #[cfg(feature = "unproven")]
 impl Encode for Access {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         let text = match *self {
             Access::ReadOnly => String::from("read-only"),
             Access::ReadWrite => String::from("read-write"),

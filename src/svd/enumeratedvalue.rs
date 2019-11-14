@@ -3,7 +3,6 @@ use std::collections::HashMap;
 
 use crate::elementext::ElementExt;
 use crate::parse;
-use failure::ResultExt;
 use xmltree::Element;
 
 #[cfg(feature = "unproven")]
@@ -24,7 +23,7 @@ pub struct EnumeratedValue {
     pub(crate) _extensible: (),
 }
 impl EnumeratedValue {
-    fn _parse(tree: &Element, name: String) -> Result<EnumeratedValue, SVDError> {
+    fn _parse(tree: &Element, name: String) -> Result<EnumeratedValue> {
         Ok(EnumeratedValue {
             name,
             description: tree.get_child_text_opt("description")?,
@@ -38,29 +37,25 @@ impl EnumeratedValue {
 }
 impl Parse for EnumeratedValue {
     type Object = EnumeratedValue;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<EnumeratedValue, SVDError> {
+    fn parse(tree: &Element) -> Result<EnumeratedValue> {
         if tree.name != "enumeratedValue" {
             return Err(
-                SVDErrorKind::NotExpectedTag(tree.clone(), "enumeratedValue".to_string()).into(),
+                SVDError::NotExpectedTag(tree.clone(), "enumeratedValue".to_string()).into(),
             );
         }
         let name = tree.get_child_text("name")?;
         EnumeratedValue::_parse(tree, name.clone())
-            .context(SVDErrorKind::Other(format!(
-                "In enumerated value `{}`",
-                name
-            )))
-            .map_err(|e| e.into())
+            .context(format!("In enumerated value `{}`", name))
     }
 }
 
 #[cfg(feature = "unproven")]
 impl Encode for EnumeratedValue {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         let mut base = Element {
             prefix: None,
             namespace: None,

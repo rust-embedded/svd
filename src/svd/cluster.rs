@@ -30,8 +30,9 @@ impl Deref for Cluster {
 
 impl Parse for Cluster {
     type Object = Cluster;
-    type Error = SVDError;
-    fn parse(tree: &Element) -> Result<Cluster, SVDError> {
+    type Error = anyhow::Error;
+
+    fn parse(tree: &Element) -> Result<Cluster> {
         assert_eq!(tree.name, "cluster");
 
         let info = ClusterInfo::parse(tree)?;
@@ -40,17 +41,13 @@ impl Parse for Cluster {
             let array_info = DimElement::parse(tree)?;
             if !info.name.contains("%s") {
                 // TODO: replace with real error
-                return Err(SVDError::from(SVDErrorKind::Other(
-                    "Cluster name invalid".to_string(),
-                )));
+                anyhow::bail!("Cluster name invalid");
             }
 
             if let Some(indices) = &array_info.dim_index {
                 if array_info.dim as usize != indices.len() {
                     // TODO: replace with real error
-                    return Err(SVDError::from(SVDErrorKind::Other(
-                        "Cluster index length mismatch".to_string(),
-                    )));
+                    anyhow::bail!("Cluster index length mismatch");
                 }
             }
 
@@ -63,9 +60,10 @@ impl Parse for Cluster {
 
 #[cfg(feature = "unproven")]
 impl Encode for Cluster {
-    type Error = SVDError;
+    type Error = anyhow::Error;
+
     // TODO: support Cluster encoding
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         match self {
             Cluster::Single(i) => i.encode(),
             Cluster::Array(i, a) => {

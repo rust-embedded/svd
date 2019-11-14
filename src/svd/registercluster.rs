@@ -5,7 +5,7 @@ use crate::types::Parse;
 #[cfg(feature = "unproven")]
 use crate::encode::Encode;
 
-use crate::error::{SVDError, SVDErrorKind};
+use crate::error::*;
 use crate::svd::{cluster::Cluster, register::Register};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -29,25 +29,24 @@ impl From<Cluster> for RegisterCluster {
 
 impl Parse for RegisterCluster {
     type Object = RegisterCluster;
-    type Error = SVDError;
-    fn parse(tree: &Element) -> Result<RegisterCluster, SVDError> {
+    type Error = anyhow::Error;
+
+    fn parse(tree: &Element) -> Result<RegisterCluster> {
         if tree.name == "register" {
             Ok(RegisterCluster::Register(Register::parse(tree)?))
         } else if tree.name == "cluster" {
             Ok(RegisterCluster::Cluster(Cluster::parse(tree)?))
         } else {
-            Err(SVDError::from(SVDErrorKind::InvalidRegisterCluster(
-                tree.clone(),
-                tree.name.clone(),
-            )))
+            Err(SVDError::InvalidRegisterCluster(tree.clone(), tree.name.clone()).into())
         }
     }
 }
 
 #[cfg(feature = "unproven")]
 impl Encode for RegisterCluster {
-    type Error = SVDError;
-    fn encode(&self) -> Result<Element, SVDError> {
+    type Error = anyhow::Error;
+
+    fn encode(&self) -> Result<Element> {
         match self {
             RegisterCluster::Register(r) => r.encode(),
             RegisterCluster::Cluster(c) => c.encode(),

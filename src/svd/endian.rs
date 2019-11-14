@@ -21,9 +21,9 @@ pub enum Endian {
 
 impl Parse for Endian {
     type Object = Endian;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Endian, SVDError> {
+    fn parse(tree: &Element) -> Result<Endian> {
         let text = tree.get_text()?;
 
         match &text[..] {
@@ -31,16 +31,16 @@ impl Parse for Endian {
             "big" => Ok(Endian::Big),
             "selectable" => Ok(Endian::Selectable),
             "other" => Ok(Endian::Other),
-            s => Err(SVDErrorKind::UnknownEndian(s.into()).into()),
+            s => Err(SVDError::UnknownEndian(s.into()).into()),
         }
     }
 }
 
 #[cfg(feature = "unproven")]
 impl Encode for Endian {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         let text = match *self {
             Endian::Little => String::from("little"),
             Endian::Big => String::from("big"),

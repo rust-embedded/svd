@@ -26,9 +26,9 @@ pub struct RegisterProperties {
 
 impl Parse for RegisterProperties {
     type Object = RegisterProperties;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<RegisterProperties, SVDError> {
+    fn parse(tree: &Element) -> Result<RegisterProperties> {
         Ok(RegisterProperties {
             size: parse::optional::<u32>("size", tree)?,
             reset_value: parse::optional::<u32>("resetValue", tree)?,
@@ -41,8 +41,9 @@ impl Parse for RegisterProperties {
 
 #[cfg(feature = "unproven")]
 impl EncodeChildren for RegisterProperties {
-    type Error = SVDError;
-    fn encode(&self) -> Result<Vec<Element>, SVDError> {
+    type Error = anyhow::Error;
+
+    fn encode(&self) -> Result<Vec<Element>> {
         let mut children = Vec::new();
 
         if let Some(v) = &self.size {

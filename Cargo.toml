@@ -20,7 +20,8 @@ unproven = []
 [dependencies]
 either = "1.5"
 xmltree = "0.8"
-failure = "0.1"
+anyhow = "1.0.19"
+thiserror = "1.0.5"
 
 [dependencies.serde]
 version = "1.0"

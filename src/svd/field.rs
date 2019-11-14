@@ -8,7 +8,7 @@ use crate::types::Parse;
 use crate::elementext::ElementExt;
 #[cfg(feature = "unproven")]
 use crate::encode::Encode;
-use crate::error::SVDError;
+use crate::error::*;
 use crate::svd::{dimelement::DimElement, fieldinfo::FieldInfo};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -31,9 +31,9 @@ impl Deref for Field {
 
 impl Parse for Field {
     type Object = Field;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Field, SVDError> {
+    fn parse(tree: &Element) -> Result<Field> {
         assert_eq!(tree.name, "field");
 
         let info = FieldInfo::parse(tree)?;
@@ -53,9 +53,9 @@ impl Parse for Field {
 
 #[cfg(feature = "unproven")]
 impl Encode for Field {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         match self {
             Field::Single(info) => info.encode(),
             Field::Array(info, array_info) => {

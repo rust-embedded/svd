@@ -1,7 +1,6 @@
 #[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
-use failure::ResultExt;
 use xmltree::Element;
 
 use crate::elementext::ElementExt;
@@ -22,7 +21,7 @@ pub struct Interrupt {
 }
 
 impl Interrupt {
-    fn _parse(tree: &Element, name: String) -> Result<Interrupt, SVDError> {
+    fn _parse(tree: &Element, name: String) -> Result<Interrupt> {
         Ok(Interrupt {
             name,
             description: tree.get_child_text_opt("description")?,
@@ -33,23 +32,22 @@ impl Interrupt {
 
 impl Parse for Interrupt {
     type Object = Interrupt;
-    type Error = SVDError;
-    fn parse(tree: &Element) -> Result<Interrupt, SVDError> {
+    type Error = anyhow::Error;
+
+    fn parse(tree: &Element) -> Result<Interrupt> {
         if tree.name != "interrupt" {
-            return Err(SVDErrorKind::NotExpectedTag(tree.clone(), "interrupt".to_string()).into());
+            return Err(SVDError::NotExpectedTag(tree.clone(), "interrupt".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
-        Interrupt::_parse(tree, name.clone())
-            .context(SVDErrorKind::Other(format!("In interrupt `{}`", name)))
-            .map_err(|e| e.into())
+        Interrupt::_parse(tree, name.clone()).context(format!("In interrupt `{}`", name))
     }
 }
 
 #[cfg(feature = "unproven")]
 impl Encode for Interrupt {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         Ok(Element {
             prefix: None,
             namespace: None,

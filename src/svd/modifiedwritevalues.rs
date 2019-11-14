@@ -25,9 +25,9 @@ pub enum ModifiedWriteValues {
 
 impl Parse for ModifiedWriteValues {
     type Object = ModifiedWriteValues;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<ModifiedWriteValues, SVDError> {
+    fn parse(tree: &Element) -> Result<ModifiedWriteValues> {
         use self::ModifiedWriteValues::*;
         let text = tree.get_text()?;
 
@@ -41,18 +41,16 @@ impl Parse for ModifiedWriteValues {
             "clear" => Clear,
             "set" => Set,
             "modify" => Modify,
-            s => {
-                return Err(SVDErrorKind::InvalidModifiedWriteValues(tree.clone(), s.into()).into())
-            }
+            s => return Err(SVDError::InvalidModifiedWriteValues(tree.clone(), s.into()).into()),
         })
     }
 }
 
 #[cfg(feature = "unproven")]
 impl Encode for ModifiedWriteValues {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         use self::ModifiedWriteValues::*;
         let v = match *self {
             OneToClear => "oneToClear",
