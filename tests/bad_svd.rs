@@ -1,7 +1,5 @@
 use svd_parser as svd;
 
-use failure::Fail;
-
 #[test]
 fn arm_sample_faulty() {
     let xml = include_str!(concat!(
@@ -9,7 +7,7 @@ fn arm_sample_faulty() {
         "/tests/ARM_Sample_faulty.svd"
     ));
     if let Err(e) = svd::parse(xml) {
-        for e in Fail::iter_chain(&e) {
+        for e in e.chain() {
             println!("{}", e);
         }
     } else {

@@ -2,7 +2,6 @@
 use std::collections::HashMap;
 
 use crate::elementext::ElementExt;
-use failure::ResultExt;
 use xmltree::Element;
 
 #[cfg(feature = "unproven")]
@@ -41,18 +40,16 @@ pub struct RegisterInfo {
 
 impl Parse for RegisterInfo {
     type Object = RegisterInfo;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<RegisterInfo, SVDError> {
+    fn parse(tree: &Element) -> Result<RegisterInfo> {
         let name = tree.get_child_text("name")?;
-        RegisterInfo::_parse(tree, name.clone())
-            .context(SVDErrorKind::Other(format!("In register `{}`", name)))
-            .map_err(|e| e.into())
+        RegisterInfo::_parse(tree, name.clone()).context(format!("In register `{}`", name))
     }
 }
 
 impl RegisterInfo {
-    fn _parse(tree: &Element, name: String) -> Result<RegisterInfo, SVDError> {
+    fn _parse(tree: &Element, name: String) -> Result<RegisterInfo> {
         let properties = RegisterProperties::parse(tree)?;
         Ok(RegisterInfo {
             name,
@@ -71,10 +68,7 @@ impl RegisterInfo {
                         .children
                         .iter()
                         .enumerate()
-                        .map(|(e, t)| {
-                            Field::parse(t)
-                                .context(SVDErrorKind::Other(format!("Parsing field #{}", e)))
-                        })
+                        .map(|(e, t)| Field::parse(t).context(format!("Parsing field #{}", e)))
                         .collect();
                     Some(fs?)
                 } else {
@@ -93,8 +87,9 @@ impl RegisterInfo {
 
 #[cfg(feature = "unproven")]
 impl Encode for RegisterInfo {
-    type Error = SVDError;
-    fn encode(&self) -> Result<Element, SVDError> {
+    type Error = anyhow::Error;
+
+    fn encode(&self) -> Result<Element> {
         let mut elem = Element {
             prefix: None,
             namespace: None,
@@ -152,7 +147,7 @@ impl Encode for RegisterInfo {
             let children = v
                 .iter()
                 .map(Field::encode)
-                .collect::<Result<Vec<Element>, SVDError>>()?;
+                .collect::<Result<Vec<Element>>>()?;
             if !children.is_empty() {
                 let fields = Element {
                     prefix: None,

@@ -19,25 +19,25 @@ pub enum Usage {
 
 impl Parse for Usage {
     type Object = Usage;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Usage, SVDError> {
+    fn parse(tree: &Element) -> Result<Usage> {
         let text = tree.get_text()?;
 
         match &text[..] {
             "read" => Ok(Usage::Read),
             "write" => Ok(Usage::Write),
             "read-write" => Ok(Usage::ReadWrite),
-            _ => Err(SVDErrorKind::UnknownUsageVariant(tree.clone()).into()),
+            _ => Err(SVDError::UnknownUsageVariant(tree.clone()).into()),
         }
     }
 }
 
 #[cfg(feature = "unproven")]
 impl Encode for Usage {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         let text = match *self {
             Usage::Read => String::from("read"),
             Usage::Write => String::from("write"),

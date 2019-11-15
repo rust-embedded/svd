@@ -3,8 +3,6 @@
 
 use xmltree::Element;
 
-use crate::error::*;
-
 /// Parse trait allows SVD objects to be parsed from XML elements.
 pub trait Parse {
     /// Object returned by parse method
@@ -18,9 +16,9 @@ pub trait Parse {
 /// Parses an optional child element with the provided name and Parse function
 /// Returns an none if the child doesn't exist, Ok(Some(e)) if parsing succeeds,
 /// and Err() if parsing fails.
-pub fn optional<'a, T>(n: &str, e: &'a Element) -> Result<Option<T::Object>, SVDError>
+pub fn optional<'a, T>(n: &str, e: &'a Element) -> anyhow::Result<Option<T::Object>>
 where
-    T: Parse<Error = SVDError>,
+    T: Parse<Error = anyhow::Error>,
 {
     let child = match e.get_child(n) {
         Some(c) => c,

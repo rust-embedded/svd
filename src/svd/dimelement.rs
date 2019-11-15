@@ -8,7 +8,7 @@ use crate::encode::Encode;
 #[cfg(feature = "unproven")]
 use crate::new_element;
 
-use crate::error::SVDError;
+use crate::error::*;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -22,9 +22,9 @@ pub struct DimElement {
 
 impl Parse for DimElement {
     type Object = DimElement;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<DimElement, SVDError> {
+    fn parse(tree: &Element) -> Result<DimElement> {
         Ok(DimElement {
             dim: tree.get_child_u32("dim")?,
             dim_increment: tree.get_child_u32("dimIncrement")?,
@@ -36,9 +36,9 @@ impl Parse for DimElement {
 
 #[cfg(feature = "unproven")]
 impl Encode for DimElement {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         let mut e = new_element("dimElement", None);
 
         e.children

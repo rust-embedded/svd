@@ -8,8 +8,8 @@ use crate::types::Parse;
 use crate::elementext::ElementExt;
 #[cfg(feature = "unproven")]
 use crate::encode::Encode;
-use crate::error::SVDError;
 use crate::svd::{dimelement::DimElement, registerinfo::RegisterInfo};
+use anyhow::Result;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -31,9 +31,9 @@ impl Deref for Register {
 
 impl Parse for Register {
     type Object = Register;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Register, SVDError> {
+    fn parse(tree: &Element) -> Result<Register> {
         assert_eq!(tree.name, "register");
 
         let info = RegisterInfo::parse(tree)?;
@@ -53,9 +53,9 @@ impl Parse for Register {
 
 #[cfg(feature = "unproven")]
 impl Encode for Register {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         match self {
             Register::Single(info) => info.encode(),
             Register::Array(info, array_info) => {

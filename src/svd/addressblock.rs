@@ -8,7 +8,7 @@ use crate::types::Parse;
 
 #[cfg(feature = "unproven")]
 use crate::encode::Encode;
-use crate::error::SVDError;
+use crate::error::*;
 #[cfg(feature = "unproven")]
 use crate::new_element;
 
@@ -22,9 +22,9 @@ pub struct AddressBlock {
 
 impl Parse for AddressBlock {
     type Object = AddressBlock;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<AddressBlock, SVDError> {
+    fn parse(tree: &Element) -> Result<AddressBlock> {
         Ok(AddressBlock {
             offset: tree.get_child_u32("offset")?,
             size: tree.get_child_u32("size")?,
@@ -35,9 +35,9 @@ impl Parse for AddressBlock {
 
 #[cfg(feature = "unproven")]
 impl Encode for AddressBlock {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         Ok(Element {
             prefix: None,
             namespace: None,

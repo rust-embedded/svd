@@ -29,11 +29,11 @@ pub struct Cpu {
 
 impl Parse for Cpu {
     type Object = Cpu;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Cpu, SVDError> {
+    fn parse(tree: &Element) -> Result<Cpu> {
         if tree.name != "cpu" {
-            return Err(SVDErrorKind::NameMismatch(tree.clone()).into());
+            return Err(SVDError::NameMismatch(tree.clone()).into());
         }
 
         Ok(Cpu {
@@ -51,9 +51,9 @@ impl Parse for Cpu {
 
 #[cfg(feature = "unproven")]
 impl Encode for Cpu {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         Ok(Element {
             prefix: None,
             namespace: None,

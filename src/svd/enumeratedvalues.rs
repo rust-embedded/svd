@@ -2,7 +2,6 @@
 use std::collections::HashMap;
 
 use crate::elementext::ElementExt;
-use failure::ResultExt;
 use xmltree::Element;
 
 #[cfg(feature = "unproven")]
@@ -27,9 +26,9 @@ pub struct EnumeratedValues {
 
 impl Parse for EnumeratedValues {
     type Object = EnumeratedValues;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<EnumeratedValues, SVDError> {
+    fn parse(tree: &Element) -> Result<EnumeratedValues> {
         assert_eq!(tree.name, "enumeratedValues");
         let derived_from = tree.attributes.get("derivedFrom").map(|s| s.to_owned());
         let is_derived = derived_from.is_some();
@@ -50,22 +49,19 @@ impl Parse for EnumeratedValues {
                     .enumerate()
                     .map(|(e, t)| {
                         if t.name == "enumeratedValue" {
-                            EnumeratedValue::parse(t).context(SVDErrorKind::Other(format!(
-                                "Parsing enumerated value #{}",
-                                e
-                            )))
+                            EnumeratedValue::parse(t)
+                                .context(format!("Parsing enumerated value #{}", e))
                         } else {
-                            Err(SVDErrorKind::NotExpectedTag(
-                                t.clone(),
-                                "enumeratedValue".to_string(),
+                            Err(
+                                SVDError::NotExpectedTag(t.clone(), "enumeratedValue".to_string())
+                                    .into(),
                             )
-                            .into())
                         }
                     })
                     .collect();
                 let values = values?;
                 if values.is_empty() && !is_derived {
-                    return Err(SVDErrorKind::EmptyTag(tree.clone(), tree.name.clone()).into());
+                    return Err(SVDError::EmptyTag(tree.clone(), tree.name.clone()).into());
                 }
                 values
             },
@@ -76,9 +72,9 @@ impl Parse for EnumeratedValues {
 
 #[cfg(feature = "unproven")]
 impl Encode for EnumeratedValues {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         let mut base = Element {
             prefix: None,
             namespace: None,
@@ -174,7 +170,7 @@ mod tests {
 
     #[test]
     fn valid_children() {
-        fn parse(contents: String) -> Result<EnumeratedValues, SVDError> {
+        fn parse(contents: String) -> Result<EnumeratedValues> {
             let example = String::from("<enumeratedValues>") + &contents + "</enumeratedValues>";
             let tree = Element::parse(example.as_bytes()).unwrap();
             EnumeratedValues::parse(&tree)

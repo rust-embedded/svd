@@ -36,7 +36,7 @@ pub mod svd;
 pub use svd::*;
 // Error defines SVD error types
 pub mod error;
-use error::SVDError;
+use anyhow::Result;
 // Parse defines parsing interfaces
 pub mod parse;
 use parse::Parse;
@@ -54,7 +54,7 @@ pub mod derive_from;
 pub use derive_from::DeriveFrom;
 
 /// Parses the contents of an SVD (XML) string
-pub fn parse(xml: &str) -> Result<Device, SVDError> {
+pub fn parse(xml: &str) -> Result<Device> {
     let xml = trim_utf8_bom(xml);
     let tree = Element::parse(xml.as_bytes())?;
     Device::parse(&tree)
@@ -62,7 +62,7 @@ pub fn parse(xml: &str) -> Result<Device, SVDError> {
 
 /// Encodes a device object to an SVD (XML) string
 #[cfg(feature = "unproven")]
-pub fn encode(d: &Device) -> Result<String, SVDError> {
+pub fn encode(d: &Device) -> Result<String> {
     let root = d.encode()?;
     let mut wr = Vec::new();
     root.write(&mut wr).unwrap();
@@ -98,7 +98,10 @@ pub(crate) fn new_element(name: &str, text: Option<String>) -> Element {
 #[cfg(test)]
 #[cfg(feature = "unproven")]
 pub fn run_test<
-    T: Parse<Error = SVDError, Object = T> + Encode<Error = SVDError> + core::fmt::Debug + PartialEq,
+    T: Parse<Error = anyhow::Error, Object = T>
+        + Encode<Error = anyhow::Error>
+        + core::fmt::Debug
+        + PartialEq,
 >(
     tests: &[(T, &str)],
 ) {

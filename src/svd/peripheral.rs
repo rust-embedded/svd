@@ -5,7 +5,6 @@ use xmltree::Element;
 
 use crate::elementext::ElementExt;
 use crate::parse;
-use failure::ResultExt;
 
 #[cfg(feature = "unproven")]
 use crate::encode::{Encode, EncodeChildren};
@@ -13,7 +12,7 @@ use crate::encode::{Encode, EncodeChildren};
 use crate::new_element;
 use crate::types::Parse;
 
-use crate::error::{SVDError, SVDErrorKind};
+use crate::error::*;
 use crate::svd::{
     addressblock::AddressBlock, interrupt::Interrupt, registercluster::RegisterCluster,
     registerproperties::RegisterProperties,
@@ -40,23 +39,19 @@ pub struct Peripheral {
 
 impl Parse for Peripheral {
     type Object = Peripheral;
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Peripheral, SVDError> {
+    fn parse(tree: &Element) -> Result<Peripheral> {
         if tree.name != "peripheral" {
-            return Err(
-                SVDErrorKind::NotExpectedTag(tree.clone(), "peripheral".to_string()).into(),
-            );
+            return Err(SVDError::NotExpectedTag(tree.clone(), "peripheral".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
-        Peripheral::_parse(tree, name.clone())
-            .context(SVDErrorKind::Other(format!("In peripheral `{}`", name)))
-            .map_err(|e| e.into())
+        Peripheral::_parse(tree, name.clone()).context(format!("In peripheral `{}`", name))
     }
 }
 
 impl Peripheral {
-    fn _parse(tree: &Element, name: String) -> Result<Peripheral, SVDError> {
+    fn _parse(tree: &Element, name: String) -> Result<Peripheral> {
         Ok(Peripheral {
             name,
             version: tree.get_child_text_opt("version")?,
@@ -71,10 +66,7 @@ impl Peripheral {
                     .iter()
                     .filter(|t| t.name == "interrupt")
                     .enumerate()
-                    .map(|(e, i)| {
-                        Interrupt::parse(i)
-                            .context(SVDErrorKind::Other(format!("Parsing interrupt #{}", e)))
-                    })
+                    .map(|(e, i)| Interrupt::parse(i).context(format!("Parsing interrupt #{}", e)))
                     .collect();
                 interrupt?
             },
@@ -97,9 +89,9 @@ impl Peripheral {
 
 #[cfg(feature = "unproven")]
 impl Encode for Peripheral {
-    type Error = SVDError;
+    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element, SVDError> {
+    fn encode(&self) -> Result<Element> {
         let mut elem = Element {
             prefix: None,
             namespace: None,
