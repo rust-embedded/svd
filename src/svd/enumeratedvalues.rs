@@ -13,6 +13,8 @@ use crate::parse;
 use crate::svd::{enumeratedvalue::EnumeratedValue, usage::Usage};
 use crate::types::Parse;
 
+use crate::Build;
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnumeratedValues {
@@ -35,7 +37,78 @@ pub struct EnumeratedValues {
 
     // Reserve the right to add more fields to this struct
     #[cfg_attr(feature = "serde", serde(skip))]
-    pub(crate) _extensible: (),
+    _extensible: (),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum EnumeratedValuesError {
+    #[error("EnumeratedValues is empty")]
+    Empty,
+}
+
+impl Build for EnumeratedValues {
+    type Builder = EnumeratedValuesBuilder;
+}
+
+#[derive(Default)]
+pub struct EnumeratedValuesBuilder {
+    name: Option<String>,
+    usage: Option<Usage>,
+    derived_from: Option<String>,
+    values: Option<Vec<EnumeratedValue>>,
+}
+
+impl EnumeratedValuesBuilder {
+    pub fn name(mut self, value: Option<String>) -> Self {
+        self.name = value;
+        self
+    }
+    pub fn usage(mut self, value: Option<Usage>) -> Self {
+        self.usage = value;
+        self
+    }
+    pub fn derived_from(mut self, value: Option<String>) -> Self {
+        self.derived_from = value;
+        self
+    }
+    pub fn values(mut self, value: Vec<EnumeratedValue>) -> Self {
+        self.values = Some(value);
+        self
+    }
+    pub fn build(self) -> Result<EnumeratedValues> {
+        (EnumeratedValues {
+            name: self.name,
+            usage: self.usage,
+            derived_from: self.derived_from,
+            values: self.values.unwrap_or_default(),
+            _extensible: (),
+        })
+        .validate()
+    }
+}
+
+impl EnumeratedValues {
+    fn validate(self) -> Result<Self> {
+        if let Some(name) = self.name.as_ref() {
+            check_name(name, "name")?;
+        }
+        if let Some(dname) = self.derived_from.as_ref() {
+            check_name(dname, "derivedFrom")?;
+            Ok(self)
+        } else {
+            if self.values.is_empty() {
+                Err(EnumeratedValuesError::Empty.into())
+            } else {
+                Ok(self)
+            }
+        }
+    }
+    pub(crate) fn check_range(&self, range: core::ops::Range<u32>) -> Result<()> {
+        for v in self.values.iter() {
+            v.check_range(&range)?;
+        }
+        Ok(())
+    }
 }
 
 impl Parse for EnumeratedValues {
@@ -44,14 +117,11 @@ impl Parse for EnumeratedValues {
 
     fn parse(tree: &Element) -> Result<Self> {
         assert_eq!(tree.name, "enumeratedValues");
-        let derived_from = tree.attributes.get("derivedFrom").map(|s| s.to_owned());
-        let is_derived = derived_from.is_some();
-
-        Ok(Self {
-            name: tree.get_child_text_opt("name")?,
-            usage: parse::optional::<Usage>("usage", tree)?,
-            derived_from,
-            values: {
+        EnumeratedValuesBuilder::default()
+            .name(tree.get_child_text_opt("name")?)
+            .usage(parse::optional::<Usage>("usage", tree)?)
+            .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
+            .values({
                 let values: Result<Vec<_>, _> = tree
                     .children
                     .iter()
@@ -66,21 +136,17 @@ impl Parse for EnumeratedValues {
                             EnumeratedValue::parse(t)
                                 .with_context(|| format!("Parsing enumerated value #{}", e))
                         } else {
-                            Err(
-                                SVDError::NotExpectedTag(t.clone(), "enumeratedValue".to_string())
-                                    .into(),
+                            Err(ParseError::NotExpectedTag(
+                                t.clone(),
+                                "enumeratedValue".to_string(),
                             )
+                            .into())
                         }
                     })
                     .collect();
-                let values = values?;
-                if values.is_empty() && !is_derived {
-                    return Err(SVDError::EmptyTag(tree.clone(), tree.name.clone()).into());
-                }
-                values
-            },
-            _extensible: (),
-        })
+                values?
+            })
+            .build()
     }
 }
 
@@ -124,16 +190,16 @@ impl Encode for EnumeratedValues {
 #[cfg(feature = "unproven")]
 mod tests {
     use super::*;
+    use crate::svd::enumeratedvalue::EnumeratedValueBuilder;
 
     #[test]
     fn decode_encode() {
         let example = String::from(
             "
-            <enumeratedValues derivedFrom=\"fake-derivation.png\">
+            <enumeratedValues derivedFrom=\"fake_derivation\">
                 <enumeratedValue>
                     <name>WS0</name>
                     <description>Zero wait-states inserted in fetch or read transfers</description>
-                    <value>0x00000000</value>
                     <isDefault>true</isDefault>
                 </enumeratedValue>
                 <enumeratedValue>
@@ -145,32 +211,28 @@ mod tests {
         ",
         );
 
-        let expected = EnumeratedValues {
-            name: None,
-            usage: None,
-            derived_from: Some(String::from("fake-derivation.png")),
-            values: vec![
-                EnumeratedValue {
-                    name: String::from("WS0"),
-                    description: Some(String::from(
-                        "Zero wait-states inserted in fetch or read transfers",
-                    )),
-                    value: Some(0),
-                    is_default: Some(true),
-                    _extensible: (),
-                },
-                EnumeratedValue {
-                    name: String::from("WS1"),
-                    description: Some(String::from(
-                        "One wait-state inserted for each fetch or read transfer. See Flash Wait-States table for details",
-                    )),
-                    value: Some(1),
-                    is_default: None,
-                    _extensible: (),
-                },
-            ],
-            _extensible: (),
-        };
+        let expected = EnumeratedValuesBuilder::default()
+            .derived_from(Some("fake_derivation".to_string()))
+            .values(vec![
+                EnumeratedValueBuilder::default()
+                    .name("WS0".to_string())
+                    .description(Some(
+                        "Zero wait-states inserted in fetch or read transfers".to_string()
+                    ))
+                    .is_default(Some(true))
+                    .build()
+                    .unwrap(),
+                EnumeratedValueBuilder::default()
+                    .name("WS1".to_string())
+                    .description(Some(
+                        "One wait-state inserted for each fetch or read transfer. See Flash Wait-States table for details".to_string()
+                    ))
+                    .value(Some(1))
+                    .build()
+                    .unwrap(),
+            ])
+            .build()
+            .unwrap();
 
         // TODO: move to test! macro
         let tree1 = Element::parse(example.as_bytes()).unwrap();
@@ -199,7 +261,6 @@ mod tests {
                 <name>WS0</name>
                 <description>Zero wait-states inserted in fetch or read transfers</description>
                 <value>0x00000000</value>
-                <isDefault>true</isDefault>
             </enumeratedValue>",
         );
 

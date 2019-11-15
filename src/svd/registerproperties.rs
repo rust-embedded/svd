@@ -46,13 +46,12 @@ impl Parse for RegisterProperties {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        Ok(Self {
-            size: parse::optional::<u32>("size", tree)?,
-            reset_value: parse::optional::<u32>("resetValue", tree)?,
-            reset_mask: parse::optional::<u32>("resetMask", tree)?,
-            access: parse::optional::<Access>("access", tree)?,
-            _extensible: (),
-        })
+        let mut p = RegisterProperties::default();
+        p.size = parse::optional::<u32>("size", tree)?;
+        p.reset_value = parse::optional::<u32>("resetValue", tree)?;
+        p.reset_mask = parse::optional::<u32>("resetMask", tree)?;
+        p.access = parse::optional::<Access>("access", tree)?;
+        Ok(p)
     }
 }
 
@@ -101,13 +100,11 @@ mod tests {
         ",
         );
 
-        let expected = RegisterProperties {
-            size: Some(0xaabbccdd),
-            reset_value: Some(0x11223344),
-            reset_mask: Some(0x00000000),
-            access: Some(Access::ReadOnly),
-            _extensible: (),
-        };
+        let mut expected = RegisterProperties::default();
+        expected.size = Some(0xaabbccdd);
+        expected.reset_value = Some(0x11223344);
+        expected.reset_mask = Some(0x00000000);
+        expected.access = Some(Access::ReadOnly);
 
         let tree1 = Element::parse(example.as_bytes()).unwrap();
 

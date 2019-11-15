@@ -15,6 +15,8 @@ use crate::error::*;
 use crate::new_element;
 use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties};
 
+use crate::Build;
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug)]
 pub struct Device {
@@ -61,21 +63,116 @@ pub struct Device {
     _extensible: (),
 }
 
+impl Build for Device {
+    type Builder = DeviceBuilder;
+}
+
+#[derive(Default)]
+pub struct DeviceBuilder {
+    name: Option<String>,
+    schema_version: Option<String>,
+    version: Option<String>,
+    description: Option<String>,
+    address_unit_bits: Option<u32>,
+    width: Option<u32>,
+    cpu: Option<Cpu>,
+    peripherals: Option<Vec<Peripheral>>,
+    default_register_properties: RegisterProperties,
+}
+
+impl DeviceBuilder {
+    pub fn name(mut self, value: String) -> Self {
+        self.name = Some(value);
+        self
+    }
+    pub fn schema_version(mut self, value: Option<String>) -> Self {
+        self.schema_version = value;
+        self
+    }
+    pub fn version(mut self, value: Option<String>) -> Self {
+        self.version = value;
+        self
+    }
+    pub fn description(mut self, value: Option<String>) -> Self {
+        self.description = value;
+        self
+    }
+    pub fn address_unit_bits(mut self, value: Option<u32>) -> Self {
+        self.address_unit_bits = value;
+        self
+    }
+    pub fn width(mut self, value: Option<u32>) -> Self {
+        self.width = value;
+        self
+    }
+    pub fn cpu(mut self, value: Option<Cpu>) -> Self {
+        self.cpu = value;
+        self
+    }
+    pub fn peripherals(mut self, value: Vec<Peripheral>) -> Self {
+        self.peripherals = Some(value);
+        self
+    }
+    pub fn default_register_properties(mut self, value: RegisterProperties) -> Self {
+        self.default_register_properties = value;
+        self
+    }
+    pub fn build(self) -> Result<Device> {
+        (Device {
+            name: self
+                .name
+                .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
+            schema_version: self.schema_version,
+            version: self.version,
+            description: self.description,
+            address_unit_bits: self.address_unit_bits,
+            width: self.width,
+            cpu: self.cpu,
+            peripherals: self
+                .peripherals
+                .ok_or_else(|| BuildError::Uninitialized("peripherals".to_string()))?,
+            default_register_properties: self.default_register_properties,
+            _extensible: (),
+        })
+        .validate()
+    }
+}
+
+impl Device {
+    fn validate(self) -> Result<Self> {
+        // TODO
+        if self.peripherals.is_empty() {
+            return Err(DeviceError::Empty)?;
+        }
+        Ok(self)
+    }
+}
+
 impl Parse for Device {
     type Object = Self;
     type Error = anyhow::Error;
 
-    /// Parses a SVD file
     fn parse(tree: &Element) -> Result<Self> {
-        Ok(Self {
-            name: tree.get_child_text("name")?,
-            schema_version: tree.attributes.get("schemaVersion").cloned(),
-            cpu: parse::optional::<Cpu>("cpu", tree)?,
-            version: tree.get_child_text_opt("version")?,
-            description: tree.get_child_text_opt("description")?,
-            address_unit_bits: parse::optional::<u32>("addressUnitBits", tree)?,
-            width: None,
-            peripherals: {
+        if tree.name != "device" {
+            return Err(ParseError::NotExpectedTag(tree.clone(), "device".to_string()).into());
+        }
+        let name = tree.get_child_text("name")?;
+        Self::_parse(tree, name.clone()).with_context(|| format!("In device `{}`", name))
+    }
+}
+
+impl Device {
+    /// Parses a SVD file
+    fn _parse(tree: &Element, name: String) -> Result<Self> {
+        DeviceBuilder::default()
+            .name(name)
+            .schema_version(tree.attributes.get("schemaVersion").cloned())
+            .cpu(parse::optional::<Cpu>("cpu", tree)?)
+            .version(tree.get_child_text_opt("version")?)
+            .description(tree.get_child_text_opt("description")?)
+            .address_unit_bits(parse::optional::<u32>("addressUnitBits", tree)?)
+            .width(None)
+            .peripherals({
                 let ps: Result<Vec<_>, _> = tree
                     .get_child_elem("peripherals")?
                     .children
@@ -83,10 +180,9 @@ impl Parse for Device {
                     .map(Peripheral::parse)
                     .collect();
                 ps?
-            },
-            default_register_properties: RegisterProperties::parse(tree)?,
-            _extensible: (),
-        })
+            })
+            .default_register_properties(RegisterProperties::parse(tree)?)
+            .build()
     }
 }
 

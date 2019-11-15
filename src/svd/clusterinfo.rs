@@ -11,6 +11,8 @@ use crate::new_element;
 use crate::error::*;
 use crate::svd::{registercluster::RegisterCluster, registerproperties::RegisterProperties};
 
+use crate::Build;
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct ClusterInfo {
@@ -46,6 +48,85 @@ pub struct ClusterInfo {
     _extensible: (),
 }
 
+impl Build for ClusterInfo {
+    type Builder = ClusterInfoBuilder;
+}
+
+#[derive(Default)]
+pub struct ClusterInfoBuilder {
+    name: Option<String>,
+    address_offset: Option<u32>,
+    derived_from: Option<String>,
+    description: Option<String>,
+    header_struct_name: Option<String>,
+    default_register_properties: RegisterProperties,
+    children: Option<Vec<RegisterCluster>>,
+}
+
+impl ClusterInfoBuilder {
+    pub fn name(mut self, value: String) -> Self {
+        self.name = Some(value);
+        self
+    }
+    pub fn address_offset(mut self, value: u32) -> Self {
+        self.address_offset = Some(value);
+        self
+    }
+    pub fn derived_from(mut self, value: Option<String>) -> Self {
+        self.derived_from = value;
+        self
+    }
+    pub fn description(mut self, value: Option<String>) -> Self {
+        self.description = value;
+        self
+    }
+    pub fn header_struct_name(mut self, value: Option<String>) -> Self {
+        self.header_struct_name = value;
+        self
+    }
+    pub fn default_register_properties(mut self, value: RegisterProperties) -> Self {
+        self.default_register_properties = value;
+        self
+    }
+    pub fn children(mut self, value: Vec<RegisterCluster>) -> Self {
+        self.children = Some(value);
+        self
+    }
+    pub fn build(self) -> Result<ClusterInfo> {
+        (ClusterInfo {
+            name: self
+                .name
+                .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
+            address_offset: self
+                .address_offset
+                .ok_or_else(|| BuildError::Uninitialized("address_offset".to_string()))?,
+            derived_from: self.derived_from,
+            description: self.description,
+            header_struct_name: self.header_struct_name,
+            default_register_properties: self.default_register_properties,
+            children: self
+                .children
+                .ok_or_else(|| BuildError::Uninitialized("children".to_string()))?,
+            _extensible: (),
+        })
+        .validate()
+    }
+}
+
+impl ClusterInfo {
+    fn validate(self) -> Result<Self> {
+        check_name(&self.name, "name")?;
+        if let Some(name) = self.derived_from.as_ref() {
+            check_name(name, "derivedFrom")?;
+        } else {
+            if self.children.is_empty() {
+                return Err(ClusterError::Empty)?;
+            }
+        }
+        Ok(self)
+    }
+}
+
 impl Parse for ClusterInfo {
     type Object = Self;
     type Error = anyhow::Error;
@@ -58,14 +139,14 @@ impl Parse for ClusterInfo {
 
 impl ClusterInfo {
     fn _parse(tree: &Element, name: String) -> Result<Self> {
-        Ok(Self {
-            name, // TODO: Handle naming of cluster
-            derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
-            description: tree.get_child_text_opt("description")?,
-            header_struct_name: tree.get_child_text_opt("headerStructName")?,
-            address_offset: tree.get_child_u32("addressOffset")?,
-            default_register_properties: RegisterProperties::parse(tree)?,
-            children: {
+        ClusterInfoBuilder::default()
+            .name(name)
+            .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
+            .description(tree.get_child_text_opt("description")?)
+            .header_struct_name(tree.get_child_text_opt("headerStructName")?)
+            .address_offset(tree.get_child_u32("addressOffset")?)
+            .default_register_properties(RegisterProperties::parse(tree)?)
+            .children({
                 let children: Result<Vec<_>, _> = tree
                     .children
                     .iter()
@@ -73,9 +154,8 @@ impl ClusterInfo {
                     .map(RegisterCluster::parse)
                     .collect();
                 children?
-            },
-            _extensible: (),
-        })
+            })
+            .build()
     }
 }
 

@@ -12,6 +12,8 @@ use crate::new_element;
 use crate::parse;
 use crate::types::Parse;
 
+use crate::Build;
+
 use crate::svd::{
     access::Access, field::Field, modifiedwritevalues::ModifiedWriteValues,
     registerproperties::RegisterProperties, writeconstraint::WriteConstraint,
@@ -81,7 +83,127 @@ pub struct RegisterInfo {
 
     // Reserve the right to add more fields to this struct
     #[cfg_attr(feature = "serde", serde(skip))]
-    pub(crate) _extensible: (),
+    _extensible: (),
+}
+
+impl Build for RegisterInfo {
+    type Builder = RegisterInfoBuilder;
+}
+
+#[derive(Default)]
+pub struct RegisterInfoBuilder {
+    name: Option<String>,
+    address_offset: Option<u32>,
+    alternate_group: Option<String>,
+    alternate_register: Option<String>,
+    derived_from: Option<String>,
+    description: Option<String>,
+    properties: RegisterProperties,
+    fields: Option<Vec<Field>>,
+    write_constraint: Option<WriteConstraint>,
+    modified_write_values: Option<ModifiedWriteValues>,
+}
+
+impl RegisterInfoBuilder {
+    pub fn name(mut self, value: String) -> Self {
+        self.name = Some(value);
+        self
+    }
+    pub fn address_offset(mut self, value: u32) -> Self {
+        self.address_offset = Some(value);
+        self
+    }
+    pub fn alternate_group(mut self, value: Option<String>) -> Self {
+        self.alternate_group = value;
+        self
+    }
+    pub fn alternate_register(mut self, value: Option<String>) -> Self {
+        self.alternate_register = value;
+        self
+    }
+    pub fn derived_from(mut self, value: Option<String>) -> Self {
+        self.derived_from = value;
+        self
+    }
+    pub fn description(mut self, value: Option<String>) -> Self {
+        self.description = value;
+        self
+    }
+    pub fn properties(mut self, value: RegisterProperties) -> Self {
+        self.properties = value;
+        self
+    }
+    pub fn size(mut self, value: Option<u32>) -> Self {
+        self.properties.size = value;
+        self
+    }
+    pub fn access(mut self, value: Option<Access>) -> Self {
+        self.properties.access = value;
+        self
+    }
+    pub fn reset_value(mut self, value: Option<u32>) -> Self {
+        self.properties.reset_value = value;
+        self
+    }
+    pub fn reset_mask(mut self, value: Option<u32>) -> Self {
+        self.properties.reset_mask = value;
+        self
+    }
+    pub fn fields(mut self, value: Option<Vec<Field>>) -> Self {
+        self.fields = value;
+        self
+    }
+    pub fn write_constraint(mut self, value: Option<WriteConstraint>) -> Self {
+        self.write_constraint = value;
+        self
+    }
+    pub fn modified_write_values(mut self, value: Option<ModifiedWriteValues>) -> Self {
+        self.modified_write_values = value;
+        self
+    }
+    pub fn build(self) -> Result<RegisterInfo> {
+        (RegisterInfo {
+            name: self
+                .name
+                .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
+            address_offset: self
+                .address_offset
+                .ok_or_else(|| BuildError::Uninitialized("address_offset".to_string()))?,
+            alternate_group: self.alternate_group,
+            alternate_register: self.alternate_register,
+            derived_from: self.derived_from,
+            description: self.description,
+            size: self.properties.size,
+            access: self.properties.access,
+            reset_value: self.properties.reset_value,
+            reset_mask: self.properties.reset_mask,
+            fields: self.fields,
+            write_constraint: self.write_constraint,
+            modified_write_values: self.modified_write_values,
+            _extensible: (),
+        })
+        .validate()
+    }
+}
+
+impl RegisterInfo {
+    fn validate(self) -> Result<Self> {
+        check_name(&self.name, "name")?;
+        if let Some(name) = self.alternate_group.as_ref() {
+            check_name(name, "alternateGroup")?;
+        }
+        if let Some(name) = self.alternate_register.as_ref() {
+            check_name(name, "alternateRegister")?;
+        }
+        if let Some(name) = self.derived_from.as_ref() {
+            check_name(name, "derivedFrom")?;
+        } else if let Some(fields) = self.fields.as_ref() {
+            if fields.is_empty() {
+                return Err(RegisterError::EmptyFields)?;
+            }
+        }
+        Ok(self)
+    }
 }
 
 impl Parse for RegisterInfo {
@@ -96,19 +218,15 @@ impl Parse for RegisterInfo {
 
 impl RegisterInfo {
     fn _parse(tree: &Element, name: String) -> Result<Self> {
-        let properties = RegisterProperties::parse(tree)?;
-        Ok(Self {
-            name,
-            alternate_group: tree.get_child_text_opt("alternateGroup")?,
-            alternate_register: tree.get_child_text_opt("alternateRegister")?,
-            description: tree.get_child_text_opt("description")?,
-            derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
-            address_offset: tree.get_child_u32("addressOffset")?,
-            size: properties.size,
-            access: properties.access,
-            reset_value: properties.reset_value,
-            reset_mask: properties.reset_mask,
-            fields: {
+        RegisterInfoBuilder::default()
+            .name(name)
+            .alternate_group(tree.get_child_text_opt("alternateGroup")?)
+            .alternate_register(tree.get_child_text_opt("alternateRegister")?)
+            .description(tree.get_child_text_opt("description")?)
+            .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
+            .address_offset(tree.get_child_u32("addressOffset")?)
+            .properties(RegisterProperties::parse(tree)?)
+            .fields({
                 if let Some(fields) = tree.get_child("fields") {
                     let fs: Result<Vec<_>, _> = fields
                         .children
@@ -122,14 +240,13 @@ impl RegisterInfo {
                 } else {
                     None
                 }
-            },
-            write_constraint: parse::optional::<WriteConstraint>("writeConstraint", tree)?,
-            modified_write_values: parse::optional::<ModifiedWriteValues>(
+            })
+            .write_constraint(parse::optional::<WriteConstraint>("writeConstraint", tree)?)
+            .modified_write_values(parse::optional::<ModifiedWriteValues>(
                 "modifiedWriteValues",
                 tree,
-            )?,
-            _extensible: (),
-        })
+            )?)
+            .build()
     }
 }
 
@@ -228,48 +345,45 @@ mod tests {
     use super::*;
     use crate::run_test;
     use crate::svd::bitrange::*;
-    use crate::svd::fieldinfo::FieldInfo;
+    use crate::svd::fieldinfo::FieldInfoBuilder;
 
     #[test]
     fn decode_encode() {
         let tests = vec![(
-            RegisterInfo {
-                name: String::from("WRITECTRL"),
-                alternate_group: Some(String::from("alternate group")),
-                alternate_register: Some(String::from("alternate register")),
-                derived_from: Some(String::from("derived from")),
-                description: Some(String::from("Write Control Register")),
-                address_offset: 8,
-                size: Some(32),
-                access: Some(Access::ReadWrite),
-                reset_value: Some(0x00000000),
-                reset_mask: Some(0x00000023),
-                fields: Some(vec![Field::Single(FieldInfo {
-                    name: String::from("WREN"),
-                    derived_from: None,
-                    description: Some(String::from("Enable Write/Erase Controller")),
-                    bit_range: BitRange {
-                        offset: 0,
-                        width: 1,
-                        range_type: BitRangeType::OffsetWidth,
-                    },
-                    access: Some(Access::ReadWrite),
-                    enumerated_values: Vec::new(),
-                    write_constraint: None,
-                    modified_write_values: None,
-                    _extensible: (),
-                })]),
-                write_constraint: None,
-                modified_write_values: Some(ModifiedWriteValues::OneToToggle),
-                _extensible: (),
-            },
+            RegisterInfoBuilder::default()
+                .name("WRITECTRL".to_string())
+                .alternate_group(Some("alternate_group".to_string()))
+                .alternate_register(Some("alternate_register".to_string()))
+                .derived_from(Some("derived_from".to_string()))
+                .description(Some("Write Control Register".to_string()))
+                .address_offset(8)
+                .size(Some(32))
+                .access(Some(Access::ReadWrite))
+                .reset_value(Some(0x00000000))
+                .reset_mask(Some(0x00000023))
+                .fields(Some(vec![Field::Single(
+                    FieldInfoBuilder::default()
+                        .name("WREN".to_string())
+                        .description(Some("Enable Write/Erase Controller".to_string()))
+                        .bit_range(BitRange {
+                            offset: 0,
+                            width: 1,
+                            range_type: BitRangeType::OffsetWidth,
+                        })
+                        .access(Some(Access::ReadWrite))
+                        .build()
+                        .unwrap(),
+                )]))
+                .modified_write_values(Some(ModifiedWriteValues::OneToToggle))
+                .build()
+                .unwrap(),
             "
-            <register derivedFrom=\"derived from\">
+            <register derivedFrom=\"derived_from\">
                 <name>WRITECTRL</name>
                 <description>Write Control Register</description>
                 <addressOffset>0x8</addressOffset>
-                <alternateGroup>alternate group</alternateGroup>
-                <alternateRegister>alternate register</alternateRegister>
+                <alternateGroup>alternate_group</alternateGroup>
+                <alternateRegister>alternate_register</alternateRegister>
                 <size>32</size>
                 <access>read-write</access>
                 <resetValue>0x00000000</resetValue>
