@@ -75,7 +75,7 @@ impl Parse for Peripheral {
             return Err(ParseError::NotExpectedTag(tree.clone(), "peripheral".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
-        Peripheral::_parse(tree, name.clone()).context(format!("In peripheral `{}`", name))
+        Peripheral::_parse(tree, name.clone()).with_context(|| format!("In peripheral `{}`", name))
     }
 }
 
@@ -95,7 +95,7 @@ impl Peripheral {
                     .iter()
                     .filter(|t| t.name == "interrupt")
                     .enumerate()
-                    .map(|(e, i)| Interrupt::parse(i).context(format!("Parsing interrupt #{}", e)))
+                    .map(|(e, i)| Interrupt::parse(i).with_context(|| format!("Parsing interrupt #{}", e)))
                     .collect();
                 interrupt?
             })

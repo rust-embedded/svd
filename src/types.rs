@@ -24,7 +24,7 @@ impl Parse for u32 {
         let text = tree.get_text()?;
 
         if text.starts_with("0x") || text.starts_with("0X") {
-            u32::from_str_radix(&text["0x".len()..], 16).context(format!("{} invalid", text))
+            u32::from_str_radix(&text["0x".len()..], 16).with_context(|| format!("{} invalid", text))
         } else if text.starts_with('#') {
             // Handle strings in the binary form of:
             // #01101x1
@@ -33,15 +33,15 @@ impl Parse for u32 {
                 &str::replace(&text.to_lowercase()["#".len()..], "x", "0"),
                 2,
             )
-            .context(format!("{} invalid", text))
+            .with_context(|| format!("{} invalid", text))
         } else if text.starts_with("0b") {
             // Handle strings in the binary form of:
             // 0b01101x1
             // along with don't care character x (replaced with 0)
             u32::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2)
-                .context(format!("{} invalid", text))
+                .with_context(|| format!("{} invalid", text))
         } else {
-            text.parse::<u32>().context(format!("{} invalid", text))
+            text.parse::<u32>().with_context(|| format!("{} invalid", text))
         }
     }
 }

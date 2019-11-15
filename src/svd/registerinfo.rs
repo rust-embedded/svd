@@ -78,7 +78,7 @@ impl Parse for RegisterInfo {
 
     fn parse(tree: &Element) -> Result<RegisterInfo> {
         let name = tree.get_child_text("name")?;
-        RegisterInfo::_parse(tree, name.clone()).context(format!("In register `{}`", name))
+        RegisterInfo::_parse(tree, name.clone()).with_context(|| format!("In register `{}`", name))
     }
 }
 
@@ -102,7 +102,7 @@ impl RegisterInfo {
                         .children
                         .iter()
                         .enumerate()
-                        .map(|(e, t)| Field::parse(t).context(format!("Parsing field #{}", e)))
+                        .map(|(e, t)| Field::parse(t).with_context(|| format!("Parsing field #{}", e)))
                         .collect();
                     Some(fs?)
                 } else {
