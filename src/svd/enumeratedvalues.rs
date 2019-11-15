@@ -13,6 +13,8 @@ use crate::parse;
 use crate::svd::{enumeratedvalue::EnumeratedValue, usage::Usage};
 use crate::types::Parse;
 
+use crate::FlatRef;
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq, derive_builder::Builder)]
 #[builder(build_fn(validate = "Self::validate"))]
@@ -38,20 +40,13 @@ pub struct EnumeratedValues {
 
 impl EnumeratedValuesBuilder {
     fn validate(&self) -> Result<(), String> {
-        match &self.derived_from {
-            Some(Some(dname)) if crate::is_valid_name(dname) => Ok(()),
-            Some(Some(dname)) => Err(format!("Derive name `{}` is invalid", dname)),
-            Some(None) | None => {
-                if match &self.values {
-                    Some(values) if values.is_empty() => true,
-                    None => true,
-                    _ => false,
-                } {
-                    Err("Empty enumerated values".to_string())
-                } else {
-                    Ok(())
-                }
-            }
+        match self.derived_from.flatref() {
+            Some(dname) if crate::is_valid_name(dname) => Ok(()),
+            Some(dname) => Err(format!("Derive name `{}` is invalid", dname)),
+            None => match &self.values {
+                Some(values) if !values.is_empty() => Ok(()),
+                _ => Err("Empty enumerated values".to_string()),
+            },
         }
     }
 }

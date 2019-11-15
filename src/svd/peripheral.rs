@@ -95,7 +95,9 @@ impl Peripheral {
                     .iter()
                     .filter(|t| t.name == "interrupt")
                     .enumerate()
-                    .map(|(e, i)| Interrupt::parse(i).with_context(|| format!("Parsing interrupt #{}", e)))
+                    .map(|(e, i)| {
+                        Interrupt::parse(i).with_context(|| format!("Parsing interrupt #{}", e))
+                    })
                     .collect();
                 interrupt?
             })

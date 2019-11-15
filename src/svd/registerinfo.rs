@@ -102,7 +102,9 @@ impl RegisterInfo {
                         .children
                         .iter()
                         .enumerate()
-                        .map(|(e, t)| Field::parse(t).with_context(|| format!("Parsing field #{}", e)))
+                        .map(|(e, t)| {
+                            Field::parse(t).with_context(|| format!("Parsing field #{}", e))
+                        })
                         .collect();
                     Some(fs?)
                 } else {

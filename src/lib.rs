@@ -109,6 +109,22 @@ fn is_valid_name(name: &str) -> bool {
     }
 }
 
+trait FlatRef {
+    type Output;
+    fn flatref(&self) -> &Self::Output;
+}
+
+impl<T> FlatRef for Option<Option<T>> {
+    type Output = Option<T>;
+    fn flatref(&self) -> &Self::Output {
+        match self.as_ref() {
+            Some(None) => &None,
+            Some(x) => x,
+            None => &None,
+        }
+    }
+}
+
 /// Generic test helper function
 /// Takes an array of (item, xml) pairs where the item implements
 /// Parse and Encode and tests object encoding and decoding

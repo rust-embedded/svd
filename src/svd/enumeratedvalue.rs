@@ -12,6 +12,8 @@ use crate::error::*;
 use crate::new_element;
 use crate::types::Parse;
 
+use crate::FlatRef;
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq, derive_builder::Builder)]
 #[builder(build_fn(validate = "Self::validate"))]
@@ -43,11 +45,8 @@ impl EnumeratedValueBuilder {
             Some(name) => Err(format!("EnumeratedValue name `{}` is invalid", name)),
             None => Err("EnumeratedValue must have name".to_string()),
         }?;
-        match (&self.value, &self.is_default) {
-            (Some(Some(_)), None)
-            | (Some(Some(_)), Some(None))
-            | (None, Some(Some(_)))
-            | (Some(None), Some(Some(_))) => Ok(()),
+        match (self.value.flatref(), self.is_default.flatref()) {
+            (Some(_), None) | (None, Some(_)) => Ok(()),
             _ => Err(format!(
                 "EnumeratedValue must contain one of `value` ({:?}) or `is_default` ({:?}) tags",
                 self.value, self.is_default
