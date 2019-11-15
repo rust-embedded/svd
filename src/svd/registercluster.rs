@@ -37,7 +37,7 @@ impl Parse for RegisterCluster {
         } else if tree.name == "cluster" {
             Ok(RegisterCluster::Cluster(Cluster::parse(tree)?))
         } else {
-            Err(SVDError::InvalidRegisterCluster(tree.clone(), tree.name.clone()).into())
+            Err(RegisterClusterError::Invalid(tree.clone(), tree.name.clone()).into())
         }
     }
 }

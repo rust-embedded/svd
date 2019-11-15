@@ -43,7 +43,7 @@ impl Parse for Peripheral {
 
     fn parse(tree: &Element) -> Result<Peripheral> {
         if tree.name != "peripheral" {
-            return Err(SVDError::NotExpectedTag(tree.clone(), "peripheral".to_string()).into());
+            return Err(ParseError::NotExpectedTag(tree.clone(), "peripheral".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
         Peripheral::_parse(tree, name.clone()).context(format!("In peripheral `{}`", name))

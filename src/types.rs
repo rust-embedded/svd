@@ -60,7 +60,9 @@ impl Parse for BoolParse {
             _ => match text.parse() {
                 Ok(b) => b,
                 Err(e) => {
-                    return Err(SVDError::InvalidBooleanValue(tree.clone(), text.clone(), e).into())
+                    return Err(
+                        ParseError::InvalidBooleanValue(tree.clone(), text.clone(), e).into(),
+                    )
                 }
             },
         })

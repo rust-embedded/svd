@@ -33,7 +33,7 @@ impl Parse for Cpu {
 
     fn parse(tree: &Element) -> Result<Cpu> {
         if tree.name != "cpu" {
-            return Err(SVDError::NameMismatch(tree.clone()).into());
+            return Err(ParseError::NameMismatch(tree.clone()).into());
         }
 
         Ok(Cpu {

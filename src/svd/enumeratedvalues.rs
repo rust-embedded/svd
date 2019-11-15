@@ -52,16 +52,19 @@ impl Parse for EnumeratedValues {
                             EnumeratedValue::parse(t)
                                 .context(format!("Parsing enumerated value #{}", e))
                         } else {
-                            Err(
-                                SVDError::NotExpectedTag(t.clone(), "enumeratedValue".to_string())
-                                    .into(),
+                            Err(ParseError::NotExpectedTag(
+                                t.clone(),
+                                "enumeratedValue".to_string(),
                             )
+                            .into())
                         }
                     })
                     .collect();
                 let values = values?;
                 if values.is_empty() && !is_derived {
-                    return Err(SVDError::EmptyTag(tree.clone(), tree.name.clone()).into());
+                    return Err(
+                        EnumeratedValuesError::Empty(tree.clone(), tree.name.clone()).into(),
+                    );
                 }
                 values
             },
