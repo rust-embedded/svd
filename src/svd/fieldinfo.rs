@@ -41,7 +41,7 @@ impl Parse for FieldInfo {
             return Err(SVDError::NotExpectedTag(tree.clone(), "field".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
-        FieldInfo::_parse(tree, name.clone()).context(format!("In field `{}`", name))
+        FieldInfo::_parse(tree, name.clone()).with_context(|| format!("In field `{}`", name))
     }
 }
 
