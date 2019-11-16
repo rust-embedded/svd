@@ -39,7 +39,7 @@ impl Parse for Interrupt {
             return Err(SVDError::NotExpectedTag(tree.clone(), "interrupt".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
-        Interrupt::_parse(tree, name.clone()).context(format!("In interrupt `{}`", name))
+        Interrupt::_parse(tree, name.clone()).with_context(|| format!("In interrupt `{}`", name))
     }
 }
 

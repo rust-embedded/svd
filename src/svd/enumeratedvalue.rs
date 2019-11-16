@@ -47,7 +47,7 @@ impl Parse for EnumeratedValue {
         }
         let name = tree.get_child_text("name")?;
         EnumeratedValue::_parse(tree, name.clone())
-            .context(format!("In enumerated value `{}`", name))
+            .with_context(|| format!("In enumerated value `{}`", name))
     }
 }
 

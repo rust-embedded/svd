@@ -16,7 +16,7 @@ use crate::svd::{registercluster::RegisterCluster, registerproperties::RegisterP
 pub struct ClusterInfo {
     pub name: String,
     pub derived_from: Option<String>,
-    pub description: String,
+    pub description: Option<String>,
     pub header_struct_name: Option<String>,
     pub address_offset: u32,
     pub default_register_properties: RegisterProperties,
@@ -30,10 +30,17 @@ impl Parse for ClusterInfo {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<ClusterInfo> {
+        let name = tree.get_child_text("name")?;
+        ClusterInfo::_parse(tree, name.clone()).with_context(|| format!("In cluster `{}`", name))
+    }
+}
+
+impl ClusterInfo {
+    fn _parse(tree: &Element, name: String) -> Result<ClusterInfo> {
         Ok(ClusterInfo {
-            name: tree.get_child_text("name")?, // TODO: Handle naming of cluster
+            name, // TODO: Handle naming of cluster
             derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
-            description: tree.get_child_text("description")?,
+            description: tree.get_child_text_opt("description")?,
             header_struct_name: tree.get_child_text_opt("headerStructName")?,
             address_offset: tree.get_child_u32("addressOffset")?,
             default_register_properties: RegisterProperties::parse(tree)?,
@@ -64,7 +71,7 @@ impl Encode for ClusterInfo {
         }
 
         e.children
-            .push(new_element("description", Some(self.description.clone())));
+            .push(new_element("description", self.description.clone()));
 
         if let Some(v) = &self.header_struct_name {
             e.children

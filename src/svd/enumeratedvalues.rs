@@ -50,7 +50,7 @@ impl Parse for EnumeratedValues {
                     .map(|(e, t)| {
                         if t.name == "enumeratedValue" {
                             EnumeratedValue::parse(t)
-                                .context(format!("Parsing enumerated value #{}", e))
+                                .with_context(|| format!("Parsing enumerated value #{}", e))
                         } else {
                             Err(
                                 SVDError::NotExpectedTag(t.clone(), "enumeratedValue".to_string())
