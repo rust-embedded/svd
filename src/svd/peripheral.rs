@@ -33,8 +33,6 @@ pub struct Peripheral {
     /// `None` indicates that the `<registers>` node is not present
     pub registers: Option<Vec<RegisterCluster>>,
     pub derived_from: Option<String>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
 }
 
 impl Parse for Peripheral {
@@ -84,7 +82,6 @@ impl Peripheral {
                 None
             },
             derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
-            _extensible: (),
         })
     }
 }

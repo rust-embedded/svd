@@ -25,8 +25,6 @@ pub struct Device {
     pub cpu: Option<Cpu>,
     pub peripherals: Vec<Peripheral>,
     pub default_register_properties: RegisterProperties,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
 }
 
 impl Parse for Device {
@@ -53,7 +51,6 @@ impl Parse for Device {
                 ps?
             },
             default_register_properties: RegisterProperties::parse(tree)?,
-            _extensible: (),
         })
     }
 }

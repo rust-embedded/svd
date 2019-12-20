@@ -28,8 +28,6 @@ pub struct FieldInfo {
     pub enumerated_values: Vec<EnumeratedValues>,
     pub write_constraint: Option<WriteConstraint>,
     pub modified_write_values: Option<ModifiedWriteValues>,
-    // Reserve the right to add more fields to this struct
-    pub(crate) _extensible: (),
 }
 
 impl Parse for FieldInfo {
@@ -67,7 +65,6 @@ impl FieldInfo {
                 "modifiedWriteValues",
                 tree,
             )?,
-            _extensible: (),
         })
     }
 }
@@ -153,13 +150,10 @@ mod tests {
                             )),
                             value: Some(0),
                             is_default: None,
-                            _extensible: (),
                         }],
-                        _extensible: (),
                     }],
                     write_constraint: None,
                     modified_write_values: None,
-                    _extensible: (),
                 },
                 "
             <field>
@@ -192,7 +186,6 @@ mod tests {
                     enumerated_values: vec![],
                     write_constraint: None,
                     modified_write_values: None,
-                    _extensible: (),
                 },
                 "
             <field derivedFrom=\"other field\">

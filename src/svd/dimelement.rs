@@ -16,8 +16,6 @@ pub struct DimElement {
     pub dim: u32,
     pub dim_increment: u32,
     pub dim_index: Option<Vec<String>>,
-    // Reserve the right to add more fields to this struct
-    _extensible: (),
 }
 
 impl Parse for DimElement {
@@ -29,7 +27,6 @@ impl Parse for DimElement {
             dim: tree.get_child_u32("dim")?,
             dim_increment: tree.get_child_u32("dimIncrement")?,
             dim_index: parse_optional::<DimIndex>("dimIndex", tree)?,
-            _extensible: (),
         })
     }
 }
@@ -69,7 +66,6 @@ mod tests {
                 dim: 100,
                 dim_increment: 4,
                 dim_index: Some(vec!["10".to_owned(), "20".to_owned()]),
-                _extensible: (),
             },
             "<dimElement>
                 <dim>100</dim>
