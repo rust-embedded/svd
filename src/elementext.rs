@@ -35,7 +35,14 @@ impl ElementExt for Element {
         String: PartialEq<K>,
     {
         if let Some(child) = self.get_child(k) {
-            Ok(Some(child.get_text().map(|s| s.to_owned())?))
+            match child.get_text() {
+                Err(e) => match e.downcast_ref() {
+                    // if tag is empty just ignore it
+                    Some(SVDError::EmptyTag(_, _)) => Ok(None),
+                    _ => return Err(e),
+                },
+                Ok(s) => Ok(Some(s.to_owned())),
+            }
         } else {
             Ok(None)
         }
