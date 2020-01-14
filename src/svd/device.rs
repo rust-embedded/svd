@@ -97,7 +97,7 @@ impl Encode for Device {
                 .push(new_element("description", Some(v.clone())));
         }
 
-        if let Some(v) = &self.description {
+        if let Some(v) = &self.address_unit_bits {
             elem.children
                 .push(new_element("addressUnitBits", Some(format!("{}", v))));
         }
