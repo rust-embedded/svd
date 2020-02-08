@@ -14,14 +14,35 @@ use crate::svd::{registercluster::RegisterCluster, registerproperties::RegisterP
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct ClusterInfo {
+    /// String to identify the cluster.
+    /// Cluster names are required to be unique within the scope of a peripheral
     pub name: String,
-    pub derived_from: Option<String>,
-    pub description: Option<String>,
-    pub header_struct_name: Option<String>,
+
+    /// Cluster address relative to the `baseAddress` of the peripheral
     pub address_offset: u32,
+
+    /// Specify the cluster name from which to inherit data.
+    /// Elements specified subsequently override inherited values
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub derived_from: Option<String>,
+
+    /// String describing the details of the register cluster
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub description: Option<String>,
+
+    /// Specify the struct type name created in the device header file
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub header_struct_name: Option<String>,
+
     pub default_register_properties: RegisterProperties,
+
     pub children: Vec<RegisterCluster>,
+
     // Reserve the right to add more fields to this struct
+    #[cfg_attr(feature = "serde", serde(skip))]
     _extensible: (),
 }
 

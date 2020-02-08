@@ -16,11 +16,23 @@ use crate::types::Parse;
 #[derive(Clone, Debug, PartialEq)]
 pub struct Cpu {
     pub name: String,
+
+    /// Define the HW revision of the processor
     pub revision: String,
+
+    /// Define the endianness of the processor
     pub endian: Endian,
+
+    /// Indicate whether the processor is equipped with a memory protection unit (MPU)
     pub mpu_present: bool,
+
+    /// Indicate whether the processor is equipped with a hardware floating point unit (FPU)
     pub fpu_present: bool,
+
+    /// Define the number of bits available in the Nested Vectored Interrupt Controller (NVIC) for configuring priority
     pub nvic_priority_bits: u32,
+
+    /// Indicate whether the processor implements a vendor-specific System Tick Timer
     pub has_vendor_systick: bool,
 
     // Reserve the right to add more fields to this struct

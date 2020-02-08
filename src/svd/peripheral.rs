@@ -21,19 +21,55 @@ use crate::svd::{
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug)]
 pub struct Peripheral {
+    /// The string identifies the peripheral. Peripheral names are required to be unique for a device
     pub name: String,
-    pub version: Option<String>,
-    pub display_name: Option<String>,
-    pub group_name: Option<String>,
-    pub description: Option<String>,
+
+    /// Lowest address reserved or used by the peripheral
     pub base_address: u32,
+
+    /// The string specifies the version of this peripheral description
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub version: Option<String>,
+
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub display_name: Option<String>,
+
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub group_name: Option<String>,
+
+    /// The string provides an overview of the purpose and functionality of the peripheral
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub description: Option<String>,
+
+    /// Specify an address range uniquely mapped to this peripheral
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub address_block: Option<AddressBlock>,
+
+    /// A peripheral can have multiple associated interrupts
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty"))]
     pub interrupt: Vec<Interrupt>,
+
     pub default_register_properties: RegisterProperties,
+
+    /// Group to enclose register definitions.
     /// `None` indicates that the `<registers>` node is not present
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub registers: Option<Vec<RegisterCluster>>,
+
+    /// Specify the peripheral name from which to inherit data. Elements specified subsequently override inherited values
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub derived_from: Option<String>,
+
     // Reserve the right to add more fields to this struct
+    #[cfg_attr(feature = "serde", serde(skip))]
     _extensible: (),
 }
 
