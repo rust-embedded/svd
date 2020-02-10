@@ -3,6 +3,8 @@ use crate::elementext::ElementExt;
 use std::collections::HashMap;
 use xmltree::Element;
 
+use rayon::prelude::*;
+
 use crate::parse;
 use crate::types::Parse;
 
@@ -47,7 +49,7 @@ impl Parse for Device {
                 let ps: Result<Vec<_>, _> = tree
                     .get_child_elem("peripherals")?
                     .children
-                    .iter()
+                    .par_iter()
                     .map(Peripheral::parse)
                     .collect();
                 ps?
