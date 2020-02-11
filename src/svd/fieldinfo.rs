@@ -20,15 +20,43 @@ use crate::svd::{
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct FieldInfo {
+    /// Name string used to identify the field.
+    /// Field names must be unique within a register
     pub name: String,
-    pub derived_from: Option<String>,
-    pub description: Option<String>,
+
     pub bit_range: BitRange,
+
+    /// Specify the field name from which to inherit data.
+    /// Elements specified subsequently override inherited values
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub derived_from: Option<String>,
+
+    /// String describing the details of the register
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub description: Option<String>,
+
+    /// Predefined strings set the access type.
+    /// The element can be omitted if access rights get inherited from parent elements
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub access: Option<Access>,
+
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty"))]
     pub enumerated_values: Vec<EnumeratedValues>,
+
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub write_constraint: Option<WriteConstraint>,
+
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub modified_write_values: Option<ModifiedWriteValues>,
+
     // Reserve the right to add more fields to this struct
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) _extensible: (),
 }
 

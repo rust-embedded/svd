@@ -15,11 +15,26 @@ use crate::types::Parse;
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnumeratedValue {
+    /// String describing the semantics of the value. Can be displayed instead of the value
     pub name: String,
+
+    /// Extended string describing the value
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub description: Option<String>,
+
+    /// Defines the constant for the bit-field as decimal, hexadecimal or binary number
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub value: Option<u32>,
+
+    /// Defines the name and description for all other values that are not listed explicitly
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub is_default: Option<bool>,
+
     // Reserve the right to add more fields to this struct
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) _extensible: (),
 }
 impl EnumeratedValue {

@@ -20,21 +20,67 @@ use crate::svd::{
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct RegisterInfo {
+    /// String to identify the register.
+    /// Register names are required to be unique within the scope of a peripheral
     pub name: String,
-    pub alternate_group: Option<String>,
-    pub alternate_register: Option<String>,
-    pub derived_from: Option<String>,
-    pub description: Option<String>,
+
+    /// Define the address offset relative to the enclosing element
     pub address_offset: u32,
+
+    /// Specifies a group name associated with all alternate register that have the same name
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub alternate_group: Option<String>,
+
+    /// This tag can reference a register that has been defined above to
+    /// current location in the description and that describes the memory location already
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub alternate_register: Option<String>,
+
+    /// Specify the register name from which to inherit data.
+    /// Elements specified subsequently override inherited values
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub derived_from: Option<String>,
+
+    /// String describing the details of the register
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub description: Option<String>,
+
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub size: Option<u32>,
+
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub access: Option<Access>,
+
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub reset_value: Option<u32>,
+
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub reset_mask: Option<u32>,
+
     /// `None` indicates that the `<fields>` node is not present
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub fields: Option<Vec<Field>>,
+
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub write_constraint: Option<WriteConstraint>,
+
+    /// Element to describe the manipulation of data written to a register
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub modified_write_values: Option<ModifiedWriteValues>,
+
     // Reserve the right to add more fields to this struct
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) _extensible: (),
 }
 

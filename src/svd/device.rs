@@ -18,16 +18,46 @@ use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterP
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug)]
 pub struct Device {
+    /// The string identifies the device or device series. Device names are required to be unique
     pub name: String,
+
+    /// Specify the compliant CMSIS-SVD schema version
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     schema_version: Option<String>,
+
+    /// Define the version of the SVD file
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub version: Option<String>,
+
+    /// Describe the main features of the device (for example CPU, clock frequency, peripheral overview)
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub description: Option<String>,
+
+    /// Define the number of data bits uniquely selected by each address
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub address_unit_bits: Option<u32>,
+
+    /// Define the number of data bit-width of the maximum single data transfer supported by the bus infrastructure
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub width: Option<u32>,
+
+    /// Describe the processor included in the device
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub cpu: Option<Cpu>,
+
+    /// Group to define peripherals
     pub peripherals: Vec<Peripheral>,
+
     pub default_register_properties: RegisterProperties,
+
     // Reserve the right to add more fields to this struct
+    #[cfg_attr(feature = "serde", serde(skip))]
     _extensible: (),
 }
 

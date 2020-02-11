@@ -13,10 +13,20 @@ use crate::error::*;
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct DimElement {
+    /// Defines the number of elements in an array or list
     pub dim: u32,
+
+    /// Specify the address increment between two neighboring array or list members in the address map
     pub dim_increment: u32,
+
+    /// Specify the strings that substitue the placeholder `%s` within `name` and `displayName`.
+    /// By default, <dimIndex> is a value starting with 0
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub dim_index: Option<Vec<String>>,
+
     // Reserve the right to add more fields to this struct
+    #[cfg_attr(feature = "serde", serde(skip))]
     _extensible: (),
 }
 

@@ -16,11 +16,25 @@ use crate::types::Parse;
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnumeratedValues {
+    /// Identifier for the whole enumeration section
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub name: Option<String>,
+
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub usage: Option<Usage>,
+
+    /// Makes a copy from a previously defined enumeratedValues section.
+    /// No modifications are allowed
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub derived_from: Option<String>,
+
     pub values: Vec<EnumeratedValue>,
+
     // Reserve the right to add more fields to this struct
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) _extensible: (),
 }
 
