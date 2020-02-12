@@ -62,12 +62,12 @@ pub struct Device {
 }
 
 impl Parse for Device {
-    type Object = Device;
+    type Object = Self;
     type Error = anyhow::Error;
 
     /// Parses a SVD file
-    fn parse(tree: &Element) -> Result<Device> {
-        Ok(Device {
+    fn parse(tree: &Element) -> Result<Self> {
+        Ok(Self {
             name: tree.get_child_text("name")?,
             schema_version: tree.attributes.get("schemaVersion").cloned(),
             cpu: parse::optional::<Cpu>("cpu", tree)?,

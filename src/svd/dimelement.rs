@@ -31,11 +31,11 @@ pub struct DimElement {
 }
 
 impl Parse for DimElement {
-    type Object = DimElement;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<DimElement> {
-        Ok(DimElement {
+    fn parse(tree: &Element) -> Result<Self> {
+        Ok(Self {
             dim: tree.get_child_u32("dim")?,
             dim_increment: tree.get_child_u32("dimIncrement")?,
             dim_index: parse_optional::<DimIndex>("dimIndex", tree)?,

@@ -47,18 +47,18 @@ pub struct ClusterInfo {
 }
 
 impl Parse for ClusterInfo {
-    type Object = ClusterInfo;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<ClusterInfo> {
+    fn parse(tree: &Element) -> Result<Self> {
         let name = tree.get_child_text("name")?;
-        ClusterInfo::_parse(tree, name.clone()).with_context(|| format!("In cluster `{}`", name))
+        Self::_parse(tree, name.clone()).with_context(|| format!("In cluster `{}`", name))
     }
 }
 
 impl ClusterInfo {
-    fn _parse(tree: &Element, name: String) -> Result<ClusterInfo> {
-        Ok(ClusterInfo {
+    fn _parse(tree: &Element, name: String) -> Result<Self> {
+        Ok(Self {
             name, // TODO: Handle naming of cluster
             derived_from: tree.attributes.get("derivedFrom").map(|s| s.to_owned()),
             description: tree.get_child_text_opt("description")?,

@@ -74,21 +74,21 @@ pub struct Peripheral {
 }
 
 impl Parse for Peripheral {
-    type Object = Peripheral;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Peripheral> {
+    fn parse(tree: &Element) -> Result<Self> {
         if tree.name != "peripheral" {
             return Err(SVDError::NotExpectedTag(tree.clone(), "peripheral".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
-        Peripheral::_parse(tree, name.clone()).with_context(|| format!("In peripheral `{}`", name))
+        Self::_parse(tree, name.clone()).with_context(|| format!("In peripheral `{}`", name))
     }
 }
 
 impl Peripheral {
-    fn _parse(tree: &Element, name: String) -> Result<Peripheral> {
-        Ok(Peripheral {
+    fn _parse(tree: &Element, name: String) -> Result<Self> {
+        Ok(Self {
             name,
             version: tree.get_child_text_opt("version")?,
             display_name: tree.get_child_text_opt("displayName")?,

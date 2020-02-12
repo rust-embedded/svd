@@ -39,15 +39,15 @@ pub struct EnumeratedValues {
 }
 
 impl Parse for EnumeratedValues {
-    type Object = EnumeratedValues;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<EnumeratedValues> {
+    fn parse(tree: &Element) -> Result<Self> {
         assert_eq!(tree.name, "enumeratedValues");
         let derived_from = tree.attributes.get("derivedFrom").map(|s| s.to_owned());
         let is_derived = derived_from.is_some();
 
-        Ok(EnumeratedValues {
+        Ok(Self {
             name: tree.get_child_text_opt("name")?,
             usage: parse::optional::<Usage>("usage", tree)?,
             derived_from,

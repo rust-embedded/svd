@@ -20,10 +20,10 @@ pub enum Endian {
 }
 
 impl Parse for Endian {
-    type Object = Endian;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Endian> {
+    fn parse(tree: &Element) -> Result<Self> {
         let text = tree.get_text()?;
 
         match &text[..] {

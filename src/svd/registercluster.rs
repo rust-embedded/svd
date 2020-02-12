@@ -28,10 +28,10 @@ impl From<Cluster> for RegisterCluster {
 }
 
 impl Parse for RegisterCluster {
-    type Object = RegisterCluster;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<RegisterCluster> {
+    fn parse(tree: &Element) -> Result<Self> {
         if tree.name == "register" {
             Ok(RegisterCluster::Register(Register::parse(tree)?))
         } else if tree.name == "cluster" {

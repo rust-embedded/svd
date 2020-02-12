@@ -30,10 +30,10 @@ impl Deref for Register {
 }
 
 impl Parse for Register {
-    type Object = Register;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Register> {
+    fn parse(tree: &Element) -> Result<Self> {
         assert_eq!(tree.name, "register");
 
         let info = RegisterInfo::parse(tree)?;

@@ -35,10 +35,10 @@ pub enum BitRangeType {
 }
 
 impl Parse for BitRange {
-    type Object = BitRange;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<BitRange> {
+    fn parse(tree: &Element) -> Result<Self> {
         let (end, start, range_type): (u32, u32, BitRangeType) = if let Some(range) =
             tree.get_child("bitRange")
         {
@@ -113,7 +113,7 @@ impl Parse for BitRange {
             return Err(SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax).into());
         };
 
-        Ok(BitRange {
+        Ok(Self {
             offset: start,
             width: end - start + 1,
             range_type,
