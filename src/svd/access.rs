@@ -19,10 +19,10 @@ pub enum Access {
 }
 
 impl Parse for Access {
-    type Object = Access;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Access> {
+    fn parse(tree: &Element) -> Result<Self> {
         let text = tree.get_text()?;
 
         match &text[..] {

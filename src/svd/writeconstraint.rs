@@ -27,10 +27,10 @@ pub struct WriteConstraintRange {
 }
 
 impl Parse for WriteConstraint {
-    type Object = WriteConstraint;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<WriteConstraint> {
+    fn parse(tree: &Element) -> Result<Self> {
         if tree.children.len() == 1 {
             let field = &tree.children[0].name;
             // Write constraint can only be one of the following
@@ -78,11 +78,11 @@ impl Encode for WriteConstraint {
 }
 
 impl Parse for WriteConstraintRange {
-    type Object = WriteConstraintRange;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<WriteConstraintRange> {
-        Ok(WriteConstraintRange {
+    fn parse(tree: &Element) -> Result<Self> {
+        Ok(Self {
             min: tree.get_child_u32("minimum")?,
             max: tree.get_child_u32("maximum")?,
         })

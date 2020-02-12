@@ -85,19 +85,19 @@ pub struct RegisterInfo {
 }
 
 impl Parse for RegisterInfo {
-    type Object = RegisterInfo;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<RegisterInfo> {
+    fn parse(tree: &Element) -> Result<Self> {
         let name = tree.get_child_text("name")?;
-        RegisterInfo::_parse(tree, name.clone()).with_context(|| format!("In register `{}`", name))
+        Self::_parse(tree, name.clone()).with_context(|| format!("In register `{}`", name))
     }
 }
 
 impl RegisterInfo {
-    fn _parse(tree: &Element, name: String) -> Result<RegisterInfo> {
+    fn _parse(tree: &Element, name: String) -> Result<Self> {
         let properties = RegisterProperties::parse(tree)?;
-        Ok(RegisterInfo {
+        Ok(Self {
             name,
             alternate_group: tree.get_child_text_opt("alternateGroup")?,
             alternate_register: tree.get_child_text_opt("alternateRegister")?,

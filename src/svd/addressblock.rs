@@ -21,11 +21,11 @@ pub struct AddressBlock {
 }
 
 impl Parse for AddressBlock {
-    type Object = AddressBlock;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<AddressBlock> {
-        Ok(AddressBlock {
+    fn parse(tree: &Element) -> Result<Self> {
+        Ok(Self {
             offset: tree.get_child_u32("offset")?,
             size: tree.get_child_u32("size")?,
             usage: tree.get_child_text("usage")?,

@@ -29,10 +29,10 @@ impl Deref for Cluster {
 }
 
 impl Parse for Cluster {
-    type Object = Cluster;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Cluster> {
+    fn parse(tree: &Element) -> Result<Self> {
         assert_eq!(tree.name, "cluster");
 
         let info = ClusterInfo::parse(tree)?;

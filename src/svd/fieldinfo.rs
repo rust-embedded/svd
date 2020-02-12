@@ -61,15 +61,15 @@ pub struct FieldInfo {
 }
 
 impl Parse for FieldInfo {
-    type Object = FieldInfo;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<FieldInfo> {
+    fn parse(tree: &Element) -> Result<Self> {
         if tree.name != "field" {
             return Err(SVDError::NotExpectedTag(tree.clone(), "field".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
-        FieldInfo::_parse(tree, name.clone()).with_context(|| format!("In field `{}`", name))
+        Self::_parse(tree, name.clone()).with_context(|| format!("In field `{}`", name))
     }
 }
 

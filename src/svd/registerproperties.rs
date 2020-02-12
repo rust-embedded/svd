@@ -42,11 +42,11 @@ pub struct RegisterProperties {
 }
 
 impl Parse for RegisterProperties {
-    type Object = RegisterProperties;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<RegisterProperties> {
-        Ok(RegisterProperties {
+    fn parse(tree: &Element) -> Result<Self> {
+        Ok(Self {
             size: parse::optional::<u32>("size", tree)?,
             reset_value: parse::optional::<u32>("resetValue", tree)?,
             reset_mask: parse::optional::<u32>("resetMask", tree)?,

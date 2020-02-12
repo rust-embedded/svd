@@ -18,10 +18,10 @@ pub enum Usage {
 }
 
 impl Parse for Usage {
-    type Object = Usage;
+    type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Usage> {
+    fn parse(tree: &Element) -> Result<Self> {
         let text = tree.get_text()?;
 
         match &text[..] {
