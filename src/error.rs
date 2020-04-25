@@ -41,6 +41,14 @@ pub enum SVDError {
     EncodeNotImplemented(String),
     #[error("Error parsing SVD XML")]
     FileParseError,
+    #[error("Device must contain at least one peripheral")]
+    EmptyDevice,
+    #[error("Peripheral have `registers` tag, but it is empty")]
+    EmptyRegisters,
+    #[error("Cluster must contain at least one Register or Cluster")]
+    EmptyCluster,
+    #[error("Register have `fields` tag, but it is empty")]
+    EmptyFields,
 }
 
 // TODO: Consider making into an Error
@@ -49,4 +57,42 @@ pub enum InvalidBitRange {
     Syntax,
     ParseError,
     MsbLsb,
+    Empty,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum BuildError {
+    #[error("`{0}` must be initialized")]
+    Uninitialized(String),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum NameError {
+    #[error("Name `{0}` in tag `{1}` contains unexpected symbol")]
+    Invalid(String, String),
+}
+
+pub(crate) fn is_valid_name(name: &str) -> bool {
+    let mut chars = name.chars();
+    if let Some(first) = chars.next() {
+        if !(first.is_ascii_alphabetic() || first == '_') {
+            return false;
+        }
+        for c in chars {
+            if !(c.is_ascii_alphanumeric() || c == '_' || c == '%') {
+                return false;
+            }
+        }
+        true
+    } else {
+        false
+    }
+}
+
+pub(crate) fn check_name(name: &str, tag: &str) -> Result<()> {
+    if is_valid_name(name) {
+        Ok(())
+    } else {
+        Err(NameError::Invalid(name.to_string(), tag.to_string()).into())
+    }
 }

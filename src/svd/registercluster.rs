@@ -16,13 +16,13 @@ pub enum RegisterCluster {
 }
 
 impl From<Register> for RegisterCluster {
-    fn from(reg: Register) -> RegisterCluster {
+    fn from(reg: Register) -> Self {
         RegisterCluster::Register(reg)
     }
 }
 
 impl From<Cluster> for RegisterCluster {
-    fn from(cluser: Cluster) -> RegisterCluster {
+    fn from(cluser: Cluster) -> Self {
         RegisterCluster::Cluster(cluser)
     }
 }

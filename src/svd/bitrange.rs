@@ -45,18 +45,18 @@ impl Parse for BitRange {
             let text = range
                 .text
                 .as_ref()
-                .ok_or_else(|| anyhow::anyhow!("text missing"))?; // TODO: Make into a proper error, text empty or something similar
-                                                                  // TODO: If the `InvalidBitRange` enum was an error we could context into here somehow so that
-                                                                  // the output would be similar to the parse error
+                .ok_or_else(|| SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::Empty))?;
             if !text.starts_with('[') {
                 return Err(
                     SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax).into(),
-                ); // TODO: Maybe have a MissingOpen/MissingClosing variant
+                );
+                // TODO: Maybe have a MissingOpen/MissingClosing variant
             }
             if !text.ends_with(']') {
                 return Err(
                     SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax).into(),
-                ); // TODO: Maybe have a MissingOpen/MissingClosing variant
+                );
+                // TODO: Maybe have a MissingOpen/MissingClosing variant
             }
 
             let mut parts = text[1..text.len() - 1].split(':');

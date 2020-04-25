@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Builder pattern now is used for creating structures
+- Peripherals are processed in parallel with `rayon`
+- Serde now skips empty tags
+- Fix: bug in `addressUnitBits`
+
 ## [v0.9.0] - 2019-11-17
 
 - [breaking-change]  make `ClusterInfo` `description` optional
