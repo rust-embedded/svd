@@ -18,8 +18,6 @@ use crate::svd::{
     registerproperties::RegisterProperties,
 };
 
-use crate::Build;
-
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug)]
 pub struct Peripheral {
@@ -73,10 +71,6 @@ pub struct Peripheral {
     // Reserve the right to add more fields to this struct
     #[cfg_attr(feature = "serde", serde(skip))]
     _extensible: (),
-}
-
-impl Build for Peripheral {
-    type Builder = PeripheralBuilder;
 }
 
 #[derive(Default)]

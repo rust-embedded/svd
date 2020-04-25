@@ -15,8 +15,6 @@ use crate::error::*;
 use crate::new_element;
 use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties};
 
-use crate::Build;
-
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug)]
 pub struct Device {
@@ -61,10 +59,6 @@ pub struct Device {
     // Reserve the right to add more fields to this struct
     #[cfg_attr(feature = "serde", serde(skip))]
     _extensible: (),
-}
-
-impl Build for Device {
-    type Builder = DeviceBuilder;
 }
 
 #[derive(Default)]

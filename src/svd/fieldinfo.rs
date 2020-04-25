@@ -12,8 +12,6 @@ use crate::new_element;
 use crate::parse;
 use crate::types::Parse;
 
-use crate::Build;
-
 use crate::svd::{
     access::Access, bitrange::BitRange, enumeratedvalues::EnumeratedValues,
     modifiedwritevalues::ModifiedWriteValues, writeconstraint::WriteConstraint,
@@ -60,10 +58,6 @@ pub struct FieldInfo {
     // Reserve the right to add more fields to this struct
     #[cfg_attr(feature = "serde", serde(skip))]
     _extensible: (),
-}
-
-impl Build for FieldInfo {
-    type Builder = FieldInfoBuilder;
 }
 
 #[derive(Default)]

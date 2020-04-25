@@ -12,8 +12,6 @@ use crate::error::*;
 use crate::new_element;
 use crate::types::Parse;
 
-use crate::Build;
-
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnumeratedValue {
@@ -46,10 +44,6 @@ pub enum EnumeratedValueError {
     AbsentValue(Option<u32>, Option<bool>),
     #[error("Value {0} out of range {1:?}")]
     OutOfRange(u32, core::ops::Range<u32>),
-}
-
-impl Build for EnumeratedValue {
-    type Builder = EnumeratedValueBuilder;
 }
 
 #[derive(Default)]

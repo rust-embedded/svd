@@ -13,8 +13,6 @@ use crate::parse;
 use crate::svd::{enumeratedvalue::EnumeratedValue, usage::Usage};
 use crate::types::Parse;
 
-use crate::Build;
-
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnumeratedValues {
@@ -44,10 +42,6 @@ pub struct EnumeratedValues {
 pub enum EnumeratedValuesError {
     #[error("EnumeratedValues is empty")]
     Empty,
-}
-
-impl Build for EnumeratedValues {
-    type Builder = EnumeratedValuesBuilder;
 }
 
 #[derive(Default)]

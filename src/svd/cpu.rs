@@ -12,8 +12,6 @@ use crate::new_element;
 use crate::svd::endian::Endian;
 use crate::types::Parse;
 
-use crate::Build;
-
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct Cpu {
@@ -40,10 +38,6 @@ pub struct Cpu {
     // Reserve the right to add more fields to this struct
     #[cfg_attr(feature = "serde", serde(skip))]
     _extensible: (),
-}
-
-impl Build for Cpu {
-    type Builder = CpuBuilder;
 }
 
 #[derive(Default)]

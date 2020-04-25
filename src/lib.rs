@@ -92,10 +92,6 @@ pub(crate) fn new_element(name: &str, text: Option<String>) -> Element {
     }
 }
 
-pub trait Build {
-    type Builder;
-}
-
 /// Generic test helper function
 /// Takes an array of (item, xml) pairs where the item implements
 /// Parse and Encode and tests object encoding and decoding

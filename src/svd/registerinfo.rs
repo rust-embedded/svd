@@ -12,8 +12,6 @@ use crate::new_element;
 use crate::parse;
 use crate::types::Parse;
 
-use crate::Build;
-
 use crate::svd::{
     access::Access, field::Field, modifiedwritevalues::ModifiedWriteValues,
     registerproperties::RegisterProperties, writeconstraint::WriteConstraint,
@@ -84,10 +82,6 @@ pub struct RegisterInfo {
     // Reserve the right to add more fields to this struct
     #[cfg_attr(feature = "serde", serde(skip))]
     _extensible: (),
-}
-
-impl Build for RegisterInfo {
-    type Builder = RegisterInfoBuilder;
 }
 
 #[derive(Default)]

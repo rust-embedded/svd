@@ -11,8 +11,6 @@ use crate::new_element;
 use crate::error::*;
 use crate::svd::{registercluster::RegisterCluster, registerproperties::RegisterProperties};
 
-use crate::Build;
-
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct ClusterInfo {
@@ -46,10 +44,6 @@ pub struct ClusterInfo {
     // Reserve the right to add more fields to this struct
     #[cfg_attr(feature = "serde", serde(skip))]
     _extensible: (),
-}
-
-impl Build for ClusterInfo {
-    type Builder = ClusterInfoBuilder;
 }
 
 #[derive(Default)]
