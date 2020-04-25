@@ -46,7 +46,7 @@ pub enum EnumeratedValueError {
     OutOfRange(u32, core::ops::Range<u32>),
 }
 
-#[derive(Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct EnumeratedValueBuilder {
     name: Option<String>,
     description: Option<String>,

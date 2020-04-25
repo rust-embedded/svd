@@ -84,7 +84,7 @@ pub struct RegisterInfo {
     _extensible: (),
 }
 
-#[derive(Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct RegisterInfoBuilder {
     name: Option<String>,
     address_offset: Option<u32>,

@@ -73,7 +73,7 @@ pub struct Peripheral {
     _extensible: (),
 }
 
-#[derive(Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct PeripheralBuilder {
     name: Option<String>,
     base_address: Option<u32>,

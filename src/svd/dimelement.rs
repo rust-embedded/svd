@@ -30,7 +30,7 @@ pub struct DimElement {
     _extensible: (),
 }
 
-#[derive(Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DimElementBuilder {
     dim: Option<u32>,
     dim_increment: Option<u32>,

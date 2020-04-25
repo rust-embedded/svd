@@ -46,7 +46,7 @@ pub struct ClusterInfo {
     _extensible: (),
 }
 
-#[derive(Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct ClusterInfoBuilder {
     name: Option<String>,
     address_offset: Option<u32>,

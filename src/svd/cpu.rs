@@ -40,7 +40,7 @@ pub struct Cpu {
     _extensible: (),
 }
 
-#[derive(Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct CpuBuilder {
     name: Option<String>,
     revision: Option<String>,

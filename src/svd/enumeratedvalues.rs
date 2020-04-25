@@ -44,7 +44,7 @@ pub enum EnumeratedValuesError {
     Empty,
 }
 
-#[derive(Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct EnumeratedValuesBuilder {
     name: Option<String>,
     usage: Option<Usage>,

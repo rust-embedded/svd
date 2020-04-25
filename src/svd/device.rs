@@ -61,7 +61,7 @@ pub struct Device {
     _extensible: (),
 }
 
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 pub struct DeviceBuilder {
     name: Option<String>,
     schema_version: Option<String>,

@@ -60,7 +60,7 @@ pub struct FieldInfo {
     _extensible: (),
 }
 
-#[derive(Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct FieldInfoBuilder {
     name: Option<String>,
     bit_range: Option<BitRange>,
