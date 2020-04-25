@@ -15,6 +15,8 @@ use crate::error::*;
 use crate::new_element;
 use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties};
 
+use crate::Build;
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug)]
 pub struct Device {
@@ -61,7 +63,11 @@ pub struct Device {
     _extensible: (),
 }
 
-#[derive(Clone, Debug, Default)]
+impl Build for Device {
+    type Builder = DeviceBuilder;
+}
+
+#[derive(Default)]
 pub struct DeviceBuilder {
     name: Option<String>,
     schema_version: Option<String>,
@@ -136,7 +142,7 @@ impl Device {
     fn validate(self) -> Result<Self> {
         // TODO
         if self.peripherals.is_empty() {
-            return Err(SVDError::EmptyDevice)?;
+            return Err(DeviceError::Empty)?;
         }
         Ok(self)
     }
@@ -148,7 +154,7 @@ impl Parse for Device {
 
     fn parse(tree: &Element) -> Result<Self> {
         if tree.name != "device" {
-            return Err(SVDError::NotExpectedTag(tree.clone(), "device".to_string()).into());
+            return Err(ParseError::NotExpectedTag(tree.clone(), "device".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
         Self::_parse(tree, name.clone()).with_context(|| format!("In device `{}`", name))

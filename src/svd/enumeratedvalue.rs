@@ -12,6 +12,8 @@ use crate::error::*;
 use crate::new_element;
 use crate::types::Parse;
 
+use crate::Build;
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnumeratedValue {
@@ -46,7 +48,11 @@ pub enum EnumeratedValueError {
     OutOfRange(u32, core::ops::Range<u32>),
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+impl Build for EnumeratedValue {
+    type Builder = EnumeratedValueBuilder;
+}
+
+#[derive(Default)]
 pub struct EnumeratedValueBuilder {
     name: Option<String>,
     description: Option<String>,
@@ -122,7 +128,7 @@ impl Parse for EnumeratedValue {
     fn parse(tree: &Element) -> Result<Self> {
         if tree.name != "enumeratedValue" {
             return Err(
-                SVDError::NotExpectedTag(tree.clone(), "enumeratedValue".to_string()).into(),
+                ParseError::NotExpectedTag(tree.clone(), "enumeratedValue".to_string()).into(),
             );
         }
         let name = tree.get_child_text("name")?;

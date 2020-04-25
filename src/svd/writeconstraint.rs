@@ -44,10 +44,10 @@ impl Parse for WriteConstraint {
                 "range" => Ok(WriteConstraint::Range(WriteConstraintRange::parse(
                     tree.get_child_elem(field.as_ref())?,
                 )?)),
-                _ => Err(SVDError::UnknownWriteConstraint(tree.clone()).into()),
+                _ => Err(WriteConstraintError::Unknown(tree.clone()).into()),
             }
         } else {
-            Err(SVDError::MoreThanOneWriteConstraint(tree.clone()).into())
+            Err(WriteConstraintError::MoreThanOne(tree.clone()).into())
         }
     }
 }

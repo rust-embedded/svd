@@ -18,6 +18,8 @@ use crate::svd::{
     registerproperties::RegisterProperties,
 };
 
+use crate::Build;
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug)]
 pub struct Peripheral {
@@ -73,7 +75,11 @@ pub struct Peripheral {
     _extensible: (),
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+impl Build for Peripheral {
+    type Builder = PeripheralBuilder;
+}
+
+#[derive(Default)]
 pub struct PeripheralBuilder {
     name: Option<String>,
     base_address: Option<u32>,
@@ -164,7 +170,7 @@ impl Peripheral {
             check_name(name, "derivedFrom")?;
         } else if let Some(registers) = self.registers.as_ref() {
             if registers.is_empty() {
-                return Err(SVDError::EmptyRegisters)?;
+                return Err(PeripheralError::EmptyRegisters)?;
             }
         }
         Ok(self)
@@ -177,7 +183,7 @@ impl Parse for Peripheral {
 
     fn parse(tree: &Element) -> Result<Self> {
         if tree.name != "peripheral" {
-            return Err(SVDError::NotExpectedTag(tree.clone(), "peripheral".to_string()).into());
+            return Err(ParseError::NotExpectedTag(tree.clone(), "peripheral".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
         Self::_parse(tree, name.clone()).with_context(|| format!("In peripheral `{}`", name))

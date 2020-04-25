@@ -45,17 +45,13 @@ impl Parse for BitRange {
             let text = range
                 .text
                 .as_ref()
-                .ok_or_else(|| SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::Empty))?;
+                .ok_or_else(|| BitRangeError::Invalid(tree.clone(), InvalidBitRange::Empty))?;
             if !text.starts_with('[') {
-                return Err(
-                    SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax).into(),
-                );
+                return Err(BitRangeError::Invalid(tree.clone(), InvalidBitRange::Syntax).into());
                 // TODO: Maybe have a MissingOpen/MissingClosing variant
             }
             if !text.ends_with(']') {
-                return Err(
-                    SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax).into(),
-                );
+                return Err(BitRangeError::Invalid(tree.clone(), InvalidBitRange::Syntax).into());
                 // TODO: Maybe have a MissingOpen/MissingClosing variant
             }
 
@@ -63,21 +59,17 @@ impl Parse for BitRange {
             (
                 parts
                     .next()
-                    .ok_or_else(|| {
-                        SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax)
-                    })?
+                    .ok_or_else(|| BitRangeError::Invalid(tree.clone(), InvalidBitRange::Syntax))?
                     .parse::<u32>()
                     .with_context(|| {
-                        SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::ParseError)
+                        BitRangeError::Invalid(tree.clone(), InvalidBitRange::ParseError)
                     })?,
                 parts
                     .next()
-                    .ok_or_else(|| {
-                        SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax)
-                    })?
+                    .ok_or_else(|| BitRangeError::Invalid(tree.clone(), InvalidBitRange::Syntax))?
                     .parse::<u32>()
                     .with_context(|| {
-                        SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::ParseError)
+                        BitRangeError::Invalid(tree.clone(), InvalidBitRange::ParseError)
                     })?,
                 BitRangeType::BitRange,
             )
@@ -86,10 +78,10 @@ impl Parse for BitRange {
             (
                 // TODO: `u32::parse` should not hide it's errors
                 u32::parse(msb).with_context(|| {
-                    SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::MsbLsb)
+                    BitRangeError::Invalid(tree.clone(), InvalidBitRange::MsbLsb)
                 })?,
                 u32::parse(lsb).with_context(|| {
-                    SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::MsbLsb)
+                    BitRangeError::Invalid(tree.clone(), InvalidBitRange::MsbLsb)
                 })?,
                 BitRangeType::MsbLsb,
             )
@@ -102,15 +94,15 @@ impl Parse for BitRange {
                 // TODO: capture that error comes from offset/width tag
                 // TODO: `u32::parse` should not hide it's errors
                 offset: u32::parse(offset).with_context(|| {
-                    SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::ParseError)
+                    BitRangeError::Invalid(tree.clone(), InvalidBitRange::ParseError)
                 })?,
                 width: u32::parse(width).with_context(|| {
-                    SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::ParseError)
+                    BitRangeError::Invalid(tree.clone(), InvalidBitRange::ParseError)
                 })?,
                 range_type: BitRangeType::OffsetWidth,
             });
         } else {
-            return Err(SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax).into());
+            return Err(BitRangeError::Invalid(tree.clone(), InvalidBitRange::Syntax).into());
         };
 
         Ok(Self {

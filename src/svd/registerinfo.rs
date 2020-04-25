@@ -12,6 +12,8 @@ use crate::new_element;
 use crate::parse;
 use crate::types::Parse;
 
+use crate::Build;
+
 use crate::svd::{
     access::Access, field::Field, modifiedwritevalues::ModifiedWriteValues,
     registerproperties::RegisterProperties, writeconstraint::WriteConstraint,
@@ -84,7 +86,11 @@ pub struct RegisterInfo {
     _extensible: (),
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+impl Build for RegisterInfo {
+    type Builder = RegisterInfoBuilder;
+}
+
+#[derive(Default)]
 pub struct RegisterInfoBuilder {
     name: Option<String>,
     address_offset: Option<u32>,
@@ -193,7 +199,7 @@ impl RegisterInfo {
             check_name(name, "derivedFrom")?;
         } else if let Some(fields) = self.fields.as_ref() {
             if fields.is_empty() {
-                return Err(SVDError::EmptyFields)?;
+                return Err(RegisterError::EmptyFields)?;
             }
         }
         Ok(self)

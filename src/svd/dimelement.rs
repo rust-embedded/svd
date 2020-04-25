@@ -9,6 +9,7 @@ use crate::encode::Encode;
 use crate::new_element;
 
 use crate::error::*;
+use crate::Build;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -30,7 +31,11 @@ pub struct DimElement {
     _extensible: (),
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+impl Build for DimElement {
+    type Builder = DimElementBuilder;
+}
+
+#[derive(Default)]
 pub struct DimElementBuilder {
     dim: Option<u32>,
     dim_increment: Option<u32>,

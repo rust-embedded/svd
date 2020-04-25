@@ -13,6 +13,8 @@ use crate::parse;
 use crate::svd::{enumeratedvalue::EnumeratedValue, usage::Usage};
 use crate::types::Parse;
 
+use crate::Build;
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnumeratedValues {
@@ -44,7 +46,11 @@ pub enum EnumeratedValuesError {
     Empty,
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+impl Build for EnumeratedValues {
+    type Builder = EnumeratedValuesBuilder;
+}
+
+#[derive(Default)]
 pub struct EnumeratedValuesBuilder {
     name: Option<String>,
     usage: Option<Usage>,
@@ -130,10 +136,11 @@ impl Parse for EnumeratedValues {
                             EnumeratedValue::parse(t)
                                 .with_context(|| format!("Parsing enumerated value #{}", e))
                         } else {
-                            Err(
-                                SVDError::NotExpectedTag(t.clone(), "enumeratedValue".to_string())
-                                    .into(),
+                            Err(ParseError::NotExpectedTag(
+                                t.clone(),
+                                "enumeratedValue".to_string(),
                             )
+                            .into())
                         }
                     })
                     .collect();

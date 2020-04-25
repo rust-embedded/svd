@@ -11,6 +11,8 @@ use crate::new_element;
 use crate::error::*;
 use crate::svd::{registercluster::RegisterCluster, registerproperties::RegisterProperties};
 
+use crate::Build;
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct ClusterInfo {
@@ -46,7 +48,11 @@ pub struct ClusterInfo {
     _extensible: (),
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+impl Build for ClusterInfo {
+    type Builder = ClusterInfoBuilder;
+}
+
+#[derive(Default)]
 pub struct ClusterInfoBuilder {
     name: Option<String>,
     address_offset: Option<u32>,
@@ -114,7 +120,7 @@ impl ClusterInfo {
             check_name(name, "derivedFrom")?;
         } else {
             if self.children.is_empty() {
-                return Err(SVDError::EmptyCluster)?;
+                return Err(ClusterError::Empty)?;
             }
         }
         Ok(self)

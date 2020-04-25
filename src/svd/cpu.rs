@@ -12,6 +12,8 @@ use crate::new_element;
 use crate::svd::endian::Endian;
 use crate::types::Parse;
 
+use crate::Build;
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct Cpu {
@@ -40,7 +42,11 @@ pub struct Cpu {
     _extensible: (),
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+impl Build for Cpu {
+    type Builder = CpuBuilder;
+}
+
+#[derive(Default)]
 pub struct CpuBuilder {
     name: Option<String>,
     revision: Option<String>,
@@ -122,7 +128,7 @@ impl Parse for Cpu {
 
     fn parse(tree: &Element) -> Result<Self> {
         if tree.name != "cpu" {
-            return Err(SVDError::NameMismatch(tree.clone()).into());
+            return Err(ParseError::NameMismatch(tree.clone()).into());
         }
 
         CpuBuilder::default()

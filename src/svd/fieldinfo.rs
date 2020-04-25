@@ -12,6 +12,8 @@ use crate::new_element;
 use crate::parse;
 use crate::types::Parse;
 
+use crate::Build;
+
 use crate::svd::{
     access::Access, bitrange::BitRange, enumeratedvalues::EnumeratedValues,
     modifiedwritevalues::ModifiedWriteValues, writeconstraint::WriteConstraint,
@@ -60,7 +62,11 @@ pub struct FieldInfo {
     _extensible: (),
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+impl Build for FieldInfo {
+    type Builder = FieldInfoBuilder;
+}
+
+#[derive(Default)]
 pub struct FieldInfoBuilder {
     name: Option<String>,
     bit_range: Option<BitRange>,
@@ -144,7 +150,7 @@ impl Parse for FieldInfo {
 
     fn parse(tree: &Element) -> Result<Self> {
         if tree.name != "field" {
-            return Err(SVDError::NotExpectedTag(tree.clone(), "field".to_string()).into());
+            return Err(ParseError::NotExpectedTag(tree.clone(), "field".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
         Self::_parse(tree, name.clone()).with_context(|| format!("In field `{}`", name))
