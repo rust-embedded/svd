@@ -19,7 +19,7 @@ use crate::svd::{
 };
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Peripheral {
     /// The string identifies the peripheral. Peripheral names are required to be unique for a device
     pub name: String,
