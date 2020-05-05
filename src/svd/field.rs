@@ -44,9 +44,9 @@ impl Parse for Field {
             if let Some(indices) = &array_info.dim_index {
                 assert_eq!(array_info.dim as usize, indices.len())
             }
-            Ok(Self::Array(info, array_info))
+            Ok(Field::Array(info, array_info))
         } else {
-            Ok(Self::Single(info))
+            Ok(Field::Single(info))
         }
     }
 }
