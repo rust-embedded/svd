@@ -51,6 +51,7 @@ impl Parse for RegisterProperties {
         p.reset_value = parse::optional::<u32>("resetValue", tree)?;
         p.reset_mask = parse::optional::<u32>("resetMask", tree)?;
         p.access = parse::optional::<Access>("access", tree)?;
+        check_reset_value(p.size, p.reset_value, p.reset_mask)?;
         Ok(p)
     }
 }
