@@ -159,9 +159,9 @@ impl PeripheralBuilder {
 impl Peripheral {
     fn validate(self) -> Result<Self> {
         // TODO
-        check_name(&self.name, "name")?;
+        check_dimable_name(&self.name, "name")?;
         if let Some(name) = self.derived_from.as_ref() {
-            check_name(name, "derivedFrom")?;
+            check_dimable_name(name, "derivedFrom")?;
         } else if let Some(registers) = self.registers.as_ref() {
             if registers.is_empty() {
                 return Err(SVDError::EmptyRegisters)?;

@@ -182,15 +182,15 @@ impl RegisterInfoBuilder {
 
 impl RegisterInfo {
     fn validate(self) -> Result<Self> {
-        check_name(&self.name, "name")?;
+        check_dimable_name(&self.name, "name")?;
         if let Some(name) = self.alternate_group.as_ref() {
             check_name(name, "alternateGroup")?;
         }
         if let Some(name) = self.alternate_register.as_ref() {
-            check_name(name, "alternateRegister")?;
+            check_dimable_name(name, "alternateRegister")?;
         }
         if let Some(name) = self.derived_from.as_ref() {
-            check_name(name, "derivedFrom")?;
+            check_dimable_name(name, "derivedFrom")?;
         } else if let Some(fields) = self.fields.as_ref() {
             if fields.is_empty() {
                 return Err(SVDError::EmptyFields)?;
