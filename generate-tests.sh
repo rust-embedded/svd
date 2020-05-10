@@ -60,7 +60,6 @@ EOF
     done
     cat >"$tests_dir/cmsis.rs"<<EOF
 pub mod cmsis_tests;
-use cmsis_tests::*;
 EOF
 }
 
