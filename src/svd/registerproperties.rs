@@ -51,6 +51,7 @@ impl Parse for RegisterProperties {
         p.reset_value = parse::optional::<u32>("resetValue", tree)?;
         p.reset_mask = parse::optional::<u32>("resetMask", tree)?;
         p.access = parse::optional::<Access>("access", tree)?;
+        check_reset_value(p.size, p.reset_value, p.reset_mask)?;
         Ok(p)
     }
 }
@@ -94,7 +95,7 @@ mod tests {
             <mock>
                 <size>0xaabbccdd</size>
                 <resetValue>0x11223344</resetValue>
-                <resetMask>0x00000000</resetMask>
+                <resetMask>0xffffffff</resetMask>
                 <access>read-only</access>
             </mock>
         ",
@@ -103,7 +104,7 @@ mod tests {
         let mut expected = RegisterProperties::default();
         expected.size = Some(0xaabbccdd);
         expected.reset_value = Some(0x11223344);
-        expected.reset_mask = Some(0x00000000);
+        expected.reset_mask = Some(0xffffffff);
         expected.access = Some(Access::ReadOnly);
 
         let tree1 = Element::parse(example.as_bytes()).unwrap();
