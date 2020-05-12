@@ -2,6 +2,7 @@
 //! This module defines error types and messages for SVD parsing and encoding
 
 pub use anyhow::{Context, Result};
+use core::u32;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use xmltree::Element;
