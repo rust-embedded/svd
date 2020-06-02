@@ -4,7 +4,8 @@ main() {
     if [ -x "$(command -v cross)" ]; then
         cross -V
     else
-        cargo install cross
+        rustup install stable
+        cargo +stable install cross
     fi
 }
 
