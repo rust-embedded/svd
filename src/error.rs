@@ -96,7 +96,7 @@ pub(crate) fn check_name(name: &str, tag: &str) -> Result<()> {
 
 pub(crate) fn check_dimable_name(name: &str, tag: &str) -> Result<()> {
     static PATTERN: Lazy<Regex> = Lazy::new(|| {
-        Regex::new("^((%s)|(%s)[_A-Za-z]{1}[_A-Za-z0-9]*)|([_A-Za-z]{1}[_A-Za-z0-9]*(\\[%s\\])?)|([_A-Za-z]{1}[_A-Za-z0-9]*(%s)?[_A-Za-z0-9]*)$").unwrap()
+        Regex::new("^(((%s)|(%s)[_A-Za-z]{1}[_A-Za-z0-9]*)|([_A-Za-z]{1}[_A-Za-z0-9]*(\\[%s\\])?)|([_A-Za-z]{1}[_A-Za-z0-9]*(%s)?[_A-Za-z0-9]*))$").unwrap()
     });
     if PATTERN.is_match(name) {
         Ok(())
