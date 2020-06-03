@@ -105,6 +105,13 @@ pub(crate) fn check_dimable_name(name: &str, tag: &str) -> Result<()> {
     }
 }
 
+pub(crate) fn check_derived_name(name: &str, tag: &str) -> Result<()> {
+    for x in name.split(".") {
+        check_dimable_name(x, tag)?
+    }
+    Ok(())
+}
+
 pub(crate) fn check_reset_value(
     size: Option<u32>,
     value: Option<u32>,

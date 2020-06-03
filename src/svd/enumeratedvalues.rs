@@ -87,7 +87,7 @@ impl EnumeratedValues {
             check_name(name, "name")?;
         }
         if let Some(dname) = self.derived_from.as_ref() {
-            check_name(dname, "derivedFrom")?;
+            check_derived_name(dname, "derivedFrom")?;
             Ok(self)
         } else {
             if self.values.is_empty() {
