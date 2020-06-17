@@ -60,7 +60,7 @@ impl Encode for Field {
             Field::Single(info) => info.encode(),
             Field::Array(info, array_info) => {
                 // TODO: is this correct? probably not, need tests
-                let base = info.encode()?;
+                let mut base = info.encode()?;
                 base.merge(&array_info.encode()?);
                 Ok(base)
             }
@@ -68,4 +68,47 @@ impl Encode for Field {
     }
 }
 
-// TODO: add Field encode and decode tests
+#[cfg(test)]
+#[cfg(feature = "unproven")]
+mod tests {
+    use super::*;
+    use crate::bitrange::{BitRange, BitRangeType};
+    use crate::dimelement::DimElementBuilder;
+    use crate::fieldinfo::FieldInfoBuilder;
+
+    use crate::run_test;
+    #[test]
+    fn decode_encode() {
+        let tests = vec![(
+            Field::Array(
+                FieldInfoBuilder::default()
+                    .name("MODE%s".to_string())
+                    .derived_from(Some("other_field".to_string()))
+                    .bit_range(BitRange {
+                        offset: 24,
+                        width: 2,
+                        range_type: BitRangeType::OffsetWidth,
+                    })
+                    .build()
+                    .unwrap(),
+                DimElementBuilder::default()
+                    .dim(2)
+                    .dim_increment(4)
+                    .dim_index(Some(vec!["10".to_string(), "20".to_string()]))
+                    .build()
+                    .unwrap(),
+            ),
+            "
+            <field derivedFrom=\"other_field\">
+              <name>MODE%s</name>
+              <bitOffset>24</bitOffset>
+              <bitWidth>2</bitWidth>
+              <dim>2</dim>
+              <dimIncrement>4</dimIncrement>
+              <dimIndex>10,20</dimIndex>
+            </field>
+            ",
+        )];
+        run_test::<Field>(&tests[..]);
+    }
+}

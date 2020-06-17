@@ -23,7 +23,7 @@ pub trait ElementExt {
     fn get_child_u32(&self, n: &str) -> Result<u32>;
     fn get_child_bool(&self, n: &str) -> Result<bool>;
 
-    fn merge(&self, n: &Self) -> Self;
+    fn merge(&mut self, n: &Self);
 
     fn debug(&self);
 }
@@ -88,12 +88,10 @@ impl ElementExt for Element {
     }
 
     // Merges the children of two elements, maintaining the name and description of the first
-    fn merge(&self, r: &Self) -> Self {
-        let mut n = self.clone();
+    fn merge(&mut self, r: &Self) {
         for c in &r.children {
-            n.children.push(c.clone());
+            self.children.push(c.clone());
         }
-        n
     }
 
     fn debug(&self) {

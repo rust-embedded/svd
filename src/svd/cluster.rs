@@ -68,7 +68,7 @@ impl Encode for Cluster {
             Cluster::Single(i) => i.encode(),
             Cluster::Array(i, a) => {
                 let mut e = i.encode()?;
-                e = e.merge(&a.encode()?);
+                e.merge(&a.encode()?);
                 Ok(e)
             }
         }
