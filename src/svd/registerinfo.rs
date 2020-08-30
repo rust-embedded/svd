@@ -190,7 +190,7 @@ impl RegisterInfo {
             check_dimable_name(name, "alternateRegister")?;
         }
         if let Some(name) = self.derived_from.as_ref() {
-            check_dimable_name(name, "derivedFrom")?;
+            check_derived_name(name, "derivedFrom")?;
         } else if let Some(fields) = self.fields.as_ref() {
             if fields.is_empty() {
                 return Err(SVDError::EmptyFields)?;
