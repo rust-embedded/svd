@@ -24,12 +24,12 @@ pub struct RegisterProperties {
     /// Default value for all registers at RESET
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub reset_value: Option<u32>,
+    pub reset_value: Option<u64>,
 
     /// Define which register bits have a defined reset value
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub reset_mask: Option<u32>,
+    pub reset_mask: Option<u64>,
 
     /// Default access rights for all registers
     #[cfg_attr(feature = "serde", serde(default))]
@@ -48,8 +48,8 @@ impl Parse for RegisterProperties {
     fn parse(tree: &Element) -> Result<Self> {
         let mut p = RegisterProperties::default();
         p.size = parse::optional::<u32>("size", tree)?;
-        p.reset_value = parse::optional::<u32>("resetValue", tree)?;
-        p.reset_mask = parse::optional::<u32>("resetMask", tree)?;
+        p.reset_value = parse::optional::<u64>("resetValue", tree)?;
+        p.reset_mask = parse::optional::<u64>("resetMask", tree)?;
         p.access = parse::optional::<Access>("access", tree)?;
         check_reset_value(p.size, p.reset_value, p.reset_mask)?;
         Ok(p)
