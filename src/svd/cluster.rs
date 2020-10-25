@@ -39,10 +39,7 @@ impl Parse for Cluster {
 
         if tree.get_child("dimIncrement").is_some() {
             let array_info = DimElement::parse(tree)?;
-            if !info.name.contains("%s") {
-                // TODO: replace with real error
-                anyhow::bail!("Cluster name invalid");
-            }
+            check_has_placeholder(&info.name, "cluster")?;
 
             if let Some(indices) = &array_info.dim_index {
                 if array_info.dim as usize != indices.len() {
