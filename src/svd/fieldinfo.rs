@@ -131,8 +131,15 @@ impl FieldInfo {
         if let Some(name) = self.derived_from.as_ref() {
             check_derived_name(name, "derivedFrom")?;
         }
-        for ev in &self.enumerated_values {
-            ev.check_range(0..2_u32.pow(self.bit_range.width))?;
+
+        // If the bit_range has its maximum width, all enumerated values will of
+        // course fit in so we can skip validation.
+        //
+        // TODO: If enumerated values ever change to u64, this needs to be updated.
+        if self.bit_range.width < 32 {
+            for ev in &self.enumerated_values {
+                ev.check_range(0..2_u32.pow(self.bit_range.width))?;
+            }
         }
         Ok(self)
     }
