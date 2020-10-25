@@ -25,7 +25,7 @@ pub struct Peripheral {
     pub name: String,
 
     /// Lowest address reserved or used by the peripheral
-    pub base_address: u32,
+    pub base_address: u64,
 
     /// The string specifies the version of this peripheral description
     #[cfg_attr(feature = "serde", serde(default))]
@@ -76,7 +76,7 @@ pub struct Peripheral {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct PeripheralBuilder {
     name: Option<String>,
-    base_address: Option<u32>,
+    base_address: Option<u64>,
     version: Option<String>,
     display_name: Option<String>,
     group_name: Option<String>,
@@ -93,7 +93,7 @@ impl PeripheralBuilder {
         self.name = Some(value);
         self
     }
-    pub fn base_address(mut self, value: u32) -> Self {
+    pub fn base_address(mut self, value: u64) -> Self {
         self.base_address = Some(value);
         self
     }
@@ -192,7 +192,7 @@ impl Peripheral {
             .display_name(tree.get_child_text_opt("displayName")?)
             .group_name(tree.get_child_text_opt("groupName")?)
             .description(tree.get_child_text_opt("description")?)
-            .base_address(tree.get_child_u32("baseAddress")?)
+            .base_address(tree.get_child_u64("baseAddress")?)
             .address_block(parse::optional::<AddressBlock>("addressBlock", tree)?)
             .interrupt({
                 let interrupt: Result<Vec<_>, _> = tree

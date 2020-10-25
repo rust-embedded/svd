@@ -21,6 +21,7 @@ pub trait ElementExt {
 
     fn get_child_elem<'a>(&'a self, n: &str) -> Result<&'a Element>;
     fn get_child_u32(&self, n: &str) -> Result<u32>;
+    fn get_child_u64(&self, n: &str) -> Result<u64>;
     fn get_child_bool(&self, n: &str) -> Result<bool>;
 
     fn merge(&self, n: &Self) -> Self;
@@ -79,6 +80,12 @@ impl ElementExt for Element {
     fn get_child_u32(&self, n: &str) -> Result<u32> {
         let s = self.get_child_elem(n)?;
         u32::parse(&s).context(SVDError::ParseError(self.clone()))
+    }
+
+    /// Get a u64 value from a named child element
+    fn get_child_u64(&self, n: &str) -> Result<u64> {
+        let s = self.get_child_elem(n)?;
+        u64::parse(&s).context(SVDError::ParseError(self.clone()))
     }
 
     /// Get a bool value from a named child element
