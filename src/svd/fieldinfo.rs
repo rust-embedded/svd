@@ -132,6 +132,10 @@ impl FieldInfo {
             check_derived_name(name, "derivedFrom")?;
         }
 
+        if self.bit_range.width == 0 {
+            anyhow::bail!("bitRange width of 0 does not make sense");
+        }
+
         // If the bit_range has its maximum width, all enumerated values will of
         // course fit in so we can skip validation.
         //
