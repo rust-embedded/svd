@@ -81,7 +81,7 @@ pub enum NameError {
 pub enum ResetValueError {
     #[error("Reset value 0x{0:x} doesn't fit in {1} bits")]
     ValueTooLarge(u32, u32),
-    #[error("Reset value 0x{0:x} conflicts with mask '{1}'")]
+    #[error("Reset value 0x{0:x} conflicts with mask '0x{1:x}'")]
     MaskConflict(u32, u32),
     #[error("Mask value 0x{0:x} doesn't fit in {1} bits")]
     MaskTooLarge(u32, u32),
