@@ -73,13 +73,15 @@ pub enum BuildError {
 pub enum NameError {
     #[error("Name `{0}` in tag `{1}` contains unexpected symbol")]
     Invalid(String, String),
+    #[error("Name `{0}` in tag `{1}` is missing a %s placeholder")]
+    MissingPlaceholder(String, String),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum ResetValueError {
     #[error("Reset value 0x{0:x} doesn't fit in {1} bits")]
     ValueTooLarge(u32, u32),
-    #[error("Reset value 0x{0:x} conflicts with mask '{1}'")]
+    #[error("Reset value 0x{0:x} conflicts with mask '0x{1:x}'")]
     MaskConflict(u32, u32),
     #[error("Mask value 0x{0:x} doesn't fit in {1} bits")]
     MaskTooLarge(u32, u32),
@@ -102,6 +104,14 @@ pub(crate) fn check_dimable_name(name: &str, tag: &str) -> Result<()> {
         Ok(())
     } else {
         Err(NameError::Invalid(name.to_string(), tag.to_string()).into())
+    }
+}
+
+pub(crate) fn check_has_placeholder(name: &str, tag: &str) -> Result<()> {
+    if name.contains("%s") {
+        Ok(())
+    } else {
+        Err(NameError::MissingPlaceholder(name.to_string(), tag.to_string()).into())
     }
 }
 

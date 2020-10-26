@@ -40,7 +40,7 @@ impl Parse for Field {
 
         if tree.get_child("dimIncrement").is_some() {
             let array_info = DimElement::parse(tree)?;
-            assert!(info.name.contains("%s"));
+            check_has_placeholder(&info.name, "field")?;
             if let Some(indices) = &array_info.dim_index {
                 assert_eq!(array_info.dim as usize, indices.len())
             }

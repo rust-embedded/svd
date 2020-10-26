@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Peripherals are processed in parallel with `rayon`
 - Serde now skips empty tags
 - Fix: bug in `addressUnitBits`
+- Fix: panic with 32 bit wide fields that have enumerated values
+- Fix: produce error on 0-width fields
+- Fix: error instead of panic when an array/cluster name is missing the `%s` placeholder
 
 ## [v0.9.0] - 2019-11-17
 
