@@ -97,7 +97,7 @@ impl EnumeratedValues {
             }
         }
     }
-    pub(crate) fn check_range(&self, range: core::ops::Range<u32>) -> Result<()> {
+    pub(crate) fn check_range(&self, range: core::ops::Range<u64>) -> Result<()> {
         for v in self.values.iter() {
             v.check_range(&range)?;
         }

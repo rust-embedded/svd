@@ -26,7 +26,7 @@ pub struct EnumeratedValue {
     /// Defines the constant for the bit-field as decimal, hexadecimal or binary number
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub value: Option<u32>,
+    pub value: Option<u64>,
 
     /// Defines the name and description for all other values that are not listed explicitly
     #[cfg_attr(feature = "serde", serde(default))]
@@ -41,16 +41,16 @@ pub struct EnumeratedValue {
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum EnumeratedValueError {
     #[error("EnumeratedValue must contain one of `value` (passed {0:?}) or `is_default` (passed {1:?}) tags")]
-    AbsentValue(Option<u32>, Option<bool>),
+    AbsentValue(Option<u64>, Option<bool>),
     #[error("Value {0} out of range {1:?}")]
-    OutOfRange(u32, core::ops::Range<u32>),
+    OutOfRange(u64, core::ops::Range<u64>),
 }
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct EnumeratedValueBuilder {
     name: Option<String>,
     description: Option<String>,
-    value: Option<u32>,
+    value: Option<u64>,
     is_default: Option<bool>,
 }
 
@@ -63,7 +63,7 @@ impl EnumeratedValueBuilder {
         self.description = value;
         self
     }
-    pub fn value(mut self, value: Option<u32>) -> Self {
+    pub fn value(mut self, value: Option<u64>) -> Self {
         self.value = value;
         self
     }
@@ -93,7 +93,7 @@ impl EnumeratedValue {
             _ => Err(EnumeratedValueError::AbsentValue(self.value, self.is_default).into()),
         }
     }
-    pub(crate) fn check_range(&self, range: &core::ops::Range<u32>) -> Result<()> {
+    pub(crate) fn check_range(&self, range: &core::ops::Range<u64>) -> Result<()> {
         match &self.value {
             Some(x) if !range.contains(x) => {
                 Err(EnumeratedValueError::OutOfRange(*x, range.clone()).into())
@@ -110,7 +110,7 @@ impl EnumeratedValue {
             .description(tree.get_child_text_opt("description")?)
             // TODO: this .ok() approach is simple, but does not expose errors parsing child objects.
             // Suggest refactoring all parse::type methods to return result so parse::optional works.
-            .value(parse::optional::<u32>("value", tree)?)
+            .value(parse::optional::<u64>("value", tree)?)
             .is_default(tree.get_child_bool("isDefault").ok())
             .build()
     }
