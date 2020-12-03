@@ -22,8 +22,8 @@ pub enum WriteConstraint {
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WriteConstraintRange {
-    pub min: u32,
-    pub max: u32,
+    pub min: u64,
+    pub max: u64,
 }
 
 impl Parse for WriteConstraint {
@@ -83,8 +83,8 @@ impl Parse for WriteConstraintRange {
 
     fn parse(tree: &Element) -> Result<Self> {
         Ok(Self {
-            min: tree.get_child_u32("minimum")?,
-            max: tree.get_child_u32("maximum")?,
+            min: tree.get_child_u64("minimum")?,
+            max: tree.get_child_u64("maximum")?,
         })
     }
 }
