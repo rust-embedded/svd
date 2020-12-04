@@ -61,7 +61,7 @@ impl Encode for Register {
             Register::Single(info) => info.encode(),
             Register::Array(info, array_info) => {
                 // TODO: is this correct? probably not, need tests
-                let base = info.encode()?;
+                let mut base = info.encode()?;
                 base.merge(&array_info.encode()?);
                 Ok(base)
             }
@@ -69,4 +69,40 @@ impl Encode for Register {
     }
 }
 
-// TODO: add Register encode and decode tests
+#[cfg(test)]
+#[cfg(feature = "unproven")]
+mod tests {
+    use super::*;
+    use crate::dimelement::DimElementBuilder;
+    use crate::registerinfo::RegisterInfoBuilder;
+
+    use crate::run_test;
+    #[test]
+    fn decode_encode() {
+        let tests = vec![(
+            Register::Array(
+                RegisterInfoBuilder::default()
+                    .name("MODE%s".to_string())
+                    .address_offset(8)
+                    .build()
+                    .unwrap(),
+                DimElementBuilder::default()
+                    .dim(2)
+                    .dim_increment(4)
+                    .dim_index(Some(vec!["10".to_string(), "20".to_string()]))
+                    .build()
+                    .unwrap(),
+            ),
+            "
+            <register>
+              <name>MODE%s</name>
+              <addressOffset>0x8</addressOffset>
+              <dim>2</dim>
+              <dimIncrement>4</dimIncrement>
+              <dimIndex>10,20</dimIndex>
+            </register>
+            ",
+        )];
+        run_test::<Register>(&tests[..]);
+    }
+}
