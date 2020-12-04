@@ -48,6 +48,38 @@ impl Parse for u32 {
     }
 }
 
+impl Parse for u64 {
+    type Object = u64;
+    type Error = anyhow::Error;
+
+    fn parse(tree: &Element) -> Result<u64> {
+        let text = tree.get_text()?;
+
+        if text.starts_with("0x") || text.starts_with("0X") {
+            u64::from_str_radix(&text["0x".len()..], 16)
+                .with_context(|| format!("{} invalid", text))
+        } else if text.starts_with('#') {
+            // Handle strings in the binary form of:
+            // #01101x1
+            // along with don't care character x (replaced with 0)
+            u64::from_str_radix(
+                &str::replace(&text.to_lowercase()["#".len()..], "x", "0"),
+                2,
+            )
+            .with_context(|| format!("{} invalid", text))
+        } else if text.starts_with("0b") {
+            // Handle strings in the binary form of:
+            // 0b01101x1
+            // along with don't care character x (replaced with 0)
+            u64::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2)
+                .with_context(|| format!("{} invalid", text))
+        } else {
+            text.parse::<u64>()
+                .with_context(|| format!("{} invalid", text))
+        }
+    }
+}
+
 pub struct BoolParse;
 
 impl Parse for BoolParse {

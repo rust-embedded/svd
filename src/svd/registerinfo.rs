@@ -59,11 +59,11 @@ pub struct RegisterInfo {
 
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub reset_value: Option<u32>,
+    pub reset_value: Option<u64>,
 
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub reset_mask: Option<u32>,
+    pub reset_mask: Option<u64>,
 
     /// `None` indicates that the `<fields>` node is not present
     #[cfg_attr(feature = "serde", serde(default))]
@@ -135,11 +135,11 @@ impl RegisterInfoBuilder {
         self.properties.access = value;
         self
     }
-    pub fn reset_value(mut self, value: Option<u32>) -> Self {
+    pub fn reset_value(mut self, value: Option<u64>) -> Self {
         self.properties.reset_value = value;
         self
     }
-    pub fn reset_mask(mut self, value: Option<u32>) -> Self {
+    pub fn reset_mask(mut self, value: Option<u64>) -> Self {
         self.properties.reset_mask = value;
         self
     }

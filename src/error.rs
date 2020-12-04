@@ -2,7 +2,7 @@
 //! This module defines error types and messages for SVD parsing and encoding
 
 pub use anyhow::{Context, Result};
-use core::u32;
+use core::u64;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use xmltree::Element;
@@ -80,11 +80,11 @@ pub enum NameError {
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum ResetValueError {
     #[error("Reset value 0x{0:x} doesn't fit in {1} bits")]
-    ValueTooLarge(u32, u32),
+    ValueTooLarge(u64, u32),
     #[error("Reset value 0x{0:x} conflicts with mask '0x{1:x}'")]
-    MaskConflict(u32, u32),
+    MaskConflict(u64, u64),
     #[error("Mask value 0x{0:x} doesn't fit in {1} bits")]
-    MaskTooLarge(u32, u32),
+    MaskTooLarge(u64, u32),
 }
 
 pub(crate) fn check_name(name: &str, tag: &str) -> Result<()> {
@@ -124,10 +124,10 @@ pub(crate) fn check_derived_name(name: &str, tag: &str) -> Result<()> {
 
 pub(crate) fn check_reset_value(
     size: Option<u32>,
-    value: Option<u32>,
-    mask: Option<u32>,
+    value: Option<u64>,
+    mask: Option<u64>,
 ) -> Result<()> {
-    const MAX_BITS: u32 = u32::MAX.count_ones();
+    const MAX_BITS: u32 = u64::MAX.count_ones();
 
     if let (Some(size), Some(value)) = (size, value) {
         if MAX_BITS - value.leading_zeros() > size {

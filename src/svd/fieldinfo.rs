@@ -138,11 +138,9 @@ impl FieldInfo {
 
         // If the bit_range has its maximum width, all enumerated values will of
         // course fit in so we can skip validation.
-        //
-        // TODO: If enumerated values ever change to u64, this needs to be updated.
-        if self.bit_range.width < 32 {
+        if self.bit_range.width < 64 {
             for ev in &self.enumerated_values {
-                ev.check_range(0..2_u32.pow(self.bit_range.width))?;
+                ev.check_range(0..2_u64.pow(self.bit_range.width))?;
             }
         }
         Ok(self)
