@@ -1,5 +1,4 @@
 use crate::elementext::ElementExt;
-#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 use xmltree::Element;
 
@@ -8,10 +7,9 @@ use rayon::prelude::*;
 use crate::parse;
 use crate::types::Parse;
 
-#[cfg(feature = "unproven")]
 use crate::encode::{Encode, EncodeChildren};
 use crate::error::*;
-#[cfg(feature = "unproven")]
+
 use crate::new_element;
 use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties};
 
@@ -180,7 +178,6 @@ impl Device {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for Device {
     type Error = anyhow::Error;
 

@@ -1,13 +1,11 @@
-#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use crate::elementext::ElementExt;
 use xmltree::Element;
 
-#[cfg(feature = "unproven")]
 use crate::encode::Encode;
 use crate::error::*;
-#[cfg(feature = "unproven")]
+
 use crate::new_element;
 use crate::parse;
 use crate::svd::{enumeratedvalue::EnumeratedValue, usage::Usage};
@@ -143,7 +141,6 @@ impl Parse for EnumeratedValues {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for EnumeratedValues {
     type Error = anyhow::Error;
 
@@ -180,7 +177,6 @@ impl Encode for EnumeratedValues {
 }
 
 #[cfg(test)]
-#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use crate::svd::enumeratedvalue::EnumeratedValueBuilder;

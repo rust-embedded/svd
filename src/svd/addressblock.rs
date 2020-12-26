@@ -1,4 +1,3 @@
-#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use crate::elementext::ElementExt;
@@ -6,10 +5,8 @@ use xmltree::Element;
 
 use crate::types::Parse;
 
-#[cfg(feature = "unproven")]
 use crate::encode::Encode;
 use crate::error::*;
-#[cfg(feature = "unproven")]
 use crate::new_element;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -33,7 +30,6 @@ impl Parse for AddressBlock {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for AddressBlock {
     type Error = anyhow::Error;
 
@@ -55,7 +51,6 @@ impl Encode for AddressBlock {
 }
 
 #[cfg(test)]
-#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use crate::run_test;

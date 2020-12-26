@@ -1,4 +1,4 @@
-#[cfg(feature = "unproven")]
+
 use std::collections::HashMap;
 
 use xmltree::Element;
@@ -6,9 +6,8 @@ use xmltree::Element;
 use crate::elementext::ElementExt;
 use crate::parse;
 
-#[cfg(feature = "unproven")]
 use crate::encode::{Encode, EncodeChildren};
-#[cfg(feature = "unproven")]
+
 use crate::new_element;
 use crate::types::Parse;
 
@@ -222,7 +221,6 @@ impl Peripheral {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for Peripheral {
     type Error = anyhow::Error;
 

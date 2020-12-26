@@ -2,4 +2,3 @@
 [._]*.sw[a-p]
 Cargo.lock
 target
-tests/

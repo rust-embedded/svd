@@ -1,10 +1,8 @@
-#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use xmltree::Element;
 
 use crate::elementext::ElementExt;
-#[cfg(feature = "unproven")]
 use crate::encode::Encode;
 use crate::types::Parse;
 
@@ -36,7 +34,6 @@ impl Parse for Endian {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for Endian {
     type Error = anyhow::Error;
 
@@ -61,7 +58,6 @@ impl Encode for Endian {
 }
 
 #[cfg(test)]
-#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use crate::run_test;

@@ -1,11 +1,10 @@
 use crate::elementext::ElementExt;
-#[cfg(feature = "unproven")]
+
 use std::collections::HashMap;
 use xmltree::Element;
 
 use crate::types::Parse;
 
-#[cfg(feature = "unproven")]
 use crate::encode::Encode;
 use crate::error::*;
 
@@ -46,7 +45,6 @@ impl Parse for ModifiedWriteValues {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for ModifiedWriteValues {
     type Error = anyhow::Error;
 
@@ -77,7 +75,6 @@ impl Encode for ModifiedWriteValues {
 }
 
 #[cfg(test)]
-#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use crate::run_test;

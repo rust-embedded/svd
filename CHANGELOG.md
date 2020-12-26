@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fix: produce error on 0-width fields
 - Fix: error instead of panic when an array/cluster name is missing the `%s` placeholder
 - [breaking-change] Add support for 64 addresses, register values, enum values and writeConstraints
+- [breaking-change] Remove unproven flag
 
 ## [v0.9.0] - 2019-11-17
 

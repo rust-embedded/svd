@@ -1,13 +1,11 @@
-#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use xmltree::Element;
 
 use crate::elementext::ElementExt;
-#[cfg(feature = "unproven")]
 use crate::encode::Encode;
 use crate::error::*;
-#[cfg(feature = "unproven")]
+
 use crate::new_element;
 use crate::svd::endian::Endian;
 use crate::types::Parse;
@@ -137,7 +135,6 @@ impl Parse for Cpu {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for Cpu {
     type Error = anyhow::Error;
 
@@ -172,7 +169,6 @@ impl Cpu {
 }
 
 #[cfg(test)]
-#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use crate::run_test;

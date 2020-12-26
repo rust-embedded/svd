@@ -1,13 +1,11 @@
-#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use crate::elementext::ElementExt;
 use xmltree::Element;
 
-#[cfg(feature = "unproven")]
 use crate::encode::Encode;
 use crate::error::*;
-#[cfg(feature = "unproven")]
+
 use crate::new_element;
 use crate::types::Parse;
 
@@ -52,7 +50,6 @@ impl Parse for WriteConstraint {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for WriteConstraint {
     type Error = anyhow::Error;
 
@@ -89,7 +86,6 @@ impl Parse for WriteConstraintRange {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for WriteConstraintRange {
     type Error = anyhow::Error;
 
@@ -110,7 +106,6 @@ impl Encode for WriteConstraintRange {
 }
 
 #[cfg(test)]
-#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use crate::run_test;

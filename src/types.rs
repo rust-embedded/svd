@@ -2,7 +2,6 @@
 
 use xmltree::Element;
 
-#[cfg(feature = "unproven")]
 pub use crate::encode::Encode;
 pub use crate::parse::optional as parse_optional;
 pub use crate::parse::Parse;
