@@ -1,11 +1,9 @@
 use xmltree::Element;
 
-#[cfg(feature = "unproven")]
 use crate::encode::Encode;
-#[cfg(feature = "unproven")]
 use crate::encode::EncodeChildren;
 use crate::error::*;
-#[cfg(feature = "unproven")]
+
 use crate::new_element;
 use crate::parse;
 use crate::types::Parse;
@@ -56,7 +54,6 @@ impl Parse for RegisterProperties {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl EncodeChildren for RegisterProperties {
     type Error = anyhow::Error;
 
@@ -84,7 +81,6 @@ impl EncodeChildren for RegisterProperties {
 }
 
 #[cfg(test)]
-#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
 

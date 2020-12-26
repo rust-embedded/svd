@@ -1,10 +1,8 @@
-#[cfg(feature = "unproven")]
 use std::collections::HashMap;
 
 use crate::elementext::ElementExt;
 use xmltree::Element;
 
-#[cfg(feature = "unproven")]
 use crate::encode::Encode;
 use crate::error::*;
 use crate::types::Parse;
@@ -33,7 +31,6 @@ impl Parse for Usage {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for Usage {
     type Error = anyhow::Error;
 
@@ -57,7 +54,6 @@ impl Encode for Usage {
 }
 
 #[cfg(test)]
-#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use crate::run_test;

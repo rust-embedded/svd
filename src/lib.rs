@@ -24,9 +24,7 @@
 
 #![deny(warnings)]
 
-#[cfg(feature = "unproven")]
 use std::collections::HashMap;
-
 use xmltree::Element;
 
 // ElementExt extends XML elements with useful methods
@@ -41,9 +39,7 @@ use anyhow::Result;
 pub mod parse;
 use parse::Parse;
 // Encode defines encoding interfaces
-#[cfg(feature = "unproven")]
 pub mod encode;
-#[cfg(feature = "unproven")]
 use encode::Encode;
 // Types defines simple types and parse/encode implementations
 pub mod types;
@@ -61,7 +57,6 @@ pub fn parse(xml: &str) -> Result<Device> {
 }
 
 /// Encodes a device object to an SVD (XML) string
-#[cfg(feature = "unproven")]
 pub fn encode(d: &Device) -> Result<String> {
     let root = d.encode()?;
     let mut wr = Vec::new();
@@ -79,7 +74,6 @@ fn trim_utf8_bom(s: &str) -> &str {
 }
 
 /// Helper to create new base xml elements
-#[cfg(feature = "unproven")]
 pub(crate) fn new_element(name: &str, text: Option<String>) -> Element {
     Element {
         prefix: None,
@@ -96,7 +90,6 @@ pub(crate) fn new_element(name: &str, text: Option<String>) -> Element {
 /// Takes an array of (item, xml) pairs where the item implements
 /// Parse and Encode and tests object encoding and decoding
 #[cfg(test)]
-#[cfg(feature = "unproven")]
 pub fn run_test<
     T: Parse<Error = anyhow::Error, Object = T>
         + Encode<Error = anyhow::Error>

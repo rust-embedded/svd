@@ -3,9 +3,7 @@ use xmltree::Element;
 use crate::types::{parse_optional, DimIndex, Parse};
 
 use crate::elementext::ElementExt;
-#[cfg(feature = "unproven")]
 use crate::encode::Encode;
-#[cfg(feature = "unproven")]
 use crate::new_element;
 
 use crate::error::*;
@@ -77,7 +75,6 @@ impl Parse for DimElement {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for DimElement {
     type Error = anyhow::Error;
 
@@ -100,7 +97,6 @@ impl Encode for DimElement {
 }
 
 #[cfg(test)]
-#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use crate::run_test;

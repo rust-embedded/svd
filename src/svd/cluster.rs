@@ -3,9 +3,7 @@ use xmltree::Element;
 
 use crate::types::Parse;
 
-#[cfg(feature = "unproven")]
 use crate::elementext::ElementExt;
-#[cfg(feature = "unproven")]
 use crate::encode::Encode;
 use crate::error::*;
 use crate::svd::{clusterinfo::ClusterInfo, dimelement::DimElement};
@@ -55,7 +53,6 @@ impl Parse for Cluster {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for Cluster {
     type Error = anyhow::Error;
 

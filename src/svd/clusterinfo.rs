@@ -3,9 +3,7 @@ use xmltree::Element;
 
 use crate::types::Parse;
 
-#[cfg(feature = "unproven")]
 use crate::encode::{Encode, EncodeChildren};
-#[cfg(feature = "unproven")]
 use crate::new_element;
 
 use crate::error::*;
@@ -153,7 +151,6 @@ impl ClusterInfo {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for ClusterInfo {
     type Error = anyhow::Error;
 

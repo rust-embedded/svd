@@ -4,9 +4,8 @@ use xmltree::Element;
 
 use crate::types::Parse;
 
-#[cfg(feature = "unproven")]
 use crate::elementext::ElementExt;
-#[cfg(feature = "unproven")]
+
 use crate::encode::Encode;
 use crate::error::*;
 use crate::svd::{dimelement::DimElement, fieldinfo::FieldInfo};
@@ -51,7 +50,7 @@ impl Parse for Field {
     }
 }
 
-#[cfg(feature = "unproven")]
+
 impl Encode for Field {
     type Error = anyhow::Error;
 
@@ -69,7 +68,6 @@ impl Encode for Field {
 }
 
 #[cfg(test)]
-#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use crate::bitrange::{BitRange, BitRangeType};

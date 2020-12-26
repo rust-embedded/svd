@@ -1,13 +1,12 @@
-#[cfg(feature = "unproven")]
+
 use std::collections::HashMap;
 
 use crate::elementext::ElementExt;
 use xmltree::Element;
 
-#[cfg(feature = "unproven")]
 use crate::encode::Encode;
 use crate::error::*;
-#[cfg(feature = "unproven")]
+
 use crate::new_element;
 use crate::parse;
 use crate::types::Parse;
@@ -187,7 +186,6 @@ impl FieldInfo {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for FieldInfo {
     type Error = anyhow::Error;
 
@@ -237,7 +235,6 @@ impl Encode for FieldInfo {
 }
 
 #[cfg(test)]
-#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use crate::run_test;

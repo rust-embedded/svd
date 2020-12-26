@@ -1,14 +1,12 @@
-#[cfg(feature = "unproven")]
+
 use std::collections::HashMap;
 
 use xmltree::Element;
 
 use crate::elementext::ElementExt;
 
-#[cfg(feature = "unproven")]
 use crate::encode::Encode;
 use crate::error::*;
-#[cfg(feature = "unproven")]
 use crate::new_element;
 use crate::types::Parse;
 
@@ -50,7 +48,6 @@ impl Parse for Interrupt {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for Interrupt {
     type Error = anyhow::Error;
 
@@ -72,7 +69,6 @@ impl Encode for Interrupt {
 }
 
 #[cfg(test)]
-#[cfg(feature = "unproven")]
 mod tests {
     use super::*;
     use crate::run_test;

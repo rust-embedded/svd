@@ -2,9 +2,7 @@ use xmltree::Element;
 
 use crate::types::Parse;
 
-#[cfg(feature = "unproven")]
 use crate::encode::Encode;
-
 use crate::error::*;
 use crate::svd::{cluster::Cluster, register::Register};
 
@@ -42,7 +40,6 @@ impl Parse for RegisterCluster {
     }
 }
 
-#[cfg(feature = "unproven")]
 impl Encode for RegisterCluster {
     type Error = anyhow::Error;
 
