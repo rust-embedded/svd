@@ -91,8 +91,10 @@ pub(crate) fn check_name(name: &str, tag: &str) -> Result<()> {
     static PATTERN: Lazy<Regex> = Lazy::new(|| Regex::new("^[_A-Za-z0-9]*$").unwrap());
     if PATTERN.is_match(name) {
         Ok(())
-    } else {
+    } else if cfg!(feature = "strict") {
         Err(NameError::Invalid(name.to_string(), tag.to_string()).into())
+    } else {
+        Ok(())
     }
 }
 

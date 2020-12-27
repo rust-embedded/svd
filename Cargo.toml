@@ -15,6 +15,7 @@ readme = "README.md"
 
 [features]
 derive-from = []
+strict = []
 
 [dependencies]
 xmltree = "0.8"
