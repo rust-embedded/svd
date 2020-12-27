@@ -1,4 +1,3 @@
-
 use std::collections::HashMap;
 
 use xmltree::Element;
@@ -237,19 +236,19 @@ impl Encode for Peripheral {
 
         if let Some(v) = &self.version {
             elem.children
-                .push(new_element("version", Some(format!("{}", v))));
+                .push(new_element("version", Some(v.to_string())));
         };
         if let Some(v) = &self.display_name {
             elem.children
-                .push(new_element("displayName", Some(format!("{}", v))));
+                .push(new_element("displayName", Some(v.to_string())));
         };
         if let Some(v) = &self.group_name {
             elem.children
-                .push(new_element("groupName", Some(format!("{}", v))));
+                .push(new_element("groupName", Some(v.to_string())));
         };
         if let Some(v) = &self.description {
             elem.children
-                .push(new_element("description", Some(format!("{}", v))));
+                .push(new_element("description", Some(v.to_string())));
         };
         elem.children.push(new_element(
             "baseAddress",
@@ -283,7 +282,7 @@ impl Encode for Peripheral {
 
         if let Some(v) = &self.derived_from {
             elem.attributes
-                .insert(String::from("derivedFrom"), format!("{}", v));
+                .insert(String::from("derivedFrom"), v.to_string());
         }
 
         Ok(elem)

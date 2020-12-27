@@ -64,6 +64,7 @@ impl EnumeratedValueBuilder {
         self.value = value;
         self
     }
+    #[allow(clippy::wrong_self_convention)]
     pub fn is_default(mut self, value: Option<bool>) -> Self {
         self.is_default = value;
         self

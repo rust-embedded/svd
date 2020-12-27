@@ -87,12 +87,10 @@ impl EnumeratedValues {
         if let Some(dname) = self.derived_from.as_ref() {
             check_derived_name(dname, "derivedFrom")?;
             Ok(self)
+        } else if self.values.is_empty() {
+            Err(EnumeratedValuesError::Empty.into())
         } else {
-            if self.values.is_empty() {
-                Err(EnumeratedValuesError::Empty.into())
-            } else {
-                Ok(self)
-            }
+            Ok(self)
         }
     }
     pub(crate) fn check_range(&self, range: core::ops::Range<u64>) -> Result<()> {

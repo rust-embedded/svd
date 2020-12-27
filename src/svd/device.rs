@@ -198,7 +198,7 @@ impl Encode for Device {
         );
         if let Some(schema_version) = &self.schema_version {
             elem.attributes
-                .insert(String::from("schemaVersion"), format!("{}", schema_version));
+                .insert(String::from("schemaVersion"), schema_version.to_string());
         }
         if let Some(schema_version) = &self.schema_version {
             elem.attributes.insert(

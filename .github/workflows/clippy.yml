@@ -15,7 +15,6 @@ jobs:
           toolchain: 1.36.0
           override: true
           components: clippy
-      # TODO enable this once clippy warnings are fixed
-      # - uses: actions-rs/clippy-check@v1
-      #   with:
-      #     token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}

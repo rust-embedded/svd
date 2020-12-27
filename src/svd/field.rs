@@ -50,7 +50,6 @@ impl Parse for Field {
     }
 }
 
-
 impl Encode for Field {
     type Error = anyhow::Error;
 
