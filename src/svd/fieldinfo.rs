@@ -1,4 +1,3 @@
-
 use std::collections::HashMap;
 
 use crate::elementext::ElementExt;
@@ -208,7 +207,7 @@ impl Encode for FieldInfo {
 
         if let Some(v) = &self.derived_from {
             elem.attributes
-                .insert(String::from("derivedFrom"), format!("{}", v));
+                .insert(String::from("derivedFrom"), v.to_string());
         }
 
         // Add bit range

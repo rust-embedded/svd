@@ -110,10 +110,8 @@ impl ClusterInfo {
         check_dimable_name(&self.name, "name")?;
         if let Some(name) = self.derived_from.as_ref() {
             check_derived_name(name, "derivedFrom")?;
-        } else {
-            if self.children.is_empty() {
-                return Err(SVDError::EmptyCluster)?;
-            }
+        } else if self.children.is_empty() {
+            return Err(SVDError::EmptyCluster)?;
         }
         Ok(self)
     }
@@ -159,7 +157,7 @@ impl Encode for ClusterInfo {
 
         if let Some(v) = &self.derived_from {
             e.attributes
-                .insert(String::from("derivedFrom"), format!("{}", v));
+                .insert(String::from("derivedFrom"), v.to_string());
         }
 
         e.children

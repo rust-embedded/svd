@@ -267,22 +267,21 @@ impl Encode for RegisterInfo {
         }
         if let Some(v) = &self.alternate_group {
             elem.children
-                .push(new_element("alternateGroup", Some(format!("{}", v))));
+                .push(new_element("alternateGroup", Some(v.to_string())));
         }
 
         if let Some(v) = &self.alternate_register {
             elem.children
-                .push(new_element("alternateRegister", Some(format!("{}", v))));
+                .push(new_element("alternateRegister", Some(v.to_string())));
         }
 
         if let Some(v) = &self.derived_from {
             elem.attributes
-                .insert(String::from("derivedFrom"), format!("{}", v));
+                .insert(String::from("derivedFrom"), v.to_string());
         }
 
         if let Some(v) = &self.size {
-            elem.children
-                .push(new_element("size", Some(format!("{}", v))));
+            elem.children.push(new_element("size", Some(v.to_string())));
         };
 
         if let Some(v) = &self.access {

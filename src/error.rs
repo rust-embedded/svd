@@ -116,7 +116,7 @@ pub(crate) fn check_has_placeholder(name: &str, tag: &str) -> Result<()> {
 }
 
 pub(crate) fn check_derived_name(name: &str, tag: &str) -> Result<()> {
-    for x in name.split(".") {
+    for x in name.split('.') {
         check_dimable_name(x, tag)?
     }
     Ok(())
