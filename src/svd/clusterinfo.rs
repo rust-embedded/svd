@@ -111,6 +111,7 @@ impl ClusterInfo {
         if let Some(name) = self.derived_from.as_ref() {
             check_derived_name(name, "derivedFrom")?;
         } else if self.children.is_empty() {
+            #[cfg(feature = "strict")]
             return Err(SVDError::EmptyCluster)?;
         }
         Ok(self)

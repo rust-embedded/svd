@@ -191,6 +191,7 @@ impl RegisterInfo {
             check_derived_name(name, "derivedFrom")?;
         } else if let Some(fields) = self.fields.as_ref() {
             if fields.is_empty() {
+                #[cfg(feature = "strict")]
                 return Err(SVDError::EmptyFields)?;
             }
         }
