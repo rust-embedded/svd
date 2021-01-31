@@ -1,7 +1,7 @@
 //! Parse traits.
 //! These support parsing of SVD types from XML
 
-use xmltree::Element;
+use minidom::Element;
 
 /// Parse trait allows SVD objects to be parsed from XML elements.
 pub trait Parse {
@@ -20,7 +20,7 @@ pub fn optional<'a, T>(n: &str, e: &'a Element) -> anyhow::Result<Option<T::Obje
 where
     T: Parse<Error = anyhow::Error>,
 {
-    let child = match e.get_child(n) {
+    let child = match e.get_child(n, "") {
         Some(c) => c,
         None => return Ok(None),
     };

@@ -1,7 +1,5 @@
-use std::collections::HashMap;
-
 use crate::elementext::ElementExt;
-use xmltree::Element;
+use minidom::Element;
 
 use crate::encode::Encode;
 use crate::error::*;
@@ -150,7 +148,7 @@ impl Parse for FieldInfo {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        if tree.name != "field" {
+        if tree.name() != "field" {
             return Err(SVDError::NotExpectedTag(tree.clone(), "field".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
@@ -163,15 +161,14 @@ impl FieldInfo {
         let bit_range = BitRange::parse(tree)?;
         FieldInfoBuilder::default()
             .name(name)
-            .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
+            .derived_from(tree.attr("derivedFrom").map(|s| s.to_owned()))
             .description(tree.get_child_text_opt("description")?)
             .bit_range(bit_range)
             .access(parse::optional::<Access>("access", tree)?)
             .enumerated_values({
                 let values: Result<Vec<_>, _> = tree
-                    .children
-                    .iter()
-                    .filter(|t| t.name == "enumeratedValues")
+                    .children()
+                    .filter(|t| t.name() == "enumeratedValues")
                     .map(|t| EnumeratedValues::parse(t))
                     .collect();
                 values?
@@ -189,47 +186,37 @@ impl Encode for FieldInfo {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        let mut children = vec![new_element("name", Some(self.name.clone()))];
+        let mut e =
+            Element::builder("field", "").append(new_element("name", Some(self.name.clone())));
 
         if let Some(description) = &self.description {
-            children.push(new_element("description", Some(description.clone())))
+            e = e.append(new_element("description", Some(description.clone())));
         }
 
-        let mut elem = Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("field"),
-            attributes: HashMap::new(),
-            children,
-            text: None,
-        };
-
         if let Some(v) = &self.derived_from {
-            elem.attributes
-                .insert(String::from("derivedFrom"), v.to_string());
+            e = e.attr("derivedFrom", v);
         }
 
         // Add bit range
-        elem.children.append(&mut self.bit_range.encode()?);
+        e = e.append_all(self.bit_range.encode()?);
 
         if let Some(v) = &self.access {
-            elem.children.push(v.encode()?);
+            e = e.append(v.encode()?);
         };
 
         let enumerated_values: Result<Vec<Element>> =
             self.enumerated_values.iter().map(|v| v.encode()).collect();
-        elem.children.append(&mut enumerated_values?);
+        e = e.append_all(enumerated_values?);
 
         if let Some(v) = &self.write_constraint {
-            elem.children.push(v.encode()?);
+            e = e.append(v.encode()?);
         };
 
         if let Some(v) = &self.modified_write_values {
-            elem.children.push(v.encode()?);
+            e = e.append(v.encode()?);
         };
 
-        Ok(elem)
+        Ok(e.build())
     }
 }
 

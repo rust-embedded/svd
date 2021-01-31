@@ -1,6 +1,6 @@
 //! Shared primitive types for use in SVD objects.
 
-use xmltree::Element;
+use minidom::Element;
 
 pub use crate::encode::Encode;
 pub use crate::parse::optional as parse_optional;
@@ -86,7 +86,7 @@ impl Parse for BoolParse {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<bool> {
-        let text = unwrap!(tree.text.as_ref());
+        let text = tree.text();
         Ok(match text.as_ref() {
             "0" => false,
             "1" => true,

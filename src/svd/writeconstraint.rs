@@ -1,7 +1,5 @@
-use std::collections::HashMap;
-
 use crate::elementext::ElementExt;
-use xmltree::Element;
+use minidom::Element;
 
 use crate::encode::Encode;
 use crate::error::*;
@@ -29,8 +27,8 @@ impl Parse for WriteConstraint {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        if tree.children.len() == 1 {
-            let field = &tree.children[0].name;
+        if tree.children().count() == 1 {
+            let field = &tree.children().next().unwrap().name();
             // Write constraint can only be one of the following
             match field.as_ref() {
                 "writeAsRead" => Ok(WriteConstraint::WriteAsRead(
@@ -55,22 +53,16 @@ impl Encode for WriteConstraint {
 
     fn encode(&self) -> Result<Element> {
         let v = match *self {
-            WriteConstraint::WriteAsRead(v) => new_element("writeAsRead", Some(format!("{}", v))),
+            WriteConstraint::WriteAsRead(v) => {
+                new_element("writeAsRead", Some(format!("{}", v))).build()
+            }
             WriteConstraint::UseEnumeratedValues(v) => {
-                new_element("useEnumeratedValues", Some(format!("{}", v)))
+                new_element("useEnumeratedValues", Some(format!("{}", v))).build()
             }
             WriteConstraint::Range(v) => v.encode()?,
         };
 
-        Ok(Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("writeConstraint"),
-            attributes: HashMap::new(),
-            children: vec![v],
-            text: None,
-        })
+        Ok(Element::builder("writeConstraint", "").append(v).build())
     }
 }
 
@@ -90,18 +82,10 @@ impl Encode for WriteConstraintRange {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        Ok(Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("range"),
-            attributes: HashMap::new(),
-            children: vec![
-                new_element("minimum", Some(format!("0x{:08.x}", self.min))),
-                new_element("maximum", Some(format!("0x{:08.x}", self.max))),
-            ],
-            text: None,
-        })
+        Ok(Element::builder("range", "")
+            .append(new_element("minimum", Some(format!("0x{:08.x}", self.min))))
+            .append(new_element("maximum", Some(format!("0x{:08.x}", self.max))))
+            .build())
     }
 }
 

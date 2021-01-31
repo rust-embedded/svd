@@ -1,6 +1,6 @@
 use core::ops::Deref;
 
-use xmltree::Element;
+use minidom::Element;
 
 use crate::types::Parse;
 
@@ -34,11 +34,11 @@ impl Parse for Register {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        assert_eq!(tree.name, "register");
+        assert_eq!(tree.name(), "register");
 
         let info = RegisterInfo::parse(tree)?;
 
-        if tree.get_child("dimIncrement").is_some() {
+        if tree.get_child("dimIncrement", "").is_some() {
             let array_info = DimElement::parse(tree)?;
             check_has_placeholder(&info.name, "register")?;
             if let Some(indices) = &array_info.dim_index {

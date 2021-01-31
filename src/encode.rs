@@ -1,7 +1,7 @@
 //! Encode traits.
 //! These support encoding of SVD types to XML
 
-use xmltree::Element;
+use minidom::Element;
 
 /// Encode trait allows SVD objects to be encoded into XML elements.
 pub trait Encode {

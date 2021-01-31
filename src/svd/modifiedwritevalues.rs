@@ -1,7 +1,7 @@
 use crate::elementext::ElementExt;
+use crate::new_element;
 
-use std::collections::HashMap;
-use xmltree::Element;
+use minidom::Element;
 
 use crate::types::Parse;
 
@@ -62,15 +62,7 @@ impl Encode for ModifiedWriteValues {
             Modify => "modify",
         };
 
-        Ok(Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("modifiedWriteValues"),
-            attributes: HashMap::new(),
-            children: vec![],
-            text: Some(v.into()),
-        })
+        Ok(new_element("modifiedWriteValues", Some(v.into())).build())
     }
 }
 

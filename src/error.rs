@@ -3,9 +3,9 @@
 
 pub use anyhow::{Context, Result};
 use core::u64;
+use minidom::Element;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use xmltree::Element;
 
 #[allow(clippy::large_enum_variant)]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]

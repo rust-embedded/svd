@@ -1,7 +1,5 @@
-use std::collections::HashMap;
-
 use crate::elementext::ElementExt;
-use xmltree::Element;
+use minidom::Element;
 
 use crate::types::Parse;
 
@@ -34,19 +32,11 @@ impl Encode for AddressBlock {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        Ok(Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("addressBlock"),
-            attributes: HashMap::new(),
-            children: vec![
-                new_element("offset", Some(format!("{}", self.offset))),
-                new_element("size", Some(format!("0x{:08.x}", self.size))),
-                new_element("usage", Some(self.usage.clone())),
-            ],
-            text: None,
-        })
+        Ok(Element::builder("addressBlock", "")
+            .append(new_element("offset", Some(format!("{}", self.offset))))
+            .append(new_element("size", Some(format!("0x{:08.x}", self.size))))
+            .append(new_element("usage", Some(self.usage.clone())))
+            .build())
     }
 }
 

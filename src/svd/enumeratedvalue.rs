@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
 use crate::elementext::ElementExt;
 use crate::parse;
-use xmltree::Element;
+use minidom::Element;
 
 use crate::encode::Encode;
 use crate::error::*;
@@ -118,7 +116,7 @@ impl Parse for EnumeratedValue {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        if tree.name != "enumeratedValue" {
+        if tree.name() != "enumeratedValue" {
             return Err(
                 SVDError::NotExpectedTag(tree.clone(), "enumeratedValue".to_string()).into(),
             );
@@ -132,32 +130,23 @@ impl Encode for EnumeratedValue {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        let mut base = Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("enumeratedValue"),
-            attributes: HashMap::new(),
-            children: vec![new_element("name", Some(self.name.clone()))],
-            text: None,
-        };
+        let mut e = Element::builder("enumeratedValue", "")
+            .append(new_element("name", Some(self.name.clone())));
 
         if let Some(d) = &self.description {
             let s = (*d).clone();
-            base.children.push(new_element("description", Some(s)));
+            e = e.append(new_element("description", Some(s)));
         };
 
         if let Some(v) = &self.value {
-            base.children
-                .push(new_element("value", Some(format!("0x{:08.x}", *v))));
+            e = e.append(new_element("value", Some(format!("0x{:08.x}", *v))));
         };
 
         if let Some(v) = &self.is_default {
-            base.children
-                .push(new_element("isDefault", Some(format!("{}", v))));
+            e = e.append(new_element("isDefault", Some(format!("{}", v))));
         };
 
-        Ok(base)
+        Ok(e.build())
     }
 }
 

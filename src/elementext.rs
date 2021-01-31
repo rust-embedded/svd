@@ -1,21 +1,22 @@
 //! SVD Element Extensions.
-//! This module is extends xmltree::Element objects with convenience methods
+//! This module is extends minidom::Element objects with convenience methods
 
-use xmltree::Element;
+use minidom::Element;
 
 use crate::types::{BoolParse, Parse};
 
 use crate::error::*;
 
-/// Defines extensions for implementation over xmltree::Element
+/// Defines extensions for implementation over minidom::Element
 pub trait ElementExt {
     fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>>
     where
-        String: PartialEq<K>;
+        String: PartialEq<K>,
+        K: AsRef<str>;
     fn get_child_text<K>(&self, k: K) -> Result<String>
     where
         String: PartialEq<K>,
-        K: core::fmt::Display + Clone;
+        K: core::fmt::Display + Clone + AsRef<str>;
 
     fn get_text(&self) -> Result<String>;
 
@@ -29,13 +30,14 @@ pub trait ElementExt {
     fn debug(&self);
 }
 
-/// Implements extensions for xmltree::Element
+/// Implements extensions for minidom::Element
 impl ElementExt for Element {
     fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>>
     where
         String: PartialEq<K>,
+        K: AsRef<str>,
     {
-        if let Some(child) = self.get_child(k) {
+        if let Some(child) = self.get_child(k, "") {
             match child.get_text() {
                 Err(e) => match e.downcast_ref() {
                     // if tag is empty just ignore it
@@ -51,7 +53,7 @@ impl ElementExt for Element {
     fn get_child_text<K>(&self, k: K) -> Result<String>
     where
         String: PartialEq<K>,
-        K: core::fmt::Display + Clone,
+        K: core::fmt::Display + Clone + AsRef<str>,
     {
         self.get_child_text_opt(k.clone())?
             .ok_or_else(|| SVDError::MissingTag(self.clone(), format!("{}", k)).into())
@@ -59,18 +61,18 @@ impl ElementExt for Element {
 
     /// Get text contained by an XML Element
     fn get_text(&self) -> Result<String> {
-        match self.text.as_ref() {
-            Some(s) => Ok(s.clone()),
+        match self.texts().next() {
+            Some(s) => Ok(s.to_string()),
             // FIXME: Doesn't look good because SVDError doesn't format by itself. We already
             // capture the element and this information can be used for getting the name
             // This would fix ParseError
-            None => Err(SVDError::EmptyTag(self.clone(), self.name.clone()).into()),
+            None => Err(SVDError::EmptyTag(self.clone(), self.name().to_string()).into()),
         }
     }
 
     /// Get a named child element from an XML Element
     fn get_child_elem<'a>(&'a self, n: &str) -> Result<&'a Element> {
-        match self.get_child(n) {
+        match self.get_child(n, "") {
             Some(s) => Ok(s),
             None => Err(SVDError::MissingTag(self.clone(), n.to_string()).into()),
         }
@@ -96,16 +98,17 @@ impl ElementExt for Element {
 
     // Merges the children of two elements, maintaining the name and description of the first
     fn merge(&mut self, r: &Self) {
-        for c in &r.children {
-            self.children.push(c.clone());
+        for c in r.children() {
+            self.append_child(c.clone());
         }
     }
 
     fn debug(&self) {
-        println!("<{}>", self.name);
-        for c in &self.children {
-            println!("{}: {:?}", c.name, c.text)
+        let name = self.name();
+        println!("<{}>", name);
+        for c in self.children() {
+            println!("{}: {:?}", c.name(), c.text())
         }
-        println!("</{}>", self.name);
+        println!("</{}>", name);
     }
 }

@@ -1,4 +1,4 @@
-use xmltree::Element;
+use minidom::Element;
 
 use crate::types::Parse;
 
@@ -30,12 +30,12 @@ impl Parse for RegisterCluster {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        if tree.name == "register" {
-            Ok(RegisterCluster::Register(Register::parse(tree)?))
-        } else if tree.name == "cluster" {
-            Ok(RegisterCluster::Cluster(Cluster::parse(tree)?))
-        } else {
-            Err(SVDError::InvalidRegisterCluster(tree.clone(), tree.name.clone()).into())
+        match tree.name() {
+            "register" => Ok(RegisterCluster::Register(Register::parse(tree)?)),
+            "cluster" => Ok(RegisterCluster::Cluster(Cluster::parse(tree)?)),
+            _ => {
+                Err(SVDError::InvalidRegisterCluster(tree.clone(), tree.name().to_string()).into())
+            }
         }
     }
 }

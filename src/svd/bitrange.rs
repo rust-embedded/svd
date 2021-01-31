@@ -1,4 +1,4 @@
-use xmltree::Element;
+use minidom::Element;
 
 use crate::error::*;
 use crate::new_element;
@@ -39,12 +39,13 @@ impl Parse for BitRange {
 
     fn parse(tree: &Element) -> Result<Self> {
         let (end, start, range_type): (u32, u32, BitRangeType) = if let Some(range) =
-            tree.get_child("bitRange")
+            tree.get_child("bitRange", "")
         {
-            let text = range
-                .text
-                .as_ref()
-                .ok_or_else(|| SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::Empty))?;
+            let text = range.text();
+            //let text = range
+            //    .text
+            //    .as_ref()
+            //    .ok_or_else(|| SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::Empty))?;
             if !text.starts_with('[') {
                 return Err(
                     SVDError::InvalidBitRange(tree.clone(), InvalidBitRange::Syntax).into(),
@@ -81,7 +82,9 @@ impl Parse for BitRange {
                 BitRangeType::BitRange,
             )
         // TODO: Consider matching instead so we can say which of these tags are missing
-        } else if let (Some(lsb), Some(msb)) = (tree.get_child("lsb"), tree.get_child("msb")) {
+        } else if let (Some(lsb), Some(msb)) =
+            (tree.get_child("lsb", ""), tree.get_child("msb", ""))
+        {
             (
                 // TODO: `u32::parse` should not hide it's errors
                 u32::parse(msb).with_context(|| {
@@ -92,9 +95,10 @@ impl Parse for BitRange {
                 })?,
                 BitRangeType::MsbLsb,
             )
-        } else if let (Some(offset), Some(width)) =
-            (tree.get_child("bitOffset"), tree.get_child("bitWidth"))
-        {
+        } else if let (Some(offset), Some(width)) = (
+            tree.get_child("bitOffset", ""),
+            tree.get_child("bitWidth", ""),
+        ) {
             // Special case because offset and width are directly provided
             // (ie. do not need to be calculated as in the final step)
             return Ok(BitRange {
@@ -127,14 +131,15 @@ impl BitRange {
             BitRangeType::BitRange => Ok(vec![new_element(
                 "bitRange",
                 Some(format!("[{}:{}]", self.msb(), self.lsb())),
-            )]),
+            )
+            .build()]),
             BitRangeType::MsbLsb => Ok(vec![
-                new_element("lsb", Some(format!("{}", self.lsb()))),
-                new_element("msb", Some(format!("{}", self.msb()))),
+                new_element("lsb", Some(format!("{}", self.lsb()))).build(),
+                new_element("msb", Some(format!("{}", self.msb()))).build(),
             ]),
             BitRangeType::OffsetWidth => Ok(vec![
-                new_element("bitOffset", Some(format!("{}", self.offset))),
-                new_element("bitWidth", Some(format!("{}", self.width))),
+                new_element("bitOffset", Some(format!("{}", self.offset))).build(),
+                new_element("bitWidth", Some(format!("{}", self.width))).build(),
             ]),
         }
     }
@@ -155,7 +160,7 @@ mod tests {
                 },
                 String::from(
                     "
-                <fake><bitRange>[19:16]</bitRange></fake>
+                <fake xmlns=\"\"><bitRange>[19:16]</bitRange></fake>
             ",
                 ),
             ),
@@ -167,7 +172,7 @@ mod tests {
                 },
                 String::from(
                     "
-                <fake><bitOffset>16</bitOffset><bitWidth>4</bitWidth></fake>
+                <fake xmlns=\"\"><bitOffset>16</bitOffset><bitWidth>4</bitWidth></fake>
             ",
                 ),
             ),
@@ -179,18 +184,19 @@ mod tests {
                 },
                 String::from(
                     "
-                <fake><lsb>16</lsb><msb>19</msb></fake>
+                <fake xmlns=\"\"><lsb>16</lsb><msb>19</msb></fake>
             ",
                 ),
             ),
         ];
 
         for (a, s) in types {
-            let tree1 = Element::parse(s.as_bytes()).unwrap();
+            let tree1: Element = s.parse().unwrap();
             let value = BitRange::parse(&tree1).unwrap();
             assert_eq!(value, a, "Parsing `{}` expected `{:?}`", s, a);
-            let mut tree2 = new_element("fake", None);
-            tree2.children = value.encode().unwrap();
+            let mut tree2 = Element::builder("fake", "")
+                .append_all(value.encode().unwrap())
+                .build();
             assert_eq!(tree1, tree2, "Encoding {:?} expected {}", a, s);
         }
     }

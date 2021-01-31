@@ -1,5 +1,5 @@
 use core::ops::Deref;
-use xmltree::Element;
+use minidom::Element;
 
 use crate::types::Parse;
 
@@ -31,11 +31,11 @@ impl Parse for Cluster {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        assert_eq!(tree.name, "cluster");
+        assert_eq!(tree.name(), "cluster");
 
         let info = ClusterInfo::parse(tree)?;
 
-        if tree.get_child("dimIncrement").is_some() {
+        if tree.get_child("dimIncrement", "").is_some() {
             let array_info = DimElement::parse(tree)?;
             check_has_placeholder(&info.name, "cluster")?;
 

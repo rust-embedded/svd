@@ -1,6 +1,4 @@
-use std::collections::HashMap;
-
-use xmltree::Element;
+use minidom::Element;
 
 use crate::elementext::ElementExt;
 use crate::encode::Encode;
@@ -119,7 +117,7 @@ impl Parse for Cpu {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        if tree.name != "cpu" {
+        if tree.name() != "cpu" {
             return Err(SVDError::NameMismatch(tree.clone()).into());
         }
 
@@ -139,26 +137,27 @@ impl Encode for Cpu {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        Ok(Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("cpu"),
-            attributes: HashMap::new(),
-            children: vec![
-                new_element("name", Some(self.name.clone())),
-                new_element("revision", Some(self.revision.clone())),
-                self.endian.encode()?,
-                new_element("mpuPresent", Some(format!("{}", self.mpu_present))),
-                new_element("fpuPresent", Some(format!("{}", self.fpu_present))),
-                new_element("nvicPrioBits", Some(format!("{}", self.nvic_priority_bits))),
-                new_element(
-                    "vendorSystickConfig",
-                    Some(format!("{}", self.has_vendor_systick)),
-                ),
-            ],
-            text: None,
-        })
+        Ok(Element::builder("cpu", "")
+            .append(new_element("name", Some(self.name.clone())))
+            .append(new_element("revision", Some(self.revision.clone())))
+            .append(self.endian.encode()?)
+            .append(new_element(
+                "mpuPresent",
+                Some(format!("{}", self.mpu_present)),
+            ))
+            .append(new_element(
+                "fpuPresent",
+                Some(format!("{}", self.fpu_present)),
+            ))
+            .append(new_element(
+                "nvicPrioBits",
+                Some(format!("{}", self.nvic_priority_bits)),
+            ))
+            .append(new_element(
+                "vendorSystickConfig",
+                Some(format!("{}", self.has_vendor_systick)),
+            ))
+            .build())
     }
 }
 

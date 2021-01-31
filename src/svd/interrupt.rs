@@ -1,6 +1,4 @@
-use std::collections::HashMap;
-
-use xmltree::Element;
+use minidom::Element;
 
 use crate::elementext::ElementExt;
 
@@ -39,7 +37,7 @@ impl Parse for Interrupt {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        if tree.name != "interrupt" {
+        if tree.name() != "interrupt" {
             return Err(SVDError::NotExpectedTag(tree.clone(), "interrupt".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
@@ -51,19 +49,11 @@ impl Encode for Interrupt {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        Ok(Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("interrupt"),
-            attributes: HashMap::new(),
-            children: vec![
-                new_element("name", Some(self.name.clone())),
-                new_element("description", self.description.clone()),
-                new_element("value", Some(format!("{}", self.value))),
-            ],
-            text: None,
-        })
+        Ok(Element::builder("interrupt", "")
+            .append(new_element("name", Some(self.name.clone())))
+            .append(new_element("description", self.description.clone()))
+            .append(new_element("value", Some(format!("{}", self.value))))
+            .build())
     }
 }
 

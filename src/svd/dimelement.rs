@@ -1,4 +1,4 @@
-use xmltree::Element;
+use minidom::Element;
 
 use crate::types::{parse_optional, DimIndex, Parse};
 
@@ -79,20 +79,18 @@ impl Encode for DimElement {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        let mut e = new_element("dimElement", None);
-
-        e.children
-            .push(new_element("dim", Some(format!("{}", self.dim))));
-        e.children.push(new_element(
-            "dimIncrement",
-            Some(format!("{}", self.dim_increment)),
-        ));
+        let mut e = Element::builder("dimElement", "")
+            .append(new_element("dim", Some(format!("{}", self.dim))))
+            .append(new_element(
+                "dimIncrement",
+                Some(format!("{}", self.dim_increment)),
+            ));
 
         if let Some(di) = &self.dim_index {
-            e.children.push(new_element("dimIndex", Some(di.join(","))));
+            e = e.append(new_element("dimIndex", Some(di.join(","))));
         }
 
-        Ok(e)
+        Ok(e.build())
     }
 }
 

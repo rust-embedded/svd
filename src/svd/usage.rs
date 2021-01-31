@@ -1,7 +1,5 @@
-use std::collections::HashMap;
-
 use crate::elementext::ElementExt;
-use xmltree::Element;
+use minidom::Element;
 
 use crate::encode::Encode;
 use crate::error::*;
@@ -41,15 +39,7 @@ impl Encode for Usage {
             Usage::ReadWrite => String::from("read-write"),
         };
 
-        Ok(Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("usage"),
-            attributes: HashMap::new(),
-            children: Vec::new(),
-            text: Some(text),
-        })
+        Ok(Element::builder("usage", "").append(text).build())
     }
 }
 

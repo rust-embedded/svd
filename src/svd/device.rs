@@ -1,8 +1,5 @@
 use crate::elementext::ElementExt;
-use std::collections::HashMap;
-use xmltree::Element;
-
-use rayon::prelude::*;
+use minidom::Element;
 
 use crate::parse;
 use crate::types::Parse;
@@ -145,7 +142,7 @@ impl Parse for Device {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        if tree.name != "device" {
+        if tree.name() != "device" {
             return Err(SVDError::NotExpectedTag(tree.clone(), "device".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
@@ -158,7 +155,7 @@ impl Device {
     fn _parse(tree: &Element, name: String) -> Result<Self> {
         DeviceBuilder::default()
             .name(name)
-            .schema_version(tree.attributes.get("schemaVersion").cloned())
+            .schema_version(tree.attr("schemaVersion").map(|s| s.to_string()))
             .cpu(parse::optional::<Cpu>("cpu", tree)?)
             .version(tree.get_child_text_opt("version")?)
             .description(tree.get_child_text_opt("description")?)
@@ -167,8 +164,7 @@ impl Device {
             .peripherals({
                 let ps: Result<Vec<_>, _> = tree
                     .get_child_elem("peripherals")?
-                    .children
-                    .par_iter()
+                    .children()
                     .map(Peripheral::parse)
                     .collect();
                 ps?
@@ -182,70 +178,47 @@ impl Encode for Device {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        let mut elem = Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("device"),
-            attributes: HashMap::new(),
-            children: vec![new_element("name", Some(self.name.clone()))],
-            text: None,
-        };
+        let mut e = Element::builder("device", "")
+            .attr("xmlns:xs", "http://www.w3.org/2001/XMLSchema-instance")
+            .append(new_element("name", Some(self.name.clone())));
 
-        elem.attributes.insert(
-            String::from("xmlns:xs"),
-            String::from("http://www.w3.org/2001/XMLSchema-instance"),
-        );
         if let Some(schema_version) = &self.schema_version {
-            elem.attributes
-                .insert(String::from("schemaVersion"), schema_version.to_string());
+            e = e.attr("schemaVersion", schema_version);
         }
         if let Some(schema_version) = &self.schema_version {
-            elem.attributes.insert(
-                String::from("xs:noNamespaceSchemaLocation"),
+            e = e.attr(
+                "xs:noNamespaceSchemaLocation",
                 format!("CMSIS-SVD_Schema_{}.xsd", schema_version),
             );
         }
 
         if let Some(v) = &self.version {
-            elem.children.push(new_element("version", Some(v.clone())));
+            e = e.append(new_element("version", Some(v.clone())));
         }
 
         if let Some(v) = &self.description {
-            elem.children
-                .push(new_element("description", Some(v.clone())));
+            e = e.append(new_element("description", Some(v.clone())));
         }
 
         if let Some(v) = &self.address_unit_bits {
-            elem.children
-                .push(new_element("addressUnitBits", Some(format!("{}", v))));
+            e = e.append(new_element("addressUnitBits", Some(format!("{}", v))));
         }
 
         if let Some(v) = &self.width {
-            elem.children
-                .push(new_element("width", Some(format!("{}", v))));
+            e = e.append(new_element("width", Some(format!("{}", v))));
         }
 
-        elem.children
-            .extend(self.default_register_properties.encode()?);
+        e = e.append_all(self.default_register_properties.encode()?);
 
         if let Some(v) = &self.cpu {
-            elem.children.push(v.encode()?);
+            e = e.append(v.encode()?);
         }
 
         let peripherals: Result<Vec<_>, _> =
             self.peripherals.iter().map(Peripheral::encode).collect();
-        elem.children.push(Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("peripherals"),
-            attributes: HashMap::new(),
-            children: peripherals?,
-            text: None,
-        });
+        e = e.append(Element::builder("peripherals", "").append_all(peripherals?));
 
-        Ok(elem)
+        Ok(e.build())
     }
 }
 

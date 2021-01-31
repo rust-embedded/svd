@@ -1,6 +1,4 @@
-use std::collections::HashMap;
-
-use xmltree::Element;
+use minidom::Element;
 
 use crate::elementext::ElementExt;
 use crate::parse;
@@ -175,7 +173,7 @@ impl Parse for Peripheral {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        if tree.name != "peripheral" {
+        if tree.name() != "peripheral" {
             return Err(SVDError::NotExpectedTag(tree.clone(), "peripheral".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
@@ -195,9 +193,8 @@ impl Peripheral {
             .address_block(parse::optional::<AddressBlock>("addressBlock", tree)?)
             .interrupt({
                 let interrupt: Result<Vec<_>, _> = tree
-                    .children
-                    .iter()
-                    .filter(|t| t.name == "interrupt")
+                    .children()
+                    .filter(|t| t.name() == "interrupt")
                     .enumerate()
                     .map(|(e, i)| {
                         Interrupt::parse(i).with_context(|| format!("Parsing interrupt #{}", e))
@@ -206,17 +203,14 @@ impl Peripheral {
                 interrupt?
             })
             .default_register_properties(RegisterProperties::parse(tree)?)
-            .registers(if let Some(registers) = tree.get_child("registers") {
-                let rs: Result<Vec<_>, _> = registers
-                    .children
-                    .iter()
-                    .map(RegisterCluster::parse)
-                    .collect();
+            .registers(if let Some(registers) = tree.get_child("registers", "") {
+                let rs: Result<Vec<_>, _> =
+                    registers.children().map(RegisterCluster::parse).collect();
                 Some(rs?)
             } else {
                 None
             })
-            .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
+            .derived_from(tree.attr("derivedFrom").map(|s| s.to_owned()))
             .build()
     }
 }
@@ -225,68 +219,47 @@ impl Encode for Peripheral {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        let mut elem = Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("peripheral"),
-            attributes: HashMap::new(),
-            children: vec![new_element("name", Some(self.name.clone()))],
-            text: None,
-        };
+        let mut e =
+            Element::builder("peripheral", "").append(new_element("name", Some(self.name.clone())));
 
         if let Some(v) = &self.version {
-            elem.children
-                .push(new_element("version", Some(v.to_string())));
+            e = e.append(new_element("version", Some(v.to_string())));
         };
         if let Some(v) = &self.display_name {
-            elem.children
-                .push(new_element("displayName", Some(v.to_string())));
+            e = e.append(new_element("displayName", Some(v.to_string())));
         };
         if let Some(v) = &self.group_name {
-            elem.children
-                .push(new_element("groupName", Some(v.to_string())));
+            e = e.append(new_element("groupName", Some(v.to_string())));
         };
         if let Some(v) = &self.description {
-            elem.children
-                .push(new_element("description", Some(v.to_string())));
+            e = e.append(new_element("description", Some(v.to_string())));
         };
-        elem.children.push(new_element(
+        e = e.append(new_element(
             "baseAddress",
             Some(format!("0x{:.08x}", self.base_address)),
         ));
 
-        elem.children
-            .extend(self.default_register_properties.encode()?);
+        e = e.append_all(self.default_register_properties.encode()?);
 
         if let Some(v) = &self.address_block {
-            elem.children.push(v.encode()?);
+            e = e.append(v.encode()?);
         };
 
         let interrupts: Result<Vec<_>, _> = self.interrupt.iter().map(Interrupt::encode).collect();
 
-        elem.children.append(&mut interrupts?);
+        e = e.append_all(interrupts?);
 
         if let Some(v) = &self.registers {
             let children: Result<Vec<_>, _> = v.iter().map(|e| e.encode()).collect();
 
-            elem.children.push(Element {
-                prefix: None,
-                namespace: None,
-                namespaces: None,
-                name: String::from("registers"),
-                attributes: HashMap::new(),
-                children: children?,
-                text: None,
-            });
+            e = e.append(Element::builder("registers", "").append_all(children?));
         };
 
         if let Some(v) = &self.derived_from {
-            elem.attributes
-                .insert(String::from("derivedFrom"), v.to_string());
+            e = e.attr("derivedFrom", v);
         }
 
-        Ok(elem)
+        Ok(e.build())
     }
 }
 

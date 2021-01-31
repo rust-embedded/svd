@@ -1,4 +1,4 @@
-use xmltree::Element;
+use minidom::Element;
 
 use crate::elementext::ElementExt;
 use crate::encode::Encode;
@@ -46,7 +46,7 @@ impl Encode for Access {
             Access::WriteOnce => String::from("writeOnce"),
         };
 
-        Ok(new_element("access", Some(text)))
+        Ok(new_element("access", Some(text)).build())
     }
 }
 

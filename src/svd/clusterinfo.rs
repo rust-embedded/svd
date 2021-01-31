@@ -1,5 +1,5 @@
 use crate::elementext::ElementExt;
-use xmltree::Element;
+use minidom::Element;
 
 use crate::types::Parse;
 
@@ -132,16 +132,15 @@ impl ClusterInfo {
     fn _parse(tree: &Element, name: String) -> Result<Self> {
         ClusterInfoBuilder::default()
             .name(name)
-            .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
+            .derived_from(tree.attr("derivedFrom").map(|s| s.to_owned()))
             .description(tree.get_child_text_opt("description")?)
             .header_struct_name(tree.get_child_text_opt("headerStructName")?)
             .address_offset(tree.get_child_u32("addressOffset")?)
             .default_register_properties(RegisterProperties::parse(tree)?)
             .children({
                 let children: Result<Vec<_>, _> = tree
-                    .children
-                    .iter()
-                    .filter(|t| t.name == "register" || t.name == "cluster")
+                    .children()
+                    .filter(|t| t.name() == "register" || t.name() == "cluster")
                     .map(RegisterCluster::parse)
                     .collect();
                 children?
@@ -154,34 +153,30 @@ impl Encode for ClusterInfo {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        let mut e = new_element("cluster", None);
+        let mut e = Element::builder("cluster", "");
 
         if let Some(v) = &self.derived_from {
-            e.attributes
-                .insert(String::from("derivedFrom"), v.to_string());
+            e = e.attr(String::from("derivedFrom"), v.to_string());
         }
 
-        e.children
-            .push(new_element("description", self.description.clone()));
+        e = e.append(new_element("description", self.description.clone()));
 
         if let Some(v) = &self.header_struct_name {
-            e.children
-                .push(new_element("headerStructName", Some(v.clone())));
+            e = e.append(new_element("headerStructName", Some(v.clone())));
         }
 
-        e.children.push(new_element(
+        e = e.append(new_element(
             "addressOffset",
             Some(format!("{}", self.address_offset)),
         ));
 
-        e.children
-            .extend(self.default_register_properties.encode()?);
+        e = e.append_all(self.default_register_properties.encode()?);
 
         for c in &self.children {
-            e.children.push(c.encode()?);
+            e = e.append(c.encode()?);
         }
 
-        Ok(e)
+        Ok(e.build())
     }
 }
 

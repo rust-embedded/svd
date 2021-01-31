@@ -1,7 +1,5 @@
-use std::collections::HashMap;
-
 use crate::elementext::ElementExt;
-use xmltree::Element;
+use minidom::Element;
 
 use crate::encode::Encode;
 use crate::error::*;
@@ -216,14 +214,13 @@ impl RegisterInfo {
             .alternate_group(tree.get_child_text_opt("alternateGroup")?)
             .alternate_register(tree.get_child_text_opt("alternateRegister")?)
             .description(tree.get_child_text_opt("description")?)
-            .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
+            .derived_from(tree.attr("derivedFrom").map(|s| s.to_owned()))
             .address_offset(tree.get_child_u32("addressOffset")?)
             .properties(RegisterProperties::parse(tree)?)
             .fields({
-                if let Some(fields) = tree.get_child("fields") {
+                if let Some(fields) = tree.get_child("fields", "") {
                     let fs: Result<Vec<_>, _> = fields
-                        .children
-                        .iter()
+                        .children()
                         .enumerate()
                         .map(|(e, t)| {
                             Field::parse(t).with_context(|| format!("Parsing field #{}", e))
@@ -247,56 +244,42 @@ impl Encode for RegisterInfo {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        let mut elem = Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("register"),
-            attributes: HashMap::new(),
-            children: vec![
-                new_element("name", Some(self.name.clone())),
-                new_element(
-                    "addressOffset",
-                    Some(format!("0x{:x}", self.address_offset)),
-                ),
-            ],
-            text: None,
-        };
+        let mut e = Element::builder("register", "")
+            .append(new_element("name", Some(self.name.clone())))
+            .append(new_element(
+                "addressOffset",
+                Some(format!("0x{:x}", self.address_offset)),
+            ));
+
         if let Some(v) = &self.description {
-            elem.children
-                .push(new_element("description", Some(v.clone())));
+            e = e.append(new_element("description", Some(v.clone())));
         }
         if let Some(v) = &self.alternate_group {
-            elem.children
-                .push(new_element("alternateGroup", Some(v.to_string())));
+            e = e.append(new_element("alternateGroup", Some(v.to_string())));
         }
 
         if let Some(v) = &self.alternate_register {
-            elem.children
-                .push(new_element("alternateRegister", Some(v.to_string())));
+            e = e.append(new_element("alternateRegister", Some(v.to_string())));
         }
 
         if let Some(v) = &self.derived_from {
-            elem.attributes
-                .insert(String::from("derivedFrom"), v.to_string());
+            e = e.attr("derivedFrom", v.to_string());
         }
 
         if let Some(v) = &self.size {
-            elem.children.push(new_element("size", Some(v.to_string())));
+            e = e.append(new_element("size", Some(v.to_string())));
         };
 
         if let Some(v) = &self.access {
-            elem.children.push(v.encode()?);
+            e = e.append(v.encode()?);
         };
 
         if let Some(v) = &self.reset_value {
-            elem.children
-                .push(new_element("resetValue", Some(format!("0x{:08.x}", v))));
+            e = e.append(new_element("resetValue", Some(format!("0x{:08.x}", v))));
         };
 
         if let Some(v) = &self.reset_mask {
-            elem.children
-                .push(new_element("resetMask", Some(format!("0x{:08.x}", v))));
+            e = e.append(new_element("resetMask", Some(format!("0x{:08.x}", v))));
         };
 
         if let Some(v) = &self.fields {
@@ -305,28 +288,20 @@ impl Encode for RegisterInfo {
                 .map(Field::encode)
                 .collect::<Result<Vec<Element>>>()?;
             if !children.is_empty() {
-                let fields = Element {
-                    prefix: None,
-                    namespace: None,
-                    namespaces: None,
-                    name: String::from("fields"),
-                    attributes: HashMap::new(),
-                    children,
-                    text: None,
-                };
-                elem.children.push(fields);
+                let fields = Element::builder("fields", "").append_all(children);
+                e = e.append(fields);
             }
         };
 
         if let Some(v) = &self.write_constraint {
-            elem.children.push(v.encode()?);
+            e = e.append(v.encode()?);
         };
 
         if let Some(v) = &self.modified_write_values {
-            elem.children.push(v.encode()?);
+            e = e.append(v.encode()?);
         };
 
-        Ok(elem)
+        Ok(e.build())
     }
 }
 
