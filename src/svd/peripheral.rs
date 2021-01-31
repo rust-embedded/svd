@@ -1,3 +1,4 @@
+use crate::NS;
 use minidom::Element;
 
 use crate::elementext::ElementExt;
@@ -203,7 +204,7 @@ impl Peripheral {
                 interrupt?
             })
             .default_register_properties(RegisterProperties::parse(tree)?)
-            .registers(if let Some(registers) = tree.get_child("registers", "") {
+            .registers(if let Some(registers) = tree.get_child("registers", NS) {
                 let rs: Result<Vec<_>, _> =
                     registers.children().map(RegisterCluster::parse).collect();
                 Some(rs?)
@@ -220,7 +221,7 @@ impl Encode for Peripheral {
 
     fn encode(&self) -> Result<Element> {
         let mut e =
-            Element::builder("peripheral", "").append(new_element("name", Some(self.name.clone())));
+            Element::builder("peripheral", NS).append(new_element("name", Some(self.name.clone())));
 
         if let Some(v) = &self.version {
             e = e.append(new_element("version", Some(v.to_string())));
@@ -252,7 +253,7 @@ impl Encode for Peripheral {
         if let Some(v) = &self.registers {
             let children: Result<Vec<_>, _> = v.iter().map(|e| e.encode()).collect();
 
-            e = e.append(Element::builder("registers", "").append_all(children?));
+            e = e.append(Element::builder("registers", NS).append_all(children?));
         };
 
         if let Some(v) = &self.derived_from {

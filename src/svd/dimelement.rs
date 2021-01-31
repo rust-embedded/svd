@@ -1,3 +1,4 @@
+use crate::NS;
 use minidom::Element;
 
 use crate::types::{parse_optional, DimIndex, Parse};
@@ -79,7 +80,7 @@ impl Encode for DimElement {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        let mut e = Element::builder("dimElement", "")
+        let mut e = Element::builder("dimElement", NS)
             .append(new_element("dim", Some(format!("{}", self.dim))))
             .append(new_element(
                 "dimIncrement",

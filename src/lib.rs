@@ -24,6 +24,8 @@
 
 //#![deny(warnings)]
 
+pub const NS: &str = "SVD";
+
 use minidom::{Element, ElementBuilder};
 
 // ElementExt extends XML elements with useful methods
@@ -75,9 +77,9 @@ fn trim_utf8_bom(s: &str) -> &str {
 /// Helper to create new base xml elements
 pub(crate) fn new_element(name: &str, text: Option<String>) -> ElementBuilder {
     if let Some(text) = text {
-        Element::builder(name, "").append(text)
+        Element::builder(name, NS).append(text)
     } else {
-        Element::builder(name, "")
+        Element::builder(name, NS)
     }
 }
 

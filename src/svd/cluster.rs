@@ -1,3 +1,4 @@
+use crate::NS;
 use core::ops::Deref;
 use minidom::Element;
 
@@ -35,7 +36,7 @@ impl Parse for Cluster {
 
         let info = ClusterInfo::parse(tree)?;
 
-        if tree.get_child("dimIncrement", "").is_some() {
+        if tree.get_child("dimIncrement", NS).is_some() {
             let array_info = DimElement::parse(tree)?;
             check_has_placeholder(&info.name, "cluster")?;
 

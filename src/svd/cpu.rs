@@ -1,3 +1,4 @@
+use crate::NS;
 use minidom::Element;
 
 use crate::elementext::ElementExt;
@@ -137,7 +138,7 @@ impl Encode for Cpu {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        Ok(Element::builder("cpu", "")
+        Ok(Element::builder("cpu", NS)
             .append(new_element("name", Some(self.name.clone())))
             .append(new_element("revision", Some(self.revision.clone())))
             .append(self.endian.encode()?)

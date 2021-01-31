@@ -1,3 +1,4 @@
+use crate::NS;
 use minidom::Element;
 
 use crate::elementext::ElementExt;
@@ -43,7 +44,7 @@ impl Encode for Endian {
             Endian::Other => String::from("other"),
         };
 
-        Ok(Element::builder("endian", "").append(text).build())
+        Ok(Element::builder("endian", NS).append(text).build())
     }
 }
 

@@ -1,3 +1,4 @@
+use crate::NS;
 use minidom::Element;
 
 use crate::elementext::ElementExt;
@@ -49,7 +50,7 @@ impl Encode for Interrupt {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        Ok(Element::builder("interrupt", "")
+        Ok(Element::builder("interrupt", NS)
             .append(new_element("name", Some(self.name.clone())))
             .append(new_element("description", self.description.clone()))
             .append(new_element("value", Some(format!("{}", self.value))))

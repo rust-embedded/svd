@@ -1,4 +1,5 @@
 use crate::elementext::ElementExt;
+use crate::NS;
 use minidom::Element;
 
 use crate::encode::Encode;
@@ -140,7 +141,7 @@ impl Encode for EnumeratedValues {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        let mut e = Element::builder("enumeratedValues", "");
+        let mut e = Element::builder("enumeratedValues", NS);
 
         if let Some(d) = &self.name {
             e = e.append(new_element("name", Some((*d).clone())));
@@ -169,9 +170,9 @@ mod tests {
 
     #[test]
     fn decode_encode() {
-        let example = String::from(
+        let example =
             "
-            <enumeratedValues xmlns=\"\" derivedFrom=\"fake_derivation\">
+            <enumeratedValues xmlns=\"".to_string() + NS + "\" derivedFrom=\"fake_derivation\">
                 <enumeratedValue>
                     <name>WS0</name>
                     <description>Zero wait-states inserted in fetch or read transfers</description>
@@ -183,8 +184,7 @@ mod tests {
                     <value>0x00000001</value>
                 </enumeratedValue>
             </enumeratedValues>
-        ",
-        );
+        ";
 
         let expected = EnumeratedValuesBuilder::default()
             .derived_from(Some("fake_derivation".to_string()))
@@ -222,7 +222,11 @@ mod tests {
     #[test]
     fn valid_children() {
         fn parse(contents: String) -> Result<EnumeratedValues> {
-            let example = String::from("<enumeratedValues>") + &contents + "</enumeratedValues>";
+            let example = "<enumeratedValues xmlns=\"".to_string()
+                + NS
+                + "\">"
+                + &contents
+                + "</enumeratedValues>";
             let tree: Element = example.parse().unwrap();
             EnumeratedValues::parse(&tree)
         }

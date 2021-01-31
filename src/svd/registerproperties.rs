@@ -83,19 +83,21 @@ impl EncodeChildren for RegisterProperties {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::NS;
 
     #[test]
     fn decode_encode() {
-        let example = String::from(
-            "
-            <mock>
+        let example = "
+            <mock xmlns=\""
+            .to_string()
+            + NS
+            + "\">
                 <size>0xaabbccdd</size>
                 <resetValue>0x11223344</resetValue>
                 <resetMask>0xffffffff</resetMask>
                 <access>read-only</access>
             </mock>
-        ",
-        );
+        ";
 
         let mut expected = RegisterProperties::default();
         expected.size = Some(0xaabbccdd);
@@ -108,7 +110,7 @@ mod tests {
         let parsed = RegisterProperties::parse(&tree1).unwrap();
         assert_eq!(parsed, expected, "Parsing tree failed");
 
-        let mut tree2 = Element::builder("mock", "")
+        let mut tree2 = Element::builder("mock", NS)
             .append_all(parsed.encode().unwrap())
             .build();
         assert_eq!(tree1, tree2, "Encoding value failed");

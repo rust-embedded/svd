@@ -1,4 +1,5 @@
 use crate::elementext::ElementExt;
+use crate::NS;
 use minidom::Element;
 
 use crate::parse;
@@ -178,7 +179,7 @@ impl Encode for Device {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        let mut e = Element::builder("device", "")
+        let mut e = Element::builder("device", NS)
             .attr("xmlns:xs", "http://www.w3.org/2001/XMLSchema-instance")
             .append(new_element("name", Some(self.name.clone())));
 
@@ -216,7 +217,7 @@ impl Encode for Device {
 
         let peripherals: Result<Vec<_>, _> =
             self.peripherals.iter().map(Peripheral::encode).collect();
-        e = e.append(Element::builder("peripherals", "").append_all(peripherals?));
+        e = e.append(Element::builder("peripherals", NS).append_all(peripherals?));
 
         Ok(e.build())
     }

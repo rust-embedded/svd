@@ -1,4 +1,5 @@
 use crate::elementext::ElementExt;
+use crate::NS;
 use minidom::Element;
 
 use crate::encode::Encode;
@@ -39,7 +40,7 @@ impl Encode for Usage {
             Usage::ReadWrite => String::from("read-write"),
         };
 
-        Ok(Element::builder("usage", "").append(text).build())
+        Ok(Element::builder("usage", NS).append(text).build())
     }
 }
 

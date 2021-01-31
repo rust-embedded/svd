@@ -1,4 +1,5 @@
 use crate::elementext::ElementExt;
+use crate::NS;
 use minidom::Element;
 
 use crate::types::Parse;
@@ -153,7 +154,7 @@ impl Encode for ClusterInfo {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        let mut e = Element::builder("cluster", "");
+        let mut e = Element::builder("cluster", NS);
 
         if let Some(v) = &self.derived_from {
             e = e.attr(String::from("derivedFrom"), v.to_string());

@@ -1,4 +1,5 @@
 use crate::elementext::ElementExt;
+use crate::NS;
 use minidom::Element;
 
 use crate::types::Parse;
@@ -32,7 +33,7 @@ impl Encode for AddressBlock {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        Ok(Element::builder("addressBlock", "")
+        Ok(Element::builder("addressBlock", NS)
             .append(new_element("offset", Some(format!("{}", self.offset))))
             .append(new_element("size", Some(format!("0x{:08.x}", self.size))))
             .append(new_element("usage", Some(self.usage.clone())))

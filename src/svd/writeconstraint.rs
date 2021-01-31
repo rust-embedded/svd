@@ -1,4 +1,5 @@
 use crate::elementext::ElementExt;
+use crate::NS;
 use minidom::Element;
 
 use crate::encode::Encode;
@@ -62,7 +63,7 @@ impl Encode for WriteConstraint {
             WriteConstraint::Range(v) => v.encode()?,
         };
 
-        Ok(Element::builder("writeConstraint", "").append(v).build())
+        Ok(Element::builder("writeConstraint", NS).append(v).build())
     }
 }
 
@@ -82,7 +83,7 @@ impl Encode for WriteConstraintRange {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        Ok(Element::builder("range", "")
+        Ok(Element::builder("range", NS)
             .append(new_element("minimum", Some(format!("0x{:08.x}", self.min))))
             .append(new_element("maximum", Some(format!("0x{:08.x}", self.max))))
             .build())

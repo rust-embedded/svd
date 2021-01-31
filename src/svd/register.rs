@@ -1,5 +1,6 @@
 use core::ops::Deref;
 
+use crate::NS;
 use minidom::Element;
 
 use crate::types::Parse;
@@ -38,7 +39,7 @@ impl Parse for Register {
 
         let info = RegisterInfo::parse(tree)?;
 
-        if tree.get_child("dimIncrement", "").is_some() {
+        if tree.get_child("dimIncrement", NS).is_some() {
             let array_info = DimElement::parse(tree)?;
             check_has_placeholder(&info.name, "register")?;
             if let Some(indices) = &array_info.dim_index {

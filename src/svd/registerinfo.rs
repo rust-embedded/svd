@@ -1,4 +1,5 @@
 use crate::elementext::ElementExt;
+use crate::NS;
 use minidom::Element;
 
 use crate::encode::Encode;
@@ -218,7 +219,7 @@ impl RegisterInfo {
             .address_offset(tree.get_child_u32("addressOffset")?)
             .properties(RegisterProperties::parse(tree)?)
             .fields({
-                if let Some(fields) = tree.get_child("fields", "") {
+                if let Some(fields) = tree.get_child("fields", NS) {
                     let fs: Result<Vec<_>, _> = fields
                         .children()
                         .enumerate()
@@ -244,7 +245,7 @@ impl Encode for RegisterInfo {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        let mut e = Element::builder("register", "")
+        let mut e = Element::builder("register", NS)
             .append(new_element("name", Some(self.name.clone())))
             .append(new_element(
                 "addressOffset",
@@ -288,7 +289,7 @@ impl Encode for RegisterInfo {
                 .map(Field::encode)
                 .collect::<Result<Vec<Element>>>()?;
             if !children.is_empty() {
-                let fields = Element::builder("fields", "").append_all(children);
+                let fields = Element::builder("fields", NS).append_all(children);
                 e = e.append(fields);
             }
         };

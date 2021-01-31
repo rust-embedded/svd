@@ -1,4 +1,5 @@
 use crate::elementext::ElementExt;
+use crate::NS;
 use minidom::Element;
 
 use crate::encode::Encode;
@@ -187,7 +188,7 @@ impl Encode for FieldInfo {
 
     fn encode(&self) -> Result<Element> {
         let mut e =
-            Element::builder("field", "").append(new_element("name", Some(self.name.clone())));
+            Element::builder("field", NS).append(new_element("name", Some(self.name.clone())));
 
         if let Some(description) = &self.description {
             e = e.append(new_element("description", Some(description.clone())));

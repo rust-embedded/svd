@@ -1,5 +1,6 @@
 use crate::elementext::ElementExt;
 use crate::parse;
+use crate::NS;
 use minidom::Element;
 
 use crate::encode::Encode;
@@ -130,7 +131,7 @@ impl Encode for EnumeratedValue {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        let mut e = Element::builder("enumeratedValue", "")
+        let mut e = Element::builder("enumeratedValue", NS)
             .append(new_element("name", Some(self.name.clone())));
 
         if let Some(d) = &self.description {
