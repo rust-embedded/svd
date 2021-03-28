@@ -12,6 +12,7 @@ use crate::types::Parse;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct Cpu {
     pub name: String,
 
@@ -32,10 +33,6 @@ pub struct Cpu {
 
     /// Indicate whether the processor implements a vendor-specific System Tick Timer
     pub has_vendor_systick: bool,
-
-    // Reserve the right to add more fields to this struct
-    #[cfg_attr(feature = "serde", serde(skip))]
-    _extensible: (),
 }
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -101,13 +98,13 @@ impl CpuBuilder {
             has_vendor_systick: self
                 .has_vendor_systick
                 .ok_or_else(|| BuildError::Uninitialized("has_vendor_systick".to_string()))?,
-            _extensible: (),
         })
         .validate()
     }
 }
 
 impl Cpu {
+    #[allow(clippy::unnecessary_wraps)]
     fn validate(self) -> Result<Self> {
         // TODO
         Ok(self)

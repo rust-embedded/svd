@@ -3,7 +3,9 @@ delete_merged_branches = true
 required_approvals = 1
 timeout_sec = 14400
 status = [
-  "build (1.36.0)",
+  "build (1.40.0)",
   "build (stable)",
-  "test"
+  "test",
+  "test-strict",
+  "clippy_check",
 ]

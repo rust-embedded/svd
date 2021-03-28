@@ -12,7 +12,7 @@ jobs:
     continue-on-error: ${{ matrix.experimental || false }}
     strategy:
       matrix:
-        rust: [ 1.36.0, stable ]
+        rust: [ 1.40.0, stable ]
         include:
           # Test nightly but don't fail the build.
           - rust: nightly
@@ -44,3 +44,19 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
+
+  test-strict:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-features

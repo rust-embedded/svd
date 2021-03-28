@@ -15,6 +15,7 @@ use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterP
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct Device {
     /// The string identifies the device or device series. Device names are required to be unique
     pub name: String,
@@ -53,10 +54,6 @@ pub struct Device {
     pub peripherals: Vec<Peripheral>,
 
     pub default_register_properties: RegisterProperties,
-
-    // Reserve the right to add more fields to this struct
-    #[cfg_attr(feature = "serde", serde(skip))]
-    _extensible: (),
 }
 
 #[derive(Clone, Debug, Default)]
@@ -124,7 +121,6 @@ impl DeviceBuilder {
                 .peripherals
                 .ok_or_else(|| BuildError::Uninitialized("peripherals".to_string()))?,
             default_register_properties: self.default_register_properties,
-            _extensible: (),
         })
         .validate()
     }
@@ -134,7 +130,7 @@ impl Device {
     fn validate(self) -> Result<Self> {
         // TODO
         if self.peripherals.is_empty() {
-            return Err(SVDError::EmptyDevice)?;
+            return Err(SVDError::EmptyDevice.into());
         }
         Ok(self)
     }

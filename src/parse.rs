@@ -16,7 +16,7 @@ pub trait Parse {
 /// Parses an optional child element with the provided name and Parse function
 /// Returns an none if the child doesn't exist, Ok(Some(e)) if parsing succeeds,
 /// and Err() if parsing fails.
-pub fn optional<'a, T>(n: &str, e: &'a Element) -> anyhow::Result<Option<T::Object>>
+pub fn optional<T>(n: &str, e: &Element) -> anyhow::Result<Option<T::Object>>
 where
     T: Parse<Error = anyhow::Error>,
 {

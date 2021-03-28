@@ -18,6 +18,7 @@ use crate::svd::{
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct Peripheral {
     /// The string identifies the peripheral. Peripheral names are required to be unique for a device
     pub name: String,
@@ -65,10 +66,6 @@ pub struct Peripheral {
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub derived_from: Option<String>,
-
-    // Reserve the right to add more fields to this struct
-    #[cfg_attr(feature = "serde", serde(skip))]
-    _extensible: (),
 }
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -148,18 +145,20 @@ impl PeripheralBuilder {
             default_register_properties: self.default_register_properties,
             registers: self.registers,
             derived_from: self.derived_from,
-            _extensible: (),
         })
         .validate()
     }
 }
 
 impl Peripheral {
+    #[allow(clippy::unnecessary_wraps)]
     fn validate(self) -> Result<Self> {
         // TODO
+        #[cfg(feature = "strict")]
         check_dimable_name(&self.name, "name")?;
-        if let Some(name) = self.derived_from.as_ref() {
-            check_dimable_name(name, "derivedFrom")?;
+        if let Some(_name) = self.derived_from.as_ref() {
+            #[cfg(feature = "strict")]
+            check_dimable_name(_name, "derivedFrom")?;
         } else if let Some(registers) = self.registers.as_ref() {
             if registers.is_empty() {
                 #[cfg(feature = "strict")]

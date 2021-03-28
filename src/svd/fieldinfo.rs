@@ -17,6 +17,7 @@ use crate::svd::{
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct FieldInfo {
     /// Name string used to identify the field.
     /// Field names must be unique within a register
@@ -52,10 +53,6 @@ pub struct FieldInfo {
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub modified_write_values: Option<ModifiedWriteValues>,
-
-    // Reserve the right to add more fields to this struct
-    #[cfg_attr(feature = "serde", serde(skip))]
-    _extensible: (),
 }
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -117,7 +114,6 @@ impl FieldInfoBuilder {
             enumerated_values: self.enumerated_values.unwrap_or_default(),
             write_constraint: self.write_constraint,
             modified_write_values: self.modified_write_values,
-            _extensible: (),
         })
         .validate()
     }
@@ -125,9 +121,13 @@ impl FieldInfoBuilder {
 
 impl FieldInfo {
     fn validate(self) -> Result<Self> {
+        #[cfg(feature = "strict")]
         check_dimable_name(&self.name, "name")?;
-        if let Some(name) = self.derived_from.as_ref() {
-            check_derived_name(name, "derivedFrom")?;
+        #[cfg(feature = "strict")]
+        {
+            if let Some(name) = self.derived_from.as_ref() {
+                check_derived_name(name, "derivedFrom")?;
+            }
         }
 
         if self.bit_range.width == 0 {

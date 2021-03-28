@@ -8,12 +8,10 @@
 //! use std::fs::File;
 //! use std::io::Read;
 //!
-//! fn main() {
-//!     let xml = &mut String::new();
-//!     File::open("STM32F30x.svd").unwrap().read_to_string(xml);
+//! let xml = &mut String::new();
+//! File::open("STM32F30x.svd").unwrap().read_to_string(xml);
 //!
-//!     println!("{:?}", svd::parse(xml));
-//! }
+//! println!("{:?}", svd::parse(xml));
 //! ```
 //!
 //! # References

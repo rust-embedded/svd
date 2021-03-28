@@ -13,6 +13,7 @@ use crate::svd::access::Access;
 /// Register default properties
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[non_exhaustive]
 pub struct RegisterProperties {
     /// Default bit-width of any register
     #[cfg_attr(feature = "serde", serde(default))]
@@ -33,10 +34,6 @@ pub struct RegisterProperties {
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub access: Option<Access>,
-
-    // Reserve the right to add more fields to this struct
-    #[cfg_attr(feature = "serde", serde(skip))]
-    _extensible: (),
 }
 
 impl Parse for RegisterProperties {
@@ -44,11 +41,12 @@ impl Parse for RegisterProperties {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        let mut p = RegisterProperties::default();
-        p.size = parse::optional::<u32>("size", tree)?;
-        p.reset_value = parse::optional::<u64>("resetValue", tree)?;
-        p.reset_mask = parse::optional::<u64>("resetMask", tree)?;
-        p.access = parse::optional::<Access>("access", tree)?;
+        let p = RegisterProperties {
+            size: parse::optional::<u32>("size", tree)?,
+            reset_value: parse::optional::<u64>("resetValue", tree)?,
+            reset_mask: parse::optional::<u64>("resetMask", tree)?,
+            access: parse::optional::<Access>("access", tree)?,
+        };
         check_reset_value(p.size, p.reset_value, p.reset_mask)?;
         Ok(p)
     }

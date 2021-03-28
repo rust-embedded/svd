@@ -1,4 +1,5 @@
 //! Shared primitive types for use in SVD objects.
+#![allow(clippy::manual_strip)]
 
 use xmltree::Element;
 

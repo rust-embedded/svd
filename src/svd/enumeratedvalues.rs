@@ -13,6 +13,7 @@ use crate::types::Parse;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct EnumeratedValues {
     /// Identifier for the whole enumeration section
     #[cfg_attr(feature = "serde", serde(default))]
@@ -30,10 +31,6 @@ pub struct EnumeratedValues {
     pub derived_from: Option<String>,
 
     pub values: Vec<EnumeratedValue>,
-
-    // Reserve the right to add more fields to this struct
-    #[cfg_attr(feature = "serde", serde(skip))]
-    _extensible: (),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
@@ -73,7 +70,6 @@ impl EnumeratedValuesBuilder {
             usage: self.usage,
             derived_from: self.derived_from,
             values: self.values.unwrap_or_default(),
-            _extensible: (),
         })
         .validate()
     }
@@ -81,11 +77,15 @@ impl EnumeratedValuesBuilder {
 
 impl EnumeratedValues {
     fn validate(self) -> Result<Self> {
-        if let Some(name) = self.name.as_ref() {
-            check_name(name, "name")?;
+        #[cfg(feature = "strict")]
+        {
+            if let Some(name) = self.name.as_ref() {
+                check_name(name, "name")?;
+            }
         }
-        if let Some(dname) = self.derived_from.as_ref() {
-            check_derived_name(dname, "derivedFrom")?;
+        if let Some(_dname) = self.derived_from.as_ref() {
+            #[cfg(feature = "strict")]
+            check_derived_name(_dname, "derivedFrom")?;
             Ok(self)
         } else if self.values.is_empty() {
             Err(EnumeratedValuesError::Empty.into())
