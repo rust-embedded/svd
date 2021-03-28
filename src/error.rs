@@ -9,7 +9,7 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 use xmltree::Element;
 
-#[allow(clippy::large_enum_variant)]
+#[allow(clippy::large_enum_variant, clippy::upper_case_acronyms)]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum SVDError {
     #[error("Unknown endianness `{0}`")]

@@ -10,6 +10,7 @@ use crate::error::*;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct DimElement {
     /// Defines the number of elements in an array or list
     pub dim: u32,
@@ -22,10 +23,6 @@ pub struct DimElement {
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub dim_index: Option<Vec<String>>,
-
-    // Reserve the right to add more fields to this struct
-    #[cfg_attr(feature = "serde", serde(skip))]
-    _extensible: (),
 }
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -57,7 +54,6 @@ impl DimElementBuilder {
                 .dim_increment
                 .ok_or_else(|| BuildError::Uninitialized("dim_increment".to_string()))?,
             dim_index: self.dim_index,
-            _extensible: (),
         })
     }
 }

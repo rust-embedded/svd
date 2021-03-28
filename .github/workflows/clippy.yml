@@ -12,7 +12,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: 1.36.0
+          toolchain: stable
           override: true
           components: clippy
       - uses: actions-rs/clippy-check@v1

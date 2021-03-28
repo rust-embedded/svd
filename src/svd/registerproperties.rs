@@ -13,6 +13,7 @@ use crate::svd::access::Access;
 /// Register default properties
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[non_exhaustive]
 pub struct RegisterProperties {
     /// Default bit-width of any register
     #[cfg_attr(feature = "serde", serde(default))]
@@ -33,10 +34,6 @@ pub struct RegisterProperties {
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub access: Option<Access>,
-
-    // Reserve the right to add more fields to this struct
-    #[cfg_attr(feature = "serde", serde(skip))]
-    _extensible: (),
 }
 
 impl Parse for RegisterProperties {

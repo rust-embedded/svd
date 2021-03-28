@@ -11,6 +11,7 @@ use crate::svd::{registercluster::RegisterCluster, registerproperties::RegisterP
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct ClusterInfo {
     /// String to identify the cluster.
     /// Cluster names are required to be unique within the scope of a peripheral
@@ -38,10 +39,6 @@ pub struct ClusterInfo {
     pub default_register_properties: RegisterProperties,
 
     pub children: Vec<RegisterCluster>,
-
-    // Reserve the right to add more fields to this struct
-    #[cfg_attr(feature = "serde", serde(skip))]
-    _extensible: (),
 }
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -99,7 +96,6 @@ impl ClusterInfoBuilder {
             children: self
                 .children
                 .ok_or_else(|| BuildError::Uninitialized("children".to_string()))?,
-            _extensible: (),
         })
         .validate()
     }

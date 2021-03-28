@@ -17,6 +17,7 @@ use crate::svd::{
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct RegisterInfo {
     /// String to identify the register.
     /// Register names are required to be unique within the scope of a peripheral
@@ -76,10 +77,6 @@ pub struct RegisterInfo {
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub modified_write_values: Option<ModifiedWriteValues>,
-
-    // Reserve the right to add more fields to this struct
-    #[cfg_attr(feature = "serde", serde(skip))]
-    _extensible: (),
 }
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -172,7 +169,6 @@ impl RegisterInfoBuilder {
             fields: self.fields,
             write_constraint: self.write_constraint,
             modified_write_values: self.modified_write_values,
-            _extensible: (),
         })
         .validate()
     }
