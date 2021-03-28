@@ -5,5 +5,7 @@ timeout_sec = 14400
 status = [
   "build (1.40.0)",
   "build (stable)",
-  "test"
+  "test",
+  "test-strict",
+  "clippy_check",
 ]
