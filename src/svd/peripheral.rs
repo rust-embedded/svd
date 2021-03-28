@@ -157,9 +157,11 @@ impl PeripheralBuilder {
 impl Peripheral {
     fn validate(self) -> Result<Self> {
         // TODO
+        #[cfg(feature = "strict")]
         check_dimable_name(&self.name, "name")?;
-        if let Some(name) = self.derived_from.as_ref() {
-            check_dimable_name(name, "derivedFrom")?;
+        if let Some(_name) = self.derived_from.as_ref() {
+            #[cfg(feature = "strict")]
+            check_dimable_name(_name, "derivedFrom")?;
         } else if let Some(registers) = self.registers.as_ref() {
             if registers.is_empty() {
                 #[cfg(feature = "strict")]
