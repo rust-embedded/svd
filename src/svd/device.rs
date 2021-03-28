@@ -134,7 +134,7 @@ impl Device {
     fn validate(self) -> Result<Self> {
         // TODO
         if self.peripherals.is_empty() {
-            return Err(SVDError::EmptyDevice)?;
+            return Err(SVDError::EmptyDevice.into());
         }
         Ok(self)
     }

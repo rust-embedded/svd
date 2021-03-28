@@ -108,6 +108,7 @@ impl CpuBuilder {
 }
 
 impl Cpu {
+    #[allow(clippy::unnecessary_wraps)]
     fn validate(self) -> Result<Self> {
         // TODO
         Ok(self)

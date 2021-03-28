@@ -155,6 +155,7 @@ impl PeripheralBuilder {
 }
 
 impl Peripheral {
+    #[allow(clippy::unnecessary_wraps)]
     fn validate(self) -> Result<Self> {
         // TODO
         #[cfg(feature = "strict")]

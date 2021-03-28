@@ -40,9 +40,9 @@ impl ElementExt for Element {
                 Err(e) => match e.downcast_ref() {
                     // if tag is empty just ignore it
                     Some(SVDError::EmptyTag(_, _)) => Ok(None),
-                    _ => return Err(e),
+                    _ => Err(e),
                 },
-                Ok(s) => Ok(Some(s.to_owned())),
+                Ok(s) => Ok(Some(s)),
             }
         } else {
             Ok(None)

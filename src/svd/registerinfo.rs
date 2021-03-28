@@ -179,6 +179,7 @@ impl RegisterInfoBuilder {
 }
 
 impl RegisterInfo {
+    #[allow(clippy::unnecessary_wraps)]
     fn validate(self) -> Result<Self> {
         #[cfg(feature = "strict")]
         check_dimable_name(&self.name, "name")?;
