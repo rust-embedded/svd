@@ -3,7 +3,9 @@
 
 pub use anyhow::{Context, Result};
 use core::u64;
+#[cfg(feature = "strict")]
 use once_cell::sync::Lazy;
+#[cfg(feature = "strict")]
 use regex::Regex;
 use xmltree::Element;
 
@@ -87,6 +89,7 @@ pub enum ResetValueError {
     MaskTooLarge(u64, u32),
 }
 
+#[cfg(feature = "strict")]
 pub(crate) fn check_name(name: &str, tag: &str) -> Result<()> {
     static PATTERN: Lazy<Regex> = Lazy::new(|| Regex::new("^[_A-Za-z0-9]*$").unwrap());
     if PATTERN.is_match(name) {
@@ -98,6 +101,7 @@ pub(crate) fn check_name(name: &str, tag: &str) -> Result<()> {
     }
 }
 
+#[cfg(feature = "strict")]
 pub(crate) fn check_dimable_name(name: &str, tag: &str) -> Result<()> {
     static PATTERN: Lazy<Regex> = Lazy::new(|| {
         Regex::new("^(((%s)|(%s)[_A-Za-z]{1}[_A-Za-z0-9]*)|([_A-Za-z]{1}[_A-Za-z0-9]*(\\[%s\\])?)|([_A-Za-z]{1}[_A-Za-z0-9]*(%s)?[_A-Za-z0-9]*))$").unwrap()
@@ -117,6 +121,7 @@ pub(crate) fn check_has_placeholder(name: &str, tag: &str) -> Result<()> {
     }
 }
 
+#[cfg(feature = "strict")]
 pub(crate) fn check_derived_name(name: &str, tag: &str) -> Result<()> {
     for x in name.split('.') {
         check_dimable_name(x, tag)?
@@ -127,7 +132,7 @@ pub(crate) fn check_derived_name(name: &str, tag: &str) -> Result<()> {
 pub(crate) fn check_reset_value(
     size: Option<u32>,
     value: Option<u64>,
-    mask: Option<u64>,
+    _mask: Option<u64>,
 ) -> Result<()> {
     const MAX_BITS: u32 = u64::MAX.count_ones();
 
@@ -136,14 +141,17 @@ pub(crate) fn check_reset_value(
             return Err(ResetValueError::ValueTooLarge(value, size).into());
         }
     }
-    if let (Some(size), Some(mask)) = (size, mask) {
-        if MAX_BITS - mask.leading_zeros() > size {
-            return Err(ResetValueError::MaskTooLarge(mask, size).into());
+    #[cfg(feature = "strict")]
+    {
+        if let (Some(size), Some(mask)) = (size, _mask) {
+            if MAX_BITS - mask.leading_zeros() > size {
+                return Err(ResetValueError::MaskTooLarge(mask, size).into());
+            }
         }
-    }
-    if let (Some(value), Some(mask)) = (value, mask) {
-        if value & mask != value {
-            return Err(ResetValueError::MaskConflict(value, mask).into());
+        if let (Some(value), Some(mask)) = (value, _mask) {
+            if value & mask != value {
+                return Err(ResetValueError::MaskConflict(value, mask).into());
+            }
         }
     }
 

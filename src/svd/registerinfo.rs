@@ -180,15 +180,20 @@ impl RegisterInfoBuilder {
 
 impl RegisterInfo {
     fn validate(self) -> Result<Self> {
+        #[cfg(feature = "strict")]
         check_dimable_name(&self.name, "name")?;
-        if let Some(name) = self.alternate_group.as_ref() {
-            check_name(name, "alternateGroup")?;
+        #[cfg(feature = "strict")]
+        {
+            if let Some(name) = self.alternate_group.as_ref() {
+                check_name(name, "alternateGroup")?;
+            }
+            if let Some(name) = self.alternate_register.as_ref() {
+                check_dimable_name(name, "alternateRegister")?;
+            }
         }
-        if let Some(name) = self.alternate_register.as_ref() {
-            check_dimable_name(name, "alternateRegister")?;
-        }
-        if let Some(name) = self.derived_from.as_ref() {
-            check_derived_name(name, "derivedFrom")?;
+        if let Some(_name) = self.derived_from.as_ref() {
+            #[cfg(feature = "strict")]
+            check_derived_name(_name, "derivedFrom")?;
         } else if let Some(fields) = self.fields.as_ref() {
             if fields.is_empty() {
                 #[cfg(feature = "strict")]

@@ -85,6 +85,7 @@ impl EnumeratedValueBuilder {
 
 impl EnumeratedValue {
     fn validate(self) -> Result<Self> {
+        #[cfg(feature = "strict")]
         check_name(&self.name, "name")?;
         match (&self.value, &self.is_default) {
             (Some(_), None) | (None, Some(_)) => Ok(self),

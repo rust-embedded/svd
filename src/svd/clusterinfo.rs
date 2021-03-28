@@ -107,9 +107,11 @@ impl ClusterInfoBuilder {
 
 impl ClusterInfo {
     fn validate(self) -> Result<Self> {
+        #[cfg(feature = "strict")]
         check_dimable_name(&self.name, "name")?;
-        if let Some(name) = self.derived_from.as_ref() {
-            check_derived_name(name, "derivedFrom")?;
+        if let Some(_name) = self.derived_from.as_ref() {
+            #[cfg(feature = "strict")]
+            check_derived_name(_name, "derivedFrom")?;
         } else if self.children.is_empty() {
             #[cfg(feature = "strict")]
             return Err(SVDError::EmptyCluster)?;

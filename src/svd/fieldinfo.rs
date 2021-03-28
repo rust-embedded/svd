@@ -125,9 +125,13 @@ impl FieldInfoBuilder {
 
 impl FieldInfo {
     fn validate(self) -> Result<Self> {
+        #[cfg(feature = "strict")]
         check_dimable_name(&self.name, "name")?;
-        if let Some(name) = self.derived_from.as_ref() {
-            check_derived_name(name, "derivedFrom")?;
+        #[cfg(feature = "strict")]
+        {
+            if let Some(name) = self.derived_from.as_ref() {
+                check_derived_name(name, "derivedFrom")?;
+            }
         }
 
         if self.bit_range.width == 0 {
