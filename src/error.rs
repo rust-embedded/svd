@@ -158,6 +158,7 @@ pub(crate) fn check_reset_value(
     Ok(())
 }
 
+#[cfg(feature = "strict")]
 #[cfg(test)]
 mod tests {
     use crate::error::check_reset_value;

@@ -1,4 +1,5 @@
 //! Shared primitive types for use in SVD objects.
+#![allow(clippy::manual_strip)]
 
 use xmltree::Element;
 
@@ -34,11 +35,11 @@ impl Parse for u32 {
                 2,
             )
             .with_context(|| format!("{} invalid", text))
-        } else if let Some(digits) = text.strip_prefix("0b") {
+        } else if text.starts_with("0b") {
             // Handle strings in the binary form of:
             // 0b01101x1
             // along with don't care character x (replaced with 0)
-            u32::from_str_radix(&str::replace(digits, "x", "0"), 2)
+            u32::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2)
                 .with_context(|| format!("{} invalid", text))
         } else {
             text.parse::<u32>()
@@ -66,11 +67,11 @@ impl Parse for u64 {
                 2,
             )
             .with_context(|| format!("{} invalid", text))
-        } else if let Some(digits) = text.strip_prefix("0b") {
+        } else if text.starts_with("0b") {
             // Handle strings in the binary form of:
             // 0b01101x1
             // along with don't care character x (replaced with 0)
-            u64::from_str_radix(&str::replace(digits, "x", "0"), 2)
+            u64::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2)
                 .with_context(|| format!("{} invalid", text))
         } else {
             text.parse::<u64>()
