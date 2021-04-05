@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [v0.10.0] - 2021-04-03
+## [v0.10.0] - 2021-04-04
 
 - Added `strict` feature that hides part of checks
 - Builder pattern now is used for creating structures
