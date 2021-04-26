@@ -115,10 +115,8 @@ impl Parse for DimIndex {
             let end = unwrap!(unwrap!(parts.next()).parse::<u32>()) + 1;
 
             Ok((start..end).map(|i| i.to_string()).collect())
-        } else if text.contains(',') {
-            Ok(text.split(',').map(|s| s.to_string()).collect())
         } else {
-            unreachable!()
+            Ok(text.split(',').map(|s| s.to_string()).collect())
         }
     }
 }
