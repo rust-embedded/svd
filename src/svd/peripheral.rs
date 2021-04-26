@@ -83,6 +83,24 @@ pub struct PeripheralBuilder {
     derived_from: Option<String>,
 }
 
+impl From<Peripheral> for PeripheralBuilder {
+    fn from(p: Peripheral) -> Self {
+        Self {
+            name: Some(p.name),
+            base_address: Some(p.base_address),
+            version: p.version,
+            display_name: p.display_name,
+            group_name: p.group_name,
+            description: p.description,
+            address_block: p.address_block,
+            interrupt: p.interrupt,
+            default_register_properties: p.default_register_properties,
+            registers: p.registers,
+            derived_from: p.derived_from,
+        }
+    }
+}
+
 impl PeripheralBuilder {
     pub fn name(mut self, value: String) -> Self {
         self.name = Some(value);

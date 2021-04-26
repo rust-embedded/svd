@@ -46,6 +46,20 @@ pub struct CpuBuilder {
     has_vendor_systick: Option<bool>,
 }
 
+impl From<Cpu> for CpuBuilder {
+    fn from(c: Cpu) -> Self {
+        Self {
+            name: Some(c.name),
+            revision: Some(c.revision),
+            endian: Some(c.endian),
+            mpu_present: Some(c.mpu_present),
+            fpu_present: Some(c.fpu_present),
+            nvic_priority_bits: Some(c.nvic_priority_bits),
+            has_vendor_systick: Some(c.has_vendor_systick),
+        }
+    }
+}
+
 impl CpuBuilder {
     pub fn name(mut self, value: String) -> Self {
         self.name = Some(value);

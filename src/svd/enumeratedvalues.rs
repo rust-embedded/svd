@@ -47,6 +47,17 @@ pub struct EnumeratedValuesBuilder {
     values: Option<Vec<EnumeratedValue>>,
 }
 
+impl From<EnumeratedValues> for EnumeratedValuesBuilder {
+    fn from(e: EnumeratedValues) -> Self {
+        Self {
+            name: e.name,
+            usage: e.usage,
+            derived_from: e.derived_from,
+            values: Some(e.values),
+        }
+    }
+}
+
 impl EnumeratedValuesBuilder {
     pub fn name(mut self, value: Option<String>) -> Self {
         self.name = value;

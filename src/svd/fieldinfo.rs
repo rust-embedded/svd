@@ -67,6 +67,21 @@ pub struct FieldInfoBuilder {
     modified_write_values: Option<ModifiedWriteValues>,
 }
 
+impl From<FieldInfo> for FieldInfoBuilder {
+    fn from(f: FieldInfo) -> Self {
+        Self {
+            name: Some(f.name),
+            bit_range: Some(f.bit_range),
+            derived_from: f.derived_from,
+            description: f.description,
+            access: f.access,
+            enumerated_values: Some(f.enumerated_values),
+            write_constraint: f.write_constraint,
+            modified_write_values: f.modified_write_values,
+        }
+    }
+}
+
 impl FieldInfoBuilder {
     pub fn name(mut self, value: String) -> Self {
         self.name = Some(value);

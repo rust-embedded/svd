@@ -48,6 +48,17 @@ pub struct EnumeratedValueBuilder {
     is_default: Option<bool>,
 }
 
+impl From<EnumeratedValue> for EnumeratedValueBuilder {
+    fn from(e: EnumeratedValue) -> Self {
+        Self {
+            name: Some(e.name),
+            description: e.description,
+            value: e.value,
+            is_default: e.is_default,
+        }
+    }
+}
+
 impl EnumeratedValueBuilder {
     pub fn name(mut self, value: String) -> Self {
         self.name = Some(value);
