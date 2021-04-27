@@ -93,6 +93,28 @@ pub struct RegisterInfoBuilder {
     modified_write_values: Option<ModifiedWriteValues>,
 }
 
+impl From<RegisterInfo> for RegisterInfoBuilder {
+    fn from(r: RegisterInfo) -> Self {
+        Self {
+            name: Some(r.name),
+            address_offset: Some(r.address_offset),
+            alternate_group: r.alternate_group,
+            alternate_register: r.alternate_register,
+            derived_from: r.derived_from,
+            description: r.description,
+            properties: RegisterProperties {
+                size: r.size,
+                access: r.access,
+                reset_value: r.reset_value,
+                reset_mask: r.reset_mask,
+            },
+            fields: r.fields,
+            write_constraint: r.write_constraint,
+            modified_write_values: r.modified_write_values,
+        }
+    }
+}
+
 impl RegisterInfoBuilder {
     pub fn name(mut self, value: String) -> Self {
         self.name = Some(value);

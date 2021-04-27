@@ -32,6 +32,16 @@ pub struct DimElementBuilder {
     dim_index: Option<Vec<String>>,
 }
 
+impl From<DimElement> for DimElementBuilder {
+    fn from(d: DimElement) -> Self {
+        Self {
+            dim: Some(d.dim),
+            dim_increment: Some(d.dim_increment),
+            dim_index: d.dim_index,
+        }
+    }
+}
+
 impl DimElementBuilder {
     pub fn dim(mut self, value: u32) -> Self {
         self.dim = Some(value);

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Added implementations of `From<Type>` for `TypeBuilder`'s
+
 ## [v0.10.1] - 2021-04-17
 
 - Added `DeriveFrom` implementation for `FieldInfo`

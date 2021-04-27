@@ -52,6 +52,20 @@ pub struct ClusterInfoBuilder {
     children: Option<Vec<RegisterCluster>>,
 }
 
+impl From<ClusterInfo> for ClusterInfoBuilder {
+    fn from(c: ClusterInfo) -> Self {
+        Self {
+            name: Some(c.name),
+            address_offset: Some(c.address_offset),
+            derived_from: c.derived_from,
+            description: c.description,
+            header_struct_name: c.header_struct_name,
+            default_register_properties: c.default_register_properties,
+            children: Some(c.children),
+        }
+    }
+}
+
 impl ClusterInfoBuilder {
     pub fn name(mut self, value: String) -> Self {
         self.name = Some(value);

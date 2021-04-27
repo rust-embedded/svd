@@ -69,6 +69,22 @@ pub struct DeviceBuilder {
     default_register_properties: RegisterProperties,
 }
 
+impl From<Device> for DeviceBuilder {
+    fn from(d: Device) -> Self {
+        Self {
+            name: Some(d.name),
+            schema_version: d.schema_version,
+            version: d.version,
+            description: d.description,
+            address_unit_bits: d.address_unit_bits,
+            width: d.width,
+            cpu: d.cpu,
+            peripherals: Some(d.peripherals),
+            default_register_properties: d.default_register_properties,
+        }
+    }
+}
+
 impl DeviceBuilder {
     pub fn name(mut self, value: String) -> Self {
         self.name = Some(value);
