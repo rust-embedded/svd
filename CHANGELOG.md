@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Added `reg_iter`, `reg_iter_mut` methods on `Peripheral` and `Cluster`
+- Added `DerefMut` for `Cluster`, `Register` and `Field`
 - Added `display_name` to `RegisterInfo`
 - Added implementations of `From<Type>` for `TypeBuilder`'s
 

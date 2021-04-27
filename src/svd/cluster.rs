@@ -1,4 +1,4 @@
-use core::ops::Deref;
+use core::ops::{Deref, DerefMut};
 use xmltree::Element;
 
 use crate::types::Parse;
@@ -19,6 +19,15 @@ impl Deref for Cluster {
     type Target = ClusterInfo;
 
     fn deref(&self) -> &ClusterInfo {
+        match self {
+            Cluster::Single(info) => info,
+            Cluster::Array(info, _) => info,
+        }
+    }
+}
+
+impl DerefMut for Cluster {
+    fn deref_mut(&mut self) -> &mut ClusterInfo {
         match self {
             Cluster::Single(info) => info,
             Cluster::Array(info, _) => info,

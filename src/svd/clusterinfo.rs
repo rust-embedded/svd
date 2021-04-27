@@ -7,7 +7,11 @@ use crate::encode::{Encode, EncodeChildren};
 use crate::new_element;
 
 use crate::error::*;
-use crate::svd::{registercluster::RegisterCluster, registerproperties::RegisterProperties};
+use crate::svd::{
+    register::{RegIter, RegIterMut},
+    registercluster::RegisterCluster,
+    registerproperties::RegisterProperties,
+};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -160,6 +164,24 @@ impl ClusterInfo {
                 children?
             })
             .build()
+    }
+
+    /// returns iterator over all registers cluster contains
+    pub fn reg_iter(&self) -> RegIter {
+        let mut rem: Vec<&RegisterCluster> = Vec::with_capacity(self.children.len());
+        for r in self.children.iter().rev() {
+            rem.push(r);
+        }
+        RegIter { rem }
+    }
+
+    /// returns mutable iterator over all registers cluster contains
+    pub fn reg_iter_mut(&mut self) -> RegIterMut {
+        let mut rem: Vec<&mut RegisterCluster> = Vec::with_capacity(self.children.len());
+        for r in self.children.iter_mut().rev() {
+            rem.push(r);
+        }
+        RegIterMut { rem }
     }
 }
 

@@ -12,7 +12,10 @@ use crate::types::Parse;
 
 use crate::error::*;
 use crate::svd::{
-    addressblock::AddressBlock, interrupt::Interrupt, registercluster::RegisterCluster,
+    addressblock::AddressBlock,
+    interrupt::Interrupt,
+    register::{RegIter, RegIterMut},
+    registercluster::RegisterCluster,
     registerproperties::RegisterProperties,
 };
 
@@ -184,6 +187,32 @@ impl Peripheral {
             }
         }
         Ok(self)
+    }
+
+    /// returns iterator over all registers peripheral contains
+    pub fn reg_iter(&self) -> RegIter {
+        if let Some(regs) = &self.registers {
+            let mut rem: Vec<&RegisterCluster> = Vec::with_capacity(regs.len());
+            for r in regs.iter().rev() {
+                rem.push(r);
+            }
+            RegIter { rem }
+        } else {
+            RegIter { rem: Vec::new() }
+        }
+    }
+
+    /// returns mutable iterator over all registers peripheral contains
+    pub fn reg_iter_mut(&mut self) -> RegIterMut {
+        if let Some(regs) = &mut self.registers {
+            let mut rem: Vec<&mut RegisterCluster> = Vec::with_capacity(regs.len());
+            for r in regs.iter_mut().rev() {
+                rem.push(r);
+            }
+            RegIterMut { rem }
+        } else {
+            RegIterMut { rem: Vec::new() }
+        }
     }
 }
 
