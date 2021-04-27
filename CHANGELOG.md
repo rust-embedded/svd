@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Added `display_name` to `RegisterInfo`
 - Added implementations of `From<Type>` for `TypeBuilder`'s
 
 ## [v0.10.1] - 2021-04-17

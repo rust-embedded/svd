@@ -50,6 +50,10 @@ pub struct RegisterInfo {
 
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub display_name: Option<String>,
+
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub size: Option<u32>,
 
     #[cfg_attr(feature = "serde", serde(default))]
@@ -87,6 +91,7 @@ pub struct RegisterInfoBuilder {
     alternate_register: Option<String>,
     derived_from: Option<String>,
     description: Option<String>,
+    display_name: Option<String>,
     properties: RegisterProperties,
     fields: Option<Vec<Field>>,
     write_constraint: Option<WriteConstraint>,
@@ -101,6 +106,7 @@ impl From<RegisterInfo> for RegisterInfoBuilder {
             alternate_group: r.alternate_group,
             alternate_register: r.alternate_register,
             derived_from: r.derived_from,
+            display_name: r.display_name,
             description: r.description,
             properties: RegisterProperties {
                 size: r.size,
@@ -138,6 +144,10 @@ impl RegisterInfoBuilder {
     }
     pub fn description(mut self, value: Option<String>) -> Self {
         self.description = value;
+        self
+    }
+    pub fn display_name(mut self, value: Option<String>) -> Self {
+        self.display_name = value;
         self
     }
     pub fn properties(mut self, value: RegisterProperties) -> Self {
@@ -184,6 +194,7 @@ impl RegisterInfoBuilder {
             alternate_register: self.alternate_register,
             derived_from: self.derived_from,
             description: self.description,
+            display_name: self.display_name,
             size: self.properties.size,
             access: self.properties.access,
             reset_value: self.properties.reset_value,
@@ -240,6 +251,7 @@ impl RegisterInfo {
             .alternate_group(tree.get_child_text_opt("alternateGroup")?)
             .alternate_register(tree.get_child_text_opt("alternateRegister")?)
             .description(tree.get_child_text_opt("description")?)
+            .display_name(tree.get_child_text_opt("displayName")?)
             .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
             .address_offset(tree.get_child_u32("addressOffset")?)
             .properties(RegisterProperties::parse(tree)?)
@@ -289,6 +301,10 @@ impl Encode for RegisterInfo {
         if let Some(v) = &self.description {
             elem.children
                 .push(new_element("description", Some(v.clone())));
+        }
+        if let Some(v) = &self.display_name {
+            elem.children
+                .push(new_element("displayName", Some(v.clone())));
         }
         if let Some(v) = &self.alternate_group {
             elem.children
