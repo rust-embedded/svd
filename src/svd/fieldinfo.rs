@@ -288,7 +288,7 @@ mod tests {
                 <enumeratedValue>
                   <name>WS0</name>
                   <description>Zero wait-states inserted in fetch or read transfers</description>
-                  <value>0x00000000</value>
+                  <value>0</value>
                 </enumeratedValue>
               </enumeratedValues>
             </field>

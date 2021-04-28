@@ -67,11 +67,25 @@ impl EncodeChildren for RegisterProperties {
         };
 
         if let Some(v) = &self.reset_value {
-            children.push(new_element("resetValue", Some(format!("0x{:08.x}", v))));
+            children.push(new_element(
+                "resetValue",
+                Some(if *v > u32::MAX as u64 {
+                    format!("0x{:016X}", v)
+                } else {
+                    format!("0x{:08X}", v)
+                }),
+            ));
         };
 
         if let Some(v) = &self.reset_mask {
-            children.push(new_element("resetMask", Some(format!("0x{:08.x}", v))));
+            children.push(new_element(
+                "resetMask",
+                Some(if *v > u32::MAX as u64 {
+                    format!("0x{:016X}", v)
+                } else {
+                    format!("0x{:08X}", v)
+                }),
+            ));
         };
 
         Ok(children)
@@ -90,7 +104,7 @@ mod tests {
                 <size>64</size>
                 <access>read-only</access>
                 <resetValue>0x11223344</resetValue>
-                <resetMask>0xffffffff</resetMask>
+                <resetMask>0xFFFFFFFF</resetMask>
             </mock>
         ",
         );

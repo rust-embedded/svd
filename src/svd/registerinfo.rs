@@ -291,7 +291,7 @@ impl Encode for RegisterInfo {
 
         elem.children.push(new_element(
             "addressOffset",
-            Some(format!("0x{:x}", self.address_offset)),
+            Some(format!("0x{:X}", self.address_offset)),
         ));
 
         elem.children.extend(self.properties.encode()?);

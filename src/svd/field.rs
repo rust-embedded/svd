@@ -108,7 +108,7 @@ mod tests {
             "
             <field derivedFrom=\"other_field\">
               <dim>2</dim>
-              <dimIncrement>4</dimIncrement>
+              <dimIncrement>0x4</dimIncrement>
               <dimIndex>10,20</dimIndex>
               <name>MODE%s</name>
               <bitOffset>24</bitOffset>

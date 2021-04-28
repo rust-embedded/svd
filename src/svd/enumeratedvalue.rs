@@ -149,7 +149,7 @@ impl Encode for EnumeratedValue {
 
         if let Some(v) = &self.value {
             base.children
-                .push(new_element("value", Some(format!("0x{:08.x}", *v))));
+                .push(new_element("value", Some(format!("{}", v))));
         };
 
         if let Some(v) = &self.is_default {
@@ -181,7 +181,7 @@ mod tests {
                 <enumeratedValue>
                     <name>WS0</name>
                     <description>Zero wait-states inserted in fetch or read transfers</description>
-                    <value>0x00000000</value>
+                    <value>0</value>
                 </enumeratedValue>
             ",
         )];

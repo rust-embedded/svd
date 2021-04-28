@@ -105,7 +105,7 @@ mod tests {
             "
             <register>
               <dim>2</dim>
-              <dimIncrement>4</dimIncrement>
+              <dimIncrement>0x4</dimIncrement>
               <dimIndex>10,20</dimIndex>
               <name>MODE%s</name>
               <addressOffset>0x8</addressOffset>

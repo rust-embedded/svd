@@ -97,8 +97,8 @@ impl Encode for WriteConstraintRange {
             name: String::from("range"),
             attributes: HashMap::new(),
             children: vec![
-                new_element("minimum", Some(format!("0x{:08.x}", self.min))),
-                new_element("maximum", Some(format!("0x{:08.x}", self.max))),
+                new_element("minimum", Some(format!("{}", self.min))),
+                new_element("maximum", Some(format!("{}", self.max))),
             ],
             text: None,
         })
@@ -123,7 +123,7 @@ mod tests {
             ),
             (
                 WriteConstraint::Range(WriteConstraintRange{min: 1, max: 10}),
-                "<writeConstraint><range><minimum>0x00000001</minimum><maximum>0x0000000a</maximum></range></writeConstraint>"
+                "<writeConstraint><range><minimum>1</minimum><maximum>10</maximum></range></writeConstraint>"
             ),
         ];
 

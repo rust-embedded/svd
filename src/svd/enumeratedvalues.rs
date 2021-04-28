@@ -203,7 +203,7 @@ mod tests {
                 <enumeratedValue>
                     <name>WS1</name>
                     <description>One wait-state inserted for each fetch or read transfer. See Flash Wait-States table for details</description>
-                    <value>0x00000001</value>
+                    <value>1</value>
                 </enumeratedValue>
             </enumeratedValues>
         ",
@@ -258,7 +258,7 @@ mod tests {
             <enumeratedValue>
                 <name>WS0</name>
                 <description>Zero wait-states inserted in fetch or read transfers</description>
-                <value>0x00000000</value>
+                <value>0</value>
             </enumeratedValue>",
         );
 

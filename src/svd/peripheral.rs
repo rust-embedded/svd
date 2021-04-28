@@ -301,7 +301,7 @@ impl Encode for Peripheral {
         }
         elem.children.push(new_element(
             "baseAddress",
-            Some(format!("0x{:.08x}", self.base_address)),
+            Some(format!("0x{:.08X}", self.base_address)),
         ));
 
         elem.children
