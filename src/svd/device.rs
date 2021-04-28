@@ -181,7 +181,7 @@ impl Device {
             .description(tree.get_child_text_opt("description")?)
             .cpu(parse::optional::<Cpu>("cpu", tree)?)
             .address_unit_bits(parse::optional::<u32>("addressUnitBits", tree)?)
-            .width(None)
+            .width(parse::optional::<u32>("width", tree)?)
             .default_register_properties(RegisterProperties::parse(tree)?)
             .peripherals({
                 let ps: Result<Vec<_>, _> = tree
