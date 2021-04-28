@@ -91,7 +91,7 @@ impl Encode for DimElement {
             .push(new_element("dim", Some(format!("{}", self.dim))));
         e.children.push(new_element(
             "dimIncrement",
-            Some(format!("{}", self.dim_increment)),
+            Some(format!("0x{:X}", self.dim_increment)),
         ));
 
         if let Some(di) = &self.dim_index {
@@ -118,7 +118,7 @@ mod tests {
                 .unwrap(),
             "<dimElement>
                 <dim>100</dim>
-                <dimIncrement>4</dimIncrement>
+                <dimIncrement>0x4</dimIncrement>
                 <dimIndex>10,20</dimIndex>
             </dimElement>
             ",

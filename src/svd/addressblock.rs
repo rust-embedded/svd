@@ -41,8 +41,8 @@ impl Encode for AddressBlock {
             name: String::from("addressBlock"),
             attributes: HashMap::new(),
             children: vec![
-                new_element("offset", Some(format!("{}", self.offset))),
-                new_element("size", Some(format!("0x{:08.x}", self.size))),
+                new_element("offset", Some(format!("0x{:X}", self.offset))),
+                new_element("size", Some(format!("0x{:X}", self.size))),
                 new_element("usage", Some(self.usage.clone())),
             ],
             text: None,
@@ -64,8 +64,8 @@ mod tests {
                 usage: String::from("registers"),
             },
             "<addressBlock>
-                    <offset>0</offset>
-                    <size>0x00000800</size>
+                    <offset>0x0</offset>
+                    <size>0x800</size>
                     <usage>registers</usage>
                 </addressBlock>",
         )];
