@@ -59,7 +59,7 @@ impl EncodeChildren for RegisterProperties {
         let mut children = Vec::new();
 
         if let Some(v) = &self.size {
-            children.push(new_element("size", Some(format!("0x{:08.x}", v))));
+            children.push(new_element("size", Some(format!("0x{:X}", v))));
         };
 
         if let Some(v) = &self.reset_value {
@@ -87,7 +87,7 @@ mod tests {
         let example = String::from(
             "
             <mock>
-                <size>0xaabbccdd</size>
+                <size>0xAABBCCDD</size>
                 <resetValue>0x11223344</resetValue>
                 <resetMask>0xffffffff</resetMask>
                 <access>read-only</access>

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::elementext::ElementExt;
 use xmltree::Element;
 
-use crate::encode::Encode;
+use crate::encode::{Encode, EncodeChildren};
 use crate::error::*;
 
 use crate::new_element;
@@ -300,23 +300,7 @@ impl Encode for RegisterInfo {
                 .insert(String::from("derivedFrom"), v.to_string());
         }
 
-        if let Some(v) = &self.properties.size {
-            elem.children.push(new_element("size", Some(v.to_string())));
-        };
-
-        if let Some(v) = &self.properties.access {
-            elem.children.push(v.encode()?);
-        };
-
-        if let Some(v) = &self.properties.reset_value {
-            elem.children
-                .push(new_element("resetValue", Some(format!("0x{:08.x}", v))));
-        };
-
-        if let Some(v) = &self.properties.reset_mask {
-            elem.children
-                .push(new_element("resetMask", Some(format!("0x{:08.x}", v))));
-        };
+        elem.children.extend(self.properties.encode()?);
 
         if let Some(v) = &self.fields {
             let children = v
@@ -393,7 +377,7 @@ mod tests {
                 <addressOffset>0x8</addressOffset>
                 <alternateGroup>alternate_group</alternateGroup>
                 <alternateRegister>alternate_register</alternateRegister>
-                <size>32</size>
+                <size>0x20</size>
                 <access>read-write</access>
                 <resetValue>0x00000000</resetValue>
                 <resetMask>0x00000023</resetMask>
