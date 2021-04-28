@@ -15,12 +15,12 @@ use crate::svd::access::Access;
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 #[non_exhaustive]
 pub struct RegisterProperties {
-    /// Default bit-width of any register
+    /// Bit-width of register
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub size: Option<u32>,
 
-    /// Default value for all registers at RESET
+    /// Register value at RESET
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub reset_value: Option<u64>,
@@ -30,7 +30,7 @@ pub struct RegisterProperties {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub reset_mask: Option<u64>,
 
-    /// Default access rights for all registers
+    /// Access rights for register
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub access: Option<Access>,

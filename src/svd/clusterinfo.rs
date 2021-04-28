@@ -40,6 +40,7 @@ pub struct ClusterInfo {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub header_struct_name: Option<String>,
 
+    /// Default properties for all registers
     pub default_register_properties: RegisterProperties,
 
     pub children: Vec<RegisterCluster>,

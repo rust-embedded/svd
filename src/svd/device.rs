@@ -53,6 +53,7 @@ pub struct Device {
     /// Group to define peripherals
     pub peripherals: Vec<Peripheral>,
 
+    /// Default properties for all registers
     pub default_register_properties: RegisterProperties,
 }
 

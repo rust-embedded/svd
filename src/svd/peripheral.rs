@@ -57,6 +57,7 @@ pub struct Peripheral {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty"))]
     pub interrupt: Vec<Interrupt>,
 
+    /// Default properties for all registers
     pub default_register_properties: RegisterProperties,
 
     /// Group to enclose register definitions.
