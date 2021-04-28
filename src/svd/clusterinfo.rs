@@ -41,6 +41,7 @@ pub struct ClusterInfo {
     pub header_struct_name: Option<String>,
 
     /// Default properties for all registers
+    #[cfg_attr(feature = "serde", serde(flatten))]
     pub default_register_properties: RegisterProperties,
 
     pub children: Vec<RegisterCluster>,

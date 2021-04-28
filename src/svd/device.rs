@@ -54,6 +54,7 @@ pub struct Device {
     pub peripherals: Vec<Peripheral>,
 
     /// Default properties for all registers
+    #[cfg_attr(feature = "serde", serde(flatten))]
     pub default_register_properties: RegisterProperties,
 }
 

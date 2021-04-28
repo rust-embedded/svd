@@ -52,7 +52,7 @@ pub struct RegisterInfo {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub display_name: Option<String>,
 
-    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(flatten))]
     pub properties: RegisterProperties,
 
     /// `None` indicates that the `<fields>` node is not present
