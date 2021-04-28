@@ -55,10 +55,7 @@ impl DeriveFrom for RegisterInfo {
     fn derive_from(&self, other: &RegisterInfo) -> RegisterInfo {
         let mut derived = self.clone();
         derived.description = derived.description.or_else(|| other.description.clone());
-        derived.size = derived.size.or(other.size);
-        derived.access = derived.access.or(other.access);
-        derived.reset_value = derived.reset_value.or(other.reset_value);
-        derived.reset_mask = derived.reset_mask.or(other.reset_mask);
+        derived.properties = derived.properties.derive_from(&other.properties);
         derived.fields = derived.fields.or_else(|| other.fields.clone());
         derived.write_constraint = derived.write_constraint.or(other.write_constraint);
         derived.modified_write_values = derived

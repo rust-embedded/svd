@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::elementext::ElementExt;
 use xmltree::Element;
 
-use crate::encode::Encode;
+use crate::encode::{Encode, EncodeChildren};
 use crate::error::*;
 
 use crate::new_element;
@@ -52,21 +52,8 @@ pub struct RegisterInfo {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub display_name: Option<String>,
 
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub size: Option<u32>,
-
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub access: Option<Access>,
-
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub reset_value: Option<u64>,
-
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub reset_mask: Option<u64>,
+    #[cfg_attr(feature = "serde", serde(flatten))]
+    pub properties: RegisterProperties,
 
     /// `None` indicates that the `<fields>` node is not present
     #[cfg_attr(feature = "serde", serde(default))]
@@ -108,12 +95,7 @@ impl From<RegisterInfo> for RegisterInfoBuilder {
             derived_from: r.derived_from,
             display_name: r.display_name,
             description: r.description,
-            properties: RegisterProperties {
-                size: r.size,
-                access: r.access,
-                reset_value: r.reset_value,
-                reset_mask: r.reset_mask,
-            },
+            properties: r.properties,
             fields: r.fields,
             write_constraint: r.write_constraint,
             modified_write_values: r.modified_write_values,
@@ -195,10 +177,7 @@ impl RegisterInfoBuilder {
             derived_from: self.derived_from,
             description: self.description,
             display_name: self.display_name,
-            size: self.properties.size,
-            access: self.properties.access,
-            reset_value: self.properties.reset_value,
-            reset_mask: self.properties.reset_mask,
+            properties: self.properties,
             fields: self.fields,
             write_constraint: self.write_constraint,
             modified_write_values: self.modified_write_values,
@@ -321,23 +300,7 @@ impl Encode for RegisterInfo {
                 .insert(String::from("derivedFrom"), v.to_string());
         }
 
-        if let Some(v) = &self.size {
-            elem.children.push(new_element("size", Some(v.to_string())));
-        };
-
-        if let Some(v) = &self.access {
-            elem.children.push(v.encode()?);
-        };
-
-        if let Some(v) = &self.reset_value {
-            elem.children
-                .push(new_element("resetValue", Some(format!("0x{:08.x}", v))));
-        };
-
-        if let Some(v) = &self.reset_mask {
-            elem.children
-                .push(new_element("resetMask", Some(format!("0x{:08.x}", v))));
-        };
+        elem.children.extend(self.properties.encode()?);
 
         if let Some(v) = &self.fields {
             let children = v
