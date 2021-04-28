@@ -96,8 +96,9 @@ impl ElementExt for Element {
 
     // Merges the children of two elements, maintaining the name and description of the first
     fn merge(&mut self, r: &Self) {
-        for c in &r.children {
-            self.children.push(c.clone());
+        self.children.extend(r.children.iter().cloned());
+        for (key, val) in &r.attributes {
+            self.attributes.insert(key.clone(), val.clone());
         }
     }
 

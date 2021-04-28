@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::elementext::ElementExt;
 use crate::parse;
 use xmltree::Element;
@@ -140,15 +138,9 @@ impl Encode for EnumeratedValue {
     type Error = anyhow::Error;
 
     fn encode(&self) -> Result<Element> {
-        let mut base = Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("enumeratedValue"),
-            attributes: HashMap::new(),
-            children: vec![new_element("name", Some(self.name.clone()))],
-            text: None,
-        };
+        let mut base = new_element("enumeratedValue", None);
+        base.children
+            .push(new_element("name", Some(self.name.clone())));
 
         if let Some(d) = &self.description {
             let s = (*d).clone();

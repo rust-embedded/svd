@@ -5,6 +5,7 @@ use xmltree::Element;
 use crate::types::Parse;
 
 use crate::elementext::ElementExt;
+use crate::new_element;
 
 use crate::encode::Encode;
 use crate::error::*;
@@ -66,9 +67,9 @@ impl Encode for Field {
         match self {
             Field::Single(info) => info.encode(),
             Field::Array(info, array_info) => {
-                // TODO: is this correct? probably not, need tests
-                let mut base = info.encode()?;
+                let mut base = new_element("field", None);
                 base.merge(&array_info.encode()?);
+                base.merge(&info.encode()?);
                 Ok(base)
             }
         }
@@ -106,12 +107,12 @@ mod tests {
             ),
             "
             <field derivedFrom=\"other_field\">
-              <name>MODE%s</name>
-              <bitOffset>24</bitOffset>
-              <bitWidth>2</bitWidth>
               <dim>2</dim>
               <dimIncrement>4</dimIncrement>
               <dimIndex>10,20</dimIndex>
+              <name>MODE%s</name>
+              <bitOffset>24</bitOffset>
+              <bitWidth>2</bitWidth>
             </field>
             ",
         )];

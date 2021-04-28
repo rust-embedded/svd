@@ -20,6 +20,11 @@ pub struct RegisterProperties {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub size: Option<u32>,
 
+    /// Access rights for register
+    #[cfg_attr(feature = "serde", serde(default))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub access: Option<Access>,
+
     /// Register value at RESET
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -29,11 +34,6 @@ pub struct RegisterProperties {
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub reset_mask: Option<u64>,
-
-    /// Access rights for register
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub access: Option<Access>,
 }
 
 impl Parse for RegisterProperties {
@@ -43,9 +43,9 @@ impl Parse for RegisterProperties {
     fn parse(tree: &Element) -> Result<Self> {
         let p = RegisterProperties {
             size: parse::optional::<u32>("size", tree)?,
+            access: parse::optional::<Access>("access", tree)?,
             reset_value: parse::optional::<u64>("resetValue", tree)?,
             reset_mask: parse::optional::<u64>("resetMask", tree)?,
-            access: parse::optional::<Access>("access", tree)?,
         };
         check_reset_value(p.size, p.reset_value, p.reset_mask)?;
         Ok(p)
@@ -62,16 +62,16 @@ impl EncodeChildren for RegisterProperties {
             children.push(new_element("size", Some(format!("{}", v))));
         };
 
+        if let Some(v) = &self.access {
+            children.push(v.encode()?);
+        };
+
         if let Some(v) = &self.reset_value {
             children.push(new_element("resetValue", Some(format!("0x{:08.x}", v))));
         };
 
         if let Some(v) = &self.reset_mask {
             children.push(new_element("resetMask", Some(format!("0x{:08.x}", v))));
-        };
-
-        if let Some(v) = &self.access {
-            children.push(v.encode()?);
         };
 
         Ok(children)
@@ -88,9 +88,9 @@ mod tests {
             "
             <mock>
                 <size>64</size>
+                <access>read-only</access>
                 <resetValue>0x11223344</resetValue>
                 <resetMask>0xffffffff</resetMask>
-                <access>read-only</access>
             </mock>
         ",
         );
