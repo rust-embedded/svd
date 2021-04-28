@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.10.2] - 2021-04-28
+
 - Allow single valued `dimIndex`
 - Added `reg_iter`, `reg_iter_mut` methods on `Peripheral` and `Cluster`
 - Added `DerefMut` for `Cluster`, `Register` and `Field`
@@ -139,7 +141,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Initial SVD parser
 - A `parse` utility function to parse the contents of a SVD file (XML)
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/v0.10.1...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/v0.10.2...HEAD
+[v0.10.2]: https://github.com/rust-embedded/svd/compare/v0.10.1...v0.10.2
 [v0.10.1]: https://github.com/rust-embedded/svd/compare/v0.10.0...v0.10.1
 [v0.10.0]: https://github.com/rust-embedded/svd/compare/v0.9.0...v0.10.0
 [v0.9.0]: https://github.com/rust-embedded/svd/compare/v0.8.1...v0.9.0
