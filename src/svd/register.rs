@@ -5,6 +5,7 @@ use xmltree::Element;
 use crate::types::Parse;
 
 use crate::elementext::ElementExt;
+use crate::new_element;
 
 use crate::encode::Encode;
 use crate::error::*;
@@ -69,9 +70,9 @@ impl Encode for Register {
         match self {
             Register::Single(info) => info.encode(),
             Register::Array(info, array_info) => {
-                // TODO: is this correct? probably not, need tests
-                let mut base = info.encode()?;
+                let mut base = new_element("register", None);
                 base.merge(&array_info.encode()?);
+                base.merge(&info.encode()?);
                 Ok(base)
             }
         }
@@ -103,11 +104,11 @@ mod tests {
             ),
             "
             <register>
-              <name>MODE%s</name>
-              <addressOffset>0x8</addressOffset>
               <dim>2</dim>
               <dimIncrement>4</dimIncrement>
               <dimIndex>10,20</dimIndex>
+              <name>MODE%s</name>
+              <addressOffset>0x8</addressOffset>
             </register>
             ",
         )];
