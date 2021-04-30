@@ -69,7 +69,7 @@ impl EncodeChildren for RegisterProperties {
         if let Some(v) = &self.reset_value {
             children.push(new_element(
                 "resetValue",
-                Some(if *v > u32::MAX as u64 {
+                Some(if *v > std::u32::MAX as u64 {
                     format!("0x{:016X}", v)
                 } else {
                     format!("0x{:08X}", v)
@@ -80,7 +80,7 @@ impl EncodeChildren for RegisterProperties {
         if let Some(v) = &self.reset_mask {
             children.push(new_element(
                 "resetMask",
-                Some(if *v > u32::MAX as u64 {
+                Some(if *v > std::u32::MAX as u64 {
                     format!("0x{:016X}", v)
                 } else {
                     format!("0x{:08X}", v)
