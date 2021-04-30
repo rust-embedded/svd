@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [v0.10.2] - 2021-04-28
+## [v0.10.2] - 2021-04-30
 
 - Allow single valued `dimIndex`
 - Added `reg_iter`, `reg_iter_mut` methods on `Peripheral` and `Cluster`
