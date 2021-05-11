@@ -1,11 +1,4 @@
-use crate::elementext::ElementExt;
-use crate::parse;
-use xmltree::Element;
-
-use crate::encode::Encode;
 use crate::error::*;
-use crate::new_element;
-use crate::types::Parse;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -89,6 +82,9 @@ impl EnumeratedValueBuilder {
 }
 
 impl EnumeratedValue {
+    pub fn builder() -> EnumeratedValueBuilder {
+        EnumeratedValueBuilder::default()
+    }
     fn validate(self) -> Result<Self> {
         #[cfg(feature = "strict")]
         check_name(&self.name, "name")?;
@@ -104,88 +100,5 @@ impl EnumeratedValue {
             }
             _ => Ok(()),
         }
-    }
-}
-
-impl EnumeratedValue {
-    fn _parse(tree: &Element, name: String) -> Result<Self> {
-        EnumeratedValueBuilder::default()
-            .name(name)
-            .description(tree.get_child_text_opt("description")?)
-            // TODO: this .ok() approach is simple, but does not expose errors parsing child objects.
-            // Suggest refactoring all parse::type methods to return result so parse::optional works.
-            .value(parse::optional::<u64>("value", tree)?)
-            .is_default(tree.get_child_bool("isDefault").ok())
-            .build()
-    }
-}
-impl Parse for EnumeratedValue {
-    type Object = Self;
-    type Error = anyhow::Error;
-
-    fn parse(tree: &Element) -> Result<Self> {
-        if tree.name != "enumeratedValue" {
-            return Err(
-                SVDError::NotExpectedTag(tree.clone(), "enumeratedValue".to_string()).into(),
-            );
-        }
-        let name = tree.get_child_text("name")?;
-        Self::_parse(tree, name.clone()).with_context(|| format!("In enumerated value `{}`", name))
-    }
-}
-
-impl Encode for EnumeratedValue {
-    type Error = anyhow::Error;
-
-    fn encode(&self) -> Result<Element> {
-        let mut base = new_element("enumeratedValue", None);
-        base.children
-            .push(new_element("name", Some(self.name.clone())));
-
-        if let Some(d) = &self.description {
-            let s = (*d).clone();
-            base.children.push(new_element("description", Some(s)));
-        };
-
-        if let Some(v) = &self.value {
-            base.children
-                .push(new_element("value", Some(format!("{}", v))));
-        };
-
-        if let Some(v) = &self.is_default {
-            base.children
-                .push(new_element("isDefault", Some(format!("{}", v))));
-        };
-
-        Ok(base)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::run_test;
-
-    #[test]
-    fn decode_encode() {
-        let tests = vec![(
-            EnumeratedValueBuilder::default()
-                .name("WS0".to_string())
-                .description(Some(
-                    "Zero wait-states inserted in fetch or read transfers".to_string(),
-                ))
-                .value(Some(0))
-                .build()
-                .unwrap(),
-            "
-                <enumeratedValue>
-                    <name>WS0</name>
-                    <description>Zero wait-states inserted in fetch or read transfers</description>
-                    <value>0</value>
-                </enumeratedValue>
-            ",
-        )];
-
-        run_test::<EnumeratedValue>(&tests[..]);
     }
 }

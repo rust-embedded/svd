@@ -14,10 +14,10 @@ pub mod access;
 pub use self::access::Access;
 
 pub mod bitrange;
-pub use self::bitrange::BitRange;
+pub use self::bitrange::{BitRange, BitRangeType};
 
 pub mod writeconstraint;
-pub use self::writeconstraint::WriteConstraint;
+pub use self::writeconstraint::{WriteConstraint, WriteConstraintRange};
 
 pub mod usage;
 pub use self::usage::Usage;

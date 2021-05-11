@@ -1,12 +1,4 @@
-use crate::elementext::ElementExt;
-use xmltree::Element;
-
-use crate::encode::Encode;
 use crate::error::*;
-
-use crate::new_element;
-use crate::parse;
-use crate::types::Parse;
 
 use crate::svd::{
     access::Access, bitrange::BitRange, enumeratedvalues::EnumeratedValues,
@@ -135,6 +127,9 @@ impl FieldInfoBuilder {
 }
 
 impl FieldInfo {
+    pub fn builder() -> FieldInfoBuilder {
+        FieldInfoBuilder::default()
+    }
     fn validate(self) -> Result<Self> {
         #[cfg(feature = "strict")]
         check_dimable_name(&self.name, "name")?;
@@ -157,164 +152,5 @@ impl FieldInfo {
             }
         }
         Ok(self)
-    }
-}
-
-impl Parse for FieldInfo {
-    type Object = Self;
-    type Error = anyhow::Error;
-
-    fn parse(tree: &Element) -> Result<Self> {
-        if tree.name != "field" {
-            return Err(SVDError::NotExpectedTag(tree.clone(), "field".to_string()).into());
-        }
-        let name = tree.get_child_text("name")?;
-        Self::_parse(tree, name.clone()).with_context(|| format!("In field `{}`", name))
-    }
-}
-
-impl FieldInfo {
-    fn _parse(tree: &Element, name: String) -> Result<Self> {
-        let bit_range = BitRange::parse(tree)?;
-        FieldInfoBuilder::default()
-            .name(name)
-            .description(tree.get_child_text_opt("description")?)
-            .bit_range(bit_range)
-            .access(parse::optional::<Access>("access", tree)?)
-            .modified_write_values(parse::optional::<ModifiedWriteValues>(
-                "modifiedWriteValues",
-                tree,
-            )?)
-            .write_constraint(parse::optional::<WriteConstraint>("writeConstraint", tree)?)
-            .enumerated_values({
-                let values: Result<Vec<_>, _> = tree
-                    .children
-                    .iter()
-                    .filter(|t| t.name == "enumeratedValues")
-                    .map(|t| EnumeratedValues::parse(t))
-                    .collect();
-                values?
-            })
-            .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
-            .build()
-    }
-}
-
-impl Encode for FieldInfo {
-    type Error = anyhow::Error;
-
-    fn encode(&self) -> Result<Element> {
-        let mut elem = new_element("field", None);
-        elem.children
-            .push(new_element("name", Some(self.name.clone())));
-
-        if let Some(description) = &self.description {
-            elem.children
-                .push(new_element("description", Some(description.clone())))
-        }
-
-        // Add bit range
-        elem.children.append(&mut self.bit_range.encode()?);
-
-        if let Some(v) = &self.access {
-            elem.children.push(v.encode()?);
-        }
-
-        if let Some(v) = &self.modified_write_values {
-            elem.children.push(v.encode()?);
-        }
-
-        if let Some(v) = &self.write_constraint {
-            elem.children.push(v.encode()?);
-        }
-
-        let enumerated_values: Result<Vec<Element>> =
-            self.enumerated_values.iter().map(|v| v.encode()).collect();
-        elem.children.append(&mut enumerated_values?);
-
-        if let Some(v) = &self.derived_from {
-            elem.attributes
-                .insert(String::from("derivedFrom"), v.to_string());
-        }
-
-        Ok(elem)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::run_test;
-    use crate::svd::{
-        bitrange::BitRangeType, enumeratedvalue::EnumeratedValueBuilder,
-        enumeratedvalues::EnumeratedValuesBuilder,
-    };
-
-    #[test]
-    fn decode_encode() {
-        let tests = vec![
-            (
-                FieldInfoBuilder::default()
-                    .name("MODE".to_string())
-                    .description(Some("Read Mode".to_string()))
-                    .bit_range(BitRange {
-                        offset: 24,
-                        width: 2,
-                        range_type: BitRangeType::OffsetWidth,
-                    })
-                    .access(Some(Access::ReadWrite))
-                    .enumerated_values(vec![EnumeratedValuesBuilder::default()
-                        .values(vec![EnumeratedValueBuilder::default()
-                            .name("WS0".to_string())
-                            .description(Some(
-                                "Zero wait-states inserted in fetch or read transfers".to_string(),
-                            ))
-                            .value(Some(0))
-                            .is_default(None)
-                            .build()
-                            .unwrap()])
-                        .build()
-                        .unwrap()])
-                    .build()
-                    .unwrap(),
-                "
-            <field>
-              <name>MODE</name>
-              <description>Read Mode</description>
-              <bitOffset>24</bitOffset>
-              <bitWidth>2</bitWidth>
-              <access>read-write</access>
-              <enumeratedValues>
-                <enumeratedValue>
-                  <name>WS0</name>
-                  <description>Zero wait-states inserted in fetch or read transfers</description>
-                  <value>0</value>
-                </enumeratedValue>
-              </enumeratedValues>
-            </field>
-            ",
-            ),
-            (
-                FieldInfoBuilder::default()
-                    .name("MODE".to_string())
-                    .derived_from(Some("other_field".to_string()))
-                    .bit_range(BitRange {
-                        offset: 24,
-                        width: 2,
-                        range_type: BitRangeType::OffsetWidth,
-                    })
-                    .build()
-                    .unwrap(),
-                "
-            <field derivedFrom=\"other_field\">
-              <name>MODE</name>
-              <bitOffset>24</bitOffset>
-              <bitWidth>2</bitWidth>
-            </field>
-            ",
-            ),
-        ];
-
-        run_test::<FieldInfo>(&tests[..]);
     }
 }

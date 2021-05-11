@@ -1,14 +1,5 @@
-use std::collections::HashMap;
-
-use xmltree::Element;
-
-use crate::elementext::ElementExt;
-use crate::encode::Encode;
 use crate::error::*;
-
-use crate::new_element;
-use crate::svd::endian::Endian;
-use crate::types::Parse;
+use crate::svd::Endian;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -118,98 +109,15 @@ impl CpuBuilder {
 }
 
 impl Cpu {
+    pub fn builder() -> CpuBuilder {
+        CpuBuilder::default()
+    }
     #[allow(clippy::unnecessary_wraps)]
     fn validate(self) -> Result<Self> {
         // TODO
         Ok(self)
     }
-}
-
-impl Parse for Cpu {
-    type Object = Self;
-    type Error = anyhow::Error;
-
-    fn parse(tree: &Element) -> Result<Self> {
-        if tree.name != "cpu" {
-            return Err(SVDError::NameMismatch(tree.clone()).into());
-        }
-
-        CpuBuilder::default()
-            .name(tree.get_child_text("name")?)
-            .revision(tree.get_child_text("revision")?)
-            .endian(Endian::parse(tree.get_child_elem("endian")?)?)
-            .mpu_present(tree.get_child_bool("mpuPresent")?)
-            .fpu_present(tree.get_child_bool("fpuPresent")?)
-            .nvic_priority_bits(tree.get_child_u32("nvicPrioBits")?)
-            .has_vendor_systick(tree.get_child_bool("vendorSystickConfig")?)
-            .build()
-    }
-}
-
-impl Encode for Cpu {
-    type Error = anyhow::Error;
-
-    fn encode(&self) -> Result<Element> {
-        Ok(Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("cpu"),
-            attributes: HashMap::new(),
-            children: vec![
-                new_element("name", Some(self.name.clone())),
-                new_element("revision", Some(self.revision.clone())),
-                self.endian.encode()?,
-                new_element("mpuPresent", Some(format!("{}", self.mpu_present))),
-                new_element("fpuPresent", Some(format!("{}", self.fpu_present))),
-                new_element("nvicPrioBits", Some(format!("{}", self.nvic_priority_bits))),
-                new_element(
-                    "vendorSystickConfig",
-                    Some(format!("{}", self.has_vendor_systick)),
-                ),
-            ],
-            text: None,
-        })
-    }
-}
-
-impl Cpu {
     pub fn is_cortex_m(&self) -> bool {
         self.name.starts_with("CM")
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::run_test;
-
-    #[test]
-    fn decode_encode() {
-        let tests = vec![(
-            CpuBuilder::default()
-                .name("EFM32JG12B500F512GM48".to_string())
-                .revision("5.1.1".to_string())
-                .endian(Endian::Little)
-                .mpu_present(true)
-                .fpu_present(true)
-                .nvic_priority_bits(8)
-                .has_vendor_systick(false)
-                .build()
-                .unwrap(),
-            "
-                    <cpu>
-                        <name>EFM32JG12B500F512GM48</name>  
-                        <revision>5.1.1</revision>
-                        <endian>little</endian>
-                        <mpuPresent>true</mpuPresent>
-                        <fpuPresent>true</fpuPresent>
-                        <nvicPrioBits>8</nvicPrioBits>
-                        <vendorSystickConfig>false</vendorSystickConfig>
-                    </cpu>
-                ",
-        )];
-
-        run_test::<Cpu>(&tests[..]);
     }
 }

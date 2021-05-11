@@ -1,12 +1,5 @@
 use core::ops::{Deref, DerefMut};
-use xmltree::Element;
 
-use crate::types::Parse;
-
-use crate::elementext::ElementExt;
-use crate::encode::Encode;
-use crate::error::*;
-use crate::new_element;
 use crate::svd::{clusterinfo::ClusterInfo, dimelement::DimElement};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -35,49 +28,3 @@ impl DerefMut for Cluster {
         }
     }
 }
-
-impl Parse for Cluster {
-    type Object = Self;
-    type Error = anyhow::Error;
-
-    fn parse(tree: &Element) -> Result<Self> {
-        assert_eq!(tree.name, "cluster");
-
-        let info = ClusterInfo::parse(tree)?;
-
-        if tree.get_child("dimIncrement").is_some() {
-            let array_info = DimElement::parse(tree)?;
-            check_has_placeholder(&info.name, "cluster")?;
-
-            if let Some(indices) = &array_info.dim_index {
-                if array_info.dim as usize != indices.len() {
-                    // TODO: replace with real error
-                    anyhow::bail!("Cluster index length mismatch");
-                }
-            }
-
-            Ok(Cluster::Array(info, array_info))
-        } else {
-            Ok(Cluster::Single(info))
-        }
-    }
-}
-
-impl Encode for Cluster {
-    type Error = anyhow::Error;
-
-    // TODO: support Cluster encoding
-    fn encode(&self) -> Result<Element> {
-        match self {
-            Cluster::Single(i) => i.encode(),
-            Cluster::Array(i, a) => {
-                let mut e = new_element("cluster", None);
-                e.merge(&a.encode()?);
-                e.merge(&i.encode()?);
-                Ok(e)
-            }
-        }
-    }
-}
-
-// TODO: test Cluster encoding and decoding
