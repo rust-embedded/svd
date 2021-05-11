@@ -1,13 +1,7 @@
-use super::Element;
-use crate::elementext::ElementExt;
-
+use super::{elementext::ElementExt, optional, Element, Parse};
 use rayon::prelude::*;
 
-use crate::parse;
-use crate::types::Parse;
-
 use crate::error::*;
-
 use crate::svd::{
     cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties, Device,
 };
@@ -32,9 +26,9 @@ impl Device {
             .name(name)
             .version(tree.get_child_text_opt("version")?)
             .description(tree.get_child_text_opt("description")?)
-            .cpu(parse::optional::<Cpu>("cpu", tree)?)
-            .address_unit_bits(parse::optional::<u32>("addressUnitBits", tree)?)
-            .width(parse::optional::<u32>("width", tree)?)
+            .cpu(optional::<Cpu>("cpu", tree)?)
+            .address_unit_bits(optional::<u32>("addressUnitBits", tree)?)
+            .width(optional::<u32>("width", tree)?)
             .default_register_properties(RegisterProperties::parse(tree)?)
             .peripherals({
                 let ps: Result<Vec<_>, _> = tree

@@ -1,8 +1,6 @@
-use super::{Element, Parse};
+use super::{elementext::ElementExt, optional, Element, Parse};
 
-use crate::elementext::ElementExt;
 use crate::error::*;
-use crate::parse;
 use crate::svd::{
     Access, BitRange, EnumeratedValues, FieldInfo, ModifiedWriteValues, WriteConstraint,
 };
@@ -27,12 +25,12 @@ impl FieldInfo {
             .name(name)
             .description(tree.get_child_text_opt("description")?)
             .bit_range(bit_range)
-            .access(parse::optional::<Access>("access", tree)?)
-            .modified_write_values(parse::optional::<ModifiedWriteValues>(
+            .access(optional::<Access>("access", tree)?)
+            .modified_write_values(optional::<ModifiedWriteValues>(
                 "modifiedWriteValues",
                 tree,
             )?)
-            .write_constraint(parse::optional::<WriteConstraint>("writeConstraint", tree)?)
+            .write_constraint(optional::<WriteConstraint>("writeConstraint", tree)?)
             .enumerated_values({
                 let values: Result<Vec<_>, _> = tree
                     .children

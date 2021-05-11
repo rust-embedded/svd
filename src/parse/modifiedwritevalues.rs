@@ -1,7 +1,4 @@
-use super::Element;
-use crate::elementext::ElementExt;
-
-use crate::types::Parse;
+use super::{elementext::ElementExt, Element, Parse};
 
 use crate::error::*;
 

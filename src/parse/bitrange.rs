@@ -1,8 +1,7 @@
-use super::Element;
+use super::{Element, Parse};
 
 use crate::error::*;
 use crate::svd::{BitRange, BitRangeType};
-use crate::types::Parse;
 
 impl Parse for BitRange {
     type Object = Self;

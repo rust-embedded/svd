@@ -3,7 +3,7 @@
 
 use xmltree::Element;
 
-use crate::types::{BoolParse, Parse};
+use super::types::{BoolParse, Parse};
 
 use crate::error::*;
 
@@ -23,8 +23,6 @@ pub trait ElementExt {
     fn get_child_u32(&self, n: &str) -> Result<u32>;
     fn get_child_u64(&self, n: &str) -> Result<u64>;
     fn get_child_bool(&self, n: &str) -> Result<bool>;
-
-    fn merge(&mut self, n: &Self);
 
     fn debug(&self);
 }
@@ -92,14 +90,6 @@ impl ElementExt for Element {
     fn get_child_bool(&self, n: &str) -> Result<bool> {
         let s = self.get_child_elem(n)?;
         BoolParse::parse(s)
-    }
-
-    // Merges the children of two elements, maintaining the name and description of the first
-    fn merge(&mut self, r: &Self) {
-        self.children.extend(r.children.iter().cloned());
-        for (key, val) in &r.attributes {
-            self.attributes.insert(key.clone(), val.clone());
-        }
     }
 
     fn debug(&self) {

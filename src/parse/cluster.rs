@@ -1,8 +1,7 @@
-use super::Element;
+use super::{Element, Parse};
 
 use crate::error::*;
 use crate::svd::{Cluster, ClusterInfo, DimElement};
-use crate::types::Parse;
 
 impl Parse for Cluster {
     type Object = Self;

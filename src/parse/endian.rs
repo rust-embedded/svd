@@ -1,9 +1,7 @@
-use super::Element;
+use super::{elementext::ElementExt, Element, Parse};
 
-use crate::elementext::ElementExt;
 use crate::error::*;
 use crate::svd::Endian;
-use crate::types::Parse;
 
 impl Parse for Endian {
     type Object = Self;

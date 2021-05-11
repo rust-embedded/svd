@@ -1,8 +1,4 @@
-use super::Element;
-
-use crate::elementext::ElementExt;
-use crate::parse;
-use crate::types::Parse;
+use super::{elementext::ElementExt, optional, Element, Parse};
 
 use crate::error::*;
 use crate::svd::{AddressBlock, Interrupt, Peripheral, RegisterCluster, RegisterProperties};
@@ -30,7 +26,7 @@ impl Peripheral {
             .group_name(tree.get_child_text_opt("groupName")?)
             .base_address(tree.get_child_u64("baseAddress")?)
             .default_register_properties(RegisterProperties::parse(tree)?)
-            .address_block(parse::optional::<AddressBlock>("addressBlock", tree)?)
+            .address_block(optional::<AddressBlock>("addressBlock", tree)?)
             .interrupt({
                 let interrupt: Result<Vec<_>, _> = tree
                     .children

@@ -1,8 +1,7 @@
-use super::Element;
+use super::{Element, Parse};
 
 use crate::error::*;
 use crate::svd::{DimElement, Field, FieldInfo};
-use crate::types::Parse;
 
 impl Parse for Field {
     type Object = Self;

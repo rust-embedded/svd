@@ -22,8 +22,6 @@
 
 #![deny(warnings)]
 
-// ElementExt extends XML elements with useful methods
-pub mod elementext;
 // SVD contains svd primitives
 pub mod svd;
 pub use svd::*;
@@ -35,8 +33,6 @@ pub use parse::parse;
 // Encode defines encoding interfaces
 pub mod encode;
 pub use encode::encode;
-// Types defines simple types and parse/encode implementations
-pub mod types;
 
 #[cfg(feature = "derive-from")]
 pub mod derive_from;

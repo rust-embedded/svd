@@ -1,11 +1,6 @@
-use super::Element;
+use super::{elementext::ElementExt, optional, Element, Parse};
 
-use crate::elementext::ElementExt;
 use crate::error::*;
-
-use crate::parse;
-use crate::types::Parse;
-
 use crate::svd::{Field, ModifiedWriteValues, RegisterInfo, RegisterProperties, WriteConstraint};
 
 impl Parse for RegisterInfo {
@@ -28,11 +23,11 @@ impl RegisterInfo {
             .alternate_register(tree.get_child_text_opt("alternateRegister")?)
             .address_offset(tree.get_child_u32("addressOffset")?)
             .properties(RegisterProperties::parse(tree)?)
-            .modified_write_values(parse::optional::<ModifiedWriteValues>(
+            .modified_write_values(optional::<ModifiedWriteValues>(
                 "modifiedWriteValues",
                 tree,
             )?)
-            .write_constraint(parse::optional::<WriteConstraint>("writeConstraint", tree)?)
+            .write_constraint(optional::<WriteConstraint>("writeConstraint", tree)?)
             .fields({
                 if let Some(fields) = tree.get_child("fields") {
                     let fs: Result<Vec<_>, _> = fields

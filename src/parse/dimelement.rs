@@ -1,11 +1,11 @@
-use super::Element;
-
-use crate::elementext::ElementExt;
-use crate::types::{parse_optional, DimIndex, Parse};
-
+use super::{
+    elementext::ElementExt,
+    types::{parse_optional, DimIndex},
+    Element, Parse,
+};
 use crate::error::*;
-
 use crate::svd::DimElement;
+
 impl Parse for DimElement {
     type Object = Self;
     type Error = anyhow::Error;

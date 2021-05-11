@@ -1,9 +1,8 @@
-use super::Element;
-use crate::elementext::ElementExt;
-use crate::error::*;
-use crate::types::Parse;
+use super::{elementext::ElementExt, Element, Parse};
 
+use crate::error::*;
 use crate::svd::{Cpu, Endian};
+
 impl Parse for Cpu {
     type Object = Self;
     type Error = anyhow::Error;

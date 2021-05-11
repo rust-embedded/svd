@@ -3,11 +3,10 @@
 
 use xmltree::Element;
 
-pub use crate::encode::Encode;
 pub use crate::parse::optional as parse_optional;
 pub use crate::parse::Parse;
 
-use crate::elementext::ElementExt;
+use super::elementext::ElementExt;
 use crate::error::*;
 
 macro_rules! unwrap {
