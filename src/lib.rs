@@ -22,9 +22,6 @@
 
 #![deny(warnings)]
 
-use std::collections::HashMap;
-use xmltree::Element;
-
 // ElementExt extends XML elements with useful methods
 pub mod elementext;
 // SVD contains svd primitives
@@ -32,13 +29,12 @@ pub mod svd;
 pub use svd::*;
 // Error defines SVD error types
 pub mod error;
-use anyhow::Result;
 // Parse defines parsing interfaces
 pub mod parse;
-use parse::Parse;
+pub use parse::parse;
 // Encode defines encoding interfaces
 pub mod encode;
-use encode::Encode;
+pub use encode::encode;
 // Types defines simple types and parse/encode implementations
 pub mod types;
 
@@ -47,90 +43,5 @@ pub mod derive_from;
 #[cfg(feature = "derive-from")]
 pub use derive_from::DeriveFrom;
 
-/// Parses the contents of an SVD (XML) string
-pub fn parse(xml: &str) -> Result<Device> {
-    let xml = trim_utf8_bom(xml);
-    let tree = Element::parse(xml.as_bytes())?;
-    Device::parse(&tree)
-}
-
-/// Encodes a device object to an SVD (XML) string
-pub fn encode(d: &Device) -> Result<String> {
-    let root = d.encode()?;
-    let mut wr = Vec::new();
-    root.write(&mut wr).unwrap();
-    Ok(String::from_utf8(wr).unwrap())
-}
-
-/// Return the &str trimmed UTF-8 BOM if the input &str contains the BOM.
-fn trim_utf8_bom(s: &str) -> &str {
-    if s.len() > 2 && s.as_bytes().starts_with(b"\xef\xbb\xbf") {
-        &s[3..]
-    } else {
-        s
-    }
-}
-
-/// Helper to create new base xml elements
-pub(crate) fn new_element(name: &str, text: Option<String>) -> Element {
-    Element {
-        prefix: None,
-        namespace: None,
-        namespaces: None,
-        name: String::from(name),
-        attributes: HashMap::new(),
-        children: Vec::new(),
-        text,
-    }
-}
-
-/// Generic test helper function
-/// Takes an array of (item, xml) pairs where the item implements
-/// Parse and Encode and tests object encoding and decoding
 #[cfg(test)]
-pub fn run_test<
-    T: Parse<Error = anyhow::Error, Object = T>
-        + Encode<Error = anyhow::Error>
-        + core::fmt::Debug
-        + PartialEq,
->(
-    tests: &[(T, &str)],
-) {
-    for t in tests {
-        let mut tree1 = Element::parse(t.1.as_bytes()).unwrap();
-        let elem = T::parse(&tree1).unwrap();
-        // Hack to make assert be order agnostic
-        tree1.children.sort_by(|e1, e2| e1.name.cmp(&e2.name));
-        tree1.children.iter_mut().for_each(|e| {
-            e.children.sort_by(|e1, e2| e1.name.cmp(&e2.name));
-        });
-        assert_eq!(
-            elem, t.0,
-            "Error parsing xml` (mismatch between parsed and expected)"
-        );
-        let mut tree2 = elem.encode().unwrap();
-        // Hack to make assert be order agnostic
-        tree2.children.sort_by(|e1, e2| e1.name.cmp(&e2.name));
-        tree2.children.iter_mut().for_each(|e| {
-            e.children.sort_by(|e1, e2| e1.name.cmp(&e2.name));
-        });
-        assert_eq!(
-            tree1, tree2,
-            "Error encoding xml (mismatch between encoded and original)"
-        );
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use core::str;
-
-    #[test]
-    fn test_trim_utf8_bom_from_str() {
-        // UTF-8 BOM + "xyz"
-        let bom_str = str::from_utf8(b"\xef\xbb\xbfxyz").unwrap();
-        assert_eq!("xyz", trim_utf8_bom(bom_str));
-        assert_eq!("xyz", trim_utf8_bom("xyz"));
-    }
-}
+mod tests;

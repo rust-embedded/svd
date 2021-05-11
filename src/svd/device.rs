@@ -1,16 +1,5 @@
-use crate::elementext::ElementExt;
-use std::collections::HashMap;
-use xmltree::Element;
-
-use rayon::prelude::*;
-
-use crate::parse;
-use crate::types::Parse;
-
-use crate::encode::{Encode, EncodeChildren};
 use crate::error::*;
 
-use crate::new_element;
 use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -60,7 +49,7 @@ pub struct Device {
     /// Specify the compliant CMSIS-SVD schema version
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    schema_version: Option<String>,
+    pub(crate) schema_version: Option<String>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -150,6 +139,9 @@ impl DeviceBuilder {
 }
 
 impl Device {
+    pub fn builder() -> DeviceBuilder {
+        DeviceBuilder::default()
+    }
     fn validate(self) -> Result<Self> {
         // TODO
         if self.peripherals.is_empty() {
@@ -158,108 +150,3 @@ impl Device {
         Ok(self)
     }
 }
-
-impl Parse for Device {
-    type Object = Self;
-    type Error = anyhow::Error;
-
-    fn parse(tree: &Element) -> Result<Self> {
-        if tree.name != "device" {
-            return Err(SVDError::NotExpectedTag(tree.clone(), "device".to_string()).into());
-        }
-        let name = tree.get_child_text("name")?;
-        Self::_parse(tree, name.clone()).with_context(|| format!("In device `{}`", name))
-    }
-}
-
-impl Device {
-    /// Parses a SVD file
-    fn _parse(tree: &Element, name: String) -> Result<Self> {
-        DeviceBuilder::default()
-            .name(name)
-            .version(tree.get_child_text_opt("version")?)
-            .description(tree.get_child_text_opt("description")?)
-            .cpu(parse::optional::<Cpu>("cpu", tree)?)
-            .address_unit_bits(parse::optional::<u32>("addressUnitBits", tree)?)
-            .width(parse::optional::<u32>("width", tree)?)
-            .default_register_properties(RegisterProperties::parse(tree)?)
-            .peripherals({
-                let ps: Result<Vec<_>, _> = tree
-                    .get_child_elem("peripherals")?
-                    .children
-                    .par_iter()
-                    .map(Peripheral::parse)
-                    .collect();
-                ps?
-            })
-            .schema_version(tree.attributes.get("schemaVersion").cloned())
-            .build()
-    }
-}
-
-impl Encode for Device {
-    type Error = anyhow::Error;
-
-    fn encode(&self) -> Result<Element> {
-        let mut elem = new_element("device", None);
-        elem.children
-            .push(new_element("name", Some(self.name.clone())));
-
-        if let Some(v) = &self.version {
-            elem.children.push(new_element("version", Some(v.clone())));
-        }
-
-        if let Some(v) = &self.description {
-            elem.children
-                .push(new_element("description", Some(v.clone())));
-        }
-
-        if let Some(v) = &self.cpu {
-            elem.children.push(v.encode()?);
-        }
-
-        if let Some(v) = &self.address_unit_bits {
-            elem.children
-                .push(new_element("addressUnitBits", Some(format!("{}", v))));
-        }
-
-        if let Some(v) = &self.width {
-            elem.children
-                .push(new_element("width", Some(format!("{}", v))));
-        }
-
-        elem.children
-            .extend(self.default_register_properties.encode()?);
-
-        let peripherals: Result<Vec<_>, _> =
-            self.peripherals.iter().map(Peripheral::encode).collect();
-        elem.children.push(Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("peripherals"),
-            attributes: HashMap::new(),
-            children: peripherals?,
-            text: None,
-        });
-
-        elem.attributes.insert(
-            String::from("xmlns:xs"),
-            String::from("http://www.w3.org/2001/XMLSchema-instance"),
-        );
-        if let Some(schema_version) = &self.schema_version {
-            elem.attributes
-                .insert(String::from("schemaVersion"), schema_version.to_string());
-        }
-        if let Some(schema_version) = &self.schema_version {
-            elem.attributes.insert(
-                String::from("xs:noNamespaceSchemaLocation"),
-                format!("CMSIS-SVD_Schema_{}.xsd", schema_version),
-            );
-        }
-
-        Ok(elem)
-    }
-}
-
-// TODO: test device encoding and decoding

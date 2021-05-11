@@ -1,19 +1,6 @@
-use std::collections::HashMap;
+use crate::svd::{Access, Field, ModifiedWriteValues, RegisterProperties, WriteConstraint};
 
-use crate::elementext::ElementExt;
-use xmltree::Element;
-
-use crate::encode::{Encode, EncodeChildren};
 use crate::error::*;
-
-use crate::new_element;
-use crate::parse;
-use crate::types::Parse;
-
-use crate::svd::{
-    access::Access, field::Field, modifiedwritevalues::ModifiedWriteValues,
-    registerproperties::RegisterProperties, writeconstraint::WriteConstraint,
-};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -190,6 +177,9 @@ impl RegisterInfoBuilder {
 }
 
 impl RegisterInfo {
+    pub fn builder() -> RegisterInfoBuilder {
+        RegisterInfoBuilder::default()
+    }
     #[allow(clippy::unnecessary_wraps)]
     fn validate(self) -> Result<Self> {
         #[cfg(feature = "strict")]
@@ -213,187 +203,5 @@ impl RegisterInfo {
             }
         }
         Ok(self)
-    }
-}
-
-impl Parse for RegisterInfo {
-    type Object = Self;
-    type Error = anyhow::Error;
-
-    fn parse(tree: &Element) -> Result<Self> {
-        let name = tree.get_child_text("name")?;
-        Self::_parse(tree, name.clone()).with_context(|| format!("In register `{}`", name))
-    }
-}
-
-impl RegisterInfo {
-    fn _parse(tree: &Element, name: String) -> Result<Self> {
-        RegisterInfoBuilder::default()
-            .name(name)
-            .display_name(tree.get_child_text_opt("displayName")?)
-            .description(tree.get_child_text_opt("description")?)
-            .alternate_group(tree.get_child_text_opt("alternateGroup")?)
-            .alternate_register(tree.get_child_text_opt("alternateRegister")?)
-            .address_offset(tree.get_child_u32("addressOffset")?)
-            .properties(RegisterProperties::parse(tree)?)
-            .modified_write_values(parse::optional::<ModifiedWriteValues>(
-                "modifiedWriteValues",
-                tree,
-            )?)
-            .write_constraint(parse::optional::<WriteConstraint>("writeConstraint", tree)?)
-            .fields({
-                if let Some(fields) = tree.get_child("fields") {
-                    let fs: Result<Vec<_>, _> = fields
-                        .children
-                        .iter()
-                        .enumerate()
-                        .map(|(e, t)| {
-                            Field::parse(t).with_context(|| format!("Parsing field #{}", e))
-                        })
-                        .collect();
-                    Some(fs?)
-                } else {
-                    None
-                }
-            })
-            .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
-            .build()
-    }
-}
-
-impl Encode for RegisterInfo {
-    type Error = anyhow::Error;
-
-    fn encode(&self) -> Result<Element> {
-        let mut elem = new_element("register", None);
-        elem.children
-            .push(new_element("name", Some(self.name.clone())));
-
-        if let Some(v) = &self.display_name {
-            elem.children
-                .push(new_element("displayName", Some(v.clone())));
-        }
-
-        if let Some(v) = &self.description {
-            elem.children
-                .push(new_element("description", Some(v.clone())));
-        }
-
-        if let Some(v) = &self.alternate_group {
-            elem.children
-                .push(new_element("alternateGroup", Some(v.to_string())));
-        }
-
-        if let Some(v) = &self.alternate_register {
-            elem.children
-                .push(new_element("alternateRegister", Some(v.to_string())));
-        }
-
-        elem.children.push(new_element(
-            "addressOffset",
-            Some(format!("0x{:X}", self.address_offset)),
-        ));
-
-        elem.children.extend(self.properties.encode()?);
-
-        if let Some(v) = &self.modified_write_values {
-            elem.children.push(v.encode()?);
-        }
-
-        if let Some(v) = &self.write_constraint {
-            elem.children.push(v.encode()?);
-        }
-
-        if let Some(v) = &self.fields {
-            let children = v
-                .iter()
-                .map(Field::encode)
-                .collect::<Result<Vec<Element>>>()?;
-            if !children.is_empty() {
-                let fields = Element {
-                    prefix: None,
-                    namespace: None,
-                    namespaces: None,
-                    name: String::from("fields"),
-                    attributes: HashMap::new(),
-                    children,
-                    text: None,
-                };
-                elem.children.push(fields);
-            }
-        }
-
-        if let Some(v) = &self.derived_from {
-            elem.attributes
-                .insert(String::from("derivedFrom"), v.to_string());
-        }
-
-        Ok(elem)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::run_test;
-    use crate::svd::bitrange::*;
-    use crate::svd::fieldinfo::FieldInfoBuilder;
-
-    #[test]
-    fn decode_encode() {
-        let tests = vec![(
-            RegisterInfoBuilder::default()
-                .name("WRITECTRL".to_string())
-                .alternate_group(Some("alternate_group".to_string()))
-                .alternate_register(Some("alternate_register".to_string()))
-                .derived_from(Some("derived_from".to_string()))
-                .description(Some("Write Control Register".to_string()))
-                .address_offset(8)
-                .size(Some(32))
-                .access(Some(Access::ReadWrite))
-                .reset_value(Some(0x00000000))
-                .reset_mask(Some(0x00000023))
-                .fields(Some(vec![Field::Single(
-                    FieldInfoBuilder::default()
-                        .name("WREN".to_string())
-                        .description(Some("Enable Write/Erase Controller".to_string()))
-                        .bit_range(BitRange {
-                            offset: 0,
-                            width: 1,
-                            range_type: BitRangeType::OffsetWidth,
-                        })
-                        .access(Some(Access::ReadWrite))
-                        .build()
-                        .unwrap(),
-                )]))
-                .modified_write_values(Some(ModifiedWriteValues::OneToToggle))
-                .build()
-                .unwrap(),
-            "
-            <register derivedFrom=\"derived_from\">
-                <name>WRITECTRL</name>
-                <description>Write Control Register</description>
-                <addressOffset>0x8</addressOffset>
-                <alternateGroup>alternate_group</alternateGroup>
-                <alternateRegister>alternate_register</alternateRegister>
-                <size>32</size>
-                <access>read-write</access>
-                <resetValue>0x00000000</resetValue>
-                <resetMask>0x00000023</resetMask>
-                <fields>
-                    <field>
-                        <name>WREN</name>
-                        <description>Enable Write/Erase Controller</description>
-                        <bitOffset>0</bitOffset>
-                        <bitWidth>1</bitWidth>
-                        <access>read-write</access>
-                    </field>
-                </fields>
-                <modifiedWriteValues>oneToToggle</modifiedWriteValues>
-            </register>
-            ",
-        )];
-
-        run_test::<RegisterInfo>(&tests[..]);
     }
 }

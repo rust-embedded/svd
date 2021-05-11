@@ -1,11 +1,3 @@
-use crate::elementext::ElementExt;
-use xmltree::Element;
-
-use crate::types::Parse;
-
-use crate::encode::{Encode, EncodeChildren};
-use crate::new_element;
-
 use crate::error::*;
 use crate::svd::{
     register::{RegIter, RegIterMut},
@@ -123,6 +115,10 @@ impl ClusterInfoBuilder {
 }
 
 impl ClusterInfo {
+    pub fn builder() -> ClusterInfoBuilder {
+        ClusterInfoBuilder::default()
+    }
+
     #[allow(clippy::unnecessary_wraps)]
     fn validate(self) -> Result<Self> {
         #[cfg(feature = "strict")]
@@ -138,37 +134,7 @@ impl ClusterInfo {
     }
 }
 
-impl Parse for ClusterInfo {
-    type Object = Self;
-    type Error = anyhow::Error;
-
-    fn parse(tree: &Element) -> Result<Self> {
-        let name = tree.get_child_text("name")?;
-        Self::_parse(tree, name.clone()).with_context(|| format!("In cluster `{}`", name))
-    }
-}
-
 impl ClusterInfo {
-    fn _parse(tree: &Element, name: String) -> Result<Self> {
-        ClusterInfoBuilder::default()
-            .name(name)
-            .description(tree.get_child_text_opt("description")?)
-            .header_struct_name(tree.get_child_text_opt("headerStructName")?)
-            .address_offset(tree.get_child_u32("addressOffset")?)
-            .default_register_properties(RegisterProperties::parse(tree)?)
-            .children({
-                let children: Result<Vec<_>, _> = tree
-                    .children
-                    .iter()
-                    .filter(|t| t.name == "register" || t.name == "cluster")
-                    .map(RegisterCluster::parse)
-                    .collect();
-                children?
-            })
-            .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
-            .build()
-    }
-
     /// returns iterator over all registers cluster contains
     pub fn reg_iter(&self) -> RegIter {
         let mut rem: Vec<&RegisterCluster> = Vec::with_capacity(self.children.len());
@@ -187,44 +153,3 @@ impl ClusterInfo {
         RegIterMut { rem }
     }
 }
-
-impl Encode for ClusterInfo {
-    type Error = anyhow::Error;
-
-    fn encode(&self) -> Result<Element> {
-        let mut e = new_element("cluster", None);
-
-        e.children.push(new_element("name", Some(e.name.clone())));
-
-        if let Some(v) = &self.description {
-            e.attributes
-                .insert(String::from("description"), v.to_string());
-        }
-
-        if let Some(v) = &self.header_struct_name {
-            e.children
-                .push(new_element("headerStructName", Some(v.clone())));
-        }
-
-        e.children.push(new_element(
-            "addressOffset",
-            Some(format!("{}", self.address_offset)),
-        ));
-
-        e.children
-            .extend(self.default_register_properties.encode()?);
-
-        for c in &self.children {
-            e.children.push(c.encode()?);
-        }
-
-        if let Some(v) = &self.derived_from {
-            e.attributes
-                .insert(String::from("derivedFrom"), v.to_string());
-        }
-
-        Ok(e)
-    }
-}
-
-// TODO: test ClusterInfo encode and decode

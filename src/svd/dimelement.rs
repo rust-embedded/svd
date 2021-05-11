@@ -1,11 +1,3 @@
-use xmltree::Element;
-
-use crate::types::{parse_optional, DimIndex, Parse};
-
-use crate::elementext::ElementExt;
-use crate::encode::Encode;
-use crate::new_element;
-
 use crate::error::*;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -68,62 +60,8 @@ impl DimElementBuilder {
     }
 }
 
-impl Parse for DimElement {
-    type Object = Self;
-    type Error = anyhow::Error;
-
-    fn parse(tree: &Element) -> Result<Self> {
+impl DimElement {
+    pub fn builder() -> DimElementBuilder {
         DimElementBuilder::default()
-            .dim(tree.get_child_u32("dim")?)
-            .dim_increment(tree.get_child_u32("dimIncrement")?)
-            .dim_index(parse_optional::<DimIndex>("dimIndex", tree)?)
-            .build()
-    }
-}
-
-impl Encode for DimElement {
-    type Error = anyhow::Error;
-
-    fn encode(&self) -> Result<Element> {
-        let mut e = new_element("dimElement", None);
-
-        e.children
-            .push(new_element("dim", Some(format!("{}", self.dim))));
-        e.children.push(new_element(
-            "dimIncrement",
-            Some(format!("0x{:X}", self.dim_increment)),
-        ));
-
-        if let Some(di) = &self.dim_index {
-            e.children.push(new_element("dimIndex", Some(di.join(","))));
-        }
-
-        Ok(e)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::run_test;
-
-    #[test]
-    fn decode_encode() {
-        let tests = vec![(
-            DimElementBuilder::default()
-                .dim(100)
-                .dim_increment(4)
-                .dim_index(Some(vec!["10".to_string(), "20".to_string()]))
-                .build()
-                .unwrap(),
-            "<dimElement>
-                <dim>100</dim>
-                <dimIncrement>0x4</dimIncrement>
-                <dimIndex>10,20</dimIndex>
-            </dimElement>
-            ",
-        )];
-
-        run_test::<DimElement>(&tests[..]);
     }
 }
