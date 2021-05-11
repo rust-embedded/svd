@@ -1,12 +1,11 @@
-use super::{new_element, Element, Encode};
+use super::{new_element, Element, Encode, EncodeError};
 
-use crate::error::*;
 use crate::svd::Interrupt;
 
 impl Encode for Interrupt {
-    type Error = anyhow::Error;
+    type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element> {
+    fn encode(&self) -> Result<Element, EncodeError> {
         let children = vec![
             new_element("name", Some(self.name.clone())),
             new_element("description", self.description.clone()),

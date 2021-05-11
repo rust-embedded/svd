@@ -1,13 +1,12 @@
-use super::{new_element, Element, Encode};
+use super::{new_element, Element, Encode, EncodeError};
 
 use crate::elementext::ElementExt;
-use crate::error::*;
-
 use crate::svd::Register;
-impl Encode for Register {
-    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element> {
+impl Encode for Register {
+    type Error = EncodeError;
+
+    fn encode(&self) -> Result<Element, EncodeError> {
         match self {
             Register::Single(info) => info.encode(),
             Register::Array(info, array_info) => {

@@ -1,15 +1,11 @@
-use std::collections::HashMap;
-use xmltree::Element;
-
-use crate::encode::Encode;
-
-use crate::error::*;
+use super::{new_element, Element, Encode, EncodeError};
 
 use crate::svd::Endian;
-impl Encode for Endian {
-    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element> {
+impl Encode for Endian {
+    type Error = EncodeError;
+
+    fn encode(&self) -> Result<Element, EncodeError> {
         let text = match *self {
             Endian::Little => String::from("little"),
             Endian::Big => String::from("big"),
@@ -17,14 +13,6 @@ impl Encode for Endian {
             Endian::Other => String::from("other"),
         };
 
-        Ok(Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("endian"),
-            attributes: HashMap::new(),
-            children: Vec::new(),
-            text: Some(text),
-        })
+        Ok(new_element("endian", Some(text)))
     }
 }

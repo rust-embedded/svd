@@ -1,12 +1,11 @@
-use super::{new_element, Element, Encode};
+use super::{new_element, Element, Encode, EncodeError};
 
-use crate::error::*;
 use crate::svd::EnumeratedValues;
 
 impl Encode for EnumeratedValues {
-    type Error = anyhow::Error;
+    type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element> {
+    fn encode(&self) -> Result<Element, EncodeError> {
         let mut base = new_element("enumeratedValues", None);
 
         if let Some(d) = &self.name {

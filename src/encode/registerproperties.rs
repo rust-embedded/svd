@@ -1,11 +1,11 @@
-use super::{new_element, Element, Encode, EncodeChildren};
-use crate::error::*;
+use super::{new_element, Element, Encode, EncodeChildren, EncodeError};
+
 use crate::svd::RegisterProperties;
 
 impl EncodeChildren for RegisterProperties {
-    type Error = anyhow::Error;
+    type Error = EncodeError;
 
-    fn encode(&self) -> Result<Vec<Element>> {
+    fn encode(&self) -> Result<Vec<Element>, EncodeError> {
         let mut children = Vec::new();
 
         if let Some(v) = &self.size {

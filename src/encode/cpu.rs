@@ -1,11 +1,10 @@
-use super::{new_element, Element, Encode};
-use crate::error::*;
+use super::{new_element, Element, Encode, EncodeError};
 
 use crate::svd::Cpu;
 impl Encode for Cpu {
-    type Error = anyhow::Error;
+    type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element> {
+    fn encode(&self) -> Result<Element, EncodeError> {
         let children = vec![
             new_element("name", Some(self.name.clone())),
             new_element("revision", Some(self.revision.clone())),

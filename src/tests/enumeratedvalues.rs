@@ -1,8 +1,8 @@
-use xmltree::Element;
-use anyhow::Result;
-use crate::svd::{EnumeratedValue, EnumeratedValues};
-use crate::parse::Parse;
 use crate::encode::Encode;
+use crate::parse::Parse;
+use crate::svd::{EnumeratedValue, EnumeratedValues};
+use anyhow::Result;
+use xmltree::Element;
 
 #[test]
 fn decode_encode() {

@@ -1,13 +1,12 @@
-use super::{new_element, Element, Encode};
+use super::{new_element, Element, Encode, EncodeError};
 
 use crate::elementext::ElementExt;
-use crate::error::*;
 use crate::svd::Field;
 
 impl Encode for Field {
-    type Error = anyhow::Error;
+    type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element> {
+    fn encode(&self) -> Result<Element, EncodeError> {
         match self {
             Field::Single(info) => info.encode(),
             Field::Array(info, array_info) => {

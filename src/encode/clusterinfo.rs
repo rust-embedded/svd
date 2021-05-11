@@ -1,12 +1,11 @@
-use super::{new_element, Element, Encode, EncodeChildren};
+use super::{new_element, Element, Encode, EncodeChildren, EncodeError};
 
-use crate::error::*;
 use crate::svd::ClusterInfo;
 
 impl Encode for ClusterInfo {
-    type Error = anyhow::Error;
+    type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element> {
+    fn encode(&self) -> Result<Element, EncodeError> {
         let mut e = new_element("cluster", None);
 
         e.children.push(new_element("name", Some(e.name.clone())));

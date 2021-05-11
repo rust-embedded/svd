@@ -1,12 +1,11 @@
-use super::{new_element, Element, Encode};
+use super::{new_element, Element, Encode, EncodeError};
 
-use crate::error::*;
 use crate::svd::FieldInfo;
 
 impl Encode for FieldInfo {
-    type Error = anyhow::Error;
+    type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element> {
+    fn encode(&self) -> Result<Element, EncodeError> {
         let mut elem = new_element("field", None);
         elem.children
             .push(new_element("name", Some(self.name.clone())));
@@ -31,7 +30,7 @@ impl Encode for FieldInfo {
             elem.children.push(v.encode()?);
         }
 
-        let enumerated_values: Result<Vec<Element>> =
+        let enumerated_values: Result<Vec<Element>, EncodeError> =
             self.enumerated_values.iter().map(|v| v.encode()).collect();
         elem.children.append(&mut enumerated_values?);
 
