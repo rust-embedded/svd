@@ -1,13 +1,12 @@
-use super::{new_element, Element, Encode};
+use super::{new_element, Element, Encode, EncodeError};
 
 use crate::elementext::ElementExt;
-use crate::error::*;
 use crate::svd::Cluster;
 
 impl Encode for Cluster {
-    type Error = anyhow::Error;
+    type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element> {
+    fn encode(&self) -> Result<Element, EncodeError> {
         match self {
             Cluster::Single(i) => i.encode(),
             Cluster::Array(i, a) => {

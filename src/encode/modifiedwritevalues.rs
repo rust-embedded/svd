@@ -1,14 +1,11 @@
-use std::collections::HashMap;
-use xmltree::Element;
-
-use crate::encode::Encode;
-use crate::error::*;
+use super::{new_element, Element, Encode, EncodeError};
 
 use crate::svd::ModifiedWriteValues;
-impl Encode for ModifiedWriteValues {
-    type Error = anyhow::Error;
 
-    fn encode(&self) -> Result<Element> {
+impl Encode for ModifiedWriteValues {
+    type Error = EncodeError;
+
+    fn encode(&self) -> Result<Element, EncodeError> {
         use self::ModifiedWriteValues::*;
         let v = match *self {
             OneToClear => "oneToClear",
@@ -22,14 +19,6 @@ impl Encode for ModifiedWriteValues {
             Modify => "modify",
         };
 
-        Ok(Element {
-            prefix: None,
-            namespace: None,
-            namespaces: None,
-            name: String::from("modifiedWriteValues"),
-            attributes: HashMap::new(),
-            children: vec![],
-            text: Some(v.into()),
-        })
+        Ok(new_element("modifiedWriteValues", Some(v.into())))
     }
 }

@@ -1,4 +1,4 @@
-use crate::encode::Encode;
+use crate::encode::{Encode, EncodeError};
 use crate::parse::Parse;
 use core::str;
 use xmltree::Element;
@@ -8,7 +8,7 @@ use xmltree::Element;
 /// Parse and Encode and tests object encoding and decoding
 pub fn run_test<
     T: Parse<Error = anyhow::Error, Object = T>
-        + Encode<Error = anyhow::Error>
+        + Encode<Error = EncodeError>
         + core::fmt::Debug
         + PartialEq,
 >(

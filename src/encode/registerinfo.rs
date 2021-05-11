@@ -1,12 +1,11 @@
-use super::{new_element, Element, Encode, EncodeChildren};
+use super::{new_element, Element, Encode, EncodeChildren, EncodeError};
 
-use crate::error::*;
 use crate::svd::{Field, RegisterInfo};
 
 impl Encode for RegisterInfo {
-    type Error = anyhow::Error;
+    type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element> {
+    fn encode(&self) -> Result<Element, EncodeError> {
         let mut elem = new_element("register", None);
         elem.children
             .push(new_element("name", Some(self.name.clone())));
@@ -50,7 +49,7 @@ impl Encode for RegisterInfo {
             let children = v
                 .iter()
                 .map(Field::encode)
-                .collect::<Result<Vec<Element>>>()?;
+                .collect::<Result<Vec<Element>, EncodeError>>()?;
             if !children.is_empty() {
                 let mut fields = new_element("fields", None);
                 fields.children = children;

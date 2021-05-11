@@ -5,6 +5,9 @@ use crate::svd::Device;
 use std::collections::HashMap;
 use xmltree::Element;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum EncodeError {}
+
 /// Encode trait allows SVD objects to be encoded into XML elements.
 pub trait Encode {
     /// Encoding error
@@ -23,7 +26,7 @@ pub trait EncodeChildren {
 }
 
 /// Encodes a device object to an SVD (XML) string
-pub fn encode(d: &Device) -> anyhow::Result<String> {
+pub fn encode(d: &Device) -> Result<String, EncodeError> {
     let root = d.encode()?;
     let mut wr = Vec::new();
     root.write(&mut wr).unwrap();

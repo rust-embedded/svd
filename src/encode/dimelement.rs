@@ -1,12 +1,10 @@
-use super::{new_element, Element, Encode};
-
-use crate::error::*;
+use super::{new_element, Element, Encode, EncodeError};
 use crate::svd::DimElement;
 
 impl Encode for DimElement {
-    type Error = anyhow::Error;
+    type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element> {
+    fn encode(&self) -> Result<Element, EncodeError> {
         let mut e = new_element("dimElement", None);
 
         e.children

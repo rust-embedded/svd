@@ -1,12 +1,11 @@
-use super::{new_element, Element, Encode};
+use super::{new_element, Element, Encode, EncodeError};
 
-use crate::error::*;
 use crate::svd::AddressBlock;
 
 impl Encode for AddressBlock {
-    type Error = anyhow::Error;
+    type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element> {
+    fn encode(&self) -> Result<Element, EncodeError> {
         let children = vec![
             new_element("offset", Some(format!("0x{:X}", self.offset))),
             new_element("size", Some(format!("0x{:X}", self.size))),

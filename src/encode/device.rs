@@ -1,12 +1,10 @@
-use super::{new_element, Element, Encode, EncodeChildren};
-
-use crate::error::*;
+use super::{new_element, Element, Encode, EncodeChildren, EncodeError};
 use crate::svd::{Device, Peripheral};
 
 impl Encode for Device {
-    type Error = anyhow::Error;
+    type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element> {
+    fn encode(&self) -> Result<Element, EncodeError> {
         let mut elem = new_element("device", None);
         elem.children
             .push(new_element("name", Some(self.name.clone())));
