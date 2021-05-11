@@ -1,10 +1,7 @@
-use super::Element;
-use crate::elementext::ElementExt;
+use super::{elementext::ElementExt, optional, Element, Parse};
 
 use crate::error::*;
-use crate::parse;
 use crate::svd::{EnumeratedValue, EnumeratedValues, Usage};
-use crate::types::Parse;
 
 impl Parse for EnumeratedValues {
     type Object = Self;
@@ -14,7 +11,7 @@ impl Parse for EnumeratedValues {
         assert_eq!(tree.name, "enumeratedValues");
         EnumeratedValues::builder()
             .name(tree.get_child_text_opt("name")?)
-            .usage(parse::optional::<Usage>("usage", tree)?)
+            .usage(optional::<Usage>("usage", tree)?)
             .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
             .values({
                 let values: Result<Vec<_>, _> = tree

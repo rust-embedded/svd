@@ -33,6 +33,21 @@ pub fn encode(d: &Device) -> Result<String, EncodeError> {
     Ok(String::from_utf8(wr).unwrap())
 }
 
+/// Defines extensions for implementation over xmltree::Element
+trait ElementMerge {
+    fn merge(&mut self, n: &Self);
+}
+/// Implements extensions for xmltree::Element
+impl ElementMerge for Element {
+    // Merges the children of two elements, maintaining the name and description of the first
+    fn merge(&mut self, r: &Self) {
+        self.children.extend(r.children.iter().cloned());
+        for (key, val) in &r.attributes {
+            self.attributes.insert(key.clone(), val.clone());
+        }
+    }
+}
+
 /// Helper to create new base xml elements
 pub(crate) fn new_element(name: &str, text: Option<String>) -> Element {
     Element {

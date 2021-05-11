@@ -1,6 +1,4 @@
-use super::Element;
-
-use crate::types::Parse;
+use super::{Element, Parse};
 
 use crate::error::*;
 use crate::svd::{DimElement, Register, RegisterInfo};

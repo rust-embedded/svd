@@ -1,10 +1,7 @@
-use super::Element;
+use super::{elementext::ElementExt, optional, Element, Parse};
 
-use crate::elementext::ElementExt;
 use crate::error::*;
-use crate::parse;
 use crate::svd::EnumeratedValue;
-use crate::types::Parse;
 
 impl EnumeratedValue {
     fn _parse(tree: &Element, name: String) -> Result<Self> {
@@ -13,7 +10,7 @@ impl EnumeratedValue {
             .description(tree.get_child_text_opt("description")?)
             // TODO: this .ok() approach is simple, but does not expose errors parsing child objects.
             // Suggest refactoring all parse::type methods to return result so parse::optional works.
-            .value(parse::optional::<u64>("value", tree)?)
+            .value(optional::<u64>("value", tree)?)
             .is_default(tree.get_child_bool("isDefault").ok())
             .build()
     }

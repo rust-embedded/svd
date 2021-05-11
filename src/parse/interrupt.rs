@@ -1,9 +1,7 @@
-use super::Element;
+use super::{elementext::ElementExt, Element, Parse};
 
-use crate::elementext::ElementExt;
 use crate::error::*;
 use crate::svd::Interrupt;
-use crate::types::Parse;
 
 impl Interrupt {
     fn _parse(tree: &Element, name: String) -> Result<Self> {

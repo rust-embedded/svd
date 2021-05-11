@@ -1,9 +1,8 @@
-use super::{Element, Parse};
+use super::{elementext::ElementExt, Element, Parse};
 
-use crate::elementext::ElementExt;
 use crate::error::*;
-
 use crate::svd::Usage;
+
 impl Parse for Usage {
     type Object = Self;
     type Error = anyhow::Error;

@@ -2,6 +2,10 @@
 //! These support parsing of SVD types from XML
 
 use xmltree::Element;
+// ElementExt extends XML elements with useful methods
+pub mod elementext;
+// Types defines simple types and parse/encode implementations
+pub mod types;
 
 /// Parse trait allows SVD objects to be parsed from XML elements.
 pub trait Parse {

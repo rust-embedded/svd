@@ -1,6 +1,5 @@
-use super::{new_element, Element, Encode, EncodeError};
+use super::{new_element, Element, ElementMerge, Encode, EncodeError};
 
-use crate::elementext::ElementExt;
 use crate::svd::Cluster;
 
 impl Encode for Cluster {

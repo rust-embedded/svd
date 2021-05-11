@@ -1,8 +1,6 @@
-use super::Element;
+use super::{elementext::ElementExt, Element, Parse};
 
-use crate::elementext::ElementExt;
 use crate::error::*;
-use crate::types::Parse;
 
 use crate::svd::Access;
 impl Parse for Access {
