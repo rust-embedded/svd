@@ -2,7 +2,6 @@ use core::ops::{Deref, DerefMut};
 
 use crate::svd::{DimElement, RegisterCluster, RegisterInfo};
 
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub enum Register {
     Single(RegisterInfo),
@@ -74,5 +73,51 @@ impl<'a> std::iter::Iterator for RegIterMut<'a> {
             }
         }
         None
+    }
+}
+
+#[cfg(feature = "serde")]
+mod ser_de {
+    use super::*;
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    #[derive(serde::Deserialize, serde::Serialize)]
+    struct RegisterArray {
+        #[cfg_attr(feature = "serde", serde(flatten))]
+        #[cfg_attr(feature = "serde", serde(default))]
+        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+        dim: Option<DimElement>,
+        #[cfg_attr(feature = "serde", serde(flatten))]
+        info: RegisterInfo,
+    }
+
+    impl Serialize for Register {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            match self {
+                Register::Single(info) => info.serialize(serializer),
+                Register::Array(info, dim) => RegisterArray {
+                    dim: Some(dim.clone()),
+                    info: info.clone(),
+                }
+                .serialize(serializer),
+            }
+        }
+    }
+
+    impl<'de> Deserialize<'de> for Register {
+        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            let RegisterArray { dim, info } = RegisterArray::deserialize(deserializer)?;
+            if let Some(dim) = dim {
+                Ok(Register::Array(info, dim))
+            } else {
+                Ok(Register::Single(info))
+            }
+        }
     }
 }

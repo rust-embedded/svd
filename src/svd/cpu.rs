@@ -3,6 +3,7 @@ use super::{BuildError, SvdError};
 use crate::svd::Endian;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub struct Cpu {

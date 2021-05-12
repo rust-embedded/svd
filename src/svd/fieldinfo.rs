@@ -4,6 +4,7 @@ use super::{
 };
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub struct FieldInfo {
@@ -17,6 +18,7 @@ pub struct FieldInfo {
     pub description: Option<String>,
 
     /// Bit position of the field within the register
+    #[cfg_attr(feature = "serde", serde(flatten))]
     pub bit_range: BitRange,
 
     /// Predefined strings set the access type.
