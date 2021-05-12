@@ -102,19 +102,19 @@ pub(crate) fn check_reset_value(
 
     if let (Some(size), Some(value)) = (size, value) {
         if MAX_BITS - value.leading_zeros() > size {
-            return Err(Error::ValueTooLarge(value, size).into());
+            return Err(Error::ValueTooLarge(value, size));
         }
     }
     #[cfg(feature = "strict")]
     {
         if let (Some(size), Some(mask)) = (size, _mask) {
             if MAX_BITS - mask.leading_zeros() > size {
-                return Err(Error::MaskTooLarge(mask, size).into());
+                return Err(Error::MaskTooLarge(mask, size));
             }
         }
         if let (Some(value), Some(mask)) = (value, _mask) {
             if value & mask != value {
-                return Err(Error::MaskConflict(value, mask).into());
+                return Err(Error::MaskConflict(value, mask));
             }
         }
     }
@@ -125,7 +125,7 @@ pub(crate) fn check_reset_value(
 #[cfg(feature = "strict")]
 #[cfg(test)]
 mod tests {
-    use crate::error::check_reset_value;
+    use super::check_reset_value;
 
     #[test]
     fn test_check_reset_value() {
