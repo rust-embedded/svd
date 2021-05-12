@@ -104,6 +104,9 @@ pub enum SvdError {
 
     #[error("`EnumeratedValues error: {0}")]
     EnumeratedValues(#[from] enumeratedvalues::Error),
+
+    #[error("`RegisterProperties error: {0}")]
+    RegisterProperties(#[from] registerproperties::Error),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
