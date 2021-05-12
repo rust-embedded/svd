@@ -3,10 +3,6 @@
 
 pub use anyhow::{Context, Result};
 use core::u64;
-#[cfg(feature = "strict")]
-use once_cell::sync::Lazy;
-#[cfg(feature = "strict")]
-use regex::Regex;
 use xmltree::Element;
 
 #[allow(clippy::large_enum_variant, clippy::upper_case_acronyms)]
@@ -46,14 +42,6 @@ pub enum SVDError {
     EncodeNotImplemented(String),
     #[error("Error parsing SVD XML")]
     FileParseError,
-    #[error("Device must contain at least one peripheral")]
-    EmptyDevice,
-    #[error("Peripheral have `registers` tag, but it is empty")]
-    EmptyRegisters,
-    #[error("Cluster must contain at least one Register or Cluster")]
-    EmptyCluster,
-    #[error("Register have `fields` tag, but it is empty")]
-    EmptyFields,
 }
 
 // TODO: Consider making into an Error
@@ -66,17 +54,17 @@ pub enum InvalidBitRange {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
-pub enum BuildError {
-    #[error("`{0}` must be initialized")]
-    Uninitialized(String),
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
-pub enum NameError {
-    #[error("Name `{0}` in tag `{1}` contains unexpected symbol")]
-    Invalid(String, String),
+pub enum NameParseError {
     #[error("Name `{0}` in tag `{1}` is missing a %s placeholder")]
     MissingPlaceholder(String, String),
+}
+
+pub(crate) fn check_has_placeholder(name: &str, tag: &str) -> Result<()> {
+    if name.contains("%s") {
+        Ok(())
+    } else {
+        Err(NameParseError::MissingPlaceholder(name.to_string(), tag.to_string()).into())
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
@@ -87,46 +75,6 @@ pub enum ResetValueError {
     MaskConflict(u64, u64),
     #[error("Mask value 0x{0:x} doesn't fit in {1} bits")]
     MaskTooLarge(u64, u32),
-}
-
-#[cfg(feature = "strict")]
-pub(crate) fn check_name(name: &str, tag: &str) -> Result<()> {
-    static PATTERN: Lazy<Regex> = Lazy::new(|| Regex::new("^[_A-Za-z0-9]*$").unwrap());
-    if PATTERN.is_match(name) {
-        Ok(())
-    } else if cfg!(feature = "strict") {
-        Err(NameError::Invalid(name.to_string(), tag.to_string()).into())
-    } else {
-        Ok(())
-    }
-}
-
-#[cfg(feature = "strict")]
-pub(crate) fn check_dimable_name(name: &str, tag: &str) -> Result<()> {
-    static PATTERN: Lazy<Regex> = Lazy::new(|| {
-        Regex::new("^(((%s)|(%s)[_A-Za-z]{1}[_A-Za-z0-9]*)|([_A-Za-z]{1}[_A-Za-z0-9]*(\\[%s\\])?)|([_A-Za-z]{1}[_A-Za-z0-9]*(%s)?[_A-Za-z0-9]*))$").unwrap()
-    });
-    if PATTERN.is_match(name) {
-        Ok(())
-    } else {
-        Err(NameError::Invalid(name.to_string(), tag.to_string()).into())
-    }
-}
-
-pub(crate) fn check_has_placeholder(name: &str, tag: &str) -> Result<()> {
-    if name.contains("%s") {
-        Ok(())
-    } else {
-        Err(NameError::MissingPlaceholder(name.to_string(), tag.to_string()).into())
-    }
-}
-
-#[cfg(feature = "strict")]
-pub(crate) fn check_derived_name(name: &str, tag: &str) -> Result<()> {
-    for x in name.split('.') {
-        check_dimable_name(x, tag)?
-    }
-    Ok(())
 }
 
 pub(crate) fn check_reset_value(

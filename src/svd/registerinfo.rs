@@ -1,6 +1,13 @@
-use crate::svd::{Access, Field, ModifiedWriteValues, RegisterProperties, WriteConstraint};
+use super::{
+    Access, BuildError, Field, ModifiedWriteValues, RegisterProperties, SvdError, WriteConstraint,
+};
 
-use crate::error::*;
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum Error {
+    #[cfg(feature = "strict")]
+    #[error("Register have `fields` tag, but it is empty")]
+    EmptyFields,
+}
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -154,7 +161,7 @@ impl RegisterInfoBuilder {
         self.derived_from = value;
         self
     }
-    pub fn build(self) -> Result<RegisterInfo> {
+    pub fn build(self) -> Result<RegisterInfo, SvdError> {
         (RegisterInfo {
             name: self
                 .name
@@ -181,25 +188,25 @@ impl RegisterInfo {
         RegisterInfoBuilder::default()
     }
     #[allow(clippy::unnecessary_wraps)]
-    fn validate(self) -> Result<Self> {
+    fn validate(self) -> Result<Self, SvdError> {
         #[cfg(feature = "strict")]
-        check_dimable_name(&self.name, "name")?;
+        super::check_dimable_name(&self.name, "name")?;
         #[cfg(feature = "strict")]
         {
             if let Some(name) = self.alternate_group.as_ref() {
-                check_name(name, "alternateGroup")?;
+                super::check_name(name, "alternateGroup")?;
             }
             if let Some(name) = self.alternate_register.as_ref() {
-                check_dimable_name(name, "alternateRegister")?;
+                super::check_dimable_name(name, "alternateRegister")?;
             }
         }
         if let Some(_name) = self.derived_from.as_ref() {
             #[cfg(feature = "strict")]
-            check_derived_name(_name, "derivedFrom")?;
+            super::check_derived_name(_name, "derivedFrom")?;
         } else if let Some(fields) = self.fields.as_ref() {
             if fields.is_empty() {
                 #[cfg(feature = "strict")]
-                return Err(SVDError::EmptyFields)?;
+                return Err(Error::EmptyFields)?;
             }
         }
         Ok(self)

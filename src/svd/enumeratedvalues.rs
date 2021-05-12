@@ -1,5 +1,4 @@
-use crate::error::*;
-use crate::svd::{EnumeratedValue, Usage};
+use super::{EnumeratedValue, SvdError, Usage};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -24,7 +23,7 @@ pub struct EnumeratedValues {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
-pub enum EnumeratedValuesError {
+pub enum Error {
     #[error("EnumeratedValues is empty")]
     Empty,
 }
@@ -65,7 +64,7 @@ impl EnumeratedValuesBuilder {
         self.values = Some(value);
         self
     }
-    pub fn build(self) -> Result<EnumeratedValues> {
+    pub fn build(self) -> Result<EnumeratedValues, SvdError> {
         (EnumeratedValues {
             name: self.name,
             usage: self.usage,
@@ -80,24 +79,24 @@ impl EnumeratedValues {
     pub fn builder() -> EnumeratedValuesBuilder {
         EnumeratedValuesBuilder::default()
     }
-    fn validate(self) -> Result<Self> {
+    fn validate(self) -> Result<Self, SvdError> {
         #[cfg(feature = "strict")]
         {
             if let Some(name) = self.name.as_ref() {
-                check_name(name, "name")?;
+                super::check_name(name, "name")?;
             }
         }
         if let Some(_dname) = self.derived_from.as_ref() {
             #[cfg(feature = "strict")]
-            check_derived_name(_dname, "derivedFrom")?;
+            super::check_derived_name(_dname, "derivedFrom")?;
             Ok(self)
         } else if self.values.is_empty() {
-            Err(EnumeratedValuesError::Empty.into())
+            Err(Error::Empty.into())
         } else {
             Ok(self)
         }
     }
-    pub(crate) fn check_range(&self, range: core::ops::Range<u64>) -> Result<()> {
+    pub(crate) fn check_range(&self, range: core::ops::Range<u64>) -> Result<(), SvdError> {
         for v in self.values.iter() {
             v.check_range(&range)?;
         }

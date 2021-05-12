@@ -1,4 +1,4 @@
-use crate::error::*;
+use super::{BuildError, SvdError};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -47,7 +47,7 @@ impl DimElementBuilder {
         self.dim_index = value;
         self
     }
-    pub fn build(self) -> Result<DimElement> {
+    pub fn build(self) -> Result<DimElement, SvdError> {
         Ok(DimElement {
             dim: self
                 .dim

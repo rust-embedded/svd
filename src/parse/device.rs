@@ -22,7 +22,7 @@ impl Parse for Device {
 impl Device {
     /// Parses a SVD file
     fn _parse(tree: &Element, name: String) -> Result<Self> {
-        Device::builder()
+        Ok(Device::builder()
             .name(name)
             .version(tree.get_child_text_opt("version")?)
             .description(tree.get_child_text_opt("description")?)
@@ -40,6 +40,6 @@ impl Device {
                 ps?
             })
             .schema_version(tree.attributes.get("schemaVersion").cloned())
-            .build()
+            .build()?)
     }
 }

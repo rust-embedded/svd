@@ -1,3 +1,9 @@
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum Error {
+    #[error("bitRange width of 0 does not make sense")]
+    ZeroWidth,
+}
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct BitRange {

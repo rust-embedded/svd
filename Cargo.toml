@@ -15,15 +15,21 @@ readme = "README.md"
 
 [features]
 derive-from = []
-strict = []
+strict = ["regex", "once_cell"]
 
 [dependencies]
 xmltree = "0.8"
 anyhow = "1.0.19"
 thiserror = "1.0.5"
 rayon = "1.5.0"
-once_cell = "1.5.2"
-regex = "1"
+
+[dependencies.regex]
+version = "1"
+optional = true
+
+[dependencies.once_cell]
+version = "1.5.2"
+optional = true
 
 [dependencies.serde]
 version = "1.0"
