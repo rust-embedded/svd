@@ -5,14 +5,14 @@ use crate::svd::EnumeratedValue;
 
 impl EnumeratedValue {
     fn _parse(tree: &Element, name: String) -> Result<Self> {
-        EnumeratedValue::builder()
+        Ok(EnumeratedValue::builder()
             .name(name)
             .description(tree.get_child_text_opt("description")?)
             // TODO: this .ok() approach is simple, but does not expose errors parsing child objects.
             // Suggest refactoring all parse::type methods to return result so parse::optional works.
             .value(optional::<u64>("value", tree)?)
             .is_default(tree.get_child_bool("isDefault").ok())
-            .build()
+            .build()?)
     }
 }
 impl Parse for EnumeratedValue {

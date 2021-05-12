@@ -9,7 +9,7 @@ impl Parse for EnumeratedValues {
 
     fn parse(tree: &Element) -> Result<Self> {
         assert_eq!(tree.name, "enumeratedValues");
-        EnumeratedValues::builder()
+        Ok(EnumeratedValues::builder()
             .name(tree.get_child_text_opt("name")?)
             .usage(optional::<Usage>("usage", tree)?)
             .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
@@ -37,6 +37,6 @@ impl Parse for EnumeratedValues {
                     .collect();
                 values?
             })
-            .build()
+            .build()?)
     }
 }

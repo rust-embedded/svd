@@ -15,7 +15,7 @@ impl Parse for RegisterInfo {
 
 impl RegisterInfo {
     fn _parse(tree: &Element, name: String) -> Result<Self> {
-        RegisterInfo::builder()
+        Ok(RegisterInfo::builder()
             .name(name)
             .display_name(tree.get_child_text_opt("displayName")?)
             .description(tree.get_child_text_opt("description")?)
@@ -44,6 +44,6 @@ impl RegisterInfo {
                 }
             })
             .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
-            .build()
+            .build()?)
     }
 }

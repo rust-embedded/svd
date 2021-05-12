@@ -21,7 +21,7 @@ impl Parse for FieldInfo {
 impl FieldInfo {
     fn _parse(tree: &Element, name: String) -> Result<Self> {
         let bit_range = BitRange::parse(tree)?;
-        FieldInfo::builder()
+        Ok(FieldInfo::builder()
             .name(name)
             .description(tree.get_child_text_opt("description")?)
             .bit_range(bit_range)
@@ -41,6 +41,6 @@ impl FieldInfo {
                 values?
             })
             .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
-            .build()
+            .build()?)
     }
 }

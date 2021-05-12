@@ -1,8 +1,6 @@
-use crate::error::*;
-
-use crate::svd::{
-    access::Access, bitrange::BitRange, enumeratedvalues::EnumeratedValues,
-    modifiedwritevalues::ModifiedWriteValues, writeconstraint::WriteConstraint,
+use super::{
+    bitrange, Access, BitRange, BuildError, EnumeratedValues, ModifiedWriteValues, SvdError,
+    WriteConstraint,
 };
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -107,7 +105,7 @@ impl FieldInfoBuilder {
         self.derived_from = value;
         self
     }
-    pub fn build(self) -> Result<FieldInfo> {
+    pub fn build(self) -> Result<FieldInfo, SvdError> {
         (FieldInfo {
             name: self
                 .name
@@ -130,18 +128,18 @@ impl FieldInfo {
     pub fn builder() -> FieldInfoBuilder {
         FieldInfoBuilder::default()
     }
-    fn validate(self) -> Result<Self> {
+    fn validate(self) -> Result<Self, SvdError> {
         #[cfg(feature = "strict")]
-        check_dimable_name(&self.name, "name")?;
+        super::check_dimable_name(&self.name, "name")?;
         #[cfg(feature = "strict")]
         {
             if let Some(name) = self.derived_from.as_ref() {
-                check_derived_name(name, "derivedFrom")?;
+                super::check_derived_name(name, "derivedFrom")?;
             }
         }
 
         if self.bit_range.width == 0 {
-            anyhow::bail!("bitRange width of 0 does not make sense");
+            return Err(bitrange::Error::ZeroWidth.into());
         }
 
         // If the bit_range has its maximum width, all enumerated values will of

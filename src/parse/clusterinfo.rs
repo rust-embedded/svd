@@ -15,7 +15,7 @@ impl Parse for ClusterInfo {
 
 impl ClusterInfo {
     fn _parse(tree: &Element, name: String) -> Result<Self> {
-        ClusterInfo::builder()
+        Ok(ClusterInfo::builder()
             .name(name)
             .description(tree.get_child_text_opt("description")?)
             .header_struct_name(tree.get_child_text_opt("headerStructName")?)
@@ -31,6 +31,6 @@ impl ClusterInfo {
                 children?
             })
             .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
-            .build()
+            .build()?)
     }
 }

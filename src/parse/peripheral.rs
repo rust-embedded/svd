@@ -18,7 +18,7 @@ impl Parse for Peripheral {
 
 impl Peripheral {
     fn _parse(tree: &Element, name: String) -> Result<Self> {
-        Peripheral::builder()
+        Ok(Peripheral::builder()
             .name(name)
             .display_name(tree.get_child_text_opt("displayName")?)
             .version(tree.get_child_text_opt("version")?)
@@ -50,6 +50,6 @@ impl Peripheral {
                 None
             })
             .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
-            .build()
+            .build()?)
     }
 }

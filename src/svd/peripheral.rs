@@ -1,4 +1,5 @@
-use crate::error::*;
+use super::{BuildError, SvdError};
+
 use crate::svd::{
     addressblock::AddressBlock,
     interrupt::Interrupt,
@@ -6,6 +7,13 @@ use crate::svd::{
     registercluster::RegisterCluster,
     registerproperties::RegisterProperties,
 };
+
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum Error {
+    #[cfg(feature = "strict")]
+    #[error("Peripheral have `registers` tag, but it is empty")]
+    EmptyRegisters,
+}
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -142,7 +150,7 @@ impl PeripheralBuilder {
         self.derived_from = value;
         self
     }
-    pub fn build(self) -> Result<Peripheral> {
+    pub fn build(self) -> Result<Peripheral, SvdError> {
         (Peripheral {
             name: self
                 .name
@@ -169,17 +177,17 @@ impl Peripheral {
         PeripheralBuilder::default()
     }
     #[allow(clippy::unnecessary_wraps)]
-    fn validate(self) -> Result<Self> {
+    fn validate(self) -> Result<Self, SvdError> {
         // TODO
         #[cfg(feature = "strict")]
-        check_dimable_name(&self.name, "name")?;
+        super::check_dimable_name(&self.name, "name")?;
         if let Some(_name) = self.derived_from.as_ref() {
             #[cfg(feature = "strict")]
-            check_dimable_name(_name, "derivedFrom")?;
+            super::check_dimable_name(_name, "derivedFrom")?;
         } else if let Some(registers) = self.registers.as_ref() {
             if registers.is_empty() {
                 #[cfg(feature = "strict")]
-                return Err(SVDError::EmptyRegisters)?;
+                return Err(Error::EmptyRegisters)?;
             }
         }
         Ok(self)

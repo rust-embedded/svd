@@ -1,6 +1,12 @@
-use crate::error::*;
+use super::{BuildError, SvdError};
 
 use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties};
+
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum Error {
+    #[error("Device must contain at least one peripheral")]
+    EmptyDevice,
+}
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -118,7 +124,7 @@ impl DeviceBuilder {
         self.schema_version = value;
         self
     }
-    pub fn build(self) -> Result<Device> {
+    pub fn build(self) -> Result<Device, SvdError> {
         (Device {
             name: self
                 .name
@@ -142,10 +148,10 @@ impl Device {
     pub fn builder() -> DeviceBuilder {
         DeviceBuilder::default()
     }
-    fn validate(self) -> Result<Self> {
+    fn validate(self) -> Result<Self, SvdError> {
         // TODO
         if self.peripherals.is_empty() {
-            return Err(SVDError::EmptyDevice.into());
+            return Err(Error::EmptyDevice.into());
         }
         Ok(self)
     }

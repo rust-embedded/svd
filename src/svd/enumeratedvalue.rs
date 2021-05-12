@@ -1,4 +1,4 @@
-use crate::error::*;
+use super::{BuildError, SvdError};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -24,7 +24,7 @@ pub struct EnumeratedValue {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
-pub enum EnumeratedValueError {
+pub enum Error {
     #[error("EnumeratedValue must contain one of `value` (passed {0:?}) or `is_default` (passed {1:?}) tags")]
     AbsentValue(Option<u64>, Option<bool>),
     #[error("Value {0} out of range {1:?}")]
@@ -68,7 +68,7 @@ impl EnumeratedValueBuilder {
         self.is_default = value;
         self
     }
-    pub fn build(self) -> Result<EnumeratedValue> {
+    pub fn build(self) -> Result<EnumeratedValue, SvdError> {
         (EnumeratedValue {
             name: self
                 .name
@@ -85,19 +85,17 @@ impl EnumeratedValue {
     pub fn builder() -> EnumeratedValueBuilder {
         EnumeratedValueBuilder::default()
     }
-    fn validate(self) -> Result<Self> {
+    fn validate(self) -> Result<Self, SvdError> {
         #[cfg(feature = "strict")]
-        check_name(&self.name, "name")?;
+        super::check_name(&self.name, "name")?;
         match (&self.value, &self.is_default) {
             (Some(_), None) | (None, Some(_)) => Ok(self),
-            _ => Err(EnumeratedValueError::AbsentValue(self.value, self.is_default).into()),
+            _ => Err(Error::AbsentValue(self.value, self.is_default).into()),
         }
     }
-    pub(crate) fn check_range(&self, range: &core::ops::Range<u64>) -> Result<()> {
+    pub(crate) fn check_range(&self, range: &core::ops::Range<u64>) -> Result<(), SvdError> {
         match &self.value {
-            Some(x) if !range.contains(x) => {
-                Err(EnumeratedValueError::OutOfRange(*x, range.clone()).into())
-            }
+            Some(x) if !range.contains(x) => Err(Error::OutOfRange(*x, range.clone()).into()),
             _ => Ok(()),
         }
     }

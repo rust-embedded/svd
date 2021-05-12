@@ -11,10 +11,10 @@ impl Parse for DimElement {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        DimElement::builder()
+        Ok(DimElement::builder()
             .dim(tree.get_child_u32("dim")?)
             .dim_increment(tree.get_child_u32("dimIncrement")?)
             .dim_index(parse_optional::<DimIndex>("dimIndex", tree)?)
-            .build()
+            .build()?)
     }
 }

@@ -1,4 +1,5 @@
-use crate::error::*;
+use super::{BuildError, SvdError};
+
 use crate::svd::Endian;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -80,7 +81,7 @@ impl CpuBuilder {
         self.has_vendor_systick = Some(value);
         self
     }
-    pub fn build(self) -> Result<Cpu> {
+    pub fn build(self) -> Result<Cpu, SvdError> {
         (Cpu {
             name: self
                 .name
@@ -113,7 +114,7 @@ impl Cpu {
         CpuBuilder::default()
     }
     #[allow(clippy::unnecessary_wraps)]
-    fn validate(self) -> Result<Self> {
+    fn validate(self) -> Result<Self, SvdError> {
         // TODO
         Ok(self)
     }
