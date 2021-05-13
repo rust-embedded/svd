@@ -1,11 +1,6 @@
-use super::{BuildError, SvdError};
-
-use crate::svd::{
-    addressblock::AddressBlock,
-    interrupt::Interrupt,
+use super::{
     register::{RegIter, RegIterMut},
-    registercluster::RegisterCluster,
-    registerproperties::RegisterProperties,
+    AddressBlock, BuildError, Interrupt, RegisterCluster, RegisterProperties, SvdError,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]

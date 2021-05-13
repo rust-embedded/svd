@@ -1,7 +1,13 @@
-use super::{Element, Parse};
-
-use crate::error::*;
+use super::{Context, Element, Parse, Result, SVDError};
 use crate::svd::{BitRange, BitRangeType};
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum InvalidBitRange {
+    Syntax,
+    ParseError,
+    MsbLsb,
+    Empty,
+}
 
 impl Parse for BitRange {
     type Object = Self;

@@ -1,6 +1,4 @@
-use super::{elementext::ElementExt, Element, Parse};
-
-use crate::error::*;
+use super::{elementext::ElementExt, Element, Parse, Result, SVDError};
 use crate::svd::{WriteConstraint, WriteConstraintRange};
 
 impl Parse for WriteConstraint {

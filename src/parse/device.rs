@@ -1,10 +1,8 @@
-use super::{elementext::ElementExt, optional, Element, Parse};
-use rayon::prelude::*;
-
-use crate::error::*;
+use super::{elementext::ElementExt, optional, Context, Element, Parse, Result, SVDError};
 use crate::svd::{
     cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties, Device,
 };
+use rayon::prelude::*;
 
 impl Parse for Device {
     type Object = Self;

@@ -1,6 +1,4 @@
-use super::{elementext::ElementExt, optional, Element, Parse};
-
-use crate::error::*;
+use super::{elementext::ElementExt, optional, Context, Element, Parse, Result, SVDError};
 use crate::svd::EnumeratedValue;
 
 impl EnumeratedValue {

@@ -25,8 +25,6 @@
 // SVD contains svd primitives
 pub mod svd;
 pub use svd::*;
-// Error defines SVD error types
-pub mod error;
 // Parse defines parsing interfaces
 pub mod parse;
 pub use parse::parse;

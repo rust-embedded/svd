@@ -1,6 +1,4 @@
-use super::{elementext::ElementExt, Element, Parse};
-
-use crate::error::*;
+use super::{elementext::ElementExt, Context, Element, Parse, Result};
 use crate::svd::{ClusterInfo, RegisterCluster, RegisterProperties};
 
 impl Parse for ClusterInfo {

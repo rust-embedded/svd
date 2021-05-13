@@ -1,6 +1,4 @@
-use super::{elementext::ElementExt, optional, Element, Parse};
-
-use crate::error::*;
+use super::{elementext::ElementExt, optional, Context, Element, Parse, Result};
 use crate::svd::{Field, ModifiedWriteValues, RegisterInfo, RegisterProperties, WriteConstraint};
 
 impl Parse for RegisterInfo {

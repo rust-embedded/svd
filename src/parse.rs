@@ -75,6 +75,55 @@ mod registerproperties;
 mod usage;
 mod writeconstraint;
 
+pub use anyhow::{Context, Result};
+
+/// SVD parse Errors.
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum SVDError {
+    #[error("Expected a <{1}> tag, found none")]
+    MissingTag(Element, String),
+    #[error("Expected content in <{1}> tag, found none")]
+    EmptyTag(Element, String),
+    #[error("ParseError")]
+    ParseError(Element),
+    #[error("NameMismatch")]
+    NameMismatch(Element),
+    #[error("Unknown endianness `{0}`")]
+    UnknownEndian(String),
+    #[error("unknown access variant '{1}' found")]
+    UnknownAccessType(Element, String),
+    #[error("Bit range invalid, {1:?}")]
+    InvalidBitRange(Element, bitrange::InvalidBitRange),
+    #[error("Unknown write constraint")]
+    UnknownWriteConstraint(Element),
+    #[error("Multiple wc found")]
+    MoreThanOneWriteConstraint(Element),
+    #[error("Unknown usage variant")]
+    UnknownUsageVariant(Element),
+    #[error("Expected a <{1}>, found ...")]
+    NotExpectedTag(Element, String),
+    #[error("Invalid RegisterCluster (expected register or cluster), found {1}")]
+    InvalidRegisterCluster(Element, String),
+    #[error("Invalid modifiedWriteValues variant, found {1}")]
+    InvalidModifiedWriteValues(Element, String),
+    #[error("The content of the element could not be parsed to a boolean value {1}: {2}")]
+    InvalidBooleanValue(Element, String, core::str::ParseBoolError),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum NameParseError {
+    #[error("Name `{0}` in tag `{1}` is missing a %s placeholder")]
+    MissingPlaceholder(String, String),
+}
+
+pub(crate) fn check_has_placeholder(name: &str, tag: &str) -> Result<()> {
+    if name.contains("%s") {
+        Ok(())
+    } else {
+        Err(NameParseError::MissingPlaceholder(name.to_string(), tag.to_string()).into())
+    }
+}
+
 #[test]
 fn test_trim_utf8_bom_from_str() {
     // UTF-8 BOM + "xyz"

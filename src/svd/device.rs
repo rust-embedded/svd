@@ -1,6 +1,4 @@
-use super::{BuildError, SvdError};
-
-use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties};
+use super::{BuildError, Cpu, Peripheral, RegisterProperties, SvdError};
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
