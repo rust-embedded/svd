@@ -3,9 +3,8 @@
 
 use xmltree::Element;
 
-use super::types::{BoolParse, Parse};
-
-use crate::error::*;
+use super::types::BoolParse;
+use super::{Context, Parse, Result, SVDError};
 
 /// Defines extensions for implementation over xmltree::Element
 pub trait ElementExt {

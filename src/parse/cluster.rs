@@ -1,6 +1,4 @@
-use super::{Element, Parse};
-
-use crate::error::*;
+use super::{check_has_placeholder, Element, Parse, Result};
 use crate::svd::{Cluster, ClusterInfo, DimElement};
 
 impl Parse for Cluster {

@@ -1,6 +1,4 @@
-use super::{Element, Parse};
-
-use crate::error::*;
+use super::{Element, Parse, Result, SVDError};
 use crate::svd::{Cluster, Register};
 
 use crate::svd::RegisterCluster;

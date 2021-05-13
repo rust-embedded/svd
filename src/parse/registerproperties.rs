@@ -1,6 +1,4 @@
-use super::{optional, Element, Parse};
-
-use crate::error::*;
+use super::{optional, Element, Parse, Result};
 use crate::svd::{Access, RegisterProperties};
 
 impl Parse for RegisterProperties {

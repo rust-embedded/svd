@@ -1,6 +1,4 @@
-use super::{elementext::ElementExt, Element, Parse};
-
-use crate::error::*;
+use super::{elementext::ElementExt, Element, Parse, Result};
 use crate::svd::AddressBlock;
 
 impl Parse for AddressBlock {
