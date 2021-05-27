@@ -27,9 +27,11 @@
 
 use svd_rs as svd;
 
-use xmltree::Element;
+pub use anyhow::{Context, Result};
+use roxmltree::{Document, Node as Element, NodeId};
 // ElementExt extends XML elements with useful methods
 pub mod elementext;
+use crate::elementext::ElementExt;
 // Types defines simple types and parse/encode implementations
 pub mod types;
 
@@ -55,7 +57,7 @@ where
         None => return Ok(None),
     };
 
-    match T::parse(child) {
+    match T::parse(&child) {
         Ok(r) => Ok(Some(r)),
         Err(e) => Err(e),
     }
@@ -65,8 +67,36 @@ use crate::svd::Device;
 /// Parses the contents of an SVD (XML) string
 pub fn parse(xml: &str) -> anyhow::Result<Device> {
     let xml = trim_utf8_bom(xml);
-    let tree = Element::parse(xml.as_bytes())?;
-    Device::parse(&tree)
+    let tree = Document::parse(xml)?;
+    let root = tree.root();
+    let device = root
+        .get_child("device")
+        .ok_or_else(|| SVDError::MissingTag(root.id(), "device".to_string()))?;
+    match Device::parse(&device) {
+        o @ Ok(_) => o,
+        Err(e) => match e.downcast_ref::<SVDError>() {
+            Some(ed) => match ed {
+                SVDError::MissingTag(id, _)
+                | SVDError::EmptyTag(id, _)
+                | SVDError::ParseError(id)
+                | SVDError::UnknownAccessType(id, _)
+                | SVDError::InvalidBitRange(id, _)
+                | SVDError::UnknownWriteConstraint(id)
+                | SVDError::MoreThanOneWriteConstraint(id)
+                | SVDError::UnknownUsageVariant(id)
+                | SVDError::NotExpectedTag(id, _)
+                | SVDError::InvalidRegisterCluster(id, _)
+                | SVDError::InvalidModifiedWriteValues(id, _)
+                | SVDError::InvalidBooleanValue(id, _, _) => {
+                    let node = tree.get_node(*id).unwrap();
+                    let pos = tree.text_pos_at(node.range().start);
+                    Err(e).with_context(|| format!(" at {}", pos))
+                }
+                _ => Err(e),
+            },
+            None => Err(e),
+        },
+    }
 }
 
 /// Return the &str trimmed UTF-8 BOM if the input &str contains the BOM.
@@ -101,39 +131,35 @@ mod registerproperties;
 mod usage;
 mod writeconstraint;
 
-pub use anyhow::{Context, Result};
-
 /// SVD parse Errors.
-#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+#[derive(Clone, Debug, PartialEq, thiserror::Error)]
 pub enum SVDError {
     #[error("Expected a <{1}> tag, found none")]
-    MissingTag(Element, String),
+    MissingTag(NodeId, String),
     #[error("Expected content in <{1}> tag, found none")]
-    EmptyTag(Element, String),
+    EmptyTag(NodeId, String),
     #[error("ParseError")]
-    ParseError(Element),
-    #[error("NameMismatch")]
-    NameMismatch(Element),
+    ParseError(NodeId),
     #[error("Unknown endianness `{0}`")]
     UnknownEndian(String),
     #[error("unknown access variant '{1}' found")]
-    UnknownAccessType(Element, String),
+    UnknownAccessType(NodeId, String),
     #[error("Bit range invalid, {1:?}")]
-    InvalidBitRange(Element, bitrange::InvalidBitRange),
+    InvalidBitRange(NodeId, bitrange::InvalidBitRange),
     #[error("Unknown write constraint")]
-    UnknownWriteConstraint(Element),
+    UnknownWriteConstraint(NodeId),
     #[error("Multiple wc found")]
-    MoreThanOneWriteConstraint(Element),
+    MoreThanOneWriteConstraint(NodeId),
     #[error("Unknown usage variant")]
-    UnknownUsageVariant(Element),
+    UnknownUsageVariant(NodeId),
     #[error("Expected a <{1}>, found ...")]
-    NotExpectedTag(Element, String),
+    NotExpectedTag(NodeId, String),
     #[error("Invalid RegisterCluster (expected register or cluster), found {1}")]
-    InvalidRegisterCluster(Element, String),
+    InvalidRegisterCluster(NodeId, String),
     #[error("Invalid modifiedWriteValues variant, found {1}")]
-    InvalidModifiedWriteValues(Element, String),
+    InvalidModifiedWriteValues(NodeId, String),
     #[error("The content of the element could not be parsed to a boolean value {1}: {2}")]
-    InvalidBooleanValue(Element, String, core::str::ParseBoolError),
+    InvalidBooleanValue(NodeId, String, core::str::ParseBoolError),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]

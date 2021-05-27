@@ -1,4 +1,5 @@
 use super::{check_has_placeholder, Element, Parse, Result};
+use crate::elementext::ElementExt;
 use crate::svd::{DimElement, Register, RegisterInfo};
 
 impl Parse for Register {
@@ -6,7 +7,7 @@ impl Parse for Register {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        assert_eq!(tree.name, "register");
+        assert!(tree.has_tag_name("register"));
 
         let info = RegisterInfo::parse(tree)?;
 

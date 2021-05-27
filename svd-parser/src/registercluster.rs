@@ -7,12 +7,14 @@ impl Parse for RegisterCluster {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        if tree.name == "register" {
-            Ok(RegisterCluster::Register(Register::parse(tree)?))
-        } else if tree.name == "cluster" {
-            Ok(RegisterCluster::Cluster(Cluster::parse(tree)?))
-        } else {
-            Err(SVDError::InvalidRegisterCluster(tree.clone(), tree.name.clone()).into())
+        match tree.tag_name().name() {
+            "register" => Ok(RegisterCluster::Register(Register::parse(tree)?)),
+            "cluster" => Ok(RegisterCluster::Cluster(Cluster::parse(tree)?)),
+            _ => Err(SVDError::InvalidRegisterCluster(
+                tree.id(),
+                tree.tag_name().name().to_string(),
+            )
+            .into()),
         }
     }
 }

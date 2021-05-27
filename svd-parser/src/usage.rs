@@ -12,7 +12,7 @@ impl Parse for Usage {
             "read" => Ok(Usage::Read),
             "write" => Ok(Usage::Write),
             "read-write" => Ok(Usage::ReadWrite),
-            _ => Err(SVDError::UnknownUsageVariant(tree.clone()).into()),
+            _ => Err(SVDError::UnknownUsageVariant(tree.id()).into()),
         }
     }
 }

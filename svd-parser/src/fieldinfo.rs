@@ -8,8 +8,8 @@ impl Parse for FieldInfo {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        if tree.name != "field" {
-            return Err(SVDError::NotExpectedTag(tree.clone(), "field".to_string()).into());
+        if !tree.has_tag_name("field") {
+            return Err(SVDError::NotExpectedTag(tree.id(), "field".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
         parse_field(tree, name.clone()).with_context(|| format!("In field `{}`", name))
@@ -30,13 +30,12 @@ fn parse_field(tree: &Element, name: String) -> Result<FieldInfo> {
         .write_constraint(optional::<WriteConstraint>("writeConstraint", tree)?)
         .enumerated_values({
             let values: Result<Vec<_>, _> = tree
-                .children
-                .iter()
-                .filter(|t| t.name == "enumeratedValues")
-                .map(|t| EnumeratedValues::parse(t))
+                .children()
+                .filter(|t| t.is_element() && t.has_tag_name("enumeratedValues"))
+                .map(|t| EnumeratedValues::parse(&t))
                 .collect();
             values?
         })
-        .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
+        .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
         .build()?)
 }

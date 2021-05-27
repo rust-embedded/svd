@@ -1,4 +1,5 @@
 use super::{check_has_placeholder, Element, Parse, Result};
+use crate::elementext::ElementExt;
 use crate::svd::{DimElement, Field, FieldInfo};
 
 impl Parse for Field {
@@ -6,7 +7,7 @@ impl Parse for Field {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        assert_eq!(tree.name, "field");
+        assert!(tree.has_tag_name("field"));
 
         let info = FieldInfo::parse(tree)?;
 

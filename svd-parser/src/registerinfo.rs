@@ -28,16 +28,16 @@ fn parse_register(tree: &Element, name: String) -> Result<RegisterInfo> {
         .fields({
             if let Some(fields) = tree.get_child("fields") {
                 let fs: Result<Vec<_>, _> = fields
-                    .children
-                    .iter()
+                    .children()
+                    .filter(Element::is_element)
                     .enumerate()
-                    .map(|(e, t)| Field::parse(t).with_context(|| format!("Parsing field #{}", e)))
+                    .map(|(e, t)| Field::parse(&t).with_context(|| format!("Parsing field #{}", e)))
                     .collect();
                 Some(fs?)
             } else {
                 None
             }
         })
-        .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
+        .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
         .build()?)
 }

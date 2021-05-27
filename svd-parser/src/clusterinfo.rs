@@ -20,13 +20,14 @@ fn parse_cluster(tree: &Element, name: String) -> Result<ClusterInfo> {
         .default_register_properties(RegisterProperties::parse(tree)?)
         .children({
             let children: Result<Vec<_>, _> = tree
-                .children
-                .iter()
-                .filter(|t| t.name == "register" || t.name == "cluster")
-                .map(RegisterCluster::parse)
+                .children()
+                .filter(|t| {
+                    t.is_element() && (t.has_tag_name("register") || t.has_tag_name("cluster"))
+                })
+                .map(|t| RegisterCluster::parse(&t))
                 .collect();
             children?
         })
-        .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
+        .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
         .build()?)
 }

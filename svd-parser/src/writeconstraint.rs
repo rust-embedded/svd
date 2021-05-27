@@ -6,23 +6,21 @@ impl Parse for WriteConstraint {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        if tree.children.len() == 1 {
-            let field = &tree.children[0].name;
-            // Write constraint can only be one of the following
-            match field.as_ref() {
-                "writeAsRead" => Ok(WriteConstraint::WriteAsRead(
-                    tree.get_child_bool(field.as_ref())?,
-                )),
-                "useEnumeratedValues" => Ok(WriteConstraint::UseEnumeratedValues(
-                    tree.get_child_bool(field.as_ref())?,
-                )),
-                "range" => Ok(WriteConstraint::Range(WriteConstraintRange::parse(
-                    tree.get_child_elem(field.as_ref())?,
-                )?)),
-                _ => Err(SVDError::UnknownWriteConstraint(tree.clone()).into()),
-            }
-        } else {
-            Err(SVDError::MoreThanOneWriteConstraint(tree.clone()).into())
+        let child = tree.first_element_child().unwrap();
+        if child.next_sibling_element().is_some() {
+            return Err(SVDError::MoreThanOneWriteConstraint(tree.id()).into());
+        }
+        let field = child.tag_name().name();
+        // Write constraint can only be one of the following
+        match field {
+            "writeAsRead" => Ok(WriteConstraint::WriteAsRead(tree.get_child_bool(field)?)),
+            "useEnumeratedValues" => Ok(WriteConstraint::UseEnumeratedValues(
+                tree.get_child_bool(field)?,
+            )),
+            "range" => Ok(WriteConstraint::Range(WriteConstraintRange::parse(
+                &tree.get_child_elem(field)?,
+            )?)),
+            _ => Err(SVDError::UnknownWriteConstraint(tree.id()).into()),
         }
     }
 }

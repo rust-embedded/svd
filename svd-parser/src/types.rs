@@ -1,7 +1,7 @@
 //! Shared primitive types for use in SVD objects.
 #![allow(clippy::manual_strip)]
 
-use xmltree::Element;
+use roxmltree::Node as Element;
 
 use super::elementext::ElementExt;
 use super::{Context, Parse, Result, SVDError};
@@ -83,14 +83,16 @@ impl Parse for BoolParse {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<bool> {
-        let text = unwrap!(tree.text.as_ref());
-        Ok(match text.as_ref() {
+        let text = unwrap!(tree.text());
+        Ok(match text {
             "0" => false,
             "1" => true,
             _ => match text.parse() {
                 Ok(b) => b,
                 Err(e) => {
-                    return Err(SVDError::InvalidBooleanValue(tree.clone(), text.clone(), e).into())
+                    return Err(
+                        SVDError::InvalidBooleanValue(tree.id(), text.to_string(), e).into(),
+                    )
                 }
             },
         })

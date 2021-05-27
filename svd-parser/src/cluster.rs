@@ -1,4 +1,5 @@
 use super::{check_has_placeholder, Element, Parse, Result};
+use crate::elementext::ElementExt;
 use crate::svd::{Cluster, ClusterInfo, DimElement};
 
 impl Parse for Cluster {
@@ -6,7 +7,7 @@ impl Parse for Cluster {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        assert_eq!(tree.name, "cluster");
+        assert!(tree.has_tag_name("cluster"));
 
         let info = ClusterInfo::parse(tree)?;
 

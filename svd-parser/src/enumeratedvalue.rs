@@ -17,10 +17,8 @@ impl Parse for EnumeratedValue {
     type Error = anyhow::Error;
 
     fn parse(tree: &Element) -> Result<Self> {
-        if tree.name != "enumeratedValue" {
-            return Err(
-                SVDError::NotExpectedTag(tree.clone(), "enumeratedValue".to_string()).into(),
-            );
+        if !tree.has_tag_name("enumeratedValue") {
+            return Err(SVDError::NotExpectedTag(tree.id(), "enumeratedValue".to_string()).into());
         }
         let name = tree.get_child_text("name")?;
         parse_ev(tree, name.clone()).with_context(|| format!("In enumerated value `{}`", name))
