@@ -1,5 +1,31 @@
+//! CMSIS-SVD file parser
+//!
+//! # Usage
+//!
+//! ``` no_run
+//! use svd_parser as svd;
+//!
+//! use std::fs::File;
+//! use std::io::Read;
+//!
+//! let xml = &mut String::new();
+//! File::open("STM32F30x.svd").unwrap().read_to_string(xml);
+//!
+//! println!("{:?}", svd::parse(xml));
+//! ```
+//!
+//! # References
+//!
+//! - [SVD Schema file](https://www.keil.com/pack/doc/CMSIS/SVD/html/schema_1_2_gr.html)
+//! - [SVD file database](https://github.com/posborne/cmsis-svd/tree/master/data)
+//! - [Sample SVD file](https://www.keil.com/pack/doc/CMSIS/SVD/html/svd_Example_pg.html)
+
+#![deny(warnings)]
+
 //! Parse traits.
 //! These support parsing of SVD types from XML
+
+use svd_rs as svd;
 
 use xmltree::Element;
 // ElementExt extends XML elements with useful methods

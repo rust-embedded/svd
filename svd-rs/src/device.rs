@@ -54,7 +54,7 @@ pub struct Device {
     /// Specify the compliant CMSIS-SVD schema version
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub(crate) schema_version: Option<String>,
+    pub schema_version: Option<String>,
 }
 
 #[derive(Clone, Debug, Default)]

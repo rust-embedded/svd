@@ -1,6 +1,8 @@
 //! Encode traits.
 //! These support encoding of SVD types to XML
 
+use svd_rs as svd;
+
 use crate::svd::Device;
 use std::collections::HashMap;
 use xmltree::Element;

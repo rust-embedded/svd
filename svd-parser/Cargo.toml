@@ -1,0 +1,24 @@
+[package]
+authors = [
+    "The Tools Team <tools@teams.rust-embedded.org>",
+    "Jorge Aparicio <jorge@japaric.io>",
+]
+description = "A CMSIS-SVD file parser"
+documentation = "https://docs.rs/svd-parser"
+keywords = ["CMSIS", "SVD", "parser"]
+license = "MIT OR Apache-2.0"
+name = "svd-parser"
+repository = "https://github.com/rust-embedded/svd"
+edition = "2018"
+version = "0.10.2"
+readme = "README.md"
+
+[features]
+derive-from = ["svd-rs/derive-from"]
+
+[dependencies]
+svd-rs = { version = "0.10.2", path = "../svd-rs"}
+xmltree = "0.8"
+anyhow = "1.0.19"
+thiserror = "1.0.5"
+rayon = "1.5.0"

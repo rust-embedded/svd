@@ -23,19 +23,11 @@
 #![deny(warnings)]
 
 // SVD contains svd primitives
-pub mod svd;
-pub use svd::*;
+use svd_rs as svd;
 // Parse defines parsing interfaces
-pub mod parse;
-pub use parse::parse;
+use svd_parser::{self as parse, parse};
 // Encode defines encoding interfaces
-pub mod encode;
-pub use encode::encode;
-
-#[cfg(feature = "derive-from")]
-pub mod derive_from;
-#[cfg(feature = "derive-from")]
-pub use derive_from::DeriveFrom;
+use svd_encoder::{self as encode, encode};
 
 #[cfg(test)]
 mod tests;
