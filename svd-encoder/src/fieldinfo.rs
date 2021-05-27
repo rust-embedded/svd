@@ -1,4 +1,5 @@
 use super::{new_element, Element, Encode, EncodeError};
+use crate::bitrange::encode_bitrange;
 
 use crate::svd::FieldInfo;
 
@@ -16,7 +17,7 @@ impl Encode for FieldInfo {
         }
 
         // Add bit range
-        elem.children.append(&mut self.bit_range.encode()?);
+        elem.children.append(&mut encode_bitrange(&self.bit_range)?);
 
         if let Some(v) = &self.access {
             elem.children.push(v.encode()?);

@@ -1,6 +1,8 @@
 //! Parse traits.
 //! These support parsing of SVD types from XML
 
+use svd_rs as svd;
+
 use xmltree::Element;
 // ElementExt extends XML elements with useful methods
 pub mod elementext;

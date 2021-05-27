@@ -67,6 +67,11 @@ pub use self::device::Device;
 pub mod modifiedwritevalues;
 pub use self::modifiedwritevalues::ModifiedWriteValues;
 
+#[cfg(feature = "derive-from")]
+pub mod derive_from;
+#[cfg(feature = "derive-from")]
+pub use derive_from::DeriveFrom;
+
 #[cfg(feature = "strict")]
 use once_cell::sync::Lazy;
 #[cfg(feature = "strict")]

@@ -32,10 +32,5 @@ pub use parse::parse;
 pub mod encode;
 pub use encode::encode;
 
-#[cfg(feature = "derive-from")]
-pub mod derive_from;
-#[cfg(feature = "derive-from")]
-pub use derive_from::DeriveFrom;
-
 #[cfg(test)]
 mod tests;
