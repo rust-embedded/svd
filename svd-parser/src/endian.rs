@@ -1,19 +1,20 @@
-use super::{elementext::ElementExt, Element, Parse, Result, SVDError};
+use super::{elementext::ElementExt, Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::svd::Endian;
 
 impl Parse for Endian {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
+    type Config = Config;
 
-    fn parse(tree: &Element) -> Result<Self> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
         let text = tree.get_text()?;
 
-        match &text[..] {
+        match text {
             "little" => Ok(Endian::Little),
             "big" => Ok(Endian::Big),
             "selectable" => Ok(Endian::Selectable),
             "other" => Ok(Endian::Other),
-            s => Err(SVDError::UnknownEndian(s.into()).into()),
+            s => Err(SVDError::UnknownEndian(s.into()).at(tree.id()).into()),
         }
     }
 }

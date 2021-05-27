@@ -1,4 +1,4 @@
-use super::{BuildError, Endian, SvdError};
+use super::{BuildError, Endian, SvdError, ValidateLevel};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
@@ -80,7 +80,7 @@ impl CpuBuilder {
         self.has_vendor_systick = Some(value);
         self
     }
-    pub fn build(self) -> Result<Cpu, SvdError> {
+    pub fn build(self, lvl: ValidateLevel) -> Result<Cpu, SvdError> {
         (Cpu {
             name: self
                 .name
@@ -104,7 +104,7 @@ impl CpuBuilder {
                 .has_vendor_systick
                 .ok_or_else(|| BuildError::Uninitialized("has_vendor_systick".to_string()))?,
         })
-        .validate()
+        .validate(lvl)
     }
 }
 
@@ -113,7 +113,7 @@ impl Cpu {
         CpuBuilder::default()
     }
     #[allow(clippy::unnecessary_wraps)]
-    fn validate(self) -> Result<Self, SvdError> {
+    fn validate(self, _lvl: ValidateLevel) -> Result<Self, SvdError> {
         // TODO
         Ok(self)
     }

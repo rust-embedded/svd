@@ -1,4 +1,4 @@
-use super::{BuildError, SvdError};
+use super::{BuildError, SvdError, ValidateLevel};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -68,7 +68,7 @@ impl EnumeratedValueBuilder {
         self.is_default = value;
         self
     }
-    pub fn build(self) -> Result<EnumeratedValue, SvdError> {
+    pub fn build(self, lvl: ValidateLevel) -> Result<EnumeratedValue, SvdError> {
         (EnumeratedValue {
             name: self
                 .name
@@ -77,7 +77,7 @@ impl EnumeratedValueBuilder {
             value: self.value,
             is_default: self.is_default,
         })
-        .validate()
+        .validate(lvl)
     }
 }
 
@@ -85,9 +85,10 @@ impl EnumeratedValue {
     pub fn builder() -> EnumeratedValueBuilder {
         EnumeratedValueBuilder::default()
     }
-    fn validate(self) -> Result<Self, SvdError> {
-        #[cfg(feature = "strict")]
-        super::check_name(&self.name, "name")?;
+    fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
+        if lvl.is_strict() {
+            super::check_name(&self.name, "name")?;
+        }
         match (&self.value, &self.is_default) {
             (Some(_), None) | (None, Some(_)) => Ok(self),
             _ => Err(Error::AbsentValue(self.value, self.is_default).into()),

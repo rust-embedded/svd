@@ -1,6 +1,6 @@
 use super::{
     bitrange, Access, BitRange, BuildError, EnumeratedValues, ModifiedWriteValues, SvdError,
-    WriteConstraint,
+    ValidateLevel, WriteConstraint,
 };
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -107,7 +107,7 @@ impl FieldInfoBuilder {
         self.derived_from = value;
         self
     }
-    pub fn build(self) -> Result<FieldInfo, SvdError> {
+    pub fn build(self, lvl: ValidateLevel) -> Result<FieldInfo, SvdError> {
         (FieldInfo {
             name: self
                 .name
@@ -122,7 +122,7 @@ impl FieldInfoBuilder {
             enumerated_values: self.enumerated_values.unwrap_or_default(),
             derived_from: self.derived_from,
         })
-        .validate()
+        .validate(lvl)
     }
 }
 
@@ -130,11 +130,9 @@ impl FieldInfo {
     pub fn builder() -> FieldInfoBuilder {
         FieldInfoBuilder::default()
     }
-    fn validate(self) -> Result<Self, SvdError> {
-        #[cfg(feature = "strict")]
-        super::check_dimable_name(&self.name, "name")?;
-        #[cfg(feature = "strict")]
-        {
+    fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
+        if lvl.is_strict() {
+            super::check_dimable_name(&self.name, "name")?;
             if let Some(name) = self.derived_from.as_ref() {
                 super::check_derived_name(name, "derivedFrom")?;
             }

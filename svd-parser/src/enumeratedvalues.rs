@@ -1,40 +1,41 @@
-use super::{elementext::ElementExt, optional, Context, Element, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::svd::{EnumeratedValue, EnumeratedValues, Usage};
 
 impl Parse for EnumeratedValues {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
+    type Config = Config;
 
-    fn parse(tree: &Element) -> Result<Self> {
-        assert_eq!(tree.name, "enumeratedValues");
-        Ok(EnumeratedValues::builder()
+    fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
+        if !tree.has_tag_name("enumeratedValues") {
+            return Err(SVDError::NotExpectedTag("enumeratedValues".to_string())
+                .at(tree.id())
+                .into());
+        }
+        EnumeratedValues::builder()
             .name(tree.get_child_text_opt("name")?)
-            .usage(optional::<Usage>("usage", tree)?)
-            .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
+            .usage(optional::<Usage>("usage", tree, config)?)
+            .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
             .values({
                 let values: Result<Vec<_>, _> = tree
-                    .children
-                    .iter()
+                    .children()
                     .filter(|t| {
-                        ["name", "headerEnumName", "usage"]
-                            .iter()
-                            .all(|s| &t.name != s)
+                        t.is_element()
+                            && !matches!(t.tag_name().name(), "name" | "headerEnumName" | "usage")
                     })
-                    .enumerate()
-                    .map(|(e, t)| {
-                        if t.name == "enumeratedValue" {
-                            EnumeratedValue::parse(t)
-                                .with_context(|| format!("Parsing enumerated value #{}", e))
+                    .map(|t| {
+                        if t.has_tag_name("enumeratedValue") {
+                            EnumeratedValue::parse(&t, config)
                         } else {
-                            Err(
-                                SVDError::NotExpectedTag(t.clone(), "enumeratedValue".to_string())
-                                    .into(),
-                            )
+                            Err(SVDError::NotExpectedTag("enumeratedValue".to_string())
+                                .at(t.id())
+                                .into())
                         }
                     })
                     .collect();
                 values?
             })
-            .build()?)
+            .build(config.validate_level)
+            .map_err(|e| SVDError::from(e).at(tree.id()).into())
     }
 }

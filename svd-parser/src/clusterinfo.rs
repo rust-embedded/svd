@@ -1,32 +1,35 @@
-use super::{elementext::ElementExt, Context, Element, Parse, Result};
+use super::{elementext::ElementExt, Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::svd::{ClusterInfo, RegisterCluster, RegisterProperties};
 
 impl Parse for ClusterInfo {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
+    type Config = Config;
 
-    fn parse(tree: &Element) -> Result<Self> {
+    fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
         let name = tree.get_child_text("name")?;
-        parse_cluster(tree, name.clone()).with_context(|| format!("In cluster `{}`", name))
+        parse_cluster(tree, name.clone(), config)
     }
 }
 
-fn parse_cluster(tree: &Element, name: String) -> Result<ClusterInfo> {
-    Ok(ClusterInfo::builder()
+fn parse_cluster(tree: &Node, name: String, config: &Config) -> Result<ClusterInfo, SVDErrorAt> {
+    ClusterInfo::builder()
         .name(name)
         .description(tree.get_child_text_opt("description")?)
         .header_struct_name(tree.get_child_text_opt("headerStructName")?)
         .address_offset(tree.get_child_u32("addressOffset")?)
-        .default_register_properties(RegisterProperties::parse(tree)?)
+        .default_register_properties(RegisterProperties::parse(tree, config)?)
         .children({
             let children: Result<Vec<_>, _> = tree
-                .children
-                .iter()
-                .filter(|t| t.name == "register" || t.name == "cluster")
-                .map(RegisterCluster::parse)
+                .children()
+                .filter(|t| {
+                    t.is_element() && (t.has_tag_name("register") || t.has_tag_name("cluster"))
+                })
+                .map(|t| RegisterCluster::parse(&t, config))
                 .collect();
             children?
         })
-        .derived_from(tree.attributes.get("derivedFrom").map(|s| s.to_owned()))
-        .build()?)
+        .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
+        .build(config.validate_level)
+        .map_err(|e| SVDError::from(e).at(tree.id()).into())
 }

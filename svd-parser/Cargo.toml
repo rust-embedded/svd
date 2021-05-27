@@ -18,7 +18,6 @@ derive-from = ["svd-rs/derive-from"]
 
 [dependencies]
 svd-rs = { version = "0.10.2", path = "../svd-rs"}
-xmltree = "0.8"
+roxmltree = "0.14.1"
 anyhow = "1.0.19"
 thiserror = "1.0.5"
-rayon = "1.5.0"

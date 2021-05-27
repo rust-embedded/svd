@@ -1,11 +1,10 @@
 use super::{
     register::{RegIter, RegIterMut},
-    BuildError, RegisterCluster, RegisterProperties, SvdError,
+    BuildError, RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
-    #[cfg(feature = "strict")]
     #[error("Cluster must contain at least one Register or Cluster")]
     EmptyCluster,
 }
@@ -100,7 +99,7 @@ impl ClusterInfoBuilder {
         self.derived_from = value;
         self
     }
-    pub fn build(self) -> Result<ClusterInfo, SvdError> {
+    pub fn build(self, lvl: ValidateLevel) -> Result<ClusterInfo, SvdError> {
         (ClusterInfo {
             name: self
                 .name
@@ -116,7 +115,7 @@ impl ClusterInfoBuilder {
                 .ok_or_else(|| BuildError::Uninitialized("children".to_string()))?,
             derived_from: self.derived_from,
         })
-        .validate()
+        .validate(lvl)
     }
 }
 
@@ -126,15 +125,18 @@ impl ClusterInfo {
     }
 
     #[allow(clippy::unnecessary_wraps)]
-    fn validate(self) -> Result<Self, SvdError> {
-        #[cfg(feature = "strict")]
-        super::check_dimable_name(&self.name, "name")?;
+    fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
+        if lvl.is_strict() {
+            super::check_dimable_name(&self.name, "name")?;
+        }
         if let Some(_name) = self.derived_from.as_ref() {
-            #[cfg(feature = "strict")]
-            super::check_derived_name(_name, "derivedFrom")?;
+            if lvl.is_strict() {
+                super::check_derived_name(_name, "derivedFrom")?;
+            }
         } else if self.children.is_empty() {
-            #[cfg(feature = "strict")]
-            return Err(Error::EmptyCluster)?;
+            if lvl.is_strict() {
+                return Err(Error::EmptyCluster)?;
+            }
         }
         Ok(self)
     }

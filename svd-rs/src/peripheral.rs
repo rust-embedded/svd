@@ -1,11 +1,11 @@
 use super::{
     register::{RegIter, RegIterMut},
     AddressBlock, BuildError, Interrupt, RegisterCluster, RegisterProperties, SvdError,
+    ValidateLevel,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
-    #[cfg(feature = "strict")]
     #[error("Peripheral have `registers` tag, but it is empty")]
     EmptyRegisters,
 }
@@ -146,7 +146,7 @@ impl PeripheralBuilder {
         self.derived_from = value;
         self
     }
-    pub fn build(self) -> Result<Peripheral, SvdError> {
+    pub fn build(self, lvl: ValidateLevel) -> Result<Peripheral, SvdError> {
         (Peripheral {
             name: self
                 .name
@@ -164,7 +164,7 @@ impl PeripheralBuilder {
             registers: self.registers,
             derived_from: self.derived_from,
         })
-        .validate()
+        .validate(lvl)
     }
 }
 
@@ -173,17 +173,20 @@ impl Peripheral {
         PeripheralBuilder::default()
     }
     #[allow(clippy::unnecessary_wraps)]
-    fn validate(self) -> Result<Self, SvdError> {
+    fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
         // TODO
-        #[cfg(feature = "strict")]
-        super::check_dimable_name(&self.name, "name")?;
+        if lvl.is_strict() {
+            super::check_dimable_name(&self.name, "name")?;
+        }
         if let Some(_name) = self.derived_from.as_ref() {
-            #[cfg(feature = "strict")]
-            super::check_dimable_name(_name, "derivedFrom")?;
+            if lvl.is_strict() {
+                super::check_dimable_name(_name, "derivedFrom")?;
+            }
         } else if let Some(registers) = self.registers.as_ref() {
             if registers.is_empty() {
-                #[cfg(feature = "strict")]
-                return Err(Error::EmptyRegisters)?;
+                if lvl.is_strict() {
+                    return Err(Error::EmptyRegisters)?;
+                }
             }
         }
         Ok(self)

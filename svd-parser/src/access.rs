@@ -1,20 +1,23 @@
-use super::{elementext::ElementExt, Element, Parse, Result, SVDError};
+use super::{elementext::ElementExt, Config, Node, Parse, SVDError, SVDErrorAt};
 
 use crate::svd::Access;
 impl Parse for Access {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
+    type Config = Config;
 
-    fn parse(tree: &Element) -> Result<Self> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
         let text = tree.get_text()?;
 
-        match &text[..] {
+        match text {
             "read-only" => Ok(Access::ReadOnly),
             "read-write" => Ok(Access::ReadWrite),
             "read-writeOnce" => Ok(Access::ReadWriteOnce),
             "write-only" => Ok(Access::WriteOnly),
             "writeOnce" => Ok(Access::WriteOnce),
-            _ => Err(SVDError::UnknownAccessType(tree.clone(), text).into()),
+            _ => Err(SVDError::UnknownAccessType(text.into())
+                .at(tree.id())
+                .into()),
         }
     }
 }

@@ -14,18 +14,15 @@ readme = "README.md"
 
 [features]
 derive-from = []
-strict = ["regex", "once_cell"]
 
 [dependencies]
 thiserror = "1.0.5"
 
 [dependencies.regex]
 version = "1"
-optional = true
 
 [dependencies.once_cell]
 version = "1.5.2"
-optional = true
 
 [dependencies.serde]
 version = "1.0"

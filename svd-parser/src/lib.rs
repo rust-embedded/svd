@@ -25,13 +25,23 @@
 //! Parse traits.
 //! These support parsing of SVD types from XML
 
-use svd_rs as svd;
+pub use svd::ValidateLevel;
+pub use svd_rs as svd;
 
-use xmltree::Element;
+pub use anyhow::Context;
+use roxmltree::{Document, Node, NodeId};
 // ElementExt extends XML elements with useful methods
 pub mod elementext;
+use crate::elementext::ElementExt;
 // Types defines simple types and parse/encode implementations
 pub mod types;
+
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Config {
+    pub validate_level: ValidateLevel,
+    //pub expand_arrays: bool,
+    //pub expand_derived: bool,
+}
 
 /// Parse trait allows SVD objects to be parsed from XML elements.
 pub trait Parse {
@@ -39,23 +49,25 @@ pub trait Parse {
     type Object;
     /// Parsing error
     type Error;
+    /// Advanced parse options
+    type Config;
     /// Parse an XML/SVD element into it's corresponding `Object`.
-    fn parse(elem: &Element) -> Result<Self::Object, Self::Error>;
+    fn parse(elem: &Node, config: &Self::Config) -> Result<Self::Object, Self::Error>;
 }
 
 /// Parses an optional child element with the provided name and Parse function
 /// Returns an none if the child doesn't exist, Ok(Some(e)) if parsing succeeds,
 /// and Err() if parsing fails.
-pub fn optional<T>(n: &str, e: &Element) -> anyhow::Result<Option<T::Object>>
+pub fn optional<T>(n: &str, e: &Node, config: &T::Config) -> Result<Option<T::Object>, SVDErrorAt>
 where
-    T: Parse<Error = anyhow::Error>,
+    T: Parse<Error = SVDErrorAt>,
 {
     let child = match e.get_child(n) {
         Some(c) => c,
         None => return Ok(None),
     };
 
-    match T::parse(child) {
+    match T::parse(&child, config) {
         Ok(r) => Ok(Some(r)),
         Err(e) => Err(e),
     }
@@ -64,9 +76,60 @@ where
 use crate::svd::Device;
 /// Parses the contents of an SVD (XML) string
 pub fn parse(xml: &str) -> anyhow::Result<Device> {
+    parse_with_config(xml, &Config::default())
+}
+/// Parses the contents of an SVD (XML) string
+pub fn parse_with_config(xml: &str, config: &Config) -> anyhow::Result<Device> {
+    fn get_name<'a>(node: &'a Node) -> Option<&'a str> {
+        node.children()
+            .filter(|t| t.has_tag_name("name"))
+            .next()
+            .and_then(|t| t.text())
+    }
+
     let xml = trim_utf8_bom(xml);
-    let tree = Element::parse(xml.as_bytes())?;
-    Device::parse(&tree)
+    let tree = Document::parse(xml)?;
+    let root = tree.root();
+    let device = root
+        .get_child("device")
+        .ok_or_else(|| SVDError::MissingTag("device".to_string()).at(root.id()))?;
+    match Device::parse(&device, config) {
+        Ok(o) => Ok(o),
+        Err(e) => {
+            let id = e.id;
+            let node = tree.get_node(id).unwrap();
+            let pos = tree.text_pos_at(node.range().start);
+            let tagname = node.tag_name().name();
+            let mut res = Err(e.into());
+            if tagname.is_empty() {
+                res = res.with_context(|| format!("at {}", pos))
+            } else {
+                if let Some(name) = get_name(&node) {
+                    res = res.with_context(|| format!("Parsing {} `{}` at {}", tagname, name, pos))
+                } else {
+                    res = res.with_context(|| format!("Parsing unknown {} at {}", tagname, pos))
+                }
+            }
+            for parent in node.ancestors().skip(1) {
+                if parent.id() == NodeId::new(0) {
+                    break;
+                }
+                let tagname = parent.tag_name().name();
+                match tagname {
+                    "device" | "peripheral" | "register" | "field" | "enumeratedValue"
+                    | "interrupt" => {
+                        if let Some(name) = get_name(&parent) {
+                            res = res.with_context(|| format!("In {} `{}`", tagname, name));
+                        } else {
+                            res = res.with_context(|| format!("In unknown {}", tagname));
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            res
+        }
+    }
 }
 
 /// Return the &str trimmed UTF-8 BOM if the input &str contains the BOM.
@@ -101,52 +164,70 @@ mod registerproperties;
 mod usage;
 mod writeconstraint;
 
-pub use anyhow::{Context, Result};
-
 /// SVD parse Errors.
-#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+#[derive(Clone, Debug, PartialEq, thiserror::Error)]
 pub enum SVDError {
-    #[error("Expected a <{1}> tag, found none")]
-    MissingTag(Element, String),
-    #[error("Expected content in <{1}> tag, found none")]
-    EmptyTag(Element, String),
-    #[error("ParseError")]
-    ParseError(Element),
-    #[error("NameMismatch")]
-    NameMismatch(Element),
+    #[error("{0}")]
+    Svd(#[from] svd::SvdError),
+    #[error("Expected a <{0}> tag, found none")]
+    MissingTag(String),
+    #[error("Expected content in <{0}> tag, found none")]
+    EmptyTag(String),
+    #[error("Failed to parse `{0}`")]
+    ParseInt(#[from] std::num::ParseIntError),
     #[error("Unknown endianness `{0}`")]
     UnknownEndian(String),
-    #[error("unknown access variant '{1}' found")]
-    UnknownAccessType(Element, String),
-    #[error("Bit range invalid, {1:?}")]
-    InvalidBitRange(Element, bitrange::InvalidBitRange),
+    #[error("unknown access variant '{0}' found")]
+    UnknownAccessType(String),
+    #[error("Bit range invalid, {0:?}")]
+    InvalidBitRange(bitrange::InvalidBitRange),
     #[error("Unknown write constraint")]
-    UnknownWriteConstraint(Element),
+    UnknownWriteConstraint,
     #[error("Multiple wc found")]
-    MoreThanOneWriteConstraint(Element),
+    MoreThanOneWriteConstraint,
     #[error("Unknown usage variant")]
-    UnknownUsageVariant(Element),
-    #[error("Expected a <{1}>, found ...")]
-    NotExpectedTag(Element, String),
-    #[error("Invalid RegisterCluster (expected register or cluster), found {1}")]
-    InvalidRegisterCluster(Element, String),
-    #[error("Invalid modifiedWriteValues variant, found {1}")]
-    InvalidModifiedWriteValues(Element, String),
-    #[error("The content of the element could not be parsed to a boolean value {1}: {2}")]
-    InvalidBooleanValue(Element, String, core::str::ParseBoolError),
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
-pub enum NameParseError {
+    UnknownUsageVariant,
+    #[error("Expected a <{0}>, found ...")]
+    NotExpectedTag(String),
+    #[error("Invalid RegisterCluster (expected register or cluster), found {0}")]
+    InvalidRegisterCluster(String),
+    #[error("Invalid modifiedWriteValues variant, found {0}")]
+    InvalidModifiedWriteValues(String),
+    #[error("The content of the element could not be parsed to a boolean value {0}: {1}")]
+    InvalidBooleanValue(String, core::str::ParseBoolError),
+    #[error("dimIndex tag must contain {0} indexes, found {1}")]
+    IncorrectDimIndexesCount(usize, usize),
+    #[error("Failed to parse dimIndex")]
+    DimIndexParse,
     #[error("Name `{0}` in tag `{1}` is missing a %s placeholder")]
     MissingPlaceholder(String, String),
 }
 
-pub(crate) fn check_has_placeholder(name: &str, tag: &str) -> Result<()> {
+#[derive(Clone, Debug, PartialEq)]
+pub struct SVDErrorAt {
+    error: SVDError,
+    id: NodeId,
+}
+
+impl std::fmt::Display for SVDErrorAt {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.error.fmt(f)
+    }
+}
+
+impl std::error::Error for SVDErrorAt {}
+
+impl SVDError {
+    pub fn at(self, id: NodeId) -> SVDErrorAt {
+        SVDErrorAt { error: self, id }
+    }
+}
+
+pub(crate) fn check_has_placeholder(name: &str, tag: &str) -> Result<(), SVDError> {
     if name.contains("%s") {
         Ok(())
     } else {
-        Err(NameParseError::MissingPlaceholder(name.to_string(), tag.to_string()).into())
+        Err(SVDError::MissingPlaceholder(name.to_string(), tag.to_string()).into())
     }
 }
 

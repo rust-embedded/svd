@@ -1,7 +1,7 @@
-use super::{elementext::ElementExt, Context, Element, Parse, Result, SVDError};
+use super::{elementext::ElementExt, Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::svd::Interrupt;
 
-fn parse_interrupt(tree: &Element, name: String) -> Result<Interrupt> {
+fn parse_interrupt(tree: &Node, name: String) -> Result<Interrupt, SVDErrorAt> {
     Ok(Interrupt {
         name,
         description: tree.get_child_text_opt("description")?,
@@ -11,13 +11,16 @@ fn parse_interrupt(tree: &Element, name: String) -> Result<Interrupt> {
 
 impl Parse for Interrupt {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
+    type Config = Config;
 
-    fn parse(tree: &Element) -> Result<Self> {
-        if tree.name != "interrupt" {
-            return Err(SVDError::NotExpectedTag(tree.clone(), "interrupt".to_string()).into());
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
+        if !tree.has_tag_name("interrupt") {
+            return Err(SVDError::NotExpectedTag("interrupt".to_string())
+                .at(tree.id())
+                .into());
         }
         let name = tree.get_child_text("name")?;
-        parse_interrupt(tree, name.clone()).with_context(|| format!("In interrupt `{}`", name))
+        parse_interrupt(tree, name.clone())
     }
 }

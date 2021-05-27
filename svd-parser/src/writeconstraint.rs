@@ -1,37 +1,36 @@
-use super::{elementext::ElementExt, Element, Parse, Result, SVDError};
+use super::{elementext::ElementExt, Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::svd::{WriteConstraint, WriteConstraintRange};
 
 impl Parse for WriteConstraint {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
+    type Config = Config;
 
-    fn parse(tree: &Element) -> Result<Self> {
-        if tree.children.len() == 1 {
-            let field = &tree.children[0].name;
-            // Write constraint can only be one of the following
-            match field.as_ref() {
-                "writeAsRead" => Ok(WriteConstraint::WriteAsRead(
-                    tree.get_child_bool(field.as_ref())?,
-                )),
-                "useEnumeratedValues" => Ok(WriteConstraint::UseEnumeratedValues(
-                    tree.get_child_bool(field.as_ref())?,
-                )),
-                "range" => Ok(WriteConstraint::Range(WriteConstraintRange::parse(
-                    tree.get_child_elem(field.as_ref())?,
-                )?)),
-                _ => Err(SVDError::UnknownWriteConstraint(tree.clone()).into()),
-            }
-        } else {
-            Err(SVDError::MoreThanOneWriteConstraint(tree.clone()).into())
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
+        let child = tree.first_element_child().unwrap();
+        if child.next_sibling_element().is_some() {
+            return Err(SVDError::MoreThanOneWriteConstraint.at(tree.id()).into());
+        }
+        let field = child.tag_name().name();
+        // Write constraint can only be one of the following
+        match field {
+            "writeAsRead" => tree.get_child_bool(field).map(WriteConstraint::WriteAsRead),
+            "useEnumeratedValues" => tree
+                .get_child_bool(field)
+                .map(WriteConstraint::UseEnumeratedValues),
+            "range" => WriteConstraintRange::parse(&tree.get_child_elem(field)?, &())
+                .map(WriteConstraint::Range),
+            _ => Err(SVDError::UnknownWriteConstraint.at(tree.id()).into()),
         }
     }
 }
 
 impl Parse for WriteConstraintRange {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
+    type Config = ();
 
-    fn parse(tree: &Element) -> Result<Self> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
         Ok(Self {
             min: tree.get_child_u64("minimum")?,
             max: tree.get_child_u64("maximum")?,

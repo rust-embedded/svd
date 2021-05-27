@@ -1,4 +1,4 @@
-use crate::encode::new_element;
+use crate::new_element;
 use crate::parse::Parse;
 use crate::svd::{BitRange, BitRangeType};
 use xmltree::Element;

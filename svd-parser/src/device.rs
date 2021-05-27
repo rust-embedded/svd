@@ -1,41 +1,44 @@
-use super::{elementext::ElementExt, optional, Context, Element, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::svd::{
     cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties, Device,
 };
-use rayon::prelude::*;
 
 /// Parses a SVD file
 impl Parse for Device {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
+    type Config = Config;
 
-    fn parse(tree: &Element) -> Result<Self> {
-        if tree.name != "device" {
-            return Err(SVDError::NotExpectedTag(tree.clone(), "device".to_string()).into());
+    fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
+        if !tree.has_tag_name("device") {
+            return Err(SVDError::NotExpectedTag("device".to_string())
+                .at(tree.id())
+                .into());
         }
         let name = tree.get_child_text("name")?;
-        parse_device(tree, name.clone()).with_context(|| format!("In device `{}`", name))
+        parse_device(tree, name.clone(), config)
     }
 }
 
-fn parse_device(tree: &Element, name: String) -> Result<Device> {
-    Ok(Device::builder()
+fn parse_device(tree: &Node, name: String, config: &Config) -> Result<Device, SVDErrorAt> {
+    Device::builder()
         .name(name)
         .version(tree.get_child_text_opt("version")?)
         .description(tree.get_child_text_opt("description")?)
-        .cpu(optional::<Cpu>("cpu", tree)?)
-        .address_unit_bits(optional::<u32>("addressUnitBits", tree)?)
-        .width(optional::<u32>("width", tree)?)
-        .default_register_properties(RegisterProperties::parse(tree)?)
+        .cpu(optional::<Cpu>("cpu", tree, config)?)
+        .address_unit_bits(optional::<u32>("addressUnitBits", tree, &())?)
+        .width(optional::<u32>("width", tree, &())?)
+        .default_register_properties(RegisterProperties::parse(tree, config)?)
         .peripherals({
             let ps: Result<Vec<_>, _> = tree
                 .get_child_elem("peripherals")?
-                .children
-                .par_iter()
-                .map(Peripheral::parse)
+                .children()
+                .filter(Node::is_element)
+                .map(|t| Peripheral::parse(&t, config))
                 .collect();
             ps?
         })
-        .schema_version(tree.attributes.get("schemaVersion").cloned())
-        .build()?)
+        .schema_version(tree.attribute("schemaVersion").map(|s| s.to_string()))
+        .build()
+        .map_err(|e| SVDError::from(e).at(tree.id()).into())
 }

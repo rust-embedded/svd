@@ -1,10 +1,10 @@
 use super::{
-    Access, BuildError, Field, ModifiedWriteValues, RegisterProperties, SvdError, WriteConstraint,
+    Access, BuildError, Field, ModifiedWriteValues, RegisterProperties, SvdError, ValidateLevel,
+    WriteConstraint,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
-    #[cfg(feature = "strict")]
     #[error("Register have `fields` tag, but it is empty")]
     EmptyFields,
 }
@@ -162,7 +162,7 @@ impl RegisterInfoBuilder {
         self.derived_from = value;
         self
     }
-    pub fn build(self) -> Result<RegisterInfo, SvdError> {
+    pub fn build(self, lvl: ValidateLevel) -> Result<RegisterInfo, SvdError> {
         (RegisterInfo {
             name: self
                 .name
@@ -180,7 +180,7 @@ impl RegisterInfoBuilder {
             fields: self.fields,
             derived_from: self.derived_from,
         })
-        .validate()
+        .validate(lvl)
     }
 }
 
@@ -189,11 +189,9 @@ impl RegisterInfo {
         RegisterInfoBuilder::default()
     }
     #[allow(clippy::unnecessary_wraps)]
-    fn validate(self) -> Result<Self, SvdError> {
-        #[cfg(feature = "strict")]
-        super::check_dimable_name(&self.name, "name")?;
-        #[cfg(feature = "strict")]
-        {
+    fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
+        if lvl.is_strict() {
+            super::check_dimable_name(&self.name, "name")?;
             if let Some(name) = self.alternate_group.as_ref() {
                 super::check_name(name, "alternateGroup")?;
             }
@@ -202,12 +200,14 @@ impl RegisterInfo {
             }
         }
         if let Some(_name) = self.derived_from.as_ref() {
-            #[cfg(feature = "strict")]
-            super::check_derived_name(_name, "derivedFrom")?;
+            if lvl.is_strict() {
+                super::check_derived_name(_name, "derivedFrom")?;
+            }
         } else if let Some(fields) = self.fields.as_ref() {
             if fields.is_empty() {
-                #[cfg(feature = "strict")]
-                return Err(Error::EmptyFields)?;
+                if lvl.is_strict() {
+                    return Err(Error::EmptyFields)?;
+                }
             }
         }
         Ok(self)

@@ -1,11 +1,12 @@
-use super::{elementext::ElementExt, Element, Parse, Result};
+use super::{elementext::ElementExt, Config, Node, Parse, SVDErrorAt};
 use crate::svd::AddressBlock;
 
 impl Parse for AddressBlock {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
+    type Config = Config;
 
-    fn parse(tree: &Element) -> Result<Self> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
         Ok(Self {
             offset: tree.get_child_u32("offset")?,
             size: tree.get_child_u32("size")?,

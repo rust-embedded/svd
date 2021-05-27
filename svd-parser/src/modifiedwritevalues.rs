@@ -1,15 +1,16 @@
-use super::{elementext::ElementExt, Element, Parse, Result, SVDError};
+use super::{elementext::ElementExt, Config, Node, Parse, SVDError, SVDErrorAt};
 
 use crate::svd::ModifiedWriteValues;
 impl Parse for ModifiedWriteValues {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
+    type Config = Config;
 
-    fn parse(tree: &Element) -> Result<Self> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
         use self::ModifiedWriteValues::*;
         let text = tree.get_text()?;
 
-        Ok(match text.as_ref() {
+        Ok(match text {
             "oneToClear" => OneToClear,
             "oneToSet" => OneToSet,
             "oneToToggle" => OneToToggle,
@@ -19,7 +20,11 @@ impl Parse for ModifiedWriteValues {
             "clear" => Clear,
             "set" => Set,
             "modify" => Modify,
-            s => return Err(SVDError::InvalidModifiedWriteValues(tree.clone(), s.into()).into()),
+            s => {
+                return Err(SVDError::InvalidModifiedWriteValues(s.into())
+                    .at(tree.id())
+                    .into())
+            }
         })
     }
 }
