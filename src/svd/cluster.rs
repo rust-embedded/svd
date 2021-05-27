@@ -1,6 +1,6 @@
 use core::ops::{Deref, DerefMut};
 
-use crate::svd::{clusterinfo::ClusterInfo, dimelement::DimElement};
+use super::{ClusterInfo, DimElement};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Cluster {

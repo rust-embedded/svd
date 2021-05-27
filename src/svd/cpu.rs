@@ -1,6 +1,4 @@
-use super::{BuildError, SvdError};
-
-use crate::svd::Endian;
+use super::{BuildError, Endian, SvdError};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]

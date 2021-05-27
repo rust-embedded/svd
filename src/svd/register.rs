@@ -1,6 +1,6 @@
 use core::ops::{Deref, DerefMut};
 
-use crate::svd::{DimElement, RegisterCluster, RegisterInfo};
+use super::{DimElement, RegisterCluster, RegisterInfo};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Register {

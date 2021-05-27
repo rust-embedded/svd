@@ -1,4 +1,4 @@
-use crate::svd::{dimelement::DimElement, fieldinfo::FieldInfo};
+use super::{DimElement, FieldInfo};
 use core::ops::{Deref, DerefMut};
 
 #[derive(Clone, Debug, PartialEq)]
