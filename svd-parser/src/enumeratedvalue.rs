@@ -1,7 +1,7 @@
-use super::{elementext::ElementExt, optional, Context, Element, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Context, Node, Parse, Result, SVDError};
 use crate::svd::EnumeratedValue;
 
-fn parse_ev(tree: &Element, name: String) -> Result<EnumeratedValue> {
+fn parse_ev(tree: &Node, name: String) -> Result<EnumeratedValue> {
     Ok(EnumeratedValue::builder()
         .name(name)
         .description(tree.get_child_text_opt("description")?)
@@ -16,7 +16,7 @@ impl Parse for EnumeratedValue {
     type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Self> {
+    fn parse(tree: &Node) -> Result<Self> {
         if !tree.has_tag_name("enumeratedValue") {
             return Err(SVDError::NotExpectedTag(tree.id(), "enumeratedValue".to_string()).into());
         }

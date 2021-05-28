@@ -1,11 +1,11 @@
-use super::{elementext::ElementExt, Element, Parse, Result, SVDError};
+use super::{elementext::ElementExt, Node, Parse, Result, SVDError};
 
 use crate::svd::Access;
 impl Parse for Access {
     type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Self> {
+    fn parse(tree: &Node) -> Result<Self> {
         let text = tree.get_text()?;
 
         match &text[..] {

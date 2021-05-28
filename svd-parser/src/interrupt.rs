@@ -1,7 +1,7 @@
-use super::{elementext::ElementExt, Context, Element, Parse, Result, SVDError};
+use super::{elementext::ElementExt, Context, Node, Parse, Result, SVDError};
 use crate::svd::Interrupt;
 
-fn parse_interrupt(tree: &Element, name: String) -> Result<Interrupt> {
+fn parse_interrupt(tree: &Node, name: String) -> Result<Interrupt> {
     Ok(Interrupt {
         name,
         description: tree.get_child_text_opt("description")?,
@@ -13,7 +13,7 @@ impl Parse for Interrupt {
     type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Self> {
+    fn parse(tree: &Node) -> Result<Self> {
         if !tree.has_tag_name("interrupt") {
             return Err(SVDError::NotExpectedTag(tree.id(), "interrupt".to_string()).into());
         }

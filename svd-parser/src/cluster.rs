@@ -1,4 +1,4 @@
-use super::{check_has_placeholder, Element, Parse, Result};
+use super::{check_has_placeholder, Node, Parse, Result, SVDError};
 use crate::elementext::ElementExt;
 use crate::svd::{Cluster, ClusterInfo, DimElement};
 
@@ -6,8 +6,10 @@ impl Parse for Cluster {
     type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Self> {
-        assert!(tree.has_tag_name("cluster"));
+    fn parse(tree: &Node) -> Result<Self> {
+        if !tree.has_tag_name("cluster") {
+            return Err(SVDError::NotExpectedTag(tree.id(), "cluster".to_string()).into());
+        }
 
         let info = ClusterInfo::parse(tree)?;
 

@@ -1,11 +1,11 @@
-use super::{elementext::ElementExt, optional, Context, Element, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Context, Node, Parse, Result, SVDError};
 use crate::svd::{AddressBlock, Interrupt, Peripheral, RegisterCluster, RegisterProperties};
 
 impl Parse for Peripheral {
     type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Self> {
+    fn parse(tree: &Node) -> Result<Self> {
         if !tree.has_tag_name("peripheral") {
             return Err(SVDError::NotExpectedTag(tree.id(), "peripheral".to_string()).into());
         }
@@ -14,7 +14,7 @@ impl Parse for Peripheral {
     }
 }
 
-fn parse_peripheral(tree: &Element, name: String) -> Result<Peripheral> {
+fn parse_peripheral(tree: &Node, name: String) -> Result<Peripheral> {
     Ok(Peripheral::builder()
         .name(name)
         .display_name(tree.get_child_text_opt("displayName")?)
@@ -38,7 +38,7 @@ fn parse_peripheral(tree: &Element, name: String) -> Result<Peripheral> {
         .registers(if let Some(registers) = tree.get_child("registers") {
             let rs: Result<Vec<_>, _> = registers
                 .children()
-                .filter(Element::is_element)
+                .filter(Node::is_element)
                 .map(|t| RegisterCluster::parse(&t))
                 .collect();
             Some(rs?)

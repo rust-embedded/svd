@@ -1,4 +1,4 @@
-use super::{Context, Element, Parse, Result, SVDError};
+use super::{Context, Node, Parse, Result, SVDError};
 use crate::elementext::ElementExt;
 use crate::svd::{BitRange, BitRangeType};
 
@@ -14,7 +14,7 @@ impl Parse for BitRange {
     type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Self> {
+    fn parse(tree: &Node) -> Result<Self> {
         let (end, start, range_type): (u32, u32, BitRangeType) = if let Some(range) =
             tree.get_child("bitRange")
         {

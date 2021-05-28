@@ -28,7 +28,7 @@
 use svd_rs as svd;
 
 pub use anyhow::{Context, Result};
-use roxmltree::{Document, Node as Element, NodeId};
+use roxmltree::{Document, Node, NodeId};
 // ElementExt extends XML elements with useful methods
 pub mod elementext;
 use crate::elementext::ElementExt;
@@ -42,13 +42,13 @@ pub trait Parse {
     /// Parsing error
     type Error;
     /// Parse an XML/SVD element into it's corresponding `Object`.
-    fn parse(elem: &Element) -> Result<Self::Object, Self::Error>;
+    fn parse(elem: &Node) -> Result<Self::Object, Self::Error>;
 }
 
 /// Parses an optional child element with the provided name and Parse function
 /// Returns an none if the child doesn't exist, Ok(Some(e)) if parsing succeeds,
 /// and Err() if parsing fails.
-pub fn optional<T>(n: &str, e: &Element) -> anyhow::Result<Option<T::Object>>
+pub fn optional<T>(n: &str, e: &Node) -> anyhow::Result<Option<T::Object>>
 where
     T: Parse<Error = anyhow::Error>,
 {
@@ -87,7 +87,8 @@ pub fn parse(xml: &str) -> anyhow::Result<Device> {
                 | SVDError::NotExpectedTag(id, _)
                 | SVDError::InvalidRegisterCluster(id, _)
                 | SVDError::InvalidModifiedWriteValues(id, _)
-                | SVDError::InvalidBooleanValue(id, _, _) => {
+                | SVDError::InvalidBooleanValue(id, _, _)
+                | SVDError::IncorrectDimIndexesCount(id, _, _) => {
                     let node = tree.get_node(*id).unwrap();
                     let pos = tree.text_pos_at(node.range().start);
                     Err(e).with_context(|| format!(" at {}", pos))
@@ -140,8 +141,8 @@ pub enum SVDError {
     EmptyTag(NodeId, String),
     #[error("ParseError")]
     ParseError(NodeId),
-    #[error("Unknown endianness `{0}`")]
-    UnknownEndian(String),
+    #[error("Unknown endianness `{1}`")]
+    UnknownEndian(NodeId, String),
     #[error("unknown access variant '{1}' found")]
     UnknownAccessType(NodeId, String),
     #[error("Bit range invalid, {1:?}")]
@@ -160,6 +161,8 @@ pub enum SVDError {
     InvalidModifiedWriteValues(NodeId, String),
     #[error("The content of the element could not be parsed to a boolean value {1}: {2}")]
     InvalidBooleanValue(NodeId, String, core::str::ParseBoolError),
+    #[error("dimIndex tag must contain {1} indexes, found {2}")]
+    IncorrectDimIndexesCount(NodeId, usize, usize),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]

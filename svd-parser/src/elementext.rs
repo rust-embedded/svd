@@ -1,14 +1,14 @@
 //! SVD Element Extensions.
-//! This module is extends xmltree::Element objects with convenience methods
+//! This module is extends roxmltree::Element objects with convenience methods
 
-use roxmltree::Node as Element;
+use roxmltree::Node;
 
 use super::types::BoolParse;
 use super::{Context, Parse, Result, SVDError};
 
-/// Defines extensions for implementation over xmltree::Element
+/// Defines extensions for implementation over roxmltree::Node
 pub trait ElementExt {
-    fn get_child<K>(&self, k: K) -> Option<Element>
+    fn get_child<K>(&self, k: K) -> Option<Node>
     where
         K: AsRef<str>;
     fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>>
@@ -20,7 +20,7 @@ pub trait ElementExt {
 
     fn get_text(&self) -> Result<String>;
 
-    fn get_child_elem(&self, n: &str) -> Result<Element>;
+    fn get_child_elem(&self, n: &str) -> Result<Node>;
     fn get_child_u32(&self, n: &str) -> Result<u32>;
     fn get_child_u64(&self, n: &str) -> Result<u64>;
     fn get_child_bool(&self, n: &str) -> Result<bool>;
@@ -28,9 +28,9 @@ pub trait ElementExt {
     fn debug(&self);
 }
 
-/// Implements extensions for xmltree::Element
-impl<'a, 'input> ElementExt for Element<'a, 'input> {
-    fn get_child<K>(&self, k: K) -> Option<Element>
+/// Implements extensions for roxmltree::Node
+impl<'a, 'input> ElementExt for Node<'a, 'input> {
+    fn get_child<K>(&self, k: K) -> Option<Node>
     where
         K: AsRef<str>,
     {
@@ -79,7 +79,7 @@ impl<'a, 'input> ElementExt for Element<'a, 'input> {
     }
 
     /// Get a named child element from an XML Element
-    fn get_child_elem(&self, n: &str) -> Result<Element> {
+    fn get_child_elem(&self, n: &str) -> Result<Node> {
         match self.get_child(n) {
             Some(s) => Ok(s),
             None => Err(SVDError::MissingTag(self.id(), n.to_string()).into()),

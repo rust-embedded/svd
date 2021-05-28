@@ -1,17 +1,17 @@
-use super::{elementext::ElementExt, optional, Context, Element, Parse, Result};
+use super::{elementext::ElementExt, optional, Context, Node, Parse, Result};
 use crate::svd::{Field, ModifiedWriteValues, RegisterInfo, RegisterProperties, WriteConstraint};
 
 impl Parse for RegisterInfo {
     type Object = Self;
     type Error = anyhow::Error;
 
-    fn parse(tree: &Element) -> Result<Self> {
+    fn parse(tree: &Node) -> Result<Self> {
         let name = tree.get_child_text("name")?;
         parse_register(tree, name.clone()).with_context(|| format!("In register `{}`", name))
     }
 }
 
-fn parse_register(tree: &Element, name: String) -> Result<RegisterInfo> {
+fn parse_register(tree: &Node, name: String) -> Result<RegisterInfo> {
     Ok(RegisterInfo::builder()
         .name(name)
         .display_name(tree.get_child_text_opt("displayName")?)
@@ -29,7 +29,7 @@ fn parse_register(tree: &Element, name: String) -> Result<RegisterInfo> {
             if let Some(fields) = tree.get_child("fields") {
                 let fs: Result<Vec<_>, _> = fields
                     .children()
-                    .filter(Element::is_element)
+                    .filter(Node::is_element)
                     .enumerate()
                     .map(|(e, t)| Field::parse(&t).with_context(|| format!("Parsing field #{}", e)))
                     .collect();
