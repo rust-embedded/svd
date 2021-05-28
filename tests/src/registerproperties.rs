@@ -1,4 +1,4 @@
-use crate::encode::{new_element, EncodeChildren};
+use crate::{new_element, EncodeChildren};
 use crate::parse::Parse;
 use crate::svd::{Access, RegisterProperties};
 use xmltree::Element;
