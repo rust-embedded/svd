@@ -71,32 +71,23 @@ pub fn parse(xml: &str) -> anyhow::Result<Device> {
     let root = tree.root();
     let device = root
         .get_child("device")
-        .ok_or_else(|| SVDError::MissingTag(root.id(), "device".to_string()))?;
+        .ok_or_else(|| SVDError::MissingTag("device".to_string()).at(root.id()))?;
     match Device::parse(&device) {
         o @ Ok(_) => o,
-        Err(e) => match e.downcast_ref::<SVDError>() {
-            Some(ed) => match ed {
-                SVDError::MissingTag(id, _)
-                | SVDError::EmptyTag(id, _)
-                | SVDError::ParseError(id)
-                | SVDError::UnknownAccessType(id, _)
-                | SVDError::InvalidBitRange(id, _)
-                | SVDError::UnknownWriteConstraint(id)
-                | SVDError::MoreThanOneWriteConstraint(id)
-                | SVDError::UnknownUsageVariant(id)
-                | SVDError::NotExpectedTag(id, _)
-                | SVDError::InvalidRegisterCluster(id, _)
-                | SVDError::InvalidModifiedWriteValues(id, _)
-                | SVDError::InvalidBooleanValue(id, _, _)
-                | SVDError::IncorrectDimIndexesCount(id, _, _) => {
-                    let node = tree.get_node(*id).unwrap();
-                    let pos = tree.text_pos_at(node.range().start);
+        Err(e) => {
+            if let Some(id) = e.downcast_ref::<SVDErrorAt>().map(|e_at| e_at.id) {
+                let node = tree.get_node(id).unwrap();
+                let pos = tree.text_pos_at(node.range().start);
+                let name = node.tag_name().name().to_string();
+                if name.is_empty() {
                     Err(e).with_context(|| format!(" at {}", pos))
+                } else {
+                    Err(e).with_context(|| format!(" in tag \"{}\" at {}", name, pos))
                 }
-                _ => Err(e),
-            },
-            None => Err(e),
-        },
+            } else {
+                Err(e)
+            }
+        }
     }
 }
 
@@ -135,34 +126,56 @@ mod writeconstraint;
 /// SVD parse Errors.
 #[derive(Clone, Debug, PartialEq, thiserror::Error)]
 pub enum SVDError {
-    #[error("Expected a <{1}> tag, found none")]
-    MissingTag(NodeId, String),
-    #[error("Expected content in <{1}> tag, found none")]
-    EmptyTag(NodeId, String),
+    #[error("{0}")]
+    Svd(#[from] svd::SvdError),
+    #[error("Expected a <{0}> tag, found none")]
+    MissingTag(String),
+    #[error("Expected content in <{0}> tag, found none")]
+    EmptyTag(String),
     #[error("ParseError")]
-    ParseError(NodeId),
-    #[error("Unknown endianness `{1}`")]
-    UnknownEndian(NodeId, String),
-    #[error("unknown access variant '{1}' found")]
-    UnknownAccessType(NodeId, String),
-    #[error("Bit range invalid, {1:?}")]
-    InvalidBitRange(NodeId, bitrange::InvalidBitRange),
+    ParseError,
+    #[error("Unknown endianness `{0}`")]
+    UnknownEndian(String),
+    #[error("unknown access variant '{0}' found")]
+    UnknownAccessType(String),
+    #[error("Bit range invalid, {0:?}")]
+    InvalidBitRange(bitrange::InvalidBitRange),
     #[error("Unknown write constraint")]
-    UnknownWriteConstraint(NodeId),
+    UnknownWriteConstraint,
     #[error("Multiple wc found")]
-    MoreThanOneWriteConstraint(NodeId),
+    MoreThanOneWriteConstraint,
     #[error("Unknown usage variant")]
-    UnknownUsageVariant(NodeId),
-    #[error("Expected a <{1}>, found ...")]
-    NotExpectedTag(NodeId, String),
-    #[error("Invalid RegisterCluster (expected register or cluster), found {1}")]
-    InvalidRegisterCluster(NodeId, String),
-    #[error("Invalid modifiedWriteValues variant, found {1}")]
-    InvalidModifiedWriteValues(NodeId, String),
-    #[error("The content of the element could not be parsed to a boolean value {1}: {2}")]
-    InvalidBooleanValue(NodeId, String, core::str::ParseBoolError),
-    #[error("dimIndex tag must contain {1} indexes, found {2}")]
-    IncorrectDimIndexesCount(NodeId, usize, usize),
+    UnknownUsageVariant,
+    #[error("Expected a <{0}>, found ...")]
+    NotExpectedTag(String),
+    #[error("Invalid RegisterCluster (expected register or cluster), found {0}")]
+    InvalidRegisterCluster(String),
+    #[error("Invalid modifiedWriteValues variant, found {0}")]
+    InvalidModifiedWriteValues(String),
+    #[error("The content of the element could not be parsed to a boolean value {0}: {1}")]
+    InvalidBooleanValue(String, core::str::ParseBoolError),
+    #[error("dimIndex tag must contain {0} indexes, found {1}")]
+    IncorrectDimIndexesCount(usize, usize),
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct SVDErrorAt {
+    error: SVDError,
+    id: NodeId,
+}
+
+impl std::fmt::Display for SVDErrorAt {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.error.fmt(f)
+    }
+}
+
+impl std::error::Error for SVDErrorAt {}
+
+impl SVDError {
+    pub fn at(self, id: NodeId) -> SVDErrorAt {
+        SVDErrorAt { error: self, id }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]

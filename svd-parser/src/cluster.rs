@@ -8,7 +8,9 @@ impl Parse for Cluster {
 
     fn parse(tree: &Node) -> Result<Self> {
         if !tree.has_tag_name("cluster") {
-            return Err(SVDError::NotExpectedTag(tree.id(), "cluster".to_string()).into());
+            return Err(SVDError::NotExpectedTag("cluster".to_string())
+                .at(tree.id())
+                .into());
         }
 
         let info = ClusterInfo::parse(tree)?;

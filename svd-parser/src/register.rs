@@ -8,7 +8,9 @@ impl Parse for Register {
 
     fn parse(tree: &Node) -> Result<Self> {
         if !tree.has_tag_name("register") {
-            return Err(SVDError::NotExpectedTag(tree.id(), "register".to_string()).into());
+            return Err(SVDError::NotExpectedTag("register".to_string())
+                .at(tree.id())
+                .into());
         }
 
         let info = RegisterInfo::parse(tree)?;

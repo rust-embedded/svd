@@ -4,7 +4,7 @@
 use roxmltree::Node;
 
 use super::types::BoolParse;
-use super::{Context, Parse, Result, SVDError};
+use super::{Context, Parse, Result, SVDError, SVDErrorAt};
 
 /// Defines extensions for implementation over roxmltree::Node
 pub trait ElementExt {
@@ -47,11 +47,20 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
     {
         if let Some(child) = self.get_child(k) {
             match child.get_text() {
-                Err(e) => match e.downcast_ref() {
+                Err(e) => {
                     // if tag is empty just ignore it
-                    Some(SVDError::EmptyTag(_, _)) => Ok(None),
-                    _ => Err(e),
-                },
+                    if let Some(SVDError::EmptyTag(_)) = e.downcast_ref() {
+                        Ok(None)
+                    } else if let Some(SVDErrorAt {
+                        error: SVDError::EmptyTag(_),
+                        ..
+                    }) = e.downcast_ref()
+                    {
+                        Ok(None)
+                    } else {
+                        Err(e)
+                    }
+                }
                 Ok(s) => Ok(Some(s)),
             }
         } else {
@@ -64,38 +73,38 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
     {
         let k = k.as_ref();
         self.get_child_text_opt(k)?
-            .ok_or_else(|| SVDError::MissingTag(self.id(), format!("{}", k)).into())
+            .ok_or_else(|| SVDError::MissingTag(format!("{}", k)).at(self.id()).into())
     }
 
     /// Get text contained by an XML Element
     fn get_text(&self) -> Result<String> {
-        match self.text().as_ref() {
+        match self.text() {
             Some(s) => Ok(s.to_string()),
             // FIXME: Doesn't look good because SVDError doesn't format by itself. We already
             // capture the element and this information can be used for getting the name
             // This would fix ParseError
-            None => Err(SVDError::EmptyTag(self.id(), self.tag_name().name().to_string()).into()),
+            None => Err(SVDError::EmptyTag(self.tag_name().name().to_string())
+                .at(self.id())
+                .into()),
         }
     }
 
     /// Get a named child element from an XML Element
     fn get_child_elem(&self, n: &str) -> Result<Node> {
-        match self.get_child(n) {
-            Some(s) => Ok(s),
-            None => Err(SVDError::MissingTag(self.id(), n.to_string()).into()),
-        }
+        self.get_child(n)
+            .ok_or_else(|| SVDError::MissingTag(n.to_string()).at(self.id()).into())
     }
 
     /// Get a u32 value from a named child element
     fn get_child_u32(&self, n: &str) -> Result<u32> {
         let s = self.get_child_elem(n)?;
-        u32::parse(&s).context(SVDError::ParseError(self.id()))
+        u32::parse(&s).context(SVDError::ParseError.at(self.id()))
     }
 
     /// Get a u64 value from a named child element
     fn get_child_u64(&self, n: &str) -> Result<u64> {
         let s = self.get_child_elem(n)?;
-        u64::parse(&s).context(SVDError::ParseError(self.id()))
+        u64::parse(&s).context(SVDError::ParseError.at(self.id()))
     }
 
     /// Get a bool value from a named child element

@@ -90,9 +90,9 @@ impl Parse for BoolParse {
             _ => match text.parse() {
                 Ok(b) => b,
                 Err(e) => {
-                    return Err(
-                        SVDError::InvalidBooleanValue(tree.id(), text.to_string(), e).into(),
-                    )
+                    return Err(SVDError::InvalidBooleanValue(text.to_string(), e)
+                        .at(tree.id())
+                        .into())
                 }
             },
         })

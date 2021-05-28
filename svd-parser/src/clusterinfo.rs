@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, Context, Node, Parse, Result};
+use super::{elementext::ElementExt, Context, Node, Parse, Result, SVDError};
 use crate::svd::{ClusterInfo, RegisterCluster, RegisterProperties};
 
 impl Parse for ClusterInfo {
@@ -12,7 +12,7 @@ impl Parse for ClusterInfo {
 }
 
 fn parse_cluster(tree: &Node, name: String) -> Result<ClusterInfo> {
-    Ok(ClusterInfo::builder()
+    ClusterInfo::builder()
         .name(name)
         .description(tree.get_child_text_opt("description")?)
         .header_struct_name(tree.get_child_text_opt("headerStructName")?)
@@ -29,5 +29,6 @@ fn parse_cluster(tree: &Node, name: String) -> Result<ClusterInfo> {
             children?
         })
         .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
-        .build()?)
+        .build()
+        .map_err(|e| SVDError::from(e).at(tree.id()).into())
 }

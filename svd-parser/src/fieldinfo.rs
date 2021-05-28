@@ -9,7 +9,9 @@ impl Parse for FieldInfo {
 
     fn parse(tree: &Node) -> Result<Self> {
         if !tree.has_tag_name("field") {
-            return Err(SVDError::NotExpectedTag(tree.id(), "field".to_string()).into());
+            return Err(SVDError::NotExpectedTag("field".to_string())
+                .at(tree.id())
+                .into());
         }
         let name = tree.get_child_text("name")?;
         parse_field(tree, name.clone()).with_context(|| format!("In field `{}`", name))
@@ -18,7 +20,7 @@ impl Parse for FieldInfo {
 
 fn parse_field(tree: &Node, name: String) -> Result<FieldInfo> {
     let bit_range = BitRange::parse(tree)?;
-    Ok(FieldInfo::builder()
+    FieldInfo::builder()
         .name(name)
         .description(tree.get_child_text_opt("description")?)
         .bit_range(bit_range)
@@ -37,5 +39,6 @@ fn parse_field(tree: &Node, name: String) -> Result<FieldInfo> {
             values?
         })
         .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
-        .build()?)
+        .build()
+        .map_err(|e| SVDError::from(e).at(tree.id()).into())
 }

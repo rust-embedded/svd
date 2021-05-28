@@ -15,7 +15,9 @@ impl Parse for Interrupt {
 
     fn parse(tree: &Node) -> Result<Self> {
         if !tree.has_tag_name("interrupt") {
-            return Err(SVDError::NotExpectedTag(tree.id(), "interrupt".to_string()).into());
+            return Err(SVDError::NotExpectedTag("interrupt".to_string())
+                .at(tree.id())
+                .into());
         }
         let name = tree.get_child_text("name")?;
         parse_interrupt(tree, name.clone()).with_context(|| format!("In interrupt `{}`", name))

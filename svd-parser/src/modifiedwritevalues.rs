@@ -19,7 +19,11 @@ impl Parse for ModifiedWriteValues {
             "clear" => Clear,
             "set" => Set,
             "modify" => Modify,
-            s => return Err(SVDError::InvalidModifiedWriteValues(tree.id(), s.into()).into()),
+            s => {
+                return Err(SVDError::InvalidModifiedWriteValues(s.into())
+                    .at(tree.id())
+                    .into())
+            }
         })
     }
 }

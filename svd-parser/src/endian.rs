@@ -13,7 +13,7 @@ impl Parse for Endian {
             "big" => Ok(Endian::Big),
             "selectable" => Ok(Endian::Selectable),
             "other" => Ok(Endian::Other),
-            s => Err(SVDError::UnknownEndian(tree.id(), s.into()).into()),
+            s => Err(SVDError::UnknownEndian(s.into()).at(tree.id()).into()),
         }
     }
 }

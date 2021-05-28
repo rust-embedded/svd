@@ -7,9 +7,11 @@ impl Parse for EnumeratedValues {
 
     fn parse(tree: &Node) -> Result<Self> {
         if !tree.has_tag_name("enumeratedValues") {
-            return Err(SVDError::NotExpectedTag(tree.id(), "enumeratedValues".to_string()).into());
+            return Err(SVDError::NotExpectedTag("enumeratedValues".to_string())
+                .at(tree.id())
+                .into());
         }
-        Ok(EnumeratedValues::builder()
+        EnumeratedValues::builder()
             .name(tree.get_child_text_opt("name")?)
             .usage(optional::<Usage>("usage", tree)?)
             .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
@@ -26,15 +28,15 @@ impl Parse for EnumeratedValues {
                             EnumeratedValue::parse(&t)
                                 .with_context(|| format!("Parsing enumerated value #{}", e))
                         } else {
-                            Err(
-                                SVDError::NotExpectedTag(t.id(), "enumeratedValue".to_string())
-                                    .into(),
-                            )
+                            Err(SVDError::NotExpectedTag("enumeratedValue".to_string())
+                                .at(t.id())
+                                .into())
                         }
                     })
                     .collect();
                 values?
             })
-            .build()?)
+            .build()
+            .map_err(|e| SVDError::from(e).at(tree.id()).into())
     }
 }

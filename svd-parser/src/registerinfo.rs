@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, optional, Context, Node, Parse, Result};
+use super::{elementext::ElementExt, optional, Context, Node, Parse, Result, SVDError};
 use crate::svd::{Field, ModifiedWriteValues, RegisterInfo, RegisterProperties, WriteConstraint};
 
 impl Parse for RegisterInfo {
@@ -12,7 +12,7 @@ impl Parse for RegisterInfo {
 }
 
 fn parse_register(tree: &Node, name: String) -> Result<RegisterInfo> {
-    Ok(RegisterInfo::builder()
+    RegisterInfo::builder()
         .name(name)
         .display_name(tree.get_child_text_opt("displayName")?)
         .description(tree.get_child_text_opt("description")?)
@@ -39,5 +39,6 @@ fn parse_register(tree: &Node, name: String) -> Result<RegisterInfo> {
             }
         })
         .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
-        .build()?)
+        .build()
+        .map_err(|e| SVDError::from(e).at(tree.id()).into())
 }

@@ -10,7 +10,9 @@ impl Parse for Device {
 
     fn parse(tree: &Node) -> Result<Self> {
         if !tree.has_tag_name("device") {
-            return Err(SVDError::NotExpectedTag(tree.id(), "device".to_string()).into());
+            return Err(SVDError::NotExpectedTag("device".to_string())
+                .at(tree.id())
+                .into());
         }
         let name = tree.get_child_text("name")?;
         parse_device(tree, name.clone()).with_context(|| format!("In device `{}`", name))
@@ -18,7 +20,7 @@ impl Parse for Device {
 }
 
 fn parse_device(tree: &Node, name: String) -> Result<Device> {
-    Ok(Device::builder()
+    Device::builder()
         .name(name)
         .version(tree.get_child_text_opt("version")?)
         .description(tree.get_child_text_opt("description")?)
@@ -36,5 +38,6 @@ fn parse_device(tree: &Node, name: String) -> Result<Device> {
             ps?
         })
         .schema_version(tree.attribute("schemaVersion").map(|s| s.to_string()))
-        .build()?)
+        .build()
+        .map_err(|e| SVDError::from(e).at(tree.id()).into())
 }
