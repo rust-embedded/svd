@@ -19,6 +19,7 @@ pub struct EnumeratedValues {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub derived_from: Option<String>,
 
+    /// List of variants. The number of required items depends on the bit-width of the associated field.
     pub values: Vec<EnumeratedValue>,
 }
 
@@ -101,5 +102,8 @@ impl EnumeratedValues {
             v.check_range(&range)?;
         }
         Ok(())
+    }
+    pub fn usage(&self) -> Usage {
+        self.usage.unwrap_or_default()
     }
 }
