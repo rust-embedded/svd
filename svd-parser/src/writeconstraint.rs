@@ -1,11 +1,12 @@
-use super::{elementext::ElementExt, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, Config, Node, Parse, Result, SVDError};
 use crate::svd::{WriteConstraint, WriteConstraintRange};
 
 impl Parse for WriteConstraint {
     type Object = Self;
     type Error = anyhow::Error;
+    type Config = Config;
 
-    fn parse(tree: &Node) -> Result<Self> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self> {
         let child = tree.first_element_child().unwrap();
         if child.next_sibling_element().is_some() {
             return Err(SVDError::MoreThanOneWriteConstraint.at(tree.id()).into());
@@ -17,7 +18,7 @@ impl Parse for WriteConstraint {
             "useEnumeratedValues" => tree
                 .get_child_bool(field)
                 .map(WriteConstraint::UseEnumeratedValues),
-            "range" => WriteConstraintRange::parse(&tree.get_child_elem(field)?)
+            "range" => WriteConstraintRange::parse(&tree.get_child_elem(field)?, &())
                 .map(WriteConstraint::Range),
             _ => Err(SVDError::UnknownWriteConstraint.at(tree.id()).into()),
         }
@@ -27,8 +28,9 @@ impl Parse for WriteConstraint {
 impl Parse for WriteConstraintRange {
     type Object = Self;
     type Error = anyhow::Error;
+    type Config = ();
 
-    fn parse(tree: &Node) -> Result<Self> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self> {
         Ok(Self {
             min: tree.get_child_u64("minimum")?,
             max: tree.get_child_u64("maximum")?,

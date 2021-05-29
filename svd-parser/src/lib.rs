@@ -25,6 +25,7 @@
 //! Parse traits.
 //! These support parsing of SVD types from XML
 
+use svd::ValidateLevel;
 use svd_rs as svd;
 
 pub use anyhow::{Context, Result};
@@ -35,20 +36,29 @@ use crate::elementext::ElementExt;
 // Types defines simple types and parse/encode implementations
 pub mod types;
 
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Config {
+    validate_level: ValidateLevel,
+    expand_arrays: bool,
+    expand_derived: bool,
+}
+
 /// Parse trait allows SVD objects to be parsed from XML elements.
 pub trait Parse {
     /// Object returned by parse method
     type Object;
     /// Parsing error
     type Error;
+    /// Advanced parse options
+    type Config;
     /// Parse an XML/SVD element into it's corresponding `Object`.
-    fn parse(elem: &Node) -> Result<Self::Object, Self::Error>;
+    fn parse(elem: &Node, config: &Self::Config) -> Result<Self::Object, Self::Error>;
 }
 
 /// Parses an optional child element with the provided name and Parse function
 /// Returns an none if the child doesn't exist, Ok(Some(e)) if parsing succeeds,
 /// and Err() if parsing fails.
-pub fn optional<T>(n: &str, e: &Node) -> anyhow::Result<Option<T::Object>>
+pub fn optional<T>(n: &str, e: &Node, config: &T::Config) -> anyhow::Result<Option<T::Object>>
 where
     T: Parse<Error = anyhow::Error>,
 {
@@ -57,7 +67,7 @@ where
         None => return Ok(None),
     };
 
-    match T::parse(&child) {
+    match T::parse(&child, config) {
         Ok(r) => Ok(Some(r)),
         Err(e) => Err(e),
     }
@@ -66,13 +76,17 @@ where
 use crate::svd::Device;
 /// Parses the contents of an SVD (XML) string
 pub fn parse(xml: &str) -> anyhow::Result<Device> {
+    parse_with_config(xml, &Config::default())
+}
+/// Parses the contents of an SVD (XML) string
+pub fn parse_with_config(xml: &str, config: &Config) -> anyhow::Result<Device> {
     let xml = trim_utf8_bom(xml);
     let tree = Document::parse(xml)?;
     let root = tree.root();
     let device = root
         .get_child("device")
         .ok_or_else(|| SVDError::MissingTag("device".to_string()).at(root.id()))?;
-    match Device::parse(&device) {
+    match Device::parse(&device, config) {
         o @ Ok(_) => o,
         Err(e) => {
             if let Some(id) = e.downcast_ref::<SVDErrorAt>().map(|e_at| e_at.id) {

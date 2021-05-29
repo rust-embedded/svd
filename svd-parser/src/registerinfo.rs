@@ -1,17 +1,19 @@
-use super::{elementext::ElementExt, optional, Context, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Config, Context, Node, Parse, Result, SVDError};
 use crate::svd::{Field, ModifiedWriteValues, RegisterInfo, RegisterProperties, WriteConstraint};
 
 impl Parse for RegisterInfo {
     type Object = Self;
     type Error = anyhow::Error;
+    type Config = Config;
 
-    fn parse(tree: &Node) -> Result<Self> {
+    fn parse(tree: &Node, config: &Self::Config) -> Result<Self> {
         let name = tree.get_child_text("name")?;
-        parse_register(tree, name.clone()).with_context(|| format!("In register `{}`", name))
+        parse_register(tree, name.clone(), config)
+            .with_context(|| format!("In register `{}`", name))
     }
 }
 
-fn parse_register(tree: &Node, name: String) -> Result<RegisterInfo> {
+fn parse_register(tree: &Node, name: String, config: &Config) -> Result<RegisterInfo> {
     RegisterInfo::builder()
         .name(name)
         .display_name(tree.get_child_text_opt("displayName")?)
@@ -19,19 +21,26 @@ fn parse_register(tree: &Node, name: String) -> Result<RegisterInfo> {
         .alternate_group(tree.get_child_text_opt("alternateGroup")?)
         .alternate_register(tree.get_child_text_opt("alternateRegister")?)
         .address_offset(tree.get_child_u32("addressOffset")?)
-        .properties(RegisterProperties::parse(tree)?)
+        .properties(RegisterProperties::parse(tree, config)?)
         .modified_write_values(optional::<ModifiedWriteValues>(
             "modifiedWriteValues",
             tree,
+            config,
         )?)
-        .write_constraint(optional::<WriteConstraint>("writeConstraint", tree)?)
+        .write_constraint(optional::<WriteConstraint>(
+            "writeConstraint",
+            tree,
+            config,
+        )?)
         .fields({
             if let Some(fields) = tree.get_child("fields") {
                 let fs: Result<Vec<_>, _> = fields
                     .children()
                     .filter(Node::is_element)
                     .enumerate()
-                    .map(|(e, t)| Field::parse(&t).with_context(|| format!("Parsing field #{}", e)))
+                    .map(|(e, t)| {
+                        Field::parse(&t, config).with_context(|| format!("Parsing field #{}", e))
+                    })
                     .collect();
                 Some(fs?)
             } else {
@@ -39,6 +48,6 @@ fn parse_register(tree: &Node, name: String) -> Result<RegisterInfo> {
             }
         })
         .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
-        .build()
+        .build(config.validate_level)
         .map_err(|e| SVDError::from(e).at(tree.id()).into())
 }

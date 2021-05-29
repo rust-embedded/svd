@@ -18,7 +18,7 @@ pub trait ElementExt {
     where
         K: AsRef<str>;
 
-    fn get_text(&self) -> Result<String>;
+    fn get_text(&self) -> Result<&str>;
 
     fn get_child_elem(&self, n: &str) -> Result<Node>;
     fn get_child_u32(&self, n: &str) -> Result<u32>;
@@ -61,7 +61,7 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
                         Err(e)
                     }
                 }
-                Ok(s) => Ok(Some(s)),
+                Ok(s) => Ok(Some(s.to_string())),
             }
         } else {
             Ok(None)
@@ -77,9 +77,9 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
     }
 
     /// Get text contained by an XML Element
-    fn get_text(&self) -> Result<String> {
+    fn get_text(&self) -> Result<&str> {
         match self.text() {
-            Some(s) => Ok(s.to_string()),
+            Some(s) => Ok(s),
             // FIXME: Doesn't look good because SVDError doesn't format by itself. We already
             // capture the element and this information can be used for getting the name
             // This would fix ParseError
@@ -98,19 +98,19 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
     /// Get a u32 value from a named child element
     fn get_child_u32(&self, n: &str) -> Result<u32> {
         let s = self.get_child_elem(n)?;
-        u32::parse(&s).context(SVDError::ParseError.at(self.id()))
+        u32::parse(&s, &()).context(SVDError::ParseError.at(self.id()))
     }
 
     /// Get a u64 value from a named child element
     fn get_child_u64(&self, n: &str) -> Result<u64> {
         let s = self.get_child_elem(n)?;
-        u64::parse(&s).context(SVDError::ParseError.at(self.id()))
+        u64::parse(&s, &()).context(SVDError::ParseError.at(self.id()))
     }
 
     /// Get a bool value from a named child element
     fn get_child_bool(&self, n: &str) -> Result<bool> {
         let s = self.get_child_elem(n)?;
-        BoolParse::parse(&s)
+        BoolParse::parse(&s, &())
     }
 
     fn debug(&self) {

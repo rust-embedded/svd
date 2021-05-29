@@ -67,14 +67,31 @@ pub use self::device::Device;
 pub mod modifiedwritevalues;
 pub use self::modifiedwritevalues::ModifiedWriteValues;
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum ValidateLevel {
+    Disabled,
+    Weak,
+    Strict,
+}
+
+impl Default for ValidateLevel {
+    fn default() -> Self {
+        ValidateLevel::Weak
+    }
+}
+
+impl ValidateLevel {
+    pub fn is_strict(self) -> bool {
+        self == ValidateLevel::Strict
+    }
+}
+
 #[cfg(feature = "derive-from")]
 pub mod derive_from;
 #[cfg(feature = "derive-from")]
 pub use derive_from::DeriveFrom;
 
-#[cfg(feature = "strict")]
 use once_cell::sync::Lazy;
-#[cfg(feature = "strict")]
 use regex::Regex;
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
@@ -82,22 +99,18 @@ pub enum SvdError {
     #[error("`Build error: {0}")]
     Build(#[from] BuildError),
 
-    #[cfg(feature = "strict")]
     #[error("`Name check error: {0}")]
     Name(#[from] NameError),
 
     #[error("`Device error: {0}")]
     Device(#[from] device::Error),
 
-    #[cfg(feature = "strict")]
     #[error("`Peripheral error: {0}")]
     Peripheral(#[from] peripheral::Error),
 
-    #[cfg(feature = "strict")]
     #[error("`Cluster error: {0}")]
     Cluster(#[from] clusterinfo::Error),
 
-    #[cfg(feature = "strict")]
     #[error("`Register error: {0}")]
     Register(#[from] registerinfo::Error),
 
@@ -120,26 +133,21 @@ pub enum BuildError {
     Uninitialized(String),
 }
 
-#[cfg(feature = "strict")]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum NameError {
     #[error("Name `{0}` contains unexpected symbol")]
     Invalid(String, String),
 }
 
-#[cfg(feature = "strict")]
 pub(crate) fn check_name(name: &str, tag: &str) -> Result<(), NameError> {
     static PATTERN: Lazy<Regex> = Lazy::new(|| Regex::new("^[_A-Za-z0-9]*$").unwrap());
     if PATTERN.is_match(name) {
         Ok(())
-    } else if cfg!(feature = "strict") {
-        Err(NameError::Invalid(name.to_string(), tag.to_string()))
     } else {
-        Ok(())
+        Err(NameError::Invalid(name.to_string(), tag.to_string()))
     }
 }
 
-#[cfg(feature = "strict")]
 pub(crate) fn check_dimable_name(name: &str, tag: &str) -> Result<(), NameError> {
     static PATTERN: Lazy<Regex> = Lazy::new(|| {
         Regex::new("^(((%s)|(%s)[_A-Za-z]{1}[_A-Za-z0-9]*)|([_A-Za-z]{1}[_A-Za-z0-9]*(\\[%s\\])?)|([_A-Za-z]{1}[_A-Za-z0-9]*(%s)?[_A-Za-z0-9]*))$").unwrap()
@@ -151,7 +159,6 @@ pub(crate) fn check_dimable_name(name: &str, tag: &str) -> Result<(), NameError>
     }
 }
 
-#[cfg(feature = "strict")]
 pub(crate) fn check_derived_name(name: &str, tag: &str) -> Result<(), NameError> {
     for x in name.split('.') {
         check_dimable_name(x, tag)?

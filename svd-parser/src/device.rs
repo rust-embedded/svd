@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, optional, Context, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Config, Context, Node, Parse, Result, SVDError};
 use crate::svd::{
     cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties, Device,
 };
@@ -7,33 +7,34 @@ use crate::svd::{
 impl Parse for Device {
     type Object = Self;
     type Error = anyhow::Error;
+    type Config = Config;
 
-    fn parse(tree: &Node) -> Result<Self> {
+    fn parse(tree: &Node, config: &Self::Config) -> Result<Self> {
         if !tree.has_tag_name("device") {
             return Err(SVDError::NotExpectedTag("device".to_string())
                 .at(tree.id())
                 .into());
         }
         let name = tree.get_child_text("name")?;
-        parse_device(tree, name.clone()).with_context(|| format!("In device `{}`", name))
+        parse_device(tree, name.clone(), config).with_context(|| format!("In device `{}`", name))
     }
 }
 
-fn parse_device(tree: &Node, name: String) -> Result<Device> {
+fn parse_device(tree: &Node, name: String, config: &Config) -> Result<Device> {
     Device::builder()
         .name(name)
         .version(tree.get_child_text_opt("version")?)
         .description(tree.get_child_text_opt("description")?)
-        .cpu(optional::<Cpu>("cpu", tree)?)
-        .address_unit_bits(optional::<u32>("addressUnitBits", tree)?)
-        .width(optional::<u32>("width", tree)?)
-        .default_register_properties(RegisterProperties::parse(tree)?)
+        .cpu(optional::<Cpu>("cpu", tree, config)?)
+        .address_unit_bits(optional::<u32>("addressUnitBits", tree, &())?)
+        .width(optional::<u32>("width", tree, &())?)
+        .default_register_properties(RegisterProperties::parse(tree, config)?)
         .peripherals({
             let ps: Result<Vec<_>, _> = tree
                 .get_child_elem("peripherals")?
                 .children()
                 .filter(Node::is_element)
-                .map(|t| Peripheral::parse(&t))
+                .map(|t| Peripheral::parse(&t, config))
                 .collect();
             ps?
         })

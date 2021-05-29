@@ -1,4 +1,4 @@
-use super::{Context, Node, Parse, Result, SVDError};
+use super::{Config, Context, Node, Parse, Result, SVDError};
 use crate::elementext::ElementExt;
 use crate::svd::{BitRange, BitRangeType};
 
@@ -13,8 +13,9 @@ pub enum InvalidBitRange {
 impl Parse for BitRange {
     type Object = Self;
     type Error = anyhow::Error;
+    type Config = Config;
 
-    fn parse(tree: &Node) -> Result<Self> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self> {
         let (end, start, range_type): (u32, u32, BitRangeType) =
             if let Some(range) = tree.get_child("bitRange") {
                 let text = range.text().ok_or_else(|| {
@@ -59,10 +60,10 @@ impl Parse for BitRange {
             } else if let (Some(lsb), Some(msb)) = (tree.get_child("lsb"), tree.get_child("msb")) {
                 (
                     // TODO: `u32::parse` should not hide it's errors
-                    u32::parse(&msb).with_context(|| {
+                    u32::parse(&msb, &()).with_context(|| {
                         SVDError::InvalidBitRange(InvalidBitRange::MsbLsb).at(tree.id())
                     })?,
-                    u32::parse(&lsb).with_context(|| {
+                    u32::parse(&lsb, &()).with_context(|| {
                         SVDError::InvalidBitRange(InvalidBitRange::MsbLsb).at(tree.id())
                     })?,
                     BitRangeType::MsbLsb,
@@ -75,10 +76,10 @@ impl Parse for BitRange {
                 return Ok(BitRange {
                     // TODO: capture that error comes from offset/width tag
                     // TODO: `u32::parse` should not hide it's errors
-                    offset: u32::parse(&offset).with_context(|| {
+                    offset: u32::parse(&offset, &()).with_context(|| {
                         SVDError::InvalidBitRange(InvalidBitRange::ParseError).at(tree.id())
                     })?,
-                    width: u32::parse(&width).with_context(|| {
+                    width: u32::parse(&width, &()).with_context(|| {
                         SVDError::InvalidBitRange(InvalidBitRange::ParseError).at(tree.id())
                     })?,
                     range_type: BitRangeType::OffsetWidth,

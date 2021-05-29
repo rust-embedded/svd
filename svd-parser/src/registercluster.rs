@@ -1,15 +1,16 @@
-use super::{Node, Parse, Result, SVDError};
+use super::{Config, Node, Parse, Result, SVDError};
 use crate::svd::{Cluster, Register};
 
 use crate::svd::RegisterCluster;
 impl Parse for RegisterCluster {
     type Object = Self;
     type Error = anyhow::Error;
+    type Config = Config;
 
-    fn parse(tree: &Node) -> Result<Self> {
+    fn parse(tree: &Node, config: &Self::Config) -> Result<Self> {
         match tree.tag_name().name() {
-            "register" => Register::parse(tree).map(RegisterCluster::Register),
-            "cluster" => Cluster::parse(tree).map(RegisterCluster::Cluster),
+            "register" => Register::parse(tree, config).map(RegisterCluster::Register),
+            "cluster" => Cluster::parse(tree, config).map(RegisterCluster::Cluster),
             _ => Err(
                 SVDError::InvalidRegisterCluster(tree.tag_name().name().to_string())
                     .at(tree.id())

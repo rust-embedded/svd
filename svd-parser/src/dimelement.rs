@@ -1,15 +1,18 @@
-use super::{elementext::ElementExt, optional, types::DimIndex, Node, Parse, Result, SVDError};
+use super::{
+    elementext::ElementExt, optional, types::DimIndex, Config, Node, Parse, Result, SVDError,
+};
 use crate::svd::DimElement;
 
 impl Parse for DimElement {
     type Object = Self;
     type Error = anyhow::Error;
+    type Config = Config;
 
-    fn parse(tree: &Node) -> Result<Self> {
+    fn parse(tree: &Node, config: &Self::Config) -> Result<Self> {
         DimElement::builder()
             .dim(tree.get_child_u32("dim")?)
             .dim_increment(tree.get_child_u32("dimIncrement")?)
-            .dim_index(optional::<DimIndex>("dimIndex", tree)?)
+            .dim_index(optional::<DimIndex>("dimIndex", tree, config)?)
             .build()
             .map_err(|e| SVDError::from(e).at(tree.id()).into())
     }

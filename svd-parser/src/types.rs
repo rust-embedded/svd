@@ -4,7 +4,7 @@
 use roxmltree::Node as Element;
 
 use super::elementext::ElementExt;
-use super::{Context, Parse, Result, SVDError};
+use super::{Config, Context, Parse, Result, SVDError};
 
 macro_rules! unwrap {
     ($e:expr) => {
@@ -15,8 +15,9 @@ macro_rules! unwrap {
 impl Parse for u32 {
     type Object = u32;
     type Error = anyhow::Error;
+    type Config = ();
 
-    fn parse(tree: &Element) -> Result<u32> {
+    fn parse(tree: &Element, _config: &Self::Config) -> Result<u32> {
         let text = tree.get_text()?;
 
         if text.starts_with("0x") || text.starts_with("0X") {
@@ -47,8 +48,9 @@ impl Parse for u32 {
 impl Parse for u64 {
     type Object = u64;
     type Error = anyhow::Error;
+    type Config = ();
 
-    fn parse(tree: &Element) -> Result<u64> {
+    fn parse(tree: &Element, _config: &Self::Config) -> Result<u64> {
         let text = tree.get_text()?;
 
         if text.starts_with("0x") || text.starts_with("0X") {
@@ -81,21 +83,20 @@ pub struct BoolParse;
 impl Parse for BoolParse {
     type Object = bool;
     type Error = anyhow::Error;
+    type Config = ();
 
-    fn parse(tree: &Element) -> Result<bool> {
-        let text = unwrap!(tree.text());
-        Ok(match text {
-            "0" => false,
-            "1" => true,
+    fn parse(tree: &Element, _config: &Self::Config) -> Result<bool> {
+        let text = tree.get_text()?;
+        match text {
+            "0" => Ok(false),
+            "1" => Ok(true),
             _ => match text.parse() {
-                Ok(b) => b,
-                Err(e) => {
-                    return Err(SVDError::InvalidBooleanValue(text.to_string(), e)
-                        .at(tree.id())
-                        .into())
-                }
+                Ok(b) => Ok(b),
+                Err(e) => Err(SVDError::InvalidBooleanValue(text.into(), e)
+                    .at(tree.id())
+                    .into()),
             },
-        })
+        }
     }
 }
 
@@ -104,8 +105,9 @@ pub struct DimIndex;
 impl Parse for DimIndex {
     type Object = Vec<String>;
     type Error = anyhow::Error;
+    type Config = Config;
 
-    fn parse(tree: &Element) -> Result<Vec<String>> {
+    fn parse(tree: &Element, _config: &Self::Config) -> Result<Vec<String>> {
         let text = tree.get_text()?;
         if text.contains('-') {
             let mut parts = text.splitn(2, '-');

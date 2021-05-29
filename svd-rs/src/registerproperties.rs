@@ -1,4 +1,4 @@
-use super::{Access, SvdError};
+use super::{Access, SvdError, ValidateLevel};
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
@@ -73,14 +73,14 @@ impl RegisterPropertiesBuilder {
         self.reset_mask = value;
         self
     }
-    pub fn build(self) -> Result<RegisterProperties, SvdError> {
+    pub fn build(self, lvl: ValidateLevel) -> Result<RegisterProperties, SvdError> {
         RegisterProperties {
             size: self.size,
             access: self.access,
             reset_value: self.reset_value,
             reset_mask: self.reset_mask,
         }
-        .validate()
+        .validate(lvl)
     }
 }
 
@@ -88,8 +88,8 @@ impl RegisterProperties {
     pub fn builder() -> RegisterPropertiesBuilder {
         RegisterPropertiesBuilder::default()
     }
-    fn validate(self) -> Result<Self, SvdError> {
-        check_reset_value(self.size, self.reset_value, self.reset_mask)?;
+    fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
+        check_reset_value(self.size, self.reset_value, self.reset_mask, lvl)?;
         Ok(self)
     }
 }
@@ -98,6 +98,7 @@ pub(crate) fn check_reset_value(
     size: Option<u32>,
     value: Option<u64>,
     _mask: Option<u64>,
+    lvl: ValidateLevel,
 ) -> Result<(), Error> {
     const MAX_BITS: u32 = core::u64::MAX.count_ones();
 
@@ -106,8 +107,7 @@ pub(crate) fn check_reset_value(
             return Err(Error::ValueTooLarge(value, size));
         }
     }
-    #[cfg(feature = "strict")]
-    {
+    if lvl.is_strict() {
         if let (Some(size), Some(mask)) = (size, _mask) {
             if MAX_BITS - mask.leading_zeros() > size {
                 return Err(Error::MaskTooLarge(mask, size));
@@ -123,29 +123,29 @@ pub(crate) fn check_reset_value(
     Ok(())
 }
 
-#[cfg(feature = "strict")]
 #[cfg(test)]
 mod tests {
     use super::check_reset_value;
 
     #[test]
     fn test_check_reset_value() {
-        check_reset_value(None, None, None).unwrap();
-        check_reset_value(Some(8), None, None).unwrap();
-        check_reset_value(Some(8), None, Some(0xff)).unwrap();
-        check_reset_value(Some(32), Some(0xfaceface), None).unwrap();
-        check_reset_value(Some(32), Some(0xfaceface), Some(0xffffffff)).unwrap();
+        let lvl = ValidateLevel::Strict;
+        check_reset_value(None, None, None, lvl).unwrap();
+        check_reset_value(Some(8), None, None, lvl).unwrap();
+        check_reset_value(Some(8), None, Some(0xff), lvl).unwrap();
+        check_reset_value(Some(32), Some(0xfaceface), None, lvl).unwrap();
+        check_reset_value(Some(32), Some(0xfaceface), Some(0xffffffff), lvl).unwrap();
 
         assert!(
-            check_reset_value(Some(8), None, Some(0x100)).is_err(),
+            check_reset_value(Some(8), None, Some(0x100), lvl).is_err(),
             "mask shouldn't fit in size"
         );
         assert!(
-            check_reset_value(Some(1), Some(0x02), None).is_err(),
+            check_reset_value(Some(1), Some(0x02), None, lvl).is_err(),
             "reset value shouldn't fit in field"
         );
         assert!(
-            check_reset_value(Some(8), Some(0x80), Some(0x01)).is_err(),
+            check_reset_value(Some(8), Some(0x80), Some(0x01), lvl).is_err(),
             "value should conflict with mask"
         );
     }

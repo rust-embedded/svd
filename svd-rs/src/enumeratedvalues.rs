@@ -1,4 +1,4 @@
-use super::{EnumeratedValue, SvdError, Usage};
+use super::{EnumeratedValue, SvdError, Usage, ValidateLevel};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -64,14 +64,14 @@ impl EnumeratedValuesBuilder {
         self.values = Some(value);
         self
     }
-    pub fn build(self) -> Result<EnumeratedValues, SvdError> {
+    pub fn build(self, lvl: ValidateLevel) -> Result<EnumeratedValues, SvdError> {
         (EnumeratedValues {
             name: self.name,
             usage: self.usage,
             derived_from: self.derived_from,
             values: self.values.unwrap_or_default(),
         })
-        .validate()
+        .validate(lvl)
     }
 }
 
@@ -79,16 +79,16 @@ impl EnumeratedValues {
     pub fn builder() -> EnumeratedValuesBuilder {
         EnumeratedValuesBuilder::default()
     }
-    fn validate(self) -> Result<Self, SvdError> {
-        #[cfg(feature = "strict")]
-        {
+    fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
+        if lvl.is_strict() {
             if let Some(name) = self.name.as_ref() {
                 super::check_name(name, "name")?;
             }
         }
         if let Some(_dname) = self.derived_from.as_ref() {
-            #[cfg(feature = "strict")]
-            super::check_derived_name(_dname, "derivedFrom")?;
+            if lvl.is_strict() {
+                super::check_derived_name(_dname, "derivedFrom")?;
+            }
             Ok(self)
         } else if self.values.is_empty() {
             Err(Error::Empty.into())
