@@ -1,0 +1,34 @@
+[package]
+edition = "2018"
+authors = [
+    "The ToolsTeam <tools@teams.rust-embedded.org>",
+]
+categories = [
+    "command-line-utilities",
+    "embedded",
+    "hardware-support",
+    "no-std",
+]
+description = "Parse SVD file and check for errors"
+documentation = "https://docs.rs/svdcheck"
+keywords = [
+    "svd",
+    "embedded",
+]
+license = "MIT OR Apache-2.0"
+name = "svdcheck"
+repository = "https://github.com/rust-embedded/svd/"
+version = "0.10.2"
+readme = "README.md"
+
+[[bin]]
+doc = false
+name = "svdcheck"
+path = "src/main.rs"
+
+[dependencies]
+clap = "2.33"
+
+[dependencies.svd-parser]
+version = "0.10.2"
+path = "../svd-parser"
