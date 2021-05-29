@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, Config, Node, Parse, SVDError, SVDErrorAt};
+use super::*;
 use crate::svd::{WriteConstraint, WriteConstraintRange};
 
 impl Parse for WriteConstraint {
@@ -9,7 +9,7 @@ impl Parse for WriteConstraint {
     fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
         let child = tree.first_element_child().unwrap();
         if child.next_sibling_element().is_some() {
-            return Err(SVDError::MoreThanOneWriteConstraint.at(tree.id()).into());
+            return Err(SVDError::MoreThanOneWriteConstraint.at(tree.id()));
         }
         let field = child.tag_name().name();
         // Write constraint can only be one of the following
@@ -20,7 +20,7 @@ impl Parse for WriteConstraint {
                 .map(WriteConstraint::UseEnumeratedValues),
             "range" => WriteConstraintRange::parse(&tree.get_child_elem(field)?, &())
                 .map(WriteConstraint::Range),
-            _ => Err(SVDError::UnknownWriteConstraint.at(tree.id()).into()),
+            _ => Err(SVDError::UnknownWriteConstraint.at(tree.id())),
         }
     }
 }

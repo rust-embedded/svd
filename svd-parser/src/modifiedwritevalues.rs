@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, Config, Node, Parse, SVDError, SVDErrorAt};
+use super::*;
 
 use crate::svd::ModifiedWriteValues;
 impl Parse for ModifiedWriteValues {
@@ -20,11 +20,7 @@ impl Parse for ModifiedWriteValues {
             "clear" => Clear,
             "set" => Set,
             "modify" => Modify,
-            s => {
-                return Err(SVDError::InvalidModifiedWriteValues(s.into())
-                    .at(tree.id())
-                    .into())
-            }
+            s => return Err(SVDError::InvalidModifiedWriteValues(s.into()).at(tree.id())),
         })
     }
 }

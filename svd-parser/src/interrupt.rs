@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, Config, Node, Parse, SVDError, SVDErrorAt};
+use super::*;
 use crate::svd::Interrupt;
 
 impl Parse for Interrupt {
@@ -8,9 +8,7 @@ impl Parse for Interrupt {
 
     fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
         if !tree.has_tag_name("interrupt") {
-            return Err(SVDError::NotExpectedTag("interrupt".to_string())
-                .at(tree.id())
-                .into());
+            return Err(SVDError::NotExpectedTag("interrupt".to_string()).at(tree.id()));
         }
         let name = tree.get_child_text("name")?;
 

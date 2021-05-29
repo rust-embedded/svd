@@ -227,7 +227,10 @@ pub(crate) fn check_has_placeholder(name: &str, tag: &str) -> Result<(), SVDErro
     if name.contains("%s") {
         Ok(())
     } else {
-        Err(SVDError::MissingPlaceholder(name.to_string(), tag.to_string()).into())
+        Err(SVDError::MissingPlaceholder(
+            name.to_string(),
+            tag.to_string(),
+        ))
     }
 }
 

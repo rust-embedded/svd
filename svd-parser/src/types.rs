@@ -3,8 +3,7 @@
 
 use roxmltree::Node;
 
-use super::elementext::ElementExt;
-use super::{Config, Parse, SVDError, SVDErrorAt};
+use super::{Config, ElementExt, Parse, SVDError, SVDErrorAt};
 
 impl Parse for u32 {
     type Object = u32;
@@ -32,7 +31,7 @@ impl Parse for u32 {
         } else {
             text.parse::<u32>()
         })
-        .map_err(|e| SVDError::from(e).at(tree.id()).into())
+        .map_err(|e| SVDError::from(e).at(tree.id()))
     }
 }
 
@@ -62,7 +61,7 @@ impl Parse for u64 {
         } else {
             text.parse::<u64>()
         })
-        .map_err(|e| SVDError::from(e).at(tree.id()).into())
+        .map_err(|e| SVDError::from(e).at(tree.id()))
     }
 }
 
@@ -80,9 +79,7 @@ impl Parse for BoolParse {
             "1" => Ok(true),
             _ => match text.parse() {
                 Ok(b) => Ok(b),
-                Err(e) => Err(SVDError::InvalidBooleanValue(text.into(), e)
-                    .at(tree.id())
-                    .into()),
+                Err(e) => Err(SVDError::InvalidBooleanValue(text.into(), e).at(tree.id())),
             },
         }
     }
@@ -108,10 +105,9 @@ impl Parse for DimIndex {
                 .next()
                 .ok_or_else(|| SVDError::DimIndexParse.at(tree.id()))?
                 .parse::<u32>()
-                .map_err(|e| SVDError::from(e).at(tree.id()))?
-                + 1;
+                .map_err(|e| SVDError::from(e).at(tree.id()))?;
 
-            Ok((start..end).map(|i| i.to_string()).collect())
+            Ok((start..=end).map(|i| i.to_string()).collect())
         } else {
             Ok(text.split(',').map(|s| s.to_string()).collect())
         }

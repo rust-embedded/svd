@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, Config, Node, Parse, SVDError, SVDErrorAt};
+use super::*;
 
 use crate::svd::Access;
 impl Parse for Access {
@@ -15,9 +15,7 @@ impl Parse for Access {
             "read-writeOnce" => Ok(Access::ReadWriteOnce),
             "write-only" => Ok(Access::WriteOnly),
             "writeOnce" => Ok(Access::WriteOnce),
-            _ => Err(SVDError::UnknownAccessType(text.into())
-                .at(tree.id())
-                .into()),
+            _ => Err(SVDError::UnknownAccessType(text.into()).at(tree.id())),
         }
     }
 }

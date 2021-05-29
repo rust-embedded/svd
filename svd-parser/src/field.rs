@@ -1,4 +1,4 @@
-use super::{check_has_placeholder, Node, Parse, SVDError, SVDErrorAt};
+use super::*;
 use crate::svd::{DimElement, Field, FieldInfo};
 use crate::{elementext::ElementExt, Config};
 
@@ -9,9 +9,7 @@ impl Parse for Field {
 
     fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
         if !tree.has_tag_name("field") {
-            return Err(SVDError::NotExpectedTag("field".to_string())
-                .at(tree.id())
-                .into());
+            return Err(SVDError::NotExpectedTag("field".to_string()).at(tree.id()));
         }
 
         let info = FieldInfo::parse(tree, config)?;
@@ -25,8 +23,7 @@ impl Parse for Field {
                         array_info.dim as usize,
                         indexes.len(),
                     )
-                    .at(tree.id())
-                    .into());
+                    .at(tree.id()));
                 }
             }
             Ok(Field::Array(info, array_info))

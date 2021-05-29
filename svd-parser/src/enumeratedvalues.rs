@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, optional, Config, Node, Parse, SVDError, SVDErrorAt};
+use super::*;
 use crate::svd::{EnumeratedValue, EnumeratedValues, Usage};
 
 impl Parse for EnumeratedValues {
@@ -8,9 +8,7 @@ impl Parse for EnumeratedValues {
 
     fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
         if !tree.has_tag_name("enumeratedValues") {
-            return Err(SVDError::NotExpectedTag("enumeratedValues".to_string())
-                .at(tree.id())
-                .into());
+            return Err(SVDError::NotExpectedTag("enumeratedValues".to_string()).at(tree.id()));
         }
         EnumeratedValues::builder()
             .name(tree.get_child_text_opt("name")?)
@@ -27,15 +25,13 @@ impl Parse for EnumeratedValues {
                         if t.has_tag_name("enumeratedValue") {
                             EnumeratedValue::parse(&t, config)
                         } else {
-                            Err(SVDError::NotExpectedTag("enumeratedValue".to_string())
-                                .at(t.id())
-                                .into())
+                            Err(SVDError::NotExpectedTag("enumeratedValue".to_string()).at(t.id()))
                         }
                     })
                     .collect();
                 values?
             })
             .build(config.validate_level)
-            .map_err(|e| SVDError::from(e).at(tree.id()).into())
+            .map_err(|e| SVDError::from(e).at(tree.id()))
     }
 }

@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, Config, Node, Parse, SVDError, SVDErrorAt};
+use super::*;
 use crate::svd::Usage;
 
 impl Parse for Usage {
@@ -13,7 +13,7 @@ impl Parse for Usage {
             "read" => Ok(Usage::Read),
             "write" => Ok(Usage::Write),
             "read-write" => Ok(Usage::ReadWrite),
-            _ => Err(SVDError::UnknownUsageVariant.at(tree.id()).into()),
+            _ => Err(SVDError::UnknownUsageVariant.at(tree.id())),
         }
     }
 }
