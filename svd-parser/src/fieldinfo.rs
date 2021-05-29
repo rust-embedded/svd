@@ -1,14 +1,14 @@
-use super::{elementext::ElementExt, optional, Config, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::svd::{
     Access, BitRange, EnumeratedValues, FieldInfo, ModifiedWriteValues, WriteConstraint,
 };
 
 impl Parse for FieldInfo {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
     type Config = Config;
 
-    fn parse(tree: &Node, config: &Self::Config) -> Result<Self> {
+    fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
         if !tree.has_tag_name("field") {
             return Err(SVDError::NotExpectedTag("field".to_string())
                 .at(tree.id())
@@ -19,7 +19,7 @@ impl Parse for FieldInfo {
     }
 }
 
-fn parse_field(tree: &Node, name: String, config: &Config) -> Result<FieldInfo> {
+fn parse_field(tree: &Node, name: String, config: &Config) -> Result<FieldInfo, SVDErrorAt> {
     let bit_range = BitRange::parse(tree, config)?;
     FieldInfo::builder()
         .name(name)

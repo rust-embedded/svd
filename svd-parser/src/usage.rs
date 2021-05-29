@@ -1,12 +1,12 @@
-use super::{elementext::ElementExt, Config, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::svd::Usage;
 
 impl Parse for Usage {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
     type Config = Config;
 
-    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
         let text = tree.get_text()?;
 
         match text {

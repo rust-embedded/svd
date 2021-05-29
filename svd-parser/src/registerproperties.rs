@@ -1,12 +1,12 @@
-use super::{optional, Config, Node, Parse, Result, SVDError};
+use super::{optional, Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::svd::{Access, RegisterProperties};
 
 impl Parse for RegisterProperties {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
     type Config = Config;
 
-    fn parse(tree: &Node, config: &Self::Config) -> Result<Self> {
+    fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
         RegisterProperties::builder()
             .size(optional::<u32>("size", tree, &())?)
             .access(optional::<Access>("access", tree, config)?)

@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, optional, Config, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::svd::{
     cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties, Device,
 };
@@ -6,10 +6,10 @@ use crate::svd::{
 /// Parses a SVD file
 impl Parse for Device {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
     type Config = Config;
 
-    fn parse(tree: &Node, config: &Self::Config) -> Result<Self> {
+    fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
         if !tree.has_tag_name("device") {
             return Err(SVDError::NotExpectedTag("device".to_string())
                 .at(tree.id())
@@ -20,7 +20,7 @@ impl Parse for Device {
     }
 }
 
-fn parse_device(tree: &Node, name: String, config: &Config) -> Result<Device> {
+fn parse_device(tree: &Node, name: String, config: &Config) -> Result<Device, SVDErrorAt> {
     Device::builder()
         .name(name)
         .version(tree.get_child_text_opt("version")?)

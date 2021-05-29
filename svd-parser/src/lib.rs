@@ -25,10 +25,10 @@
 //! Parse traits.
 //! These support parsing of SVD types from XML
 
-use svd::ValidateLevel;
-use svd_rs as svd;
+pub use svd::ValidateLevel;
+pub use svd_rs as svd;
 
-pub use anyhow::{Context, Result};
+pub use anyhow::Context;
 use roxmltree::{Document, Node, NodeId};
 // ElementExt extends XML elements with useful methods
 pub mod elementext;
@@ -38,9 +38,9 @@ pub mod types;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Config {
-    validate_level: ValidateLevel,
-    expand_arrays: bool,
-    expand_derived: bool,
+    pub validate_level: ValidateLevel,
+    //pub expand_arrays: bool,
+    //pub expand_derived: bool,
 }
 
 /// Parse trait allows SVD objects to be parsed from XML elements.
@@ -58,9 +58,9 @@ pub trait Parse {
 /// Parses an optional child element with the provided name and Parse function
 /// Returns an none if the child doesn't exist, Ok(Some(e)) if parsing succeeds,
 /// and Err() if parsing fails.
-pub fn optional<T>(n: &str, e: &Node, config: &T::Config) -> anyhow::Result<Option<T::Object>>
+pub fn optional<T>(n: &str, e: &Node, config: &T::Config) -> Result<Option<T::Object>, SVDErrorAt>
 where
-    T: Parse<Error = anyhow::Error>,
+    T: Parse<Error = SVDErrorAt>,
 {
     let child = match e.get_child(n) {
         Some(c) => c,
@@ -80,6 +80,13 @@ pub fn parse(xml: &str) -> anyhow::Result<Device> {
 }
 /// Parses the contents of an SVD (XML) string
 pub fn parse_with_config(xml: &str, config: &Config) -> anyhow::Result<Device> {
+    fn get_name<'a>(node: &'a Node) -> Option<&'a str> {
+        node.children()
+            .filter(|t| t.has_tag_name("name"))
+            .next()
+            .and_then(|t| t.text())
+    }
+
     let xml = trim_utf8_bom(xml);
     let tree = Document::parse(xml)?;
     let root = tree.root();
@@ -87,44 +94,40 @@ pub fn parse_with_config(xml: &str, config: &Config) -> anyhow::Result<Device> {
         .get_child("device")
         .ok_or_else(|| SVDError::MissingTag("device".to_string()).at(root.id()))?;
     match Device::parse(&device, config) {
-        o @ Ok(_) => o,
+        Ok(o) => Ok(o),
         Err(e) => {
-            if let Some(id) = e.downcast_ref::<SVDErrorAt>().map(|e_at| e_at.id) {
-                let node = tree.get_node(id).unwrap();
-                let pos = tree.text_pos_at(node.range().start);
-                let name = node.tag_name().name();
-                let mut res = Err(e);
-                if name.is_empty() {
-                    res = res.with_context(|| format!("at {}", pos))
-                } else {
-                    res = res.with_context(|| format!("Parsing \"{}\" at {}", name, pos))
-                }
-                for parent in node.ancestors().skip(1) {
-                    if parent.id() == NodeId::new(0) {
-                        break;
-                    }
-                    let tagname = parent.tag_name().name();
-                    match tagname {
-                        "device" | "peripheral" | "register" | "field" | "enumeratedValue"
-                        | "interrupt" => {
-                            if let Some(name) = parent
-                                .children()
-                                .filter(|t| t.has_tag_name("name"))
-                                .next()
-                                .and_then(|t| t.text())
-                            {
-                                res = res.with_context(|| format!("In {} `{}`", tagname, name));
-                            } else {
-                                res = res.with_context(|| format!("In unknown {}", tagname));
-                            }
-                        }
-                        _ => {}
-                    }
-                }
-                res
+            let id = e.id;
+            let node = tree.get_node(id).unwrap();
+            let pos = tree.text_pos_at(node.range().start);
+            let tagname = node.tag_name().name();
+            let mut res = Err(e.into());
+            if tagname.is_empty() {
+                res = res.with_context(|| format!("at {}", pos))
             } else {
-                Err(e)
+                if let Some(name) = get_name(&node) {
+                    res = res.with_context(|| format!("Parsing {} `{}` at {}", tagname, name, pos))
+                } else {
+                    res = res.with_context(|| format!("Parsing unknown {} at {}", tagname, pos))
+                }
             }
+            for parent in node.ancestors().skip(1) {
+                if parent.id() == NodeId::new(0) {
+                    break;
+                }
+                let tagname = parent.tag_name().name();
+                match tagname {
+                    "device" | "peripheral" | "register" | "field" | "enumeratedValue"
+                    | "interrupt" => {
+                        if let Some(name) = get_name(&parent) {
+                            res = res.with_context(|| format!("In {} `{}`", tagname, name));
+                        } else {
+                            res = res.with_context(|| format!("In unknown {}", tagname));
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            res
         }
     }
 }
@@ -194,6 +197,10 @@ pub enum SVDError {
     InvalidBooleanValue(String, core::str::ParseBoolError),
     #[error("dimIndex tag must contain {0} indexes, found {1}")]
     IncorrectDimIndexesCount(usize, usize),
+    #[error("Failed to parse dimIndex")]
+    DimIndexParse,
+    #[error("Name `{0}` in tag `{1}` is missing a %s placeholder")]
+    MissingPlaceholder(String, String),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -216,17 +223,11 @@ impl SVDError {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
-pub enum NameParseError {
-    #[error("Name `{0}` in tag `{1}` is missing a %s placeholder")]
-    MissingPlaceholder(String, String),
-}
-
-pub(crate) fn check_has_placeholder(name: &str, tag: &str) -> Result<()> {
+pub(crate) fn check_has_placeholder(name: &str, tag: &str) -> Result<(), SVDError> {
     if name.contains("%s") {
         Ok(())
     } else {
-        Err(NameParseError::MissingPlaceholder(name.to_string(), tag.to_string()).into())
+        Err(SVDError::MissingPlaceholder(name.to_string(), tag.to_string()).into())
     }
 }
 

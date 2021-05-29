@@ -1,4 +1,4 @@
-use super::{Config, Node, Parse, Result, SVDError};
+use super::{Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::elementext::ElementExt;
 use crate::svd::{BitRange, BitRangeType};
 
@@ -12,10 +12,10 @@ pub enum InvalidBitRange {
 
 impl Parse for BitRange {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
     type Config = Config;
 
-    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
         let (end, start, range_type): (u32, u32, BitRangeType) =
             if let Some(range) = tree.get_child("bitRange") {
                 let text = range.text().ok_or_else(|| {

@@ -1,12 +1,12 @@
-use super::{elementext::ElementExt, optional, Config, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::svd::{EnumeratedValue, EnumeratedValues, Usage};
 
 impl Parse for EnumeratedValues {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
     type Config = Config;
 
-    fn parse(tree: &Node, config: &Self::Config) -> Result<Self> {
+    fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
         if !tree.has_tag_name("enumeratedValues") {
             return Err(SVDError::NotExpectedTag("enumeratedValues".to_string())
                 .at(tree.id())

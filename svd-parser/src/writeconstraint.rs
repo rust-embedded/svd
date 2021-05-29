@@ -1,12 +1,12 @@
-use super::{elementext::ElementExt, Config, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::svd::{WriteConstraint, WriteConstraintRange};
 
 impl Parse for WriteConstraint {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
     type Config = Config;
 
-    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
         let child = tree.first_element_child().unwrap();
         if child.next_sibling_element().is_some() {
             return Err(SVDError::MoreThanOneWriteConstraint.at(tree.id()).into());
@@ -27,10 +27,10 @@ impl Parse for WriteConstraint {
 
 impl Parse for WriteConstraintRange {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
     type Config = ();
 
-    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
         Ok(Self {
             min: tree.get_child_u64("minimum")?,
             max: tree.get_child_u64("maximum")?,

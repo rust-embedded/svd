@@ -4,26 +4,26 @@
 use roxmltree::Node;
 
 use super::types::BoolParse;
-use super::{Parse, Result, SVDError, SVDErrorAt};
+use super::{Parse, SVDError, SVDErrorAt};
 
 /// Defines extensions for implementation over roxmltree::Node
 pub trait ElementExt {
     fn get_child<K>(&self, k: K) -> Option<Node>
     where
         K: AsRef<str>;
-    fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>>
+    fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>, SVDErrorAt>
     where
         K: AsRef<str>;
-    fn get_child_text<K>(&self, k: K) -> Result<String>
+    fn get_child_text<K>(&self, k: K) -> Result<String, SVDErrorAt>
     where
         K: AsRef<str>;
 
-    fn get_text(&self) -> Result<&str>;
+    fn get_text(&self) -> Result<&str, SVDErrorAt>;
 
-    fn get_child_elem(&self, n: &str) -> Result<Node>;
-    fn get_child_u32(&self, n: &str) -> Result<u32>;
-    fn get_child_u64(&self, n: &str) -> Result<u64>;
-    fn get_child_bool(&self, n: &str) -> Result<bool>;
+    fn get_child_elem(&self, n: &str) -> Result<Node, SVDErrorAt>;
+    fn get_child_u32(&self, n: &str) -> Result<u32, SVDErrorAt>;
+    fn get_child_u64(&self, n: &str) -> Result<u64, SVDErrorAt>;
+    fn get_child_bool(&self, n: &str) -> Result<bool, SVDErrorAt>;
 
     fn debug(&self);
 }
@@ -41,7 +41,7 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
         }
         None
     }
-    fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>>
+    fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>, SVDErrorAt>
     where
         K: AsRef<str>,
     {
@@ -49,16 +49,12 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
             match child.get_text() {
                 Err(e) => {
                     // if tag is empty just ignore it
-                    if let Some(SVDError::EmptyTag(_)) = e.downcast_ref() {
-                        Ok(None)
-                    } else if let Some(SVDErrorAt {
-                        error: SVDError::EmptyTag(_),
-                        ..
-                    }) = e.downcast_ref()
-                    {
-                        Ok(None)
-                    } else {
-                        Err(e)
+                    match e {
+                        SVDErrorAt {
+                            error: SVDError::EmptyTag(_),
+                            ..
+                        } => Ok(None),
+                        _ => Err(e),
                     }
                 }
                 Ok(s) => Ok(Some(s.to_string())),
@@ -67,7 +63,7 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
             Ok(None)
         }
     }
-    fn get_child_text<K>(&self, k: K) -> Result<String>
+    fn get_child_text<K>(&self, k: K) -> Result<String, SVDErrorAt>
     where
         K: AsRef<str>,
     {
@@ -77,7 +73,7 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
     }
 
     /// Get text contained by an XML Element
-    fn get_text(&self) -> Result<&str> {
+    fn get_text(&self) -> Result<&str, SVDErrorAt> {
         match self.text() {
             Some(s) => Ok(s),
             // FIXME: Doesn't look good because SVDError doesn't format by itself. We already
@@ -90,25 +86,25 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
     }
 
     /// Get a named child element from an XML Element
-    fn get_child_elem(&self, n: &str) -> Result<Node> {
+    fn get_child_elem(&self, n: &str) -> Result<Node, SVDErrorAt> {
         self.get_child(n)
             .ok_or_else(|| SVDError::MissingTag(n.to_string()).at(self.id()).into())
     }
 
     /// Get a u32 value from a named child element
-    fn get_child_u32(&self, n: &str) -> Result<u32> {
+    fn get_child_u32(&self, n: &str) -> Result<u32, SVDErrorAt> {
         let s = self.get_child_elem(n)?;
         u32::parse(&s, &())
     }
 
     /// Get a u64 value from a named child element
-    fn get_child_u64(&self, n: &str) -> Result<u64> {
+    fn get_child_u64(&self, n: &str) -> Result<u64, SVDErrorAt> {
         let s = self.get_child_elem(n)?;
         u64::parse(&s, &())
     }
 
     /// Get a bool value from a named child element
-    fn get_child_bool(&self, n: &str) -> Result<bool> {
+    fn get_child_bool(&self, n: &str) -> Result<bool, SVDErrorAt> {
         let s = self.get_child_elem(n)?;
         BoolParse::parse(&s, &())
     }

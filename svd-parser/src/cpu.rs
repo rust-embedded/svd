@@ -1,12 +1,12 @@
-use super::{elementext::ElementExt, Config, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::svd::{Cpu, Endian};
 
 impl Parse for Cpu {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
     type Config = Config;
 
-    fn parse(tree: &Node, config: &Config) -> Result<Self> {
+    fn parse(tree: &Node, config: &Config) -> Result<Self, Self::Error> {
         if !tree.has_tag_name("cpu") {
             return Err(SVDError::NotExpectedTag("cpu".to_string())
                 .at(tree.id())

@@ -1,18 +1,18 @@
-use super::{elementext::ElementExt, optional, Config, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Config, Node, Parse, SVDError, SVDErrorAt};
 use crate::svd::{Field, ModifiedWriteValues, RegisterInfo, RegisterProperties, WriteConstraint};
 
 impl Parse for RegisterInfo {
     type Object = Self;
-    type Error = anyhow::Error;
+    type Error = SVDErrorAt;
     type Config = Config;
 
-    fn parse(tree: &Node, config: &Self::Config) -> Result<Self> {
+    fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
         let name = tree.get_child_text("name")?;
         parse_register(tree, name.clone(), config)
     }
 }
 
-fn parse_register(tree: &Node, name: String, config: &Config) -> Result<RegisterInfo> {
+fn parse_register(tree: &Node, name: String, config: &Config) -> Result<RegisterInfo, SVDErrorAt> {
     RegisterInfo::builder()
         .name(name)
         .display_name(tree.get_child_text_opt("displayName")?)
