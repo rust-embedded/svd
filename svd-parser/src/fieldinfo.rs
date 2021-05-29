@@ -14,37 +14,33 @@ impl Parse for FieldInfo {
                 .at(tree.id())
                 .into());
         }
-        let name = tree.get_child_text("name")?;
-        parse_field(tree, name.clone(), config)
-    }
-}
 
-fn parse_field(tree: &Node, name: String, config: &Config) -> Result<FieldInfo, SVDErrorAt> {
-    let bit_range = BitRange::parse(tree, config)?;
-    FieldInfo::builder()
-        .name(name)
-        .description(tree.get_child_text_opt("description")?)
-        .bit_range(bit_range)
-        .access(optional::<Access>("access", tree, config)?)
-        .modified_write_values(optional::<ModifiedWriteValues>(
-            "modifiedWriteValues",
-            tree,
-            config,
-        )?)
-        .write_constraint(optional::<WriteConstraint>(
-            "writeConstraint",
-            tree,
-            config,
-        )?)
-        .enumerated_values({
-            let values: Result<Vec<_>, _> = tree
-                .children()
-                .filter(|t| t.is_element() && t.has_tag_name("enumeratedValues"))
-                .map(|t| EnumeratedValues::parse(&t, config))
-                .collect();
-            values?
-        })
-        .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
-        .build(config.validate_level)
-        .map_err(|e| SVDError::from(e).at(tree.id()).into())
+        let bit_range = BitRange::parse(tree, config)?;
+        FieldInfo::builder()
+            .name(tree.get_child_text("name")?)
+            .description(tree.get_child_text_opt("description")?)
+            .bit_range(bit_range)
+            .access(optional::<Access>("access", tree, config)?)
+            .modified_write_values(optional::<ModifiedWriteValues>(
+                "modifiedWriteValues",
+                tree,
+                config,
+            )?)
+            .write_constraint(optional::<WriteConstraint>(
+                "writeConstraint",
+                tree,
+                config,
+            )?)
+            .enumerated_values({
+                let values: Result<Vec<_>, _> = tree
+                    .children()
+                    .filter(|t| t.is_element() && t.has_tag_name("enumeratedValues"))
+                    .map(|t| EnumeratedValues::parse(&t, config))
+                    .collect();
+                values?
+            })
+            .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
+            .build(config.validate_level)
+            .map_err(|e| SVDError::from(e).at(tree.id()).into())
+    }
 }

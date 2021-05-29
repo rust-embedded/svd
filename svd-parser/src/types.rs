@@ -117,5 +117,3 @@ impl Parse for DimIndex {
         }
     }
 }
-
-//TODO: encode for DimIndex
