@@ -1,6 +1,5 @@
-use super::{
-    elementext::ElementExt, optional, types::DimIndex, Config, Node, Parse, SVDError, SVDErrorAt,
-};
+use super::types::DimIndex;
+use super::*;
 use crate::svd::DimElement;
 
 impl Parse for DimElement {

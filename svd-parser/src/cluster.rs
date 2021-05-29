@@ -1,5 +1,4 @@
-use super::{check_has_placeholder, Config, Node, Parse, SVDError, SVDErrorAt};
-use crate::elementext::ElementExt;
+use super::*;
 use crate::svd::{Cluster, ClusterInfo, DimElement};
 
 impl Parse for Cluster {

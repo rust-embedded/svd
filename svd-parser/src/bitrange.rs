@@ -1,5 +1,4 @@
-use super::{Config, Node, Parse, SVDError, SVDErrorAt};
-use crate::elementext::ElementExt;
+use super::*;
 use crate::svd::{BitRange, BitRangeType};
 
 #[derive(Clone, Debug, PartialEq, Eq)]

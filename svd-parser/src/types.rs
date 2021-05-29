@@ -3,8 +3,7 @@
 
 use roxmltree::Node;
 
-use super::elementext::ElementExt;
-use super::{Config, Parse, SVDError, SVDErrorAt};
+use super::{Config, ElementExt, Parse, SVDError, SVDErrorAt};
 
 impl Parse for u32 {
     type Object = u32;

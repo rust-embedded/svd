@@ -1,4 +1,4 @@
-use super::{optional, Config, Node, Parse, SVDError, SVDErrorAt};
+use super::*;
 use crate::svd::{Access, RegisterProperties};
 
 impl Parse for RegisterProperties {

@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, optional, Config, Node, Parse, SVDError, SVDErrorAt};
+use super::*;
 use crate::svd::{EnumeratedValue, EnumeratedValues, Usage};
 
 impl Parse for EnumeratedValues {

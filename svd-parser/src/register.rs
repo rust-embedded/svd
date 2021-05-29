@@ -1,4 +1,4 @@
-use super::{check_has_placeholder, Config, Node, Parse, SVDError, SVDErrorAt};
+use super::*;
 use crate::elementext::ElementExt;
 use crate::svd::{DimElement, Register, RegisterInfo};
 

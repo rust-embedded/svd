@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, Config, Node, Parse, SVDErrorAt};
+use super::*;
 use crate::svd::AddressBlock;
 
 impl Parse for AddressBlock {

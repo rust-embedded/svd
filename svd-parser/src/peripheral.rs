@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, optional, Config, Node, Parse, SVDError, SVDErrorAt};
+use super::*;
 use crate::svd::{AddressBlock, Interrupt, Peripheral, RegisterCluster, RegisterProperties};
 
 impl Parse for Peripheral {

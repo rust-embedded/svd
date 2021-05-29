@@ -1,4 +1,4 @@
-use super::{Config, Node, Parse, SVDError, SVDErrorAt};
+use super::*;
 use crate::svd::{Cluster, Register};
 
 use crate::svd::RegisterCluster;
