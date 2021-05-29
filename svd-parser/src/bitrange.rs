@@ -21,15 +21,11 @@ impl Parse for BitRange {
                     SVDError::InvalidBitRange(InvalidBitRange::Empty).at(tree.id())
                 })?;
                 if !text.starts_with('[') {
-                    return Err(SVDError::InvalidBitRange(InvalidBitRange::Syntax)
-                        .at(tree.id())
-                        .into());
+                    return Err(SVDError::InvalidBitRange(InvalidBitRange::Syntax).at(tree.id()));
                     // TODO: Maybe have a MissingOpen/MissingClosing variant
                 }
                 if !text.ends_with(']') {
-                    return Err(SVDError::InvalidBitRange(InvalidBitRange::Syntax)
-                        .at(tree.id())
-                        .into());
+                    return Err(SVDError::InvalidBitRange(InvalidBitRange::Syntax).at(tree.id()));
                     // TODO: Maybe have a MissingOpen/MissingClosing variant
                 }
 
@@ -84,9 +80,7 @@ impl Parse for BitRange {
                     range_type: BitRangeType::OffsetWidth,
                 });
             } else {
-                return Err(SVDError::InvalidBitRange(InvalidBitRange::Syntax)
-                    .at(tree.id())
-                    .into());
+                return Err(SVDError::InvalidBitRange(InvalidBitRange::Syntax).at(tree.id()));
             };
 
         Ok(Self {

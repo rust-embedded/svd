@@ -13,6 +13,6 @@ impl Parse for RegisterProperties {
             .reset_value(optional::<u64>("resetValue", tree, &())?)
             .reset_mask(optional::<u64>("resetMask", tree, &())?)
             .build(config.validate_level)
-            .map_err(|e| SVDError::from(e).at(tree.id()).into())
+            .map_err(|e| SVDError::from(e).at(tree.id()))
     }
 }

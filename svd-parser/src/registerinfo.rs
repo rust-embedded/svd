@@ -39,6 +39,6 @@ impl Parse for RegisterInfo {
             })
             .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
             .build(config.validate_level)
-            .map_err(|e| SVDError::from(e).at(tree.id()).into())
+            .map_err(|e| SVDError::from(e).at(tree.id()))
     }
 }

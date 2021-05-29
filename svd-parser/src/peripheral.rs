@@ -8,9 +8,7 @@ impl Parse for Peripheral {
 
     fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
         if !tree.has_tag_name("peripheral") {
-            return Err(SVDError::NotExpectedTag("peripheral".to_string())
-                .at(tree.id())
-                .into());
+            return Err(SVDError::NotExpectedTag("peripheral".to_string()).at(tree.id()));
         }
 
         Peripheral::builder()
@@ -42,6 +40,6 @@ impl Parse for Peripheral {
             })
             .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
             .build(config.validate_level)
-            .map_err(|e| SVDError::from(e).at(tree.id()).into())
+            .map_err(|e| SVDError::from(e).at(tree.id()))
     }
 }

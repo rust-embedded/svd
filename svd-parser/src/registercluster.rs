@@ -12,9 +12,7 @@ impl Parse for RegisterCluster {
             "register" => Register::parse(tree, config).map(RegisterCluster::Register),
             "cluster" => Cluster::parse(tree, config).map(RegisterCluster::Cluster),
             _ => Err(
-                SVDError::InvalidRegisterCluster(tree.tag_name().name().to_string())
-                    .at(tree.id())
-                    .into(),
+                SVDError::InvalidRegisterCluster(tree.tag_name().name().to_string()).at(tree.id()),
             ),
         }
     }

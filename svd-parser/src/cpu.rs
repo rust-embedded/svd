@@ -8,9 +8,7 @@ impl Parse for Cpu {
 
     fn parse(tree: &Node, config: &Config) -> Result<Self, Self::Error> {
         if !tree.has_tag_name("cpu") {
-            return Err(SVDError::NotExpectedTag("cpu".to_string())
-                .at(tree.id())
-                .into());
+            return Err(SVDError::NotExpectedTag("cpu".to_string()).at(tree.id()));
         }
 
         Cpu::builder()

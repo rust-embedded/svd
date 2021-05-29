@@ -69,7 +69,7 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
     {
         let k = k.as_ref();
         self.get_child_text_opt(k)?
-            .ok_or_else(|| SVDError::MissingTag(format!("{}", k)).at(self.id()).into())
+            .ok_or_else(|| SVDError::MissingTag(format!("{}", k)).at(self.id()))
     }
 
     /// Get text contained by an XML Element
@@ -79,16 +79,14 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
             // FIXME: Doesn't look good because SVDError doesn't format by itself. We already
             // capture the element and this information can be used for getting the name
             // This would fix ParseError
-            None => Err(SVDError::EmptyTag(self.tag_name().name().to_string())
-                .at(self.id())
-                .into()),
+            None => Err(SVDError::EmptyTag(self.tag_name().name().to_string()).at(self.id())),
         }
     }
 
     /// Get a named child element from an XML Element
     fn get_child_elem(&self, n: &str) -> Result<Node, SVDErrorAt> {
         self.get_child(n)
-            .ok_or_else(|| SVDError::MissingTag(n.to_string()).at(self.id()).into())
+            .ok_or_else(|| SVDError::MissingTag(n.to_string()).at(self.id()))
     }
 
     /// Get a u32 value from a named child element
