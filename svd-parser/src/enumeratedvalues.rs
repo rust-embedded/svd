@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, optional, Config, Context, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Config, Node, Parse, Result, SVDError};
 use crate::svd::{EnumeratedValue, EnumeratedValues, Usage};
 
 impl Parse for EnumeratedValues {
@@ -23,11 +23,9 @@ impl Parse for EnumeratedValues {
                         t.is_element()
                             && !matches!(t.tag_name().name(), "name" | "headerEnumName" | "usage")
                     })
-                    .enumerate()
-                    .map(|(e, t)| {
+                    .map(|t| {
                         if t.has_tag_name("enumeratedValue") {
                             EnumeratedValue::parse(&t, config)
-                                .with_context(|| format!("Parsing enumerated value #{}", e))
                         } else {
                             Err(SVDError::NotExpectedTag("enumeratedValue".to_string())
                                 .at(t.id())

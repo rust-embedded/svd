@@ -1,4 +1,4 @@
-use super::{Config, Context, Node, Parse, Result, SVDError};
+use super::{Config, Node, Parse, Result, SVDError};
 use crate::elementext::ElementExt;
 use crate::svd::{BitRange, BitRangeType};
 
@@ -42,7 +42,7 @@ impl Parse for BitRange {
                             SVDError::InvalidBitRange(InvalidBitRange::Syntax).at(tree.id())
                         })?
                         .parse::<u32>()
-                        .with_context(|| {
+                        .map_err(|_| {
                             SVDError::InvalidBitRange(InvalidBitRange::ParseError).at(tree.id())
                         })?,
                     parts
@@ -51,7 +51,7 @@ impl Parse for BitRange {
                             SVDError::InvalidBitRange(InvalidBitRange::Syntax).at(tree.id())
                         })?
                         .parse::<u32>()
-                        .with_context(|| {
+                        .map_err(|_| {
                             SVDError::InvalidBitRange(InvalidBitRange::ParseError).at(tree.id())
                         })?,
                     BitRangeType::BitRange,
@@ -60,10 +60,10 @@ impl Parse for BitRange {
             } else if let (Some(lsb), Some(msb)) = (tree.get_child("lsb"), tree.get_child("msb")) {
                 (
                     // TODO: `u32::parse` should not hide it's errors
-                    u32::parse(&msb, &()).with_context(|| {
+                    u32::parse(&msb, &()).map_err(|_| {
                         SVDError::InvalidBitRange(InvalidBitRange::MsbLsb).at(tree.id())
                     })?,
-                    u32::parse(&lsb, &()).with_context(|| {
+                    u32::parse(&lsb, &()).map_err(|_| {
                         SVDError::InvalidBitRange(InvalidBitRange::MsbLsb).at(tree.id())
                     })?,
                     BitRangeType::MsbLsb,
@@ -76,10 +76,10 @@ impl Parse for BitRange {
                 return Ok(BitRange {
                     // TODO: capture that error comes from offset/width tag
                     // TODO: `u32::parse` should not hide it's errors
-                    offset: u32::parse(&offset, &()).with_context(|| {
+                    offset: u32::parse(&offset, &()).map_err(|_| {
                         SVDError::InvalidBitRange(InvalidBitRange::ParseError).at(tree.id())
                     })?,
-                    width: u32::parse(&width, &()).with_context(|| {
+                    width: u32::parse(&width, &()).map_err(|_| {
                         SVDError::InvalidBitRange(InvalidBitRange::ParseError).at(tree.id())
                     })?,
                     range_type: BitRangeType::OffsetWidth,

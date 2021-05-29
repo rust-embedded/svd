@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, optional, Config, Context, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Config, Node, Parse, Result, SVDError};
 use crate::svd::EnumeratedValue;
 
 fn parse_ev(tree: &Node, name: String, config: &Config) -> Result<EnumeratedValue> {
@@ -26,6 +26,5 @@ impl Parse for EnumeratedValue {
         }
         let name = tree.get_child_text("name")?;
         parse_ev(tree, name.clone(), config)
-            .with_context(|| format!("In enumerated value `{}`", name))
     }
 }

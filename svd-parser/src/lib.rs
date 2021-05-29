@@ -92,12 +92,36 @@ pub fn parse_with_config(xml: &str, config: &Config) -> anyhow::Result<Device> {
             if let Some(id) = e.downcast_ref::<SVDErrorAt>().map(|e_at| e_at.id) {
                 let node = tree.get_node(id).unwrap();
                 let pos = tree.text_pos_at(node.range().start);
-                let name = node.tag_name().name().to_string();
+                let name = node.tag_name().name();
+                let mut res = Err(e);
                 if name.is_empty() {
-                    Err(e).with_context(|| format!(" at {}", pos))
+                    res = res.with_context(|| format!("at {}", pos))
                 } else {
-                    Err(e).with_context(|| format!(" in tag \"{}\" at {}", name, pos))
+                    res = res.with_context(|| format!("Parsing \"{}\" at {}", name, pos))
                 }
+                for parent in node.ancestors().skip(1) {
+                    if parent.id() == NodeId::new(0) {
+                        break;
+                    }
+                    let tagname = parent.tag_name().name();
+                    match tagname {
+                        "device" | "peripheral" | "register" | "field" | "enumeratedValue"
+                        | "interrupt" => {
+                            if let Some(name) = parent
+                                .children()
+                                .filter(|t| t.has_tag_name("name"))
+                                .next()
+                                .and_then(|t| t.text())
+                            {
+                                res = res.with_context(|| format!("In {} `{}`", tagname, name));
+                            } else {
+                                res = res.with_context(|| format!("In unknown {}", tagname));
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+                res
             } else {
                 Err(e)
             }
@@ -146,8 +170,8 @@ pub enum SVDError {
     MissingTag(String),
     #[error("Expected content in <{0}> tag, found none")]
     EmptyTag(String),
-    #[error("ParseError")]
-    ParseError,
+    #[error("Failed to parse `{0}`")]
+    ParseInt(#[from] std::num::ParseIntError),
     #[error("Unknown endianness `{0}`")]
     UnknownEndian(String),
     #[error("unknown access variant '{0}' found")]

@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, Config, Context, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, Config, Node, Parse, Result, SVDError};
 use crate::svd::{ClusterInfo, RegisterCluster, RegisterProperties};
 
 impl Parse for ClusterInfo {
@@ -8,7 +8,7 @@ impl Parse for ClusterInfo {
 
     fn parse(tree: &Node, config: &Self::Config) -> Result<Self> {
         let name = tree.get_child_text("name")?;
-        parse_cluster(tree, name.clone(), config).with_context(|| format!("In cluster `{}`", name))
+        parse_cluster(tree, name.clone(), config)
     }
 }
 

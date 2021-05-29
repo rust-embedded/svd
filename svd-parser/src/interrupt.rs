@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, Config, Context, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, Config, Node, Parse, Result, SVDError};
 use crate::svd::Interrupt;
 
 fn parse_interrupt(tree: &Node, name: String) -> Result<Interrupt> {
@@ -21,6 +21,6 @@ impl Parse for Interrupt {
                 .into());
         }
         let name = tree.get_child_text("name")?;
-        parse_interrupt(tree, name.clone()).with_context(|| format!("In interrupt `{}`", name))
+        parse_interrupt(tree, name.clone())
     }
 }

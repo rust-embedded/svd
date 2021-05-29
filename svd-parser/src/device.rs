@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, optional, Config, Context, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Config, Node, Parse, Result, SVDError};
 use crate::svd::{
     cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties, Device,
 };
@@ -16,7 +16,7 @@ impl Parse for Device {
                 .into());
         }
         let name = tree.get_child_text("name")?;
-        parse_device(tree, name.clone(), config).with_context(|| format!("In device `{}`", name))
+        parse_device(tree, name.clone(), config)
     }
 }
 

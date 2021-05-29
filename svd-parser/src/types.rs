@@ -1,10 +1,10 @@
 //! Shared primitive types for use in SVD objects.
 #![allow(clippy::manual_strip)]
 
-use roxmltree::Node as Element;
+use roxmltree::Node;
 
 use super::elementext::ElementExt;
-use super::{Config, Context, Parse, Result, SVDError};
+use super::{Config, Parse, Result, SVDError};
 
 macro_rules! unwrap {
     ($e:expr) => {
@@ -17,12 +17,11 @@ impl Parse for u32 {
     type Error = anyhow::Error;
     type Config = ();
 
-    fn parse(tree: &Element, _config: &Self::Config) -> Result<u32> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<u32> {
         let text = tree.get_text()?;
 
-        if text.starts_with("0x") || text.starts_with("0X") {
+        (if text.starts_with("0x") || text.starts_with("0X") {
             u32::from_str_radix(&text["0x".len()..], 16)
-                .with_context(|| format!("{} invalid", text))
         } else if text.starts_with('#') {
             // Handle strings in the binary form of:
             // #01101x1
@@ -31,17 +30,15 @@ impl Parse for u32 {
                 &str::replace(&text.to_lowercase()["#".len()..], "x", "0"),
                 2,
             )
-            .with_context(|| format!("{} invalid", text))
         } else if text.starts_with("0b") {
             // Handle strings in the binary form of:
             // 0b01101x1
             // along with don't care character x (replaced with 0)
             u32::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2)
-                .with_context(|| format!("{} invalid", text))
         } else {
             text.parse::<u32>()
-                .with_context(|| format!("{} invalid", text))
-        }
+        })
+        .map_err(|e| SVDError::from(e).at(tree.id()).into())
     }
 }
 
@@ -50,12 +47,11 @@ impl Parse for u64 {
     type Error = anyhow::Error;
     type Config = ();
 
-    fn parse(tree: &Element, _config: &Self::Config) -> Result<u64> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<u64> {
         let text = tree.get_text()?;
 
-        if text.starts_with("0x") || text.starts_with("0X") {
+        (if text.starts_with("0x") || text.starts_with("0X") {
             u64::from_str_radix(&text["0x".len()..], 16)
-                .with_context(|| format!("{} invalid", text))
         } else if text.starts_with('#') {
             // Handle strings in the binary form of:
             // #01101x1
@@ -64,17 +60,15 @@ impl Parse for u64 {
                 &str::replace(&text.to_lowercase()["#".len()..], "x", "0"),
                 2,
             )
-            .with_context(|| format!("{} invalid", text))
         } else if text.starts_with("0b") {
             // Handle strings in the binary form of:
             // 0b01101x1
             // along with don't care character x (replaced with 0)
             u64::from_str_radix(&str::replace(&text["0b".len()..], "x", "0"), 2)
-                .with_context(|| format!("{} invalid", text))
         } else {
             text.parse::<u64>()
-                .with_context(|| format!("{} invalid", text))
-        }
+        })
+        .map_err(|e| SVDError::from(e).at(tree.id()).into())
     }
 }
 
@@ -85,7 +79,7 @@ impl Parse for BoolParse {
     type Error = anyhow::Error;
     type Config = ();
 
-    fn parse(tree: &Element, _config: &Self::Config) -> Result<bool> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<bool> {
         let text = tree.get_text()?;
         match text {
             "0" => Ok(false),
@@ -107,7 +101,7 @@ impl Parse for DimIndex {
     type Error = anyhow::Error;
     type Config = Config;
 
-    fn parse(tree: &Element, _config: &Self::Config) -> Result<Vec<String>> {
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Vec<String>> {
         let text = tree.get_text()?;
         if text.contains('-') {
             let mut parts = text.splitn(2, '-');

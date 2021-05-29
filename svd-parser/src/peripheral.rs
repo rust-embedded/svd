@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, optional, Config, Context, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Config, Node, Parse, Result, SVDError};
 use crate::svd::{AddressBlock, Interrupt, Peripheral, RegisterCluster, RegisterProperties};
 
 impl Parse for Peripheral {
@@ -14,7 +14,6 @@ impl Parse for Peripheral {
         }
         let name = tree.get_child_text("name")?;
         parse_peripheral(tree, name.clone(), config)
-            .with_context(|| format!("In peripheral `{}`", name))
     }
 }
 
@@ -32,11 +31,7 @@ fn parse_peripheral(tree: &Node, name: String, config: &Config) -> Result<Periph
             let interrupt: Result<Vec<_>, _> = tree
                 .children()
                 .filter(|t| t.is_element() && t.has_tag_name("interrupt"))
-                .enumerate()
-                .map(|(e, i)| {
-                    Interrupt::parse(&i, config)
-                        .with_context(|| format!("Parsing interrupt #{}", e))
-                })
+                .map(|i| Interrupt::parse(&i, config))
                 .collect();
             interrupt?
         })

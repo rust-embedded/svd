@@ -1,4 +1,4 @@
-use super::{elementext::ElementExt, optional, Config, Context, Node, Parse, Result, SVDError};
+use super::{elementext::ElementExt, optional, Config, Node, Parse, Result, SVDError};
 use crate::svd::{
     Access, BitRange, EnumeratedValues, FieldInfo, ModifiedWriteValues, WriteConstraint,
 };
@@ -15,7 +15,7 @@ impl Parse for FieldInfo {
                 .into());
         }
         let name = tree.get_child_text("name")?;
-        parse_field(tree, name.clone(), config).with_context(|| format!("In field `{}`", name))
+        parse_field(tree, name.clone(), config)
     }
 }
 

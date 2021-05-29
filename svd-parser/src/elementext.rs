@@ -4,7 +4,7 @@
 use roxmltree::Node;
 
 use super::types::BoolParse;
-use super::{Context, Parse, Result, SVDError, SVDErrorAt};
+use super::{Parse, Result, SVDError, SVDErrorAt};
 
 /// Defines extensions for implementation over roxmltree::Node
 pub trait ElementExt {
@@ -98,13 +98,13 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
     /// Get a u32 value from a named child element
     fn get_child_u32(&self, n: &str) -> Result<u32> {
         let s = self.get_child_elem(n)?;
-        u32::parse(&s, &()).context(SVDError::ParseError.at(self.id()))
+        u32::parse(&s, &())
     }
 
     /// Get a u64 value from a named child element
     fn get_child_u64(&self, n: &str) -> Result<u64> {
         let s = self.get_child_elem(n)?;
-        u64::parse(&s, &()).context(SVDError::ParseError.at(self.id()))
+        u64::parse(&s, &())
     }
 
     /// Get a bool value from a named child element
