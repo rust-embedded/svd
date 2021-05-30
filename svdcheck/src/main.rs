@@ -32,8 +32,7 @@ fn main() {
     // Use the 'svd_parser' crate to parse the file.
     let mut config = svd::Config::default();
     config.validate_level = svd::ValidateLevel::Strict;
-    let _device = svd::parse_with_config(svd_xml, &config)
-        .expect("Failed to parse the SVD file into Rust structs");
-        
+    let _device = svd::parse_with_config(svd_xml, &config).expect("Error parsing SVD file");
+
     println!("OK!");
 }

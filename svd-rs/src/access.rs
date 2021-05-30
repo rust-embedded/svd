@@ -44,3 +44,9 @@ impl Access {
         }
     }
 }
+
+impl Default for Access {
+    fn default() -> Self {
+        Self::ReadWrite
+    }
+}
