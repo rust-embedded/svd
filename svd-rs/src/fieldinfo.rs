@@ -1,7 +1,13 @@
 use super::{
-    bitrange, Access, BitRange, BuildError, EnumeratedValues, ModifiedWriteValues, SvdError,
+    bitrange, Access, BitRange, BuildError, EnumeratedValues, ModifiedWriteValues, SvdError, Usage,
     ValidateLevel, WriteConstraint,
 };
+
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum Error {
+    #[error("You can have 0, 1 or 2 enumeratedValues with different usage")]
+    IncompatibleEnumeratedValues,
+}
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
@@ -147,6 +153,16 @@ impl FieldInfo {
         if self.bit_range.width < 64 {
             for ev in &self.enumerated_values {
                 ev.check_range(0..2_u64.pow(self.bit_range.width))?;
+            }
+        }
+
+        if lvl.is_strict() {
+            match self.enumerated_values.as_slice() {
+                [] | [_] => {}
+                [ev1, ev2]
+                    if (ev1.usage() == Usage::Read && ev2.usage() == Usage::Write)
+                        || (ev2.usage() == Usage::Read && ev1.usage() == Usage::Write) => {}
+                _ => return Err(Error::IncompatibleEnumeratedValues.into()),
             }
         }
         Ok(self)
