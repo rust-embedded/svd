@@ -114,6 +114,9 @@ pub enum SvdError {
     #[error("`Register error: {0}")]
     Register(#[from] registerinfo::Error),
 
+    #[error("`Field error: {0}")]
+    Field(#[from] fieldinfo::Error),
+
     #[error("`BitRange error: {0}")]
     BitRange(#[from] bitrange::Error),
 
