@@ -9,7 +9,7 @@ impl EncodeChildren for RegisterProperties {
         let mut children = Vec::new();
 
         if let Some(v) = &self.size {
-            children.push(new_element("size", Some(format!("{}", v))));
+            children.push(new_element("size", Some(format!("0x{:x}", v))));
         };
 
         if let Some(v) = &self.access {
