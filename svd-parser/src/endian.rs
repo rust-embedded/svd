@@ -9,12 +9,6 @@ impl Parse for Endian {
     fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
         let text = tree.get_text()?;
 
-        match text {
-            "little" => Ok(Endian::Little),
-            "big" => Ok(Endian::Big),
-            "selectable" => Ok(Endian::Selectable),
-            "other" => Ok(Endian::Other),
-            s => Err(SVDError::UnknownEndian(s.into()).at(tree.id())),
-        }
+        Self::from_str(text).ok_or_else(|| SVDError::UnknownEndian(text.into()).at(tree.id()))
     }
 }

@@ -37,3 +37,35 @@ impl Default for ModifiedWriteValues {
         Self::Modify
     }
 }
+
+impl ModifiedWriteValues {
+    pub fn from_str(s: &str) -> Option<Self> {
+        use self::ModifiedWriteValues::*;
+        match s {
+            "oneToClear" => Some(OneToClear),
+            "oneToSet" => Some(OneToSet),
+            "oneToToggle" => Some(OneToToggle),
+            "zeroToClear" => Some(ZeroToClear),
+            "zeroToSet" => Some(ZeroToSet),
+            "zeroToToggle" => Some(ZeroToToggle),
+            "clear" => Some(Clear),
+            "set" => Some(Set),
+            "modify" => Some(Modify),
+            _ => None,
+        }
+    }
+
+    pub const fn to_str(self) -> &'static str {
+        match self {
+            Self::OneToClear => "oneToClear",
+            Self::OneToSet => "oneToSet",
+            Self::OneToToggle => "oneToToggle",
+            Self::ZeroToClear => "zeroToClear",
+            Self::ZeroToSet => "zeroToSet",
+            Self::ZeroToToggle => "zeroToToggle",
+            Self::Clear => "clear",
+            Self::Set => "set",
+            Self::Modify => "modify",
+        }
+    }
+}

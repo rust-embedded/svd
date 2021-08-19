@@ -14,3 +14,22 @@ impl Default for Usage {
         Self::ReadWrite
     }
 }
+
+impl Usage {
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "read" => Some(Self::Read),
+            "write" => Some(Self::Write),
+            "read-write" => Some(Self::ReadWrite),
+            _ => None,
+        }
+    }
+
+    pub const fn to_str(self) -> &'static str {
+        match self {
+            Self::Read => "read",
+            Self::Write => "write",
+            Self::ReadWrite => "read-write",
+        }
+    }
+}
