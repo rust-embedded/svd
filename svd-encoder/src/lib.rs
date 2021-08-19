@@ -5,7 +5,7 @@ use svd_rs as svd;
 
 use crate::svd::Device;
 use std::collections::HashMap;
-use xmltree::Element;
+use xmltree::{Element, EmitterConfig};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum EncodeError {}
@@ -31,7 +31,9 @@ pub trait EncodeChildren {
 pub fn encode(d: &Device) -> Result<String, EncodeError> {
     let root = d.encode()?;
     let mut wr = Vec::new();
-    root.write(&mut wr).unwrap();
+    let mut cfg = EmitterConfig::new();
+    cfg.perform_indent = true;
+    root.write_with_config(&mut wr, cfg).unwrap();
     Ok(String::from_utf8(wr).unwrap())
 }
 
