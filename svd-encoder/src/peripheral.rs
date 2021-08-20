@@ -38,7 +38,9 @@ impl Encode for Peripheral {
             .extend(self.default_register_properties.encode()?);
 
         if let Some(v) = &self.address_block {
-            elem.children.push(v.encode()?);
+            for ab in v {
+                elem.children.push(ab.encode()?);
+            }
         }
 
         let interrupts: Result<Vec<_>, _> = self.interrupt.iter().map(Interrupt::encode).collect();

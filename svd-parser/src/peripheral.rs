@@ -19,7 +19,19 @@ impl Parse for Peripheral {
             .group_name(tree.get_child_text_opt("groupName")?)
             .base_address(tree.get_child_u64("baseAddress")?)
             .default_register_properties(RegisterProperties::parse(tree, config)?)
-            .address_block(optional::<AddressBlock>("addressBlock", tree, config)?)
+            .address_block({
+                let ab: Result<Vec<_>, _> = tree
+                    .children()
+                    .filter(|t| t.is_element() && t.has_tag_name("addressBlock"))
+                    .map(|i| AddressBlock::parse(&i, config))
+                    .collect();
+                let ab = ab?;
+                if ab.is_empty() {
+                    None
+                } else {
+                    Some(ab)
+                }
+            })
             .interrupt({
                 let interrupt: Result<Vec<_>, _> = tree
                     .children()

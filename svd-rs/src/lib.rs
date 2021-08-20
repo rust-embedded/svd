@@ -41,7 +41,7 @@ pub mod registerproperties;
 pub use self::registerproperties::RegisterProperties;
 
 pub mod addressblock;
-pub use self::addressblock::AddressBlock;
+pub use self::addressblock::{AddressBlock, AddressBlockUsage};
 
 pub mod cluster;
 pub use self::cluster::Cluster;
