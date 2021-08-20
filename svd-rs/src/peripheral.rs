@@ -49,7 +49,7 @@ pub struct Peripheral {
     /// Specify an address range uniquely mapped to this peripheral
     #[cfg_attr(feature = "serde", serde(default))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub address_block: Option<AddressBlock>,
+    pub address_block: Option<Vec<AddressBlock>>,
 
     /// A peripheral can have multiple associated interrupts
     #[cfg_attr(feature = "serde", serde(default))]
@@ -77,7 +77,7 @@ pub struct PeripheralBuilder {
     group_name: Option<String>,
     base_address: Option<u64>,
     default_register_properties: RegisterProperties,
-    address_block: Option<AddressBlock>,
+    address_block: Option<Vec<AddressBlock>>,
     interrupt: Vec<Interrupt>,
     registers: Option<Vec<RegisterCluster>>,
     derived_from: Option<String>,
@@ -130,7 +130,7 @@ impl PeripheralBuilder {
         self.default_register_properties = value;
         self
     }
-    pub fn address_block(mut self, value: Option<AddressBlock>) -> Self {
+    pub fn address_block(mut self, value: Option<Vec<AddressBlock>>) -> Self {
         self.address_block = value;
         self
     }

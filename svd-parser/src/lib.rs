@@ -187,6 +187,8 @@ pub enum SVDError {
     MoreThanOneWriteConstraint,
     #[error("Unknown usage variant")]
     UnknownUsageVariant,
+    #[error("Unknown usage variant for addressBlock")]
+    UnknownAddressBlockUsageVariant,
     #[error("Expected a <{0}>, found ...")]
     NotExpectedTag(String),
     #[error("Invalid RegisterCluster (expected register or cluster), found {0}")]
