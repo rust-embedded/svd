@@ -4,5 +4,6 @@ members = [
     "svd-parser",
     "svd-encoder",
     "svdcheck",
+    "svdpatch",
     "tests",
 ]
