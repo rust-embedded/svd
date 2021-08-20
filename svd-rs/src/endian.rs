@@ -17,11 +17,20 @@ impl Default for Endian {
 impl Endian {
     pub fn from_str(s: &str) -> Option<Self> {
         match s {
-            "little" => Some(Endian::Little),
-            "big" => Some(Endian::Big),
-            "selectable" => Some(Endian::Selectable),
-            "other" => Some(Endian::Other),
+            "little" => Some(Self::Little),
+            "big" => Some(Self::Big),
+            "selectable" => Some(Self::Selectable),
+            "other" => Some(Self::Other),
             _ => None,
+        }
+    }
+
+    pub const fn to_str(self) -> &'static str {
+        match self {
+            Self::Little => "little",
+            Self::Big => "big",
+            Self::Selectable => "selectable",
+            Self::Other => "other",
         }
     }
 }

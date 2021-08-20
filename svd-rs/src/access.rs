@@ -54,12 +54,22 @@ impl Default for Access {
 impl Access {
     pub fn from_str(s: &str) -> Option<Self> {
         match s {
-            "read-only" => Some(Access::ReadOnly),
-            "read-write" => Some(Access::ReadWrite),
-            "read-writeOnce" => Some(Access::ReadWriteOnce),
-            "write-only" => Some(Access::WriteOnly),
-            "writeOnce" => Some(Access::WriteOnce),
+            "read-only" => Some(Self::ReadOnly),
+            "read-write" => Some(Self::ReadWrite),
+            "read-writeOnce" => Some(Self::ReadWriteOnce),
+            "write-only" => Some(Self::WriteOnly),
+            "writeOnce" => Some(Self::WriteOnce),
             _ => None,
+        }
+    }
+
+    pub const fn to_str(self) -> &'static str {
+        match self {
+            Self::ReadOnly => "read-only",
+            Self::ReadWrite => "read-write",
+            Self::ReadWriteOnce => "read-writeOnce",
+            Self::WriteOnly => "write-only",
+            Self::WriteOnce => "writeOnce",
         }
     }
 }
