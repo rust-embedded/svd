@@ -1,0 +1,21 @@
+[package]
+name = "svdpatch"
+authors = ["The Tools Team <tools@teams.rust-embedded.org>"]
+version = "0.1.0"
+edition = "2018"
+description = "A CMSIS-SVD file parser"
+documentation = "https://docs.rs/svd-parser"
+keywords = ["CMSIS", "SVD"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/rust-embedded/svd"
+readme = "README.md"
+
+[dependencies]
+yaml-rust = "0.4"
+thiserror = "1.0"
+linked-hash-map = "0.5"
+globset = "0.4.8"
+regex = "1.5.4"
+commands = "0.0.5"
+svd-parser = { version = "0.10.2", path = "../svd-parser"}
+svd-encoder = { version = "0.10.2", path = "../svd-encoder"}
