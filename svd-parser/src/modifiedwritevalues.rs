@@ -7,20 +7,9 @@ impl Parse for ModifiedWriteValues {
     type Config = Config;
 
     fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
-        use self::ModifiedWriteValues::*;
         let text = tree.get_text()?;
 
-        Ok(match text {
-            "oneToClear" => OneToClear,
-            "oneToSet" => OneToSet,
-            "oneToToggle" => OneToToggle,
-            "zeroToClear" => ZeroToClear,
-            "zeroToSet" => ZeroToSet,
-            "zeroToToggle" => ZeroToToggle,
-            "clear" => Clear,
-            "set" => Set,
-            "modify" => Modify,
-            s => return Err(SVDError::InvalidModifiedWriteValues(s.into()).at(tree.id())),
-        })
+        Self::from_str(text)
+            .ok_or_else(|| SVDError::InvalidModifiedWriteValues(text.into()).at(tree.id()))
     }
 }
