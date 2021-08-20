@@ -50,3 +50,16 @@ impl Default for Access {
         Self::ReadWrite
     }
 }
+
+impl Access {
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "read-only" => Some(Access::ReadOnly),
+            "read-write" => Some(Access::ReadWrite),
+            "read-writeOnce" => Some(Access::ReadWriteOnce),
+            "write-only" => Some(Access::WriteOnly),
+            "writeOnce" => Some(Access::WriteOnce),
+            _ => None,
+        }
+    }
+}

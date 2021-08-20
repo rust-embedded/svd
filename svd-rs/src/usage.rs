@@ -14,3 +14,14 @@ impl Default for Usage {
         Self::ReadWrite
     }
 }
+
+impl Usage {
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "read" => Some(Usage::Read),
+            "write" => Some(Usage::Write),
+            "read-write" => Some(Usage::ReadWrite),
+            _ => None,
+        }
+    }
+}
