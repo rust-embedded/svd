@@ -54,4 +54,18 @@ impl ModifiedWriteValues {
             _ => None,
         }
     }
+
+    pub const fn to_str(self) -> &'static str {
+        match self {
+            Self::OneToClear => "oneToClear",
+            Self::OneToSet => "oneToSet",
+            Self::OneToToggle => "oneToToggle",
+            Self::ZeroToClear => "zeroToClear",
+            Self::ZeroToSet => "zeroToSet",
+            Self::ZeroToToggle => "zeroToToggle",
+            Self::Clear => "clear",
+            Self::Set => "set",
+            Self::Modify => "modify",
+        }
+    }
 }
