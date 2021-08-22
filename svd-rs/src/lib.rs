@@ -81,6 +81,18 @@ impl Default for ValidateLevel {
 }
 
 impl ValidateLevel {
+    pub fn is_disabled(self) -> bool {
+        self == ValidateLevel::Disabled
+    }
+}
+
+impl ValidateLevel {
+    pub fn is_weak(self) -> bool {
+        self != ValidateLevel::Disabled
+    }
+}
+
+impl ValidateLevel {
     pub fn is_strict(self) -> bool {
         self == ValidateLevel::Strict
     }

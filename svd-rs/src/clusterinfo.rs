@@ -63,7 +63,7 @@ impl From<ClusterInfo> for ClusterInfoBuilder {
             description: c.description,
             header_struct_name: c.header_struct_name,
             address_offset: Some(c.address_offset),
-            default_register_properties: c.default_register_properties,
+            default_register_properties: c.default_register_properties.into(),
             children: Some(c.children),
             derived_from: c.derived_from,
         }
@@ -100,7 +100,7 @@ impl ClusterInfoBuilder {
         self
     }
     pub fn build(self, lvl: ValidateLevel) -> Result<ClusterInfo, SvdError> {
-        (ClusterInfo {
+        let mut cluster = ClusterInfo {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
@@ -109,13 +109,16 @@ impl ClusterInfoBuilder {
             address_offset: self
                 .address_offset
                 .ok_or_else(|| BuildError::Uninitialized("address_offset".to_string()))?,
-            default_register_properties: self.default_register_properties,
+            default_register_properties: self.default_register_properties.build(lvl)?,
             children: self
                 .children
                 .ok_or_else(|| BuildError::Uninitialized("children".to_string()))?,
             derived_from: self.derived_from,
-        })
-        .validate(lvl)
+        };
+        if !lvl.is_disabled() {
+            cluster.validate(lvl)?;
+        }
+        Ok(cluster)
     }
 }
 
@@ -124,21 +127,53 @@ impl ClusterInfo {
         ClusterInfoBuilder::default()
     }
 
-    #[allow(clippy::unnecessary_wraps)]
-    fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
+    pub fn modify_from(
+        &mut self,
+        builder: ClusterInfoBuilder,
+        lvl: ValidateLevel,
+    ) -> Result<(), SvdError> {
+        if let Some(name) = builder.name {
+            self.name = name;
+        }
+        if builder.description.is_some() {
+            self.description = builder.description;
+        }
+        if builder.header_struct_name.is_some() {
+            self.header_struct_name = builder.header_struct_name;
+        }
+        if let Some(address_offset) = builder.address_offset {
+            self.address_offset = address_offset;
+        }
+        if builder.derived_from.is_some() {
+            self.derived_from = builder.derived_from;
+            self.children = Vec::new();
+            self.default_register_properties = RegisterProperties::default();
+        } else {
+            self.default_register_properties
+                .modify_from(builder.default_register_properties, lvl)?;
+            if let Some(children) = builder.children {
+                self.children = children;
+            }
+        }
+        if !lvl.is_disabled() {
+            self.validate(lvl)
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
         if lvl.is_strict() {
             super::check_dimable_name(&self.name, "name")?;
         }
-        if let Some(_name) = self.derived_from.as_ref() {
+        if let Some(name) = self.derived_from.as_ref() {
             if lvl.is_strict() {
-                super::check_derived_name(_name, "derivedFrom")?;
+                super::check_derived_name(name, "derivedFrom")?;
             }
-        } else if self.children.is_empty() {
-            if lvl.is_strict() {
-                return Err(Error::EmptyCluster)?;
-            }
+        } else if self.children.is_empty() && lvl.is_strict() {
+            return Err(Error::EmptyCluster.into());
         }
-        Ok(self)
+        Ok(())
     }
 }
 

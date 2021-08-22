@@ -32,7 +32,7 @@ impl Parse for Device {
                 ps?
             })
             .schema_version(tree.attribute("schemaVersion").map(|s| s.to_string()))
-            .build()
+            .build(config.validate_level)
             .map_err(|e| SVDError::from(e).at(tree.id()))
     }
 }
