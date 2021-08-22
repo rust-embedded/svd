@@ -30,18 +30,12 @@ pub enum Access {
 impl Access {
     /// Whether the register/field is readable at least once.
     pub fn can_read(self) -> bool {
-        match self {
-            Self::ReadOnly | Self::ReadWrite | Self::ReadWriteOnce => true,
-            _ => false,
-        }
+        matches!(self, Self::ReadOnly | Self::ReadWrite | Self::ReadWriteOnce)
     }
 
     /// Whether the register/field is writable at least once.
     pub fn can_write(self) -> bool {
-        match self {
-            Self::ReadOnly => false,
-            _ => true,
-        }
+        matches!(self, Self::ReadOnly)
     }
 }
 

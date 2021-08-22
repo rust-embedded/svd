@@ -112,7 +112,6 @@ impl Cpu {
     pub fn builder() -> CpuBuilder {
         CpuBuilder::default()
     }
-    #[allow(clippy::unnecessary_wraps)]
     fn validate(self, _lvl: ValidateLevel) -> Result<Self, SvdError> {
         // TODO
         Ok(self)

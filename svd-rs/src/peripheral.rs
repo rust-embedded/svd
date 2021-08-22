@@ -92,7 +92,7 @@ impl From<Peripheral> for PeripheralBuilder {
             description: p.description,
             group_name: p.group_name,
             base_address: Some(p.base_address),
-            default_register_properties: p.default_register_properties,
+            default_register_properties: p.default_register_properties.into(),
             address_block: p.address_block,
             interrupt: p.interrupt,
             registers: p.registers,
@@ -158,7 +158,7 @@ impl PeripheralBuilder {
             base_address: self
                 .base_address
                 .ok_or_else(|| BuildError::Uninitialized("base_address".to_string()))?,
-            default_register_properties: self.default_register_properties,
+            default_register_properties: self.default_register_properties.build(lvl)?,
             address_block: self.address_block,
             interrupt: self.interrupt,
             registers: self.registers,
@@ -172,21 +172,19 @@ impl Peripheral {
     pub fn builder() -> PeripheralBuilder {
         PeripheralBuilder::default()
     }
-    #[allow(clippy::unnecessary_wraps)]
+
     fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
         // TODO
         if lvl.is_strict() {
             super::check_dimable_name(&self.name, "name")?;
         }
-        if let Some(_name) = self.derived_from.as_ref() {
+        if let Some(name) = self.derived_from.as_ref() {
             if lvl.is_strict() {
-                super::check_dimable_name(_name, "derivedFrom")?;
+                super::check_dimable_name(name, "derivedFrom")?;
             }
         } else if let Some(registers) = self.registers.as_ref() {
-            if registers.is_empty() {
-                if lvl.is_strict() {
-                    return Err(Error::EmptyRegisters)?;
-                }
+            if registers.is_empty() && lvl.is_strict() {
+                return Err(Error::EmptyRegisters.into());
             }
         }
         Ok(self)

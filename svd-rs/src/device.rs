@@ -1,4 +1,4 @@
-use super::{BuildError, Cpu, Peripheral, RegisterProperties, SvdError};
+use super::{BuildError, Cpu, Peripheral, RegisterProperties, SvdError, ValidateLevel};
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
@@ -76,7 +76,7 @@ impl From<Device> for DeviceBuilder {
             name: Some(d.name),
             version: d.version,
             description: d.description,
-            cpu: d.cpu,
+            cpu: d.cpu.map(Into::into),
             address_unit_bits: d.address_unit_bits,
             width: d.width,
             default_register_properties: d.default_register_properties,
@@ -123,8 +123,8 @@ impl DeviceBuilder {
         self.schema_version = value;
         self
     }
-    pub fn build(self) -> Result<Device, SvdError> {
-        (Device {
+    pub fn build(self, lvl: ValidateLevel) -> Result<Device, SvdError> {
+        let mut device = Device {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
@@ -133,13 +133,16 @@ impl DeviceBuilder {
             cpu: self.cpu,
             address_unit_bits: self.address_unit_bits,
             width: self.width,
-            default_register_properties: self.default_register_properties,
+            default_register_properties: self.default_register_properties.build(lvl)?,
             peripherals: self
                 .peripherals
                 .ok_or_else(|| BuildError::Uninitialized("peripherals".to_string()))?,
             schema_version: self.schema_version,
-        })
-        .validate()
+        };
+        if !lvl.is_disabled() {
+            device.validate(lvl)?;
+        }
+        Ok(device)
     }
 }
 
@@ -147,11 +150,11 @@ impl Device {
     pub fn builder() -> DeviceBuilder {
         DeviceBuilder::default()
     }
-    fn validate(self) -> Result<Self, SvdError> {
+    pub fn validate(&mut self, _lvl: ValidateLevel) -> Result<(), SvdError> {
         // TODO
         if self.peripherals.is_empty() {
             return Err(Error::EmptyDevice.into());
         }
-        Ok(self)
+        Ok(())
     }
 }
