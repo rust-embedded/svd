@@ -81,7 +81,7 @@ impl CpuBuilder {
         self
     }
     pub fn build(self, lvl: ValidateLevel) -> Result<Cpu, SvdError> {
-        (Cpu {
+        let mut cpu = Cpu {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
@@ -103,8 +103,11 @@ impl CpuBuilder {
             has_vendor_systick: self
                 .has_vendor_systick
                 .ok_or_else(|| BuildError::Uninitialized("has_vendor_systick".to_string()))?,
-        })
-        .validate(lvl)
+        };
+        if !lvl.is_disabled() {
+            cpu.validate(lvl)?;
+        }
+        Ok(cpu)
     }
 }
 
@@ -112,9 +115,37 @@ impl Cpu {
     pub fn builder() -> CpuBuilder {
         CpuBuilder::default()
     }
-    fn validate(self, _lvl: ValidateLevel) -> Result<Self, SvdError> {
+    pub fn modify_from(&mut self, builder: CpuBuilder, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if let Some(name) = builder.name {
+            self.name = name;
+        }
+        if let Some(revision) = builder.revision {
+            self.revision = revision;
+        }
+        if let Some(endian) = builder.endian {
+            self.endian = endian;
+        }
+        if let Some(mpu_present) = builder.mpu_present {
+            self.mpu_present = mpu_present;
+        }
+        if let Some(fpu_present) = builder.fpu_present {
+            self.fpu_present = fpu_present;
+        }
+        if let Some(nvic_priority_bits) = builder.nvic_priority_bits {
+            self.nvic_priority_bits = nvic_priority_bits;
+        }
+        if let Some(has_vendor_systick) = builder.has_vendor_systick {
+            self.has_vendor_systick = has_vendor_systick;
+        }
+        if !lvl.is_disabled() {
+            self.validate(lvl)
+        } else {
+            Ok(())
+        }
+    }
+    pub fn validate(&mut self, _lvl: ValidateLevel) -> Result<(), SvdError> {
         // TODO
-        Ok(self)
+        Ok(())
     }
     pub fn is_cortex_m(&self) -> bool {
         self.name.starts_with("CM")

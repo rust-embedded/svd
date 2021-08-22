@@ -1,6 +1,6 @@
 use super::{
-    bitrange, Access, BitRange, BuildError, EnumeratedValues, ModifiedWriteValues, SvdError, Usage,
-    ValidateLevel, WriteConstraint,
+    bitrange, Access, BitRange, BuildError, EmptyToNone, EnumeratedValues, ModifiedWriteValues,
+    SvdError, Usage, ValidateLevel, WriteConstraint,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
@@ -58,6 +58,8 @@ pub struct FieldInfoBuilder {
     name: Option<String>,
     description: Option<String>,
     bit_range: Option<BitRange>,
+    bit_offset: Option<u32>,
+    bit_width: Option<u32>,
     access: Option<Access>,
     modified_write_values: Option<ModifiedWriteValues>,
     write_constraint: Option<WriteConstraint>,
@@ -71,6 +73,8 @@ impl From<FieldInfo> for FieldInfoBuilder {
             name: Some(f.name),
             description: f.description,
             bit_range: Some(f.bit_range),
+            bit_offset: None,
+            bit_width: None,
             access: f.access,
             modified_write_values: f.modified_write_values,
             write_constraint: f.write_constraint,
@@ -91,6 +95,30 @@ impl FieldInfoBuilder {
     }
     pub fn bit_range(mut self, value: BitRange) -> Self {
         self.bit_range = Some(value);
+        self.bit_offset = None;
+        self.bit_width = None;
+        self
+    }
+    pub fn bit_offset(mut self, value: u32) -> Self {
+        if let Some(bit_range) = self.bit_range.as_mut() {
+            bit_range.offset = value;
+        } else if let Some(width) = self.bit_offset {
+            self.bit_range = Some(BitRange::from_offset_width(value, width));
+            self.bit_width = None;
+        } else {
+            self.bit_offset = Some(value);
+        }
+        self
+    }
+    pub fn bit_width(mut self, value: u32) -> Self {
+        if let Some(bit_range) = self.bit_range.as_mut() {
+            bit_range.width = value;
+        } else if let Some(offset) = self.bit_offset {
+            self.bit_range = Some(BitRange::from_offset_width(offset, value));
+            self.bit_offset = None;
+        } else {
+            self.bit_width = Some(value);
+        }
         self
     }
     pub fn access(mut self, value: Option<Access>) -> Self {
@@ -118,7 +146,7 @@ impl FieldInfoBuilder {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
-            description: self.description,
+            description: self.description.empty_to_none(),
             bit_range: self
                 .bit_range
                 .ok_or_else(|| BuildError::Uninitialized("bit_range".to_string()))?,
@@ -148,10 +176,16 @@ impl FieldInfo {
             self.name = name;
         }
         if builder.description.is_some() {
-            self.description = builder.description;
+            self.description = builder.description.empty_to_none();
         }
         if let Some(bit_range) = builder.bit_range {
             self.bit_range = bit_range;
+        }
+        if let Some(offset) = builder.bit_offset {
+            self.bit_range.offset = offset;
+        }
+        if let Some(width) = builder.bit_width {
+            self.bit_range.width = width;
         }
         if builder.access.is_some() {
             self.access = builder.access;

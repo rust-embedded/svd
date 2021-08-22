@@ -1,7 +1,7 @@
 use super::{
     register::{RegIter, RegIterMut},
-    AddressBlock, BuildError, Interrupt, RegisterCluster, RegisterProperties, SvdError,
-    ValidateLevel,
+    AddressBlock, BuildError, EmptyToNone, Interrupt, RegisterCluster, RegisterProperties,
+    SvdError, ValidateLevel,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
@@ -92,7 +92,7 @@ impl From<Peripheral> for PeripheralBuilder {
             description: p.description,
             group_name: p.group_name,
             base_address: Some(p.base_address),
-            default_register_properties: p.default_register_properties.into(),
+            default_register_properties: p.default_register_properties,
             address_block: p.address_block,
             interrupt: p.interrupt,
             registers: p.registers,
@@ -147,14 +147,14 @@ impl PeripheralBuilder {
         self
     }
     pub fn build(self, lvl: ValidateLevel) -> Result<Peripheral, SvdError> {
-        (Peripheral {
+        let mut per = Peripheral {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
-            display_name: self.display_name,
-            version: self.version,
-            description: self.description,
-            group_name: self.group_name,
+            display_name: self.display_name.empty_to_none(),
+            version: self.version.empty_to_none(),
+            description: self.description.empty_to_none(),
+            group_name: self.group_name.empty_to_none(),
             base_address: self
                 .base_address
                 .ok_or_else(|| BuildError::Uninitialized("base_address".to_string()))?,
@@ -163,8 +163,11 @@ impl PeripheralBuilder {
             interrupt: self.interrupt,
             registers: self.registers,
             derived_from: self.derived_from,
-        })
-        .validate(lvl)
+        };
+        if !lvl.is_disabled() {
+            per.validate(lvl)?;
+        }
+        Ok(per)
     }
 }
 
@@ -172,8 +175,55 @@ impl Peripheral {
     pub fn builder() -> PeripheralBuilder {
         PeripheralBuilder::default()
     }
+    pub fn modify_from(
+        &mut self,
+        builder: PeripheralBuilder,
+        lvl: ValidateLevel,
+    ) -> Result<(), SvdError> {
+        if let Some(name) = builder.name {
+            self.name = name;
+        }
+        if builder.display_name.is_some() {
+            self.display_name = builder.display_name.empty_to_none();
+        }
+        if builder.version.is_some() {
+            self.version = builder.version.empty_to_none();
+        }
+        if builder.description.is_some() {
+            self.description = builder.description.empty_to_none();
+        }
+        if builder.group_name.is_some() {
+            self.group_name = builder.group_name.empty_to_none();
+        }
+        if let Some(base_address) = builder.base_address {
+            self.base_address = base_address;
+        }
+        if !builder.interrupt.is_empty() {
+            self.interrupt = builder.interrupt;
+        }
+        if builder.derived_from.is_some() {
+            self.derived_from = builder.derived_from;
+            self.registers = None;
+            self.address_block = None;
+            self.default_register_properties = RegisterProperties::default();
+        } else {
+            if builder.address_block.is_some() {
+                self.address_block = builder.address_block;
+            }
+            self.default_register_properties
+                .modify_from(builder.default_register_properties, lvl)?;
+            if builder.registers.is_some() {
+                self.registers = builder.registers.empty_to_none();
+            }
+        }
+        if !lvl.is_disabled() {
+            self.validate(lvl)
+        } else {
+            Ok(())
+        }
+    }
 
-    fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
+    pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
         // TODO
         if lvl.is_strict() {
             super::check_dimable_name(&self.name, "name")?;
@@ -187,7 +237,7 @@ impl Peripheral {
                 return Err(Error::EmptyRegisters.into());
             }
         }
-        Ok(self)
+        Ok(())
     }
 
     /// returns iterator over all registers peripheral contains

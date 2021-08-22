@@ -11,8 +11,7 @@ impl Encode for ClusterInfo {
         e.children.push(new_element("name", Some(e.name.clone())));
 
         if let Some(v) = &self.description {
-            e.attributes
-                .insert(String::from("description"), v.to_string());
+            e.children.push(new_element("description", Some(v.clone())));
         }
 
         if let Some(v) = &self.header_struct_name {
