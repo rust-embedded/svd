@@ -1,4 +1,4 @@
-use super::{BuildError, SvdError, ValidateLevel};
+use super::{BuildError, EmptyToNone, SvdError, ValidateLevel};
 
 /// Describes a single entry in the enumeration.
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -70,15 +70,18 @@ impl EnumeratedValueBuilder {
         self
     }
     pub fn build(self, lvl: ValidateLevel) -> Result<EnumeratedValue, SvdError> {
-        (EnumeratedValue {
+        let mut ev = EnumeratedValue {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
-            description: self.description,
+            description: self.description.empty_to_none(),
             value: self.value,
             is_default: self.is_default,
-        })
-        .validate(lvl)
+        };
+        if !lvl.is_disabled() {
+            ev.validate(lvl)?;
+        }
+        Ok(ev)
     }
 }
 
@@ -86,12 +89,35 @@ impl EnumeratedValue {
     pub fn builder() -> EnumeratedValueBuilder {
         EnumeratedValueBuilder::default()
     }
-    fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
+    pub fn modify_from(
+        &mut self,
+        builder: EnumeratedValueBuilder,
+        lvl: ValidateLevel,
+    ) -> Result<(), SvdError> {
+        if let Some(name) = builder.name {
+            self.name = name;
+        }
+        if builder.description.is_some() {
+            self.description = builder.description.empty_to_none();
+        }
+        if builder.value.is_some() {
+            self.value = builder.value;
+        }
+        if builder.is_default.is_some() {
+            self.is_default = builder.is_default;
+        }
+        if !lvl.is_disabled() {
+            self.validate(lvl)
+        } else {
+            Ok(())
+        }
+    }
+    pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
         if lvl.is_strict() {
             super::check_name(&self.name, "name")?;
         }
         match (&self.value, &self.is_default) {
-            (Some(_), None) | (None, Some(_)) => Ok(self),
+            (Some(_), None) | (None, Some(_)) => Ok(()),
             _ => Err(Error::AbsentValue(self.value, self.is_default).into()),
         }
     }

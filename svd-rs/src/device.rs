@@ -1,4 +1,6 @@
-use super::{BuildError, Cpu, Peripheral, RegisterProperties, SvdError, ValidateLevel};
+use super::{
+    BuildError, Cpu, EmptyToNone, Peripheral, RegisterProperties, SvdError, ValidateLevel,
+};
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
@@ -149,6 +151,40 @@ impl DeviceBuilder {
 impl Device {
     pub fn builder() -> DeviceBuilder {
         DeviceBuilder::default()
+    }
+    pub fn modify_from(
+        &mut self,
+        builder: DeviceBuilder,
+        lvl: ValidateLevel,
+    ) -> Result<(), SvdError> {
+        if let Some(name) = builder.name {
+            self.name = name;
+        }
+        if builder.version.is_some() {
+            self.version = builder.version.empty_to_none();
+        }
+        if builder.description.is_some() {
+            self.description = builder.description.empty_to_none();
+        }
+        if builder.cpu.is_some() {
+            self.cpu = builder.cpu;
+        }
+        if builder.address_unit_bits.is_some() {
+            self.address_unit_bits = builder.address_unit_bits;
+        }
+        if builder.width.is_some() {
+            self.width = builder.width;
+        }
+        self.default_register_properties
+            .modify_from(builder.default_register_properties, lvl)?;
+        if let Some(peripherals) = builder.peripherals {
+            self.peripherals = peripherals;
+        }
+        if !lvl.is_disabled() {
+            self.validate(lvl)
+        } else {
+            Ok(())
+        }
     }
     pub fn validate(&mut self, _lvl: ValidateLevel) -> Result<(), SvdError> {
         // TODO

@@ -1,4 +1,4 @@
-use super::{EnumeratedValue, SvdError, Usage, ValidateLevel};
+use super::{EmptyToNone, EnumeratedValue, SvdError, Usage, ValidateLevel};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -66,13 +66,16 @@ impl EnumeratedValuesBuilder {
         self
     }
     pub fn build(self, lvl: ValidateLevel) -> Result<EnumeratedValues, SvdError> {
-        (EnumeratedValues {
-            name: self.name,
+        let mut evs = EnumeratedValues {
+            name: self.name.empty_to_none(),
             usage: self.usage,
             derived_from: self.derived_from,
             values: self.values.unwrap_or_default(),
-        })
-        .validate(lvl)
+        };
+        if !lvl.is_disabled() {
+            evs.validate(lvl)?;
+        }
+        Ok(evs)
     }
 }
 
@@ -80,7 +83,33 @@ impl EnumeratedValues {
     pub fn builder() -> EnumeratedValuesBuilder {
         EnumeratedValuesBuilder::default()
     }
-    fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
+    pub fn modify_from(
+        &mut self,
+        builder: EnumeratedValuesBuilder,
+        lvl: ValidateLevel,
+    ) -> Result<(), SvdError> {
+        if builder.derived_from.is_some() {
+            self.name = None;
+            self.usage = None;
+            self.values = Vec::new();
+        } else {
+            if builder.name.is_some() {
+                self.name = builder.name.empty_to_none();
+            }
+            if builder.usage.is_some() {
+                self.usage = builder.usage;
+            }
+            if let Some(values) = builder.values {
+                self.values = values;
+            }
+        }
+        if !lvl.is_disabled() {
+            self.validate(lvl)
+        } else {
+            Ok(())
+        }
+    }
+    pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
         if lvl.is_strict() {
             if let Some(name) = self.name.as_ref() {
                 super::check_name(name, "name")?;
@@ -90,11 +119,11 @@ impl EnumeratedValues {
             if lvl.is_strict() {
                 super::check_derived_name(_dname, "derivedFrom")?;
             }
-            Ok(self)
+            Ok(())
         } else if self.values.is_empty() {
             Err(Error::Empty.into())
         } else {
-            Ok(self)
+            Ok(())
         }
     }
     pub(crate) fn check_range(&self, range: core::ops::Range<u64>) -> Result<(), SvdError> {

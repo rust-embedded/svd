@@ -1,6 +1,6 @@
 use super::{
     register::{RegIter, RegIterMut},
-    BuildError, RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
+    BuildError, EmptyToNone, RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
@@ -63,7 +63,7 @@ impl From<ClusterInfo> for ClusterInfoBuilder {
             description: c.description,
             header_struct_name: c.header_struct_name,
             address_offset: Some(c.address_offset),
-            default_register_properties: c.default_register_properties.into(),
+            default_register_properties: c.default_register_properties,
             children: Some(c.children),
             derived_from: c.derived_from,
         }
@@ -104,8 +104,8 @@ impl ClusterInfoBuilder {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
-            description: self.description,
-            header_struct_name: self.header_struct_name,
+            description: self.description.empty_to_none(),
+            header_struct_name: self.header_struct_name.empty_to_none(),
             address_offset: self
                 .address_offset
                 .ok_or_else(|| BuildError::Uninitialized("address_offset".to_string()))?,
@@ -136,10 +136,10 @@ impl ClusterInfo {
             self.name = name;
         }
         if builder.description.is_some() {
-            self.description = builder.description;
+            self.description = builder.description.empty_to_none();
         }
         if builder.header_struct_name.is_some() {
-            self.header_struct_name = builder.header_struct_name;
+            self.header_struct_name = builder.header_struct_name.empty_to_none();
         }
         if let Some(address_offset) = builder.address_offset {
             self.address_offset = address_offset;
