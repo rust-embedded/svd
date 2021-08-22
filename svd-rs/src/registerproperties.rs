@@ -37,26 +37,37 @@ pub struct RegisterProperties {
     pub reset_mask: Option<u64>,
 }
 
-#[derive(Clone, Copy, Debug, Default)]
-pub struct RegisterPropertiesBuilder {
-    pub size: Option<u32>,
-    pub access: Option<Access>,
-    pub reset_value: Option<u64>,
-    pub reset_mask: Option<u64>,
-}
-
-impl From<RegisterProperties> for RegisterPropertiesBuilder {
-    fn from(p: RegisterProperties) -> Self {
-        Self {
-            size: p.size,
-            access: p.access,
-            reset_value: p.reset_value,
-            reset_mask: p.reset_mask,
+impl RegisterProperties {
+    pub fn builder() -> Self {
+        Self::default()
+    }
+    pub fn modify_from(
+        &mut self,
+        builder: RegisterProperties,
+        lvl: ValidateLevel,
+    ) -> Result<(), SvdError> {
+        if builder.size.is_some() {
+            self.size = builder.size;
+        }
+        if builder.access.is_some() {
+            self.access = builder.access;
+        }
+        if builder.reset_value.is_some() {
+            self.reset_value = builder.reset_value;
+        }
+        if builder.reset_mask.is_some() {
+            self.reset_mask = builder.reset_mask;
+        }
+        if !lvl.is_disabled() {
+            self.validate(lvl)
+        } else {
+            Ok(())
         }
     }
-}
-
-impl RegisterPropertiesBuilder {
+    pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        check_reset_value(self.size, self.reset_value, self.reset_mask, lvl)?;
+        Ok(())
+    }
     pub fn size(mut self, value: Option<u32>) -> Self {
         self.size = value;
         self
@@ -73,23 +84,10 @@ impl RegisterPropertiesBuilder {
         self.reset_mask = value;
         self
     }
-    pub fn build(self, lvl: ValidateLevel) -> Result<RegisterProperties, SvdError> {
-        RegisterProperties {
-            size: self.size,
-            access: self.access,
-            reset_value: self.reset_value,
-            reset_mask: self.reset_mask,
+    pub fn build(mut self, lvl: ValidateLevel) -> Result<RegisterProperties, SvdError> {
+        if !lvl.is_disabled() {
+            self.validate(lvl)?;
         }
-        .validate(lvl)
-    }
-}
-
-impl RegisterProperties {
-    pub fn builder() -> RegisterPropertiesBuilder {
-        RegisterPropertiesBuilder::default()
-    }
-    fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
-        check_reset_value(self.size, self.reset_value, self.reset_mask, lvl)?;
         Ok(self)
     }
 }
@@ -97,7 +95,7 @@ impl RegisterProperties {
 pub(crate) fn check_reset_value(
     size: Option<u32>,
     value: Option<u64>,
-    _mask: Option<u64>,
+    mask: Option<u64>,
     lvl: ValidateLevel,
 ) -> Result<(), Error> {
     const MAX_BITS: u32 = core::u64::MAX.count_ones();
@@ -108,12 +106,12 @@ pub(crate) fn check_reset_value(
         }
     }
     if lvl.is_strict() {
-        if let (Some(size), Some(mask)) = (size, _mask) {
+        if let (Some(size), Some(mask)) = (size, mask) {
             if MAX_BITS - mask.leading_zeros() > size {
                 return Err(Error::MaskTooLarge(mask, size));
             }
         }
-        if let (Some(value), Some(mask)) = (value, _mask) {
+        if let (Some(value), Some(mask)) = (value, mask) {
             if value & mask != value {
                 return Err(Error::MaskConflict(value, mask));
             }

@@ -92,7 +92,7 @@ impl From<RegisterInfo> for RegisterInfoBuilder {
             alternate_group: r.alternate_group,
             alternate_register: r.alternate_register,
             address_offset: Some(r.address_offset),
-            properties: r.properties,
+            properties: r.properties.into(),
             modified_write_values: r.modified_write_values,
             write_constraint: r.write_constraint,
             fields: r.fields,
@@ -174,7 +174,7 @@ impl RegisterInfoBuilder {
             address_offset: self
                 .address_offset
                 .ok_or_else(|| BuildError::Uninitialized("address_offset".to_string()))?,
-            properties: self.properties,
+            properties: self.properties.build(lvl)?,
             modified_write_values: self.modified_write_values,
             write_constraint: self.write_constraint,
             fields: self.fields,
@@ -188,7 +188,6 @@ impl RegisterInfo {
     pub fn builder() -> RegisterInfoBuilder {
         RegisterInfoBuilder::default()
     }
-    #[allow(clippy::unnecessary_wraps)]
     fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
         if lvl.is_strict() {
             super::check_dimable_name(&self.name, "name")?;
@@ -199,15 +198,13 @@ impl RegisterInfo {
                 super::check_dimable_name(name, "alternateRegister")?;
             }
         }
-        if let Some(_name) = self.derived_from.as_ref() {
+        if let Some(name) = self.derived_from.as_ref() {
             if lvl.is_strict() {
-                super::check_derived_name(_name, "derivedFrom")?;
+                super::check_derived_name(name, "derivedFrom")?;
             }
         } else if let Some(fields) = self.fields.as_ref() {
-            if fields.is_empty() {
-                if lvl.is_strict() {
-                    return Err(Error::EmptyFields)?;
-                }
+            if fields.is_empty() && lvl.is_strict() {
+                return Err(Error::EmptyFields.into());
             }
         }
         Ok(self)

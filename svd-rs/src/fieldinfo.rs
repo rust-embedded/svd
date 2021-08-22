@@ -114,7 +114,7 @@ impl FieldInfoBuilder {
         self
     }
     pub fn build(self, lvl: ValidateLevel) -> Result<FieldInfo, SvdError> {
-        (FieldInfo {
+        let mut field = FieldInfo {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
@@ -127,8 +127,11 @@ impl FieldInfoBuilder {
             write_constraint: self.write_constraint,
             enumerated_values: self.enumerated_values.unwrap_or_default(),
             derived_from: self.derived_from,
-        })
-        .validate(lvl)
+        };
+        if !lvl.is_disabled() {
+            field.validate(lvl)?;
+        }
+        Ok(field)
     }
 }
 
@@ -136,7 +139,46 @@ impl FieldInfo {
     pub fn builder() -> FieldInfoBuilder {
         FieldInfoBuilder::default()
     }
-    fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
+    pub fn modify_from(
+        &mut self,
+        builder: FieldInfoBuilder,
+        lvl: ValidateLevel,
+    ) -> Result<(), SvdError> {
+        if let Some(name) = builder.name {
+            self.name = name;
+        }
+        if builder.description.is_some() {
+            self.description = builder.description;
+        }
+        if let Some(bit_range) = builder.bit_range {
+            self.bit_range = bit_range;
+        }
+        if builder.access.is_some() {
+            self.access = builder.access;
+        }
+        if builder.derived_from.is_some() {
+            self.derived_from = builder.derived_from;
+            self.modified_write_values = None;
+            self.write_constraint = None;
+            self.enumerated_values = Vec::new();
+        } else {
+            if builder.modified_write_values.is_some() {
+                self.modified_write_values = builder.modified_write_values;
+            }
+            if builder.write_constraint.is_some() {
+                self.write_constraint = builder.write_constraint;
+            }
+            if let Some(enumerated_values) = builder.enumerated_values {
+                self.enumerated_values = enumerated_values;
+            }
+        }
+        if !lvl.is_disabled() {
+            self.validate(lvl)
+        } else {
+            Ok(())
+        }
+    }
+    pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
         if lvl.is_strict() {
             super::check_dimable_name(&self.name, "name")?;
             if let Some(name) = self.derived_from.as_ref() {
@@ -165,6 +207,6 @@ impl FieldInfo {
                 _ => return Err(Error::IncompatibleEnumeratedValues.into()),
             }
         }
-        Ok(self)
+        Ok(())
     }
 }
