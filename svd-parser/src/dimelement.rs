@@ -12,7 +12,7 @@ impl Parse for DimElement {
             .dim(tree.get_child_u32("dim")?)
             .dim_increment(tree.get_child_u32("dimIncrement")?)
             .dim_index(optional::<DimIndex>("dimIndex", tree, config)?)
-            .build()
+            .build(config.validate_level)
             .map_err(|e| SVDError::from(e).at(tree.id()))
     }
 }

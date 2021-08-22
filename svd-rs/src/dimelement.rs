@@ -1,4 +1,4 @@
-use super::{BuildError, SvdError};
+use super::{BuildError, EmptyToNone, SvdError, ValidateLevel};
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
@@ -48,21 +48,49 @@ impl DimElementBuilder {
         self.dim_index = value;
         self
     }
-    pub fn build(self) -> Result<DimElement, SvdError> {
-        Ok(DimElement {
+    pub fn build(self, lvl: ValidateLevel) -> Result<DimElement, SvdError> {
+        let mut de = DimElement {
             dim: self
                 .dim
                 .ok_or_else(|| BuildError::Uninitialized("dim".to_string()))?,
             dim_increment: self
                 .dim_increment
                 .ok_or_else(|| BuildError::Uninitialized("dim_increment".to_string()))?,
-            dim_index: self.dim_index,
-        })
+            dim_index: self.dim_index.empty_to_none(),
+        };
+        if !lvl.is_disabled() {
+            de.validate(lvl)?;
+        }
+        Ok(de)
     }
 }
 
 impl DimElement {
     pub fn builder() -> DimElementBuilder {
         DimElementBuilder::default()
+    }
+    pub fn modify_from(
+        &mut self,
+        builder: DimElementBuilder,
+        lvl: ValidateLevel,
+    ) -> Result<(), SvdError> {
+        if let Some(dim) = builder.dim {
+            self.dim = dim;
+        }
+        if let Some(dim_increment) = builder.dim_increment {
+            self.dim_increment = dim_increment;
+        }
+        if builder.dim_index.is_some() {
+            self.dim_index = builder.dim_index.empty_to_none();
+        }
+        if !lvl.is_disabled() {
+            self.validate(lvl)
+        } else {
+            Ok(())
+        }
+    }
+    pub fn validate(&mut self, _lvl: ValidateLevel) -> Result<(), SvdError> {
+        // TODO
+        Ok(())
     }
 }

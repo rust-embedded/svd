@@ -180,3 +180,19 @@ pub(crate) fn check_derived_name(name: &str, tag: &str) -> Result<(), NameError>
     }
     Ok(())
 }
+
+trait EmptyToNone {
+    fn empty_to_none(self) -> Self;
+}
+
+impl EmptyToNone for Option<String> {
+    fn empty_to_none(self) -> Self {
+        self.and_then(|s| if s.is_empty() { None } else { Some(s) })
+    }
+}
+
+impl<T> EmptyToNone for Option<Vec<T>> {
+    fn empty_to_none(self) -> Self {
+        self.and_then(|v| if v.is_empty() { None } else { Some(v) })
+    }
+}

@@ -1,6 +1,6 @@
 use super::{
-    Access, BuildError, Field, ModifiedWriteValues, RegisterProperties, SvdError, ValidateLevel,
-    WriteConstraint,
+    Access, BuildError, EmptyToNone, Field, ModifiedWriteValues, RegisterProperties, SvdError,
+    ValidateLevel, WriteConstraint,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
@@ -92,7 +92,7 @@ impl From<RegisterInfo> for RegisterInfoBuilder {
             alternate_group: r.alternate_group,
             alternate_register: r.alternate_register,
             address_offset: Some(r.address_offset),
-            properties: r.properties.into(),
+            properties: r.properties,
             modified_write_values: r.modified_write_values,
             write_constraint: r.write_constraint,
             fields: r.fields,
@@ -163,7 +163,7 @@ impl RegisterInfoBuilder {
         self
     }
     pub fn build(self, lvl: ValidateLevel) -> Result<RegisterInfo, SvdError> {
-        (RegisterInfo {
+        let mut reg = RegisterInfo {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
@@ -179,8 +179,11 @@ impl RegisterInfoBuilder {
             write_constraint: self.write_constraint,
             fields: self.fields,
             derived_from: self.derived_from,
-        })
-        .validate(lvl)
+        };
+        if !lvl.is_disabled() {
+            reg.validate(lvl)?;
+        }
+        Ok(reg)
     }
 }
 
@@ -188,7 +191,54 @@ impl RegisterInfo {
     pub fn builder() -> RegisterInfoBuilder {
         RegisterInfoBuilder::default()
     }
-    fn validate(self, lvl: ValidateLevel) -> Result<Self, SvdError> {
+    pub fn modify_from(
+        &mut self,
+        builder: RegisterInfoBuilder,
+        lvl: ValidateLevel,
+    ) -> Result<(), SvdError> {
+        if let Some(name) = builder.name {
+            self.name = name;
+        }
+        if builder.display_name.is_some() {
+            self.display_name = builder.display_name.empty_to_none();
+        }
+        if builder.description.is_some() {
+            self.description = builder.description.empty_to_none();
+        }
+        if builder.alternate_group.is_some() {
+            self.alternate_group = builder.alternate_group.empty_to_none();
+        }
+        if builder.alternate_register.is_some() {
+            self.alternate_register = builder.alternate_register.empty_to_none();
+        }
+        if let Some(address_offset) = builder.address_offset {
+            self.address_offset = address_offset;
+        }
+        if builder.derived_from.is_some() {
+            self.derived_from = builder.derived_from;
+            self.fields = None;
+            self.properties = RegisterProperties::default();
+            self.modified_write_values = None;
+            self.write_constraint = None;
+        } else {
+            self.properties.modify_from(builder.properties, lvl)?;
+            if builder.modified_write_values.is_some() {
+                self.modified_write_values = builder.modified_write_values;
+            }
+            if builder.write_constraint.is_some() {
+                self.write_constraint = builder.write_constraint;
+            }
+            if builder.fields.is_some() {
+                self.fields = builder.fields.empty_to_none();
+            }
+        }
+        if !lvl.is_disabled() {
+            self.validate(lvl)
+        } else {
+            Ok(())
+        }
+    }
+    pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
         if lvl.is_strict() {
             super::check_dimable_name(&self.name, "name")?;
             if let Some(name) = self.alternate_group.as_ref() {
@@ -207,6 +257,6 @@ impl RegisterInfo {
                 return Err(Error::EmptyFields.into());
             }
         }
-        Ok(self)
+        Ok(())
     }
 }
