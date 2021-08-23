@@ -347,8 +347,14 @@ impl DeviceExt for Device {
 
     fn process(&mut self, device: &Hash, update_fields: bool) {
         // Handle any deletions
-        for pspec in device.get_vec("_delete").unwrap_or(&Vec::new()) {
-            self.delete_peripheral(pspec.as_str().unwrap());
+        match device.get(&"_delete".to_yaml()) {
+            Some(Yaml::String(pspec)) => self.delete_peripheral(pspec),
+            Some(Yaml::Array(array)) => {
+                for pspec in array {
+                    self.delete_peripheral(pspec.as_str().unwrap());
+                }
+            }
+            _ => {}
         }
 
         // Handle any copied peripherals
@@ -783,9 +789,12 @@ impl PeripheralExt for Peripheral {
         // Handle deletions
         if let Some(deletions) = pmod.get(&"_delete".to_yaml()) {
             match deletions {
+                Yaml::String(rspec) => {
+                    self.delete_register(rspec);
+                }
                 Yaml::Array(deletions) => {
                     for rspec in deletions {
-                        self.delete_register(rspec.as_str().unwrap())
+                        self.delete_register(rspec.as_str().unwrap());
                     }
                 }
                 Yaml::Hash(deletions) => {
@@ -833,11 +842,23 @@ impl PeripheralExt for Peripheral {
         }
 
         // Handle strips
-        for prefix in pmod.get_vec("_strip").unwrap_or(&Vec::new()) {
-            self.strip(prefix.as_str().unwrap(), false);
+        match pmod.get(&"_strip".to_yaml()) {
+            Some(Yaml::String(prefix)) => self.strip(prefix, false),
+            Some(Yaml::Array(array)) => {
+                for prefix in array {
+                    self.strip(prefix.as_str().unwrap(), false);
+                }
+            }
+            _ => {}
         }
-        for suffix in pmod.get_vec("_strip_end").unwrap_or(&Vec::new()) {
-            self.strip(suffix.as_str().unwrap(), true);
+        match pmod.get(&"_strip_end".to_yaml()) {
+            Some(Yaml::String(suffix)) => self.strip(suffix, true),
+            Some(Yaml::Array(array)) => {
+                for suffix in array {
+                    self.strip(suffix.as_str().unwrap(), true);
+                }
+            }
+            _ => {}
         }
 
         // Handle additions
@@ -1292,8 +1313,14 @@ impl RegisterInfoExt for RegisterInfo {
 impl RegisterExt for Register {
     fn process(&mut self, rmod: &Hash, pname: &str, update_fields: bool) {
         // Handle deletions
-        for fspec in rmod.get_vec("_delete").unwrap_or(&Vec::new()) {
-            self.delete_field(fspec.as_str().unwrap())
+        match rmod.get(&"_delete".to_yaml()) {
+            Some(Yaml::String(fspec)) => self.delete_field(fspec),
+            Some(Yaml::Array(array)) => {
+                for fspec in array {
+                    self.delete_field(fspec.as_str().unwrap());
+                }
+            }
+            _ => {}
         }
 
         // Handle field clearing
@@ -1341,11 +1368,23 @@ impl RegisterExt for Register {
         }
 
         // Handle strips
-        for prefix in rmod.get_vec("_strip").unwrap_or(&Vec::new()) {
-            self.strip(prefix.as_str().unwrap(), false);
+        match rmod.get(&"_strip".to_yaml()) {
+            Some(Yaml::String(prefix)) => self.strip(prefix, false),
+            Some(Yaml::Array(array)) => {
+                for prefix in array {
+                    self.strip(prefix.as_str().unwrap(), false);
+                }
+            }
+            _ => {}
         }
-        for suffix in rmod.get_vec("_strip_end").unwrap_or(&Vec::new()) {
-            self.strip(suffix.as_str().unwrap(), true);
+        match rmod.get(&"_strip_end".to_yaml()) {
+            Some(Yaml::String(suffix)) => self.strip(suffix, true),
+            Some(Yaml::Array(array)) => {
+                for suffix in array {
+                    self.strip(suffix.as_str().unwrap(), true);
+                }
+            }
+            _ => {}
         }
 
         // Handle fields
