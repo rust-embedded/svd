@@ -1819,7 +1819,7 @@ fn make_address_block(h: &Hash) -> AddressBlock {
         offset: h.get_i64("offset").unwrap() as u32,
         size: h.get_i64("size").unwrap() as u32,
         usage: h
-            .get_str("size")
+            .get_str("usage")
             .and_then(AddressBlockUsage::from_str)
             .unwrap(),
     }
