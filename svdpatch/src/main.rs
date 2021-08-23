@@ -128,7 +128,13 @@ fn process_file(yaml_file: &Path) -> std::io::Result<()> {
     let f = File::open(svdpath)?;
     let mut contents = String::new();
     (&f).read_to_string(&mut contents)?;
-    let mut svd = svd_parser::parse(&contents).expect("Failed to parse input SVD");
+    let mut svd = svd_parser::parse_with_config(
+        &contents,
+        &svd_parser::Config {
+            validate_level: ValidateLevel::Disabled,
+        },
+    )
+    .expect("Failed to parse input SVD");
 
     // Load all included YAML files
     yaml_includes(root);
