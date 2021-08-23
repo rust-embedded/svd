@@ -1379,8 +1379,13 @@ impl RegisterExt for Register {
         }
 
         // Handle modifications
-        for (fspec, fmod) in rmod.get_hash("_modify").unwrap_or(&Hash::new()) {
-            self.modify_field(fspec.as_str().unwrap(), fmod.as_hash().unwrap())
+        if let Some(from) = rmod.get_hash("_modify") {
+            for (fspec, fmod) in from {
+                if let Yaml::Hash(fmod) = fmod {
+                    self.modify_field(fspec.as_str().unwrap(), fmod);
+                }
+            }
+            self.modify_from(make_register(&from), VAL_LVL).ok();
         }
         // Handle additions
         for (fname, fadd) in rmod.get_hash("_add").unwrap_or(&Hash::new()) {
