@@ -48,6 +48,7 @@ fn parse_i64(val: &Yaml) -> Option<i64> {
     match val {
         Yaml::Integer(i) => Some(*i),
         Yaml::String(text) => {
+            let text = text.replace("_", "");
             (if text.starts_with("0x") || text.starts_with("0X") {
                 i64::from_str_radix(&text["0x".len()..], 16)
             } else if text.starts_with('#') {
@@ -208,12 +209,44 @@ fn update_dict(parent: &mut Hash, child: &Hash) {
             key if parent.contains_key(key) => {
                 if let Entry::Occupied(mut e) = parent.entry(key.clone()) {
                     match e.get_mut() {
-                        Yaml::Array(a) => {
-                            a.extend(val.as_vec().unwrap().clone());
+                        el if el == val => {
+                            println!("In {:?}: dublicate rule {:?}, ignored", key, val);
                         }
+                        Yaml::Array(a) => match val {
+                            Yaml::Array(val) => {
+                                a.extend(val.clone());
+                            }
+                            Yaml::String(_) => {
+                                if !a.contains(val) {
+                                    a.push(val.clone());
+                                } else {
+                                    println!("In {:?}: dublicate rule {:?}, ignored", key, val);
+                                }
+                            }
+                            _ => {}
+                        },
                         Yaml::Hash(h) => {
                             update_dict(h, val.as_hash().unwrap());
                         }
+                        s if matches!(s, Yaml::String(_)) => match val {
+                            Yaml::Array(a) => {
+                                if !a.contains(s) {
+                                    let mut a = a.clone();
+                                    a.insert(0, s.clone());
+                                    e.insert(Yaml::Array(a));
+                                } else {
+                                    println!("In {:?}: dublicate rule {:?}, ignored", key, s);
+                                }
+                            }
+                            s2 if matches!(s2, Yaml::String(_)) => {
+                                println!("In {:?}: {:?} and {:?} collected in array", key, s, s2);
+                                let mut a = Vec::new();
+                                a.push(s.clone());
+                                a.push(s2.clone());
+                                e.insert(Yaml::Array(a));
+                            }
+                            _ => {}
+                        },
                         _ => {}
                     }
                 }
