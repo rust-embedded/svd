@@ -1815,12 +1815,12 @@ impl RegisterExt for Register {
 /// Create regex from pattern to match start or end of string
 fn create_regex_from_pattern(substr: &str, strip_end: bool) -> Regex {
     // TODO: optimize
-    let regex0 = Glob::new(substr).unwrap().regex().to_string();
     // make matching non-greedy
-    let mut regex = Regex::new(r"\*")
+    let mut regex = Glob::new(substr)
         .unwrap()
-        .replace(&regex0, "*?")
-        .to_string();
+        .regex()
+        .replace('*', "*?")
+        .replace('.', r"[\w\d]");
     // change to start of string search
     if !strip_end {
         regex = "^".to_string() + &Regex::new(r"\$$").unwrap().replace(&regex, "");
