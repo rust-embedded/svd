@@ -239,11 +239,7 @@ fn update_dict(parent: &mut Hash, child: &Hash) {
                                 }
                             }
                             s2 if matches!(s2, Yaml::String(_)) => {
-                                println!("In {:?}: {:?} and {:?} collected in array", key, s, s2);
-                                let mut a = Vec::new();
-                                a.push(s.clone());
-                                a.push(s2.clone());
-                                e.insert(Yaml::Array(a));
+                                println!("In {:?}: conflicting rules {:?} and {:?}, ignored", key, s, s2);
                             }
                             _ => {}
                         },
