@@ -5,11 +5,12 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use svd_parser::svd::{
-    self, clusterinfo::ClusterInfoBuilder, cpu::CpuBuilder, fieldinfo::FieldInfoBuilder,
+    self, clusterinfo::ClusterInfoBuilder, fieldinfo::FieldInfoBuilder,
     peripheral::PeripheralBuilder, registerinfo::RegisterInfoBuilder, Access, AddressBlock,
-    AddressBlockUsage, BitRange, Cluster, ClusterInfo, Device, DimElement, Endian, EnumeratedValue,
-    EnumeratedValues, Field, FieldInfo, Interrupt, Peripheral, Register, RegisterCluster,
-    RegisterInfo, RegisterProperties, Usage, ValidateLevel, WriteConstraint, WriteConstraintRange,
+    AddressBlockUsage, BitRange, Cluster, ClusterInfo, Cpu, Device, DimElement, Endian,
+    EnumeratedValue, EnumeratedValues, Field, FieldInfo, Interrupt, Peripheral, Register,
+    RegisterCluster, RegisterInfo, RegisterProperties, Usage, ValidateLevel, WriteConstraint,
+    WriteConstraintRange,
 };
 use yaml_rust::{yaml::Hash, Yaml, YamlLoader};
 
@@ -73,6 +74,23 @@ fn parse_i64(val: &Yaml) -> Option<i64> {
     }
 }
 
+fn parse_bool(val: &Yaml) -> Option<bool> {
+    match val {
+        Yaml::Boolean(b) => Some(*b),
+        Yaml::Integer(i) => match *i {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        },
+        Yaml::String(text) => match text.as_str() {
+            "true" | "True" => Some(true),
+            "false" | "False" => Some(false),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
 trait GetVal {
     fn get_bool<K: ToYaml>(&self, k: K) -> Option<bool>;
     fn get_i64<K: ToYaml>(&self, k: K) -> Option<i64>;
@@ -83,7 +101,7 @@ trait GetVal {
 
 impl GetVal for Hash {
     fn get_bool<K: ToYaml>(&self, k: K) -> Option<bool> {
-        self.get(&k.to_yaml()).and_then(Yaml::as_bool)
+        self.get(&k.to_yaml()).and_then(parse_bool)
     }
     fn get_i64<K: ToYaml>(&self, k: K) -> Option<i64> {
         self.get(&k.to_yaml()).and_then(parse_i64)
@@ -239,7 +257,10 @@ fn update_dict(parent: &mut Hash, child: &Hash) {
                                 }
                             }
                             s2 if matches!(s2, Yaml::String(_)) => {
-                                println!("In {:?}: conflicting rules {:?} and {:?}, ignored", key, s, s2);
+                                println!(
+                                    "In {:?}: conflicting rules {:?} and {:?}, ignored",
+                                    key, s, s2
+                                );
                             }
                             _ => {}
                         },
@@ -506,11 +527,7 @@ impl DeviceExt for Device {
     }
 
     fn modify_cpu(&mut self, cmod: &Hash) {
-        let mut cpu = self
-            .cpu
-            .clone()
-            .map(CpuBuilder::from)
-            .unwrap_or_else(Default::default);
+        let mut cpu = Cpu::builder();
         if let Some(name) = cmod.get_str("name") {
             cpu = cpu.name(name.into());
         }
@@ -523,16 +540,20 @@ impl DeviceExt for Device {
         if let Some(mpu_present) = cmod.get_bool("mpuPresent") {
             cpu = cpu.mpu_present(mpu_present);
         }
-        if let Some(fpu_present) = cmod.get_bool("mpuPresent") {
+        if let Some(fpu_present) = cmod.get_bool("fpuPresent") {
             cpu = cpu.fpu_present(fpu_present);
         }
-        if let Some(nvic_priority_bits) = cmod.get_i64("nvicPriorityBits") {
+        if let Some(nvic_priority_bits) = cmod.get_i64("nvicPrioBits") {
             cpu = cpu.nvic_priority_bits(nvic_priority_bits as u32);
         }
-        if let Some(has_vendor_systick) = cmod.get_bool("hasVendorSystick") {
+        if let Some(has_vendor_systick) = cmod.get_bool("vendorSystickConfig") {
             cpu = cpu.has_vendor_systick(has_vendor_systick);
         }
-        self.cpu = Some(cpu.build(VAL_LVL).unwrap());
+        if let Some(c) = self.cpu.as_mut() {
+            c.modify_from(cpu, VAL_LVL).unwrap();
+        } else {
+            self.cpu = Some(cpu.build(VAL_LVL).unwrap());
+        }
     }
 
     fn modify_peripheral(&mut self, pspec: &str, pmod: &Hash) {
