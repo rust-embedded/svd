@@ -8,7 +8,8 @@ impl Encode for ClusterInfo {
     fn encode(&self) -> Result<Element, EncodeError> {
         let mut e = new_element("cluster", None);
 
-        e.children.push(new_element("name", Some(e.name.clone())));
+        e.children
+            .push(new_element("name", Some(self.name.clone())));
 
         if let Some(v) = &self.description {
             e.children.push(new_element("description", Some(v.clone())));
