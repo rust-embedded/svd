@@ -10,6 +10,11 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/rust-embedded/svd"
 readme = "README.md"
 
+[[bin]]
+doc = false
+name = "svdpatch"
+path = "src/main.rs"
+
 [dependencies]
 yaml-rust = "0.4"
 thiserror = "1.0"
