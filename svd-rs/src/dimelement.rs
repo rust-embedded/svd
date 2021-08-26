@@ -1,4 +1,5 @@
 use super::{BuildError, EmptyToNone, SvdError, ValidateLevel};
+use std::borrow::Cow;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
@@ -92,5 +93,34 @@ impl DimElement {
     pub fn validate(&mut self, _lvl: ValidateLevel) -> Result<(), SvdError> {
         // TODO
         Ok(())
+    }
+    pub fn indexes(&self) -> Indexes {
+        Indexes {
+            i: 0,
+            dim: self.dim,
+            dim_index: &self.dim_index,
+        }
+    }
+}
+
+pub struct Indexes<'a> {
+    i: u32,
+    dim: u32,
+    dim_index: &'a Option<Vec<String>>,
+}
+
+impl<'a> Iterator for Indexes<'a> {
+    type Item = Cow<'a, str>;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.i == self.dim {
+            return None;
+        }
+        let i = self.i;
+        self.i += 1;
+        if let Some(index) = self.dim_index.as_ref() {
+            Some(index[i as usize].as_str().into())
+        } else {
+            Some(i.to_string().into())
+        }
     }
 }
