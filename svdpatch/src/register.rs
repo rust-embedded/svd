@@ -6,7 +6,7 @@ use yaml_rust::{yaml::Hash, Yaml};
 
 use super::iterators::{MatchIterMut, Matched, OptIter};
 use super::yaml_ext::{parse_i64, GetVal, ToYaml};
-use super::{check_offsets, create_regex_from_pattern, matchname, spec_ind, VAL_LVL};
+use super::{check_offsets, matchname, spec_ind, VAL_LVL};
 use super::{make_derived_enumerated_values, make_ev_array, make_ev_name, make_field};
 
 pub type FieldIterMut<'a> = OptIter<&'a mut Field, std::slice::IterMut<'a, Field>>;
@@ -58,9 +58,11 @@ pub trait RegisterExt {
     /// Add a writeConstraint range given by field to all fspec in rtag
     fn process_field_range(&mut self, pname: &str, fspec: &str, fmod: &Vec<Yaml>);
 
-    /// Delete substring from bitfield names inside rtag. Strips from the
-    /// beginning of the name by default.
-    fn strip(&mut self, substr: &str, strip_end: bool);
+    /// Delete substring from the beginning bitfield names inside rtag
+    fn strip_start(&mut self, substr: &str);
+
+    /// Delete substring from the ending bitfield names inside rtag
+    fn strip_end(&mut self, substr: &str);
 
     /// Modify fspec inside rtag according to fmod
     fn modify_field(&mut self, fspec: &str, fmod: &Hash);
@@ -130,10 +132,10 @@ impl RegisterExt for Register {
 
         // Handle strips
         for prefix in rmod.str_vec_iter("_strip") {
-            self.strip(prefix, false);
+            self.strip_start(prefix);
         }
         for suffix in rmod.str_vec_iter("_strip_end") {
-            self.strip(suffix, true);
+            self.strip_end(suffix);
         }
 
         // Handle fields
@@ -160,13 +162,27 @@ impl RegisterExt for Register {
         self.iter_all_fields().matched(spec)
     }
 
-    fn strip(&mut self, substr: &str, strip_end: bool) {
-        let regex = create_regex_from_pattern(substr, strip_end);
-        if let Some(fields) = self.fields.as_mut() {
-            for ftag in fields {
-                ftag.name = std::str::from_utf8(&regex.replace(ftag.name.as_bytes(), &[][..]))
-                    .unwrap()
-                    .to_string();
+    fn strip_start(&mut self, substr: &str) {
+        let len = substr.len();
+        let glob = globset::Glob::new(&(substr.to_string() + "*"))
+            .unwrap()
+            .compile_matcher();
+        for ftag in self.iter_all_fields() {
+            if glob.is_match(&ftag.name) {
+                ftag.name.drain(..len);
+            }
+        }
+    }
+
+    fn strip_end(&mut self, substr: &str) {
+        let len = substr.len();
+        let glob = globset::Glob::new(&("*".to_string() + substr))
+            .unwrap()
+            .compile_matcher();
+        for ftag in self.iter_all_fields() {
+            if glob.is_match(&ftag.name) {
+                let nlen = ftag.name.len();
+                ftag.name.truncate(nlen - len);
             }
         }
     }

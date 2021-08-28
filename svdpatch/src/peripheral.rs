@@ -7,7 +7,7 @@ use yaml_rust::{yaml::Hash, Yaml};
 use super::iterators::{MatchIterMut, Matched};
 use super::register::{RegisterExt, RegisterInfoExt};
 use super::yaml_ext::{GetVal, ToYaml};
-use super::{check_offsets, create_regex_from_pattern, matchname, matchsubspec, spec_ind, VAL_LVL};
+use super::{check_offsets, matchname, matchsubspec, spec_ind, VAL_LVL};
 use super::{make_cluster, make_interrupt, make_register};
 
 pub type ClusterMatchIterMut<'a, 'b> =
@@ -57,9 +57,11 @@ pub trait PeripheralExt {
     /// Work through a register, handling all fields
     fn process_register(&mut self, rspec: &str, register: &Hash, update_fields: bool);
 
-    /// Delete substring from register names inside ptag. Strips from the
-    /// beginning of the name by default
-    fn strip(&mut self, substr: &str, strip_end: bool);
+    /// Delete substring from the beginning of register names inside ptag
+    fn strip_start(&mut self, substr: &str);
+
+    /// Delete substring from the ending of register names inside ptag
+    fn strip_end(&mut self, substr: &str);
 
     /// Collect same registers in peripheral into register array
     fn collect_in_array(&mut self, rspec: &str, rmod: &Hash);
@@ -154,10 +156,10 @@ impl PeripheralExt for Peripheral {
 
         // Handle strips
         for prefix in pmod.str_vec_iter("_strip") {
-            self.strip(prefix, false);
+            self.strip_start(prefix);
         }
         for suffix in pmod.str_vec_iter("_strip_end") {
-            self.strip(suffix, true);
+            self.strip_end(suffix);
         }
 
         // Handle additions
@@ -316,17 +318,38 @@ impl PeripheralExt for Peripheral {
         }
     }
 
-    fn strip(&mut self, substr: &str, strip_end: bool) {
-        let regex = create_regex_from_pattern(substr, strip_end);
+    fn strip_start(&mut self, substr: &str) {
+        let len = substr.len();
+        let glob = globset::Glob::new(&(substr.to_string() + "*"))
+            .unwrap()
+            .compile_matcher();
         for rtag in self.reg_iter_mut() {
-            rtag.name = std::str::from_utf8(&regex.replace(rtag.name.as_bytes(), &[][..]))
-                .unwrap()
-                .to_string();
-
+            if glob.is_match(&rtag.name) {
+                rtag.name.drain(..len);
+            }
             if let Some(dname) = rtag.display_name.as_mut() {
-                *dname = std::str::from_utf8(&regex.replace(dname.as_bytes(), &[][..]))
-                    .unwrap()
-                    .to_string();
+                if glob.is_match(&dname) {
+                    dname.drain(..len);
+                }
+            }
+        }
+    }
+
+    fn strip_end(&mut self, substr: &str) {
+        let len = substr.len();
+        let glob = globset::Glob::new(&("*".to_string() + substr))
+            .unwrap()
+            .compile_matcher();
+        for rtag in self.reg_iter_mut() {
+            if glob.is_match(&rtag.name) {
+                let nlen = rtag.name.len();
+                rtag.name.truncate(nlen - len);
+            }
+            if let Some(dname) = rtag.display_name.as_mut() {
+                if glob.is_match(&dname) {
+                    let nlen = dname.len();
+                    dname.truncate(nlen - len);
+                }
             }
         }
     }

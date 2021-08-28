@@ -1,7 +1,7 @@
 use std::env;
 use std::path::Path;
 
-fn main() -> std::io::Result<()> {
+fn main() -> anyhow::Result<()> {
     let args: Vec<String> = env::args().collect();
     let path = args
         .get(1)

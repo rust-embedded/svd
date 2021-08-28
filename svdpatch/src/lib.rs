@@ -1,5 +1,4 @@
 use globset::Glob;
-use regex::bytes::Regex;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
@@ -22,7 +21,7 @@ use yaml_ext::{parse_i64, AsTypeMut, GetVal, ToYaml};
 
 const VAL_LVL: ValidateLevel = ValidateLevel::Weak;
 
-pub fn process_file(yaml_file: &Path) -> std::io::Result<()> {
+pub fn process_file(yaml_file: &Path) -> anyhow::Result<()> {
     // Load the specified YAML root file
     let f = File::open(yaml_file)?;
     let mut contents = String::new();
@@ -49,20 +48,19 @@ pub fn process_file(yaml_file: &Path) -> std::io::Result<()> {
         &svd_parser::Config {
             validate_level: ValidateLevel::Disabled,
         },
-    )
-    .expect("Failed to parse input SVD");
+    )?;
 
     // Load all included YAML files
-    yaml_includes(root);
+    yaml_includes(root)?;
 
     // Process device
     svd.process(root, true);
 
     // SVD should now be updated, write it out
-    let svd_out = svd_encoder::encode(&svd).expect("Encode failed");
+    let svd_out = svd_encoder::encode(&svd)?;
 
     let mut f = File::create(&svdpath_out)?;
-    f.write(svd_out.as_bytes()).unwrap();
+    f.write(svd_out.as_bytes())?;
 
     Ok(())
 }
@@ -73,7 +71,7 @@ fn abspath(frompath: &Path, relpath: &Path) -> PathBuf {
 }
 
 /// Recursively loads any included YAML files.
-pub fn yaml_includes(parent: &mut Hash) -> Vec<PathBuf> {
+pub fn yaml_includes(parent: &mut Hash) -> anyhow::Result<Vec<PathBuf>> {
     let y_path = "_path".to_yaml();
     let mut included = vec![];
     let self_path = PathBuf::from(parent.get(&y_path).unwrap().as_str().unwrap());
@@ -83,10 +81,10 @@ pub fn yaml_includes(parent: &mut Hash) -> Vec<PathBuf> {
         if included.contains(&path) {
             continue;
         }
-        let f = File::open(&path).unwrap();
+        let f = File::open(&path)?;
         let mut contents = String::new();
-        (&f).read_to_string(&mut contents).unwrap();
-        let mut docs = YamlLoader::load_from_str(&contents).unwrap();
+        (&f).read_to_string(&mut contents)?;
+        let mut docs = YamlLoader::load_from_str(&contents)?;
         if docs.is_empty() {
             continue;
         }
@@ -101,7 +99,7 @@ pub fn yaml_includes(parent: &mut Hash) -> Vec<PathBuf> {
                 match val {
                     Yaml::Hash(val) if val.contains_key(&"_include".to_yaml()) => {
                         val.insert(y_path.clone(), ypath.clone());
-                        included.extend(yaml_includes(val));
+                        included.extend(yaml_includes(val)?);
                     }
                     _ => {}
                 }
@@ -109,14 +107,14 @@ pub fn yaml_includes(parent: &mut Hash) -> Vec<PathBuf> {
         }
 
         // Process any top-level includes in child
-        included.extend(yaml_includes(child));
-        update_dict(parent, child);
+        included.extend(yaml_includes(child)?);
+        update_dict(parent, child)?;
     }
-    included
+    Ok(included)
 }
 
 /// Recursively merge child.key into parent.key, with parent overriding
-fn update_dict(parent: &mut Hash, child: &Hash) {
+fn update_dict(parent: &mut Hash, child: &Hash) -> anyhow::Result<()> {
     use linked_hash_map::Entry;
     for (key, val) in child.iter() {
         match key {
@@ -141,7 +139,7 @@ fn update_dict(parent: &mut Hash, child: &Hash) {
                             _ => {}
                         },
                         Yaml::Hash(h) => {
-                            update_dict(h, val.as_hash().unwrap());
+                            update_dict(h, val.as_hash().unwrap())?;
                         }
                         s if matches!(s, Yaml::String(_)) => match val {
                             Yaml::Array(a) => {
@@ -170,6 +168,7 @@ fn update_dict(parent: &mut Hash, child: &Hash) {
             }
         }
     }
+    Ok(())
 }
 
 /// Check if name matches against a specification
@@ -217,26 +216,6 @@ fn get_register_properties(h: &Hash) -> RegisterProperties {
         .access(h.get_str("access").and_then(Access::from_str))
         .reset_value(h.get_i64("resetValue").map(|v| v as u64))
         .reset_mask(h.get_i64("resetMask").map(|v| v as u64))
-}
-
-/// Create regex from pattern to match start or end of string
-fn create_regex_from_pattern(substr: &str, strip_end: bool) -> Regex {
-    // TODO: optimize
-    // make matching non-greedy
-    let mut regex = Glob::new(substr).unwrap().regex().replace('*', "*?");
-    // change to start of string search
-    if !strip_end {
-        regex = "^".to_string()
-            + std::str::from_utf8(
-                &Regex::new(r"\$$")
-                    .unwrap()
-                    .replace(regex.as_bytes(), &[][..]),
-            )
-            .unwrap();
-    } else {
-        regex = regex.replacen('^', "", 1);
-    }
-    Regex::new(&regex).unwrap()
 }
 
 fn make_ev_name(name: &str, usage: Usage) -> String {
