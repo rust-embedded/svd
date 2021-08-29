@@ -14,6 +14,9 @@ readme = "README.md"
 
 [dependencies]
 svd-rs = { version = "0.10.2", path = "../svd-rs"}
-xmltree = "0.8"
 anyhow = "1.0.19"
 thiserror = "1.0.5"
+
+[dependencies.xmltree]
+version = "0.10.3"
+features = ["attribute-order"]
