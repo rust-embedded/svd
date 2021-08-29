@@ -1,5 +1,5 @@
 use super::run_test;
-use crate::svd::DimElement;
+use crate::svd::{DimElement, ValidateLevel};
 
 #[test]
 fn decode_encode() {
@@ -8,7 +8,7 @@ fn decode_encode() {
             .dim(100)
             .dim_increment(4)
             .dim_index(Some(vec!["10".to_string(), "20".to_string()]))
-            .build()
+            .build(ValidateLevel::Strict)
             .unwrap(),
         "<dimElement>
             <dim>100</dim>

@@ -1,6 +1,7 @@
 use super::run_test;
 use crate::svd::{
     Access, BitRange, BitRangeType, Field, FieldInfo, ModifiedWriteValues, RegisterInfo,
+    ValidateLevel,
 };
 
 #[test]
@@ -27,23 +28,24 @@ fn decode_encode() {
                         range_type: BitRangeType::OffsetWidth,
                     })
                     .access(Some(Access::ReadWrite))
-                    .build()
+                    .build(ValidateLevel::Strict)
                     .unwrap(),
             )]))
             .modified_write_values(Some(ModifiedWriteValues::OneToToggle))
-            .build()
+            .build(ValidateLevel::Strict)
             .unwrap(),
         "
         <register derivedFrom=\"derived_from\">
             <name>WRITECTRL</name>
             <description>Write Control Register</description>
-            <addressOffset>0x8</addressOffset>
             <alternateGroup>alternate_group</alternateGroup>
             <alternateRegister>alternate_register</alternateRegister>
-            <size>32</size>
+            <addressOffset>0x8</addressOffset>
+            <size>0x20</size>
             <access>read-write</access>
             <resetValue>0x00000000</resetValue>
             <resetMask>0x00000023</resetMask>
+            <modifiedWriteValues>oneToToggle</modifiedWriteValues>
             <fields>
                 <field>
                     <name>WREN</name>
@@ -53,7 +55,6 @@ fn decode_encode() {
                     <access>read-write</access>
                 </field>
             </fields>
-            <modifiedWriteValues>oneToToggle</modifiedWriteValues>
         </register>
         ",
     )];

@@ -1,4 +1,4 @@
-use crate::{new_element, EncodeChildren};
+use crate::EncodeChildren;
 use crate::parse::Parse;
 use crate::svd::{Access, RegisterProperties};
 use xmltree::Element;
@@ -27,7 +27,7 @@ fn decode_encode() {
     let parsed = RegisterProperties::parse(&tree1).unwrap();
     assert_eq!(parsed, expected, "Parsing tree failed");
 
-    let mut tree2 = new_element("mock", None);
+    let mut tree2 = Element::new("mock");
     tree2.children = parsed.encode().unwrap();
     assert_eq!(tree1, tree2, "Encoding value failed");
 }
