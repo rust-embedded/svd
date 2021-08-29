@@ -2,9 +2,12 @@ use core::ops::{Deref, DerefMut};
 
 use super::{DimElement, RegisterCluster, RegisterInfo};
 
+/// A single register or array of registers. A register is a named, programmable resource that belongs to a [peripheral](crate::Peripheral).
 #[derive(Clone, Debug, PartialEq)]
 pub enum Register {
+    /// A single register.
     Single(RegisterInfo),
+    /// An array of registers.
     Array(RegisterInfo, DimElement),
 }
 

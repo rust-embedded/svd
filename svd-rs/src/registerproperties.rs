@@ -1,11 +1,15 @@
 use super::{Access, SvdError, ValidateLevel};
 
+/// Errors from [`RegisterProperties::validate`]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
+    /// Value is too large
     #[error("Reset value 0x{0:x} doesn't fit in {1} bits")]
     ValueTooLarge(u64, u32),
+    /// reset value is conflicting with the mask
     #[error("Reset value 0x{0:x} conflicts with mask '0x{1:x}'")]
     MaskConflict(u64, u64),
+    /// Mask doesn't fit
     #[error("Mask value 0x{0:x} doesn't fit in {1} bits")]
     MaskTooLarge(u64, u32),
 }
@@ -46,9 +50,11 @@ pub struct RegisterProperties {
 }
 
 impl RegisterProperties {
-    pub fn builder() -> Self {
+    /// Create a new [`RegisterProperties`].
+    pub fn new() -> Self {
         Self::default()
     }
+    /// Modify an existing [`RegisterProperties`] based on another.
     pub fn modify_from(
         &mut self,
         builder: RegisterProperties,
@@ -72,26 +78,33 @@ impl RegisterProperties {
             Ok(())
         }
     }
+
+    /// Validate the [`RegisterProperties`]
     pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
         check_reset_value(self.size, self.reset_value, self.reset_mask, lvl)?;
         Ok(())
     }
+    /// Set the size of the register properties.
     pub fn size(mut self, value: Option<u32>) -> Self {
         self.size = value;
         self
     }
+    /// Set the access of the register properties.
     pub fn access(mut self, value: Option<Access>) -> Self {
         self.access = value;
         self
     }
+    /// Set the reset_value of the register properties.
     pub fn reset_value(mut self, value: Option<u64>) -> Self {
         self.reset_value = value;
         self
     }
+    /// Set the reset_mask of the register properties.
     pub fn reset_mask(mut self, value: Option<u64>) -> Self {
         self.reset_mask = value;
         self
     }
+    /// Validate and build a [`RegisterProperties`].
     pub fn build(mut self, lvl: ValidateLevel) -> Result<RegisterProperties, SvdError> {
         if !lvl.is_disabled() {
             self.validate(lvl)?;

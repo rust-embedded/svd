@@ -1,10 +1,11 @@
 use super::{BuildError, Endian, SvdError, ValidateLevel};
-
+/// CPU describes the processor included in the microcontroller device.
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub struct Cpu {
+    /// Processor architecture
     pub name: String,
 
     /// Define the HW revision of the processor
@@ -26,6 +27,7 @@ pub struct Cpu {
     pub has_vendor_systick: bool,
 }
 
+/// Builder for [`Cpu`]
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct CpuBuilder {
     name: Option<String>,
@@ -52,34 +54,42 @@ impl From<Cpu> for CpuBuilder {
 }
 
 impl CpuBuilder {
+    /// Set the name of the cpu.
     pub fn name(mut self, value: String) -> Self {
         self.name = Some(value);
         self
     }
+    /// Set the revision of the cpu.
     pub fn revision(mut self, value: String) -> Self {
         self.revision = Some(value);
         self
     }
+    /// Set the endian of the cpu.
     pub fn endian(mut self, value: Endian) -> Self {
         self.endian = Some(value);
         self
     }
+    /// Set the mpu_present of the cpu.
     pub fn mpu_present(mut self, value: bool) -> Self {
         self.mpu_present = Some(value);
         self
     }
+    /// Set the fpu_present of the cpu.
     pub fn fpu_present(mut self, value: bool) -> Self {
         self.fpu_present = Some(value);
         self
     }
+    /// Set the nvic_priority_bits of the cpu.
     pub fn nvic_priority_bits(mut self, value: u32) -> Self {
         self.nvic_priority_bits = Some(value);
         self
     }
+    /// Set the has_vendor_systick of the cpu.
     pub fn has_vendor_systick(mut self, value: bool) -> Self {
         self.has_vendor_systick = Some(value);
         self
     }
+    /// Validate and build a [`Cpu`].
     pub fn build(self, lvl: ValidateLevel) -> Result<Cpu, SvdError> {
         let mut cpu = Cpu {
             name: self
@@ -112,9 +122,11 @@ impl CpuBuilder {
 }
 
 impl Cpu {
+    /// Make a builder for [`Cpu`]
     pub fn builder() -> CpuBuilder {
         CpuBuilder::default()
     }
+    /// Modify an existing [`Cpu`] based on a [builder](CpuBuilder).
     pub fn modify_from(&mut self, builder: CpuBuilder, lvl: ValidateLevel) -> Result<(), SvdError> {
         if let Some(name) = builder.name {
             self.name = name;
@@ -143,10 +155,12 @@ impl Cpu {
             Ok(())
         }
     }
+    /// Validate the [`Cpu`]
     pub fn validate(&mut self, _lvl: ValidateLevel) -> Result<(), SvdError> {
         // TODO
         Ok(())
     }
+    /// Check if the [`Cpu`] is a Cortex-M
     pub fn is_cortex_m(&self) -> bool {
         self.name.starts_with("CM")
     }

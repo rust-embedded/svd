@@ -30,14 +30,18 @@ pub struct EnumeratedValue {
     pub is_default: Option<bool>,
 }
 
+/// Errors for [`EnumeratedValue::validate`]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
+    /// No value was specified
     #[error("EnumeratedValue must contain one of `value` (passed {0:?}) or `is_default` (passed {1:?}) tags")]
     AbsentValue(Option<u64>, Option<bool>),
+    /// The value is not in range.
     #[error("Value {0} out of range {1:?}")]
     OutOfRange(u64, core::ops::Range<u64>),
 }
 
+/// Builder for [`EnumeratedValue`]
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct EnumeratedValueBuilder {
     name: Option<String>,
@@ -58,23 +62,28 @@ impl From<EnumeratedValue> for EnumeratedValueBuilder {
 }
 
 impl EnumeratedValueBuilder {
+    /// Set the name of the enumerated value.
     pub fn name(mut self, value: String) -> Self {
         self.name = Some(value);
         self
     }
+    /// Set the description of the enumerated value.
     pub fn description(mut self, value: Option<String>) -> Self {
         self.description = value;
         self
     }
+    /// Set the value of the enumerated value.
     pub fn value(mut self, value: Option<u64>) -> Self {
         self.value = value;
         self
     }
     #[allow(clippy::wrong_self_convention)]
+    /// Set if the enumerated value is defaulted for non-explicit values.
     pub fn is_default(mut self, value: Option<bool>) -> Self {
         self.is_default = value;
         self
     }
+    /// Validate and build a [`EnumeratedValue`].
     pub fn build(self, lvl: ValidateLevel) -> Result<EnumeratedValue, SvdError> {
         let mut ev = EnumeratedValue {
             name: self
@@ -92,9 +101,11 @@ impl EnumeratedValueBuilder {
 }
 
 impl EnumeratedValue {
+    /// Make a builder for [`EnumeratedValue`]
     pub fn builder() -> EnumeratedValueBuilder {
         EnumeratedValueBuilder::default()
     }
+    /// Modify an existing [`EnumeratedValue`] based on a [builder](EnumeratedValueBuilder).
     pub fn modify_from(
         &mut self,
         builder: EnumeratedValueBuilder,
@@ -118,6 +129,7 @@ impl EnumeratedValue {
             Ok(())
         }
     }
+    /// Validate the [`EnumeratedValue`].
     pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
         if lvl.is_strict() {
             super::check_name(&self.name, "name")?;

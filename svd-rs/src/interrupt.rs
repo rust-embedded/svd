@@ -1,3 +1,4 @@
+/// Describes an interrupt in the device
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct Interrupt {

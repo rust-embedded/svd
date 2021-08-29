@@ -39,6 +39,7 @@ impl Default for ModifiedWriteValues {
 }
 
 impl ModifiedWriteValues {
+    /// Parse a string into an [ModifiedWriteValues] value, returning [`Option::None`] if the string is not valid.
     pub fn parse_str(s: &str) -> Option<Self> {
         use self::ModifiedWriteValues::*;
         match s {
@@ -55,6 +56,7 @@ impl ModifiedWriteValues {
         }
     }
 
+    /// Convert this [`ModifiedWriteValues`] into a static string.
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::OneToClear => "oneToClear",

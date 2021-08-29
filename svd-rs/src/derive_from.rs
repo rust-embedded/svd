@@ -1,3 +1,4 @@
+//! Implementations of DeriveFrom, setting non-explicit fields.
 use crate::{
     ClusterInfo, EnumeratedValues, FieldInfo, Peripheral, RegisterInfo, RegisterProperties,
 };

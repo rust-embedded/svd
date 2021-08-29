@@ -2,12 +2,15 @@ use super::{
     BuildError, Cpu, EmptyToNone, Peripheral, RegisterProperties, SvdError, ValidateLevel,
 };
 
+/// Errors for [`Device::validate`]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
+    /// Device has no peripherals
     #[error("Device must contain at least one peripheral")]
     EmptyDevice,
 }
 
+/// The top element in a SVD file. Describes information specific to a device.
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[derive(Clone, Debug, PartialEq)]
@@ -71,6 +74,7 @@ pub struct Device {
     pub schema_version: Option<String>,
 }
 
+/// Builder for [`Device`]
 #[derive(Clone, Debug, Default)]
 pub struct DeviceBuilder {
     name: Option<String>,
@@ -101,42 +105,52 @@ impl From<Device> for DeviceBuilder {
 }
 
 impl DeviceBuilder {
+    /// Set the name of the device.
     pub fn name(mut self, value: String) -> Self {
         self.name = Some(value);
         self
     }
+    /// Set the version of the device.
     pub fn version(mut self, value: Option<String>) -> Self {
         self.version = value;
         self
     }
+    /// Set the description of the device.
     pub fn description(mut self, value: Option<String>) -> Self {
         self.description = value;
         self
     }
+    /// Set the cpu of the device.
     pub fn cpu(mut self, value: Option<Cpu>) -> Self {
         self.cpu = value;
         self
     }
+    /// Set the address unit bits of the device.
     pub fn address_unit_bits(mut self, value: Option<u32>) -> Self {
         self.address_unit_bits = value;
         self
     }
+    /// Set the width of the device.
     pub fn width(mut self, value: Option<u32>) -> Self {
         self.width = value;
         self
     }
+    /// Set the default register properties of the device.
     pub fn default_register_properties(mut self, value: RegisterProperties) -> Self {
         self.default_register_properties = value;
         self
     }
+    /// Set the peripherals of the device.
     pub fn peripherals(mut self, value: Vec<Peripheral>) -> Self {
         self.peripherals = Some(value);
         self
     }
+    /// Set the schema version of the device.
     pub fn schema_version(mut self, value: Option<String>) -> Self {
         self.schema_version = value;
         self
     }
+    /// Validate and build a [`Device`].
     pub fn build(self, lvl: ValidateLevel) -> Result<Device, SvdError> {
         let mut device = Device {
             name: self
@@ -161,9 +175,11 @@ impl DeviceBuilder {
 }
 
 impl Device {
+    /// Make a builder for [`Device`]
     pub fn builder() -> DeviceBuilder {
         DeviceBuilder::default()
     }
+    /// Modify an existing [`Device`] based on a [builder](DeviceBuilder).
     pub fn modify_from(
         &mut self,
         builder: DeviceBuilder,
@@ -198,6 +214,7 @@ impl Device {
             Ok(())
         }
     }
+    /// Validate the [`Device`]
     pub fn validate(&mut self, _lvl: ValidateLevel) -> Result<(), SvdError> {
         // TODO
         if self.peripherals.is_empty() {

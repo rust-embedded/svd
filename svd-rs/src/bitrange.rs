@@ -1,9 +1,12 @@
+/// Errors for bit ranges
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
+    /// The bit range is 0 bits wide
     #[error("bitRange width of 0 does not make sense")]
     ZeroWidth,
 }
 
+/// A bit range, describing the [least significant bit](Self::lsb) and [most significant bit](Self::msb)
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct BitRange {
     /// Value defining the position of the least significant bit of the field within the register
@@ -12,26 +15,35 @@ pub struct BitRange {
     /// Value defining the bit-width of the bitfield within the register
     pub width: u32,
 
+    /// The underlying description of the bit range
     pub range_type: BitRangeType,
 }
 
+/// The style of bit range that describes a [BitRange]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BitRangeType {
+    /// A bit range in the format: `[<msb>:<lsb>]`
     BitRange,
+    /// A bit range described as offset and width
     OffsetWidth,
+    /// A bit range described as lsb and msb as separate elements
     MsbLsb,
 }
 
 impl BitRange {
+    /// Get the position of the least significant bit
     pub fn lsb(&self) -> u32 {
         self.offset
     }
+    /// Get the position of the most significant bit
     pub fn msb(&self) -> u32 {
         self.offset + self.width - 1
     }
+    /// Get the bit range in the format `[<msb>:<lsb>]`
     pub fn bit_range(&self) -> String {
         format!("[{}:{}]", self.msb(), self.lsb())
     }
+    /// Construct a [`BitRange`] from a offset and width
     pub fn from_offset_width(offset: u32, width: u32) -> Self {
         Self {
             offset,
@@ -39,6 +51,8 @@ impl BitRange {
             range_type: BitRangeType::OffsetWidth,
         }
     }
+
+    /// Construct a [`BitRange`] from a msb and lsb
     pub fn from_msb_lsb(msb: u32, lsb: u32) -> Self {
         Self {
             offset: lsb,
@@ -46,6 +60,7 @@ impl BitRange {
             range_type: BitRangeType::MsbLsb,
         }
     }
+    /// Construct a [`BitRange`] from string in the format `[<msb>:<lsb>]`
     pub fn from_bit_range(text: &str) -> Option<Self> {
         if !text.starts_with('[') || !text.ends_with(']') {
             return None;

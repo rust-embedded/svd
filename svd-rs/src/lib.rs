@@ -1,76 +1,103 @@
+#![deny(missing_docs)]
 //! SVD objects.
 //! This module defines components of an SVD along with parse and encode implementations
 
+/// Endian objects
 pub mod endian;
 pub use self::endian::Endian;
 
+/// Cpu objects
 pub mod cpu;
 pub use self::cpu::Cpu;
 
+/// Interrupt objects
 pub mod interrupt;
 pub use self::interrupt::Interrupt;
 
+/// Access objects
 pub mod access;
 pub use self::access::Access;
 
+/// Bitrange objects
 pub mod bitrange;
 pub use self::bitrange::{BitRange, BitRangeType};
 
+/// Write constraint objects
 pub mod writeconstraint;
 pub use self::writeconstraint::{WriteConstraint, WriteConstraintRange};
 
+/// Usage objects
 pub mod usage;
 pub use self::usage::Usage;
 
+/// Enumerated Value objects
 pub mod enumeratedvalue;
 pub use self::enumeratedvalue::EnumeratedValue;
 
+/// Enumerated Values objects
 pub mod enumeratedvalues;
 pub use self::enumeratedvalues::EnumeratedValues;
 
+/// Field objects
 pub mod field;
 pub use self::field::Field;
 
+/// Field Info objects
 pub mod fieldinfo;
 pub use self::fieldinfo::FieldInfo;
 
+/// Register Info objects
 pub mod registerinfo;
 pub use self::registerinfo::RegisterInfo;
 
+/// Register Properties objects
 pub mod registerproperties;
 pub use self::registerproperties::RegisterProperties;
 
+/// Address Block objects
 pub mod addressblock;
 pub use self::addressblock::{AddressBlock, AddressBlockUsage};
 
+/// Cluster objects
 pub mod cluster;
 pub use self::cluster::Cluster;
 
+/// Cluster Info objects
 pub mod clusterinfo;
 pub use self::clusterinfo::ClusterInfo;
 
+/// Register objects
 pub mod register;
 pub use self::register::Register;
 
+/// Register Cluster objects
 pub mod registercluster;
 pub use self::registercluster::RegisterCluster;
 
+/// Dimelement objects
 pub mod dimelement;
 pub use self::dimelement::DimElement;
 
+/// Peripheral objects
 pub mod peripheral;
 pub use self::peripheral::Peripheral;
 
+/// Device objects
 pub mod device;
 pub use self::device::Device;
 
+/// Modified Write Values objects
 pub mod modifiedwritevalues;
 pub use self::modifiedwritevalues::ModifiedWriteValues;
 
+/// Level of validation
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ValidateLevel {
+    /// No validation.
     Disabled,
+    /// Weak validation.
     Weak,
+    /// Strict validation.
     Strict,
 }
 
@@ -81,18 +108,15 @@ impl Default for ValidateLevel {
 }
 
 impl ValidateLevel {
+    /// Returns true if validation is disabled.
     pub fn is_disabled(self) -> bool {
         self == ValidateLevel::Disabled
     }
-}
-
-impl ValidateLevel {
+    /// Returns true if validation is considered to be weakly checked.
     pub fn is_weak(self) -> bool {
         self != ValidateLevel::Disabled
     }
-}
-
-impl ValidateLevel {
+    /// Returns true if validation is considered to be strictly checked.
     pub fn is_strict(self) -> bool {
         self == ValidateLevel::Strict
     }
@@ -106,50 +130,56 @@ pub use derive_from::DeriveFrom;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
+/// Errors that can occur during building.
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum SvdError {
+    /// Error related to a builder
     #[error("`Build error: {0}")]
     Build(#[from] BuildError),
-
+    /// Name check error
     #[error("`Name check error: {0}")]
     Name(#[from] NameError),
-
+    /// Device error
     #[error("`Device error: {0}")]
     Device(#[from] device::Error),
-
+    /// Peripheral error
     #[error("`Peripheral error: {0}")]
     Peripheral(#[from] peripheral::Error),
-
+    /// Cluster error
     #[error("`Cluster error: {0}")]
     Cluster(#[from] clusterinfo::Error),
-
+    /// Register error
     #[error("`Register error: {0}")]
     Register(#[from] registerinfo::Error),
-
+    /// Field error
     #[error("`Field error: {0}")]
     Field(#[from] fieldinfo::Error),
-
+    /// BitRange error
     #[error("`BitRange error: {0}")]
     BitRange(#[from] bitrange::Error),
-
+    /// EnumeratedValue error
     #[error("`EnumeratedValue error: {0}")]
     EnumeratedValue(#[from] enumeratedvalue::Error),
-
+    /// EnumeratedValues error
     #[error("`EnumeratedValues error: {0}")]
     EnumeratedValues(#[from] enumeratedvalues::Error),
-
+    /// RegisterProperties error
     #[error("`RegisterProperties error: {0}")]
     RegisterProperties(#[from] registerproperties::Error),
 }
 
+/// Errors from a builder
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum BuildError {
+    /// Field was not set when building it.
     #[error("`{0}` must be initialized")]
     Uninitialized(String),
 }
 
+/// Invalid error
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum NameError {
+    /// Name is invalid
     #[error("Name `{0}` contains unexpected symbol")]
     Invalid(String, String),
 }
