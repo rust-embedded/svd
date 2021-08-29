@@ -1,46 +1,46 @@
-use super::{new_element, Element, Encode, EncodeChildren, EncodeError};
+use super::{new_node, Element, Encode, EncodeChildren, EncodeError, XMLNode};
 use crate::svd::{Device, Peripheral};
 
 impl Encode for Device {
     type Error = EncodeError;
 
     fn encode(&self) -> Result<Element, EncodeError> {
-        let mut elem = new_element("device", None);
-        elem.children
-            .push(new_element("name", Some(self.name.clone())));
+        let mut elem = Element::new("device");
+        elem.children.push(new_node("name", self.name.clone()));
 
         if let Some(v) = &self.version {
-            elem.children.push(new_element("version", Some(v.clone())));
+            elem.children.push(new_node("version", v.clone()));
         }
 
         if let Some(v) = &self.description {
-            elem.children
-                .push(new_element("description", Some(v.clone())));
+            elem.children.push(new_node("description", v.clone()));
         }
 
         if let Some(v) = &self.cpu {
-            elem.children.push(v.encode()?);
+            elem.children.push(XMLNode::Element(v.encode()?));
         }
 
         if let Some(v) = &self.address_unit_bits {
             elem.children
-                .push(new_element("addressUnitBits", Some(format!("{}", v))));
+                .push(new_node("addressUnitBits", format!("{}", v)));
         }
 
         if let Some(v) = &self.width {
-            elem.children
-                .push(new_element("width", Some(format!("{}", v))));
+            elem.children.push(new_node("width", format!("{}", v)));
         }
 
         elem.children
             .extend(self.default_register_properties.encode()?);
 
-        let peripherals: Result<Vec<_>, _> =
-            self.peripherals.iter().map(Peripheral::encode).collect();
+        let peripherals: Result<Vec<_>, _> = self
+            .peripherals
+            .iter()
+            .map(Peripheral::encode_node)
+            .collect();
         elem.children.push({
-            let mut e = new_element("peripherals", None);
+            let mut e = Element::new("peripherals");
             e.children = peripherals?;
-            e
+            XMLNode::Element(e)
         });
 
         elem.attributes.insert(
