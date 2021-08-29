@@ -54,7 +54,7 @@ impl Encode for Device {
         if let Some(schema_version) = &self.schema_version {
             elem.attributes.insert(
                 String::from("xs:noNamespaceSchemaLocation"),
-                format!("CMSIS-SVD_Schema_{}.xsd", schema_version),
+                format!("CMSIS-SVD_Schema_{}.xsd", schema_version.replace(".", "_")),
             );
         }
 
