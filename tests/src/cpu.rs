@@ -1,5 +1,5 @@
 use super::run_test;
-use crate::svd::{Cpu, Endian};
+use crate::svd::{Cpu, Endian, ValidateLevel};
 
 #[test]
 fn decode_encode() {
@@ -12,7 +12,7 @@ fn decode_encode() {
             .fpu_present(true)
             .nvic_priority_bits(8)
             .has_vendor_systick(false)
-            .build()
+            .build(ValidateLevel::Strict)
             .unwrap(),
         "
                 <cpu>

@@ -69,7 +69,7 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
     {
         let k = k.as_ref();
         self.get_child_text_opt(k)?
-            .ok_or_else(|| SVDError::MissingTag(format!("{}", k)).at(self.id()))
+            .ok_or_else(|| SVDError::MissingTag(k.to_string()).at(self.id()))
     }
 
     /// Get text contained by an XML Element

@@ -1,5 +1,5 @@
 use super::run_test;
-use crate::svd::AddressBlock;
+use crate::svd::{AddressBlock, AddressBlockUsage};
 
 #[test]
 fn decode_encode() {
@@ -7,7 +7,7 @@ fn decode_encode() {
         AddressBlock {
             offset: 0,
             size: 0x00000800,
-            usage: String::from("registers"),
+            usage: AddressBlockUsage::Registers,
         },
         "<addressBlock>
             <offset>0x0</offset>

@@ -1,4 +1,3 @@
-use crate::new_element;
 use crate::parse::Parse;
 use crate::svd::{BitRange, BitRangeType};
 use xmltree::Element;
@@ -48,7 +47,7 @@ fn decode_encode() {
         let tree1 = Element::parse(s.as_bytes()).unwrap();
         let value = BitRange::parse(&tree1).unwrap();
         assert_eq!(value, a, "Parsing `{}` expected `{:?}`", s, a);
-        let mut tree2 = new_element("fake", None);
+        let mut tree2 = Element::new("fake");
         tree2.children = value.encode().unwrap();
         assert_eq!(tree1, tree2, "Encoding {:?} expected {}", a, s);
     }

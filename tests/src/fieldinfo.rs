@@ -1,5 +1,7 @@
 use super::run_test;
-use crate::svd::{Access, BitRange, BitRangeType, EnumeratedValue, EnumeratedValues, FieldInfo};
+use crate::svd::{
+    Access, BitRange, BitRangeType, EnumeratedValue, EnumeratedValues, FieldInfo, ValidateLevel,
+};
 
 #[test]
 fn decode_encode() {
@@ -22,11 +24,11 @@ fn decode_encode() {
                         ))
                         .value(Some(0))
                         .is_default(None)
-                        .build()
+                        .build(ValidateLevel::Strict)
                         .unwrap()])
-                    .build()
+                    .build(ValidateLevel::Strict)
                     .unwrap()])
-                .build()
+                .build(ValidateLevel::Strict)
                 .unwrap(),
             "
         <field>
@@ -54,7 +56,7 @@ fn decode_encode() {
                     width: 2,
                     range_type: BitRangeType::OffsetWidth,
                 })
-                .build()
+                .build(ValidateLevel::Strict)
                 .unwrap(),
             "
         <field derivedFrom=\"other_field\">

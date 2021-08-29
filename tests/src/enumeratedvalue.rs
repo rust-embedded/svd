@@ -1,5 +1,5 @@
 use super::run_test;
-use crate::svd::EnumeratedValue;
+use crate::svd::{EnumeratedValue, ValidateLevel};
 
 #[test]
 fn decode_encode() {
@@ -10,7 +10,7 @@ fn decode_encode() {
                 "Zero wait-states inserted in fetch or read transfers".to_string(),
             ))
             .value(Some(0))
-            .build()
+            .build(ValidateLevel::Strict)
             .unwrap(),
         "
             <enumeratedValue>
