@@ -46,7 +46,7 @@ impl Default for Access {
 }
 
 impl Access {
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse_str(s: &str) -> Option<Self> {
         match s {
             "read-only" => Some(Self::ReadOnly),
             "read-write" => Some(Self::ReadWrite),
@@ -57,7 +57,7 @@ impl Access {
         }
     }
 
-    pub const fn to_str(self) -> &'static str {
+    pub const fn as_str(self) -> &'static str {
         match self {
             Self::ReadOnly => "read-only",
             Self::ReadWrite => "read-write",

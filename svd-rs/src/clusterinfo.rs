@@ -19,14 +19,18 @@ pub struct ClusterInfo {
     pub name: String,
 
     /// String describing the details of the register cluster
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub description: Option<String>,
 
     // alternateCluster
     /// Specify the struct type name created in the device header file
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub header_struct_name: Option<String>,
 
     /// Cluster address relative to the `baseAddress` of the peripheral
@@ -40,8 +44,10 @@ pub struct ClusterInfo {
 
     /// Specify the cluster name from which to inherit data.
     /// Elements specified subsequently override inherited values
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub derived_from: Option<String>,
 }
 

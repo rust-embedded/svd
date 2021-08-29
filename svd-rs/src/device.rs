@@ -21,29 +21,39 @@ pub struct Device {
 
     // series
     /// Define the version of the SVD file
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub version: Option<String>,
 
     /// Describe the main features of the device (for example CPU, clock frequency, peripheral overview)
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub description: Option<String>,
 
     // licenseText
     /// Describe the processor included in the device
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub cpu: Option<Cpu>,
 
     /// Define the number of data bits uniquely selected by each address
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub address_unit_bits: Option<u32>,
 
     /// Define the number of data bit-width of the maximum single data transfer supported by the bus infrastructure
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub width: Option<u32>,
 
     /// Default properties for all registers
@@ -54,8 +64,10 @@ pub struct Device {
     pub peripherals: Vec<Peripheral>,
 
     /// Specify the compliant CMSIS-SVD schema version
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub schema_version: Option<String>,
 }
 

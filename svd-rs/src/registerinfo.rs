@@ -19,24 +19,32 @@ pub struct RegisterInfo {
     pub name: String,
 
     /// Specifies a register name without the restritions of an ANSIS C identifier.
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub display_name: Option<String>,
 
     /// String describing the details of the register
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub description: Option<String>,
 
     /// Specifies a group name associated with all alternate register that have the same name
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub alternate_group: Option<String>,
 
     /// This tag can reference a register that has been defined above to
     /// current location in the description and that describes the memory location already
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub alternate_register: Option<String>,
 
     /// Define the address offset relative to the enclosing element
@@ -47,24 +55,32 @@ pub struct RegisterInfo {
     pub properties: RegisterProperties,
 
     /// Specifies the write side effects
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub modified_write_values: Option<ModifiedWriteValues>,
 
     /// Specifies the subset of allowed write values
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub write_constraint: Option<WriteConstraint>,
 
     /// `None` indicates that the `<fields>` node is not present
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub fields: Option<Vec<Field>>,
 
     /// Specify the register name from which to inherit data.
     /// Elements specified subsequently override inherited values
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub derived_from: Option<String>,
 }
 

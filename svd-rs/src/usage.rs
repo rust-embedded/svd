@@ -16,7 +16,7 @@ impl Default for Usage {
 }
 
 impl Usage {
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse_str(s: &str) -> Option<Self> {
         match s {
             "read" => Some(Self::Read),
             "write" => Some(Self::Write),
@@ -25,7 +25,7 @@ impl Usage {
         }
     }
 
-    pub const fn to_str(self) -> &'static str {
+    pub const fn as_str(self) -> &'static str {
         match self {
             Self::Read => "read",
             Self::Write => "write",
