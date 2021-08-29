@@ -15,7 +15,7 @@ impl Default for Endian {
 }
 
 impl Endian {
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse_str(s: &str) -> Option<Self> {
         match s {
             "little" => Some(Self::Little),
             "big" => Some(Self::Big),
@@ -25,7 +25,7 @@ impl Endian {
         }
     }
 
-    pub const fn to_str(self) -> &'static str {
+    pub const fn as_str(self) -> &'static str {
         match self {
             Self::Little => "little",
             Self::Big => "big",

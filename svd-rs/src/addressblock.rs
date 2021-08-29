@@ -22,7 +22,7 @@ impl Default for AddressBlockUsage {
 }
 
 impl AddressBlockUsage {
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse_str(s: &str) -> Option<Self> {
         match s {
             "registers" => Some(Self::Registers),
             "buffer" => Some(Self::Buffer),
@@ -31,10 +31,10 @@ impl AddressBlockUsage {
         }
     }
 
-    pub const fn to_str(self) -> &'static str {
+    pub const fn as_str(self) -> &'static str {
         match self {
             Self::Registers => "registers",
-            Self::Buffer => "wribufferte",
+            Self::Buffer => "buffer",
             Self::Reserved => "reserved",
         }
     }

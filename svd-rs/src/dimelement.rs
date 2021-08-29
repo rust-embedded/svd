@@ -14,8 +14,10 @@ pub struct DimElement {
 
     /// Specify the strings that substitue the placeholder `%s` within `name` and `displayName`.
     /// By default, <dimIndex> is a value starting with 0
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub dim_index: Option<Vec<String>>,
 }
 

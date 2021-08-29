@@ -34,9 +34,10 @@ mod ser_de {
 
     #[derive(serde::Deserialize, serde::Serialize)]
     struct FieldArray {
-        #[cfg_attr(feature = "serde", serde(flatten))]
-        #[cfg_attr(feature = "serde", serde(default))]
-        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+        #[cfg_attr(
+            feature = "serde",
+            serde(flatten, default, skip_serializing_if = "Option::is_none")
+        )]
         dim: Option<DimElement>,
         #[cfg_attr(feature = "serde", serde(flatten))]
         info: FieldInfo,

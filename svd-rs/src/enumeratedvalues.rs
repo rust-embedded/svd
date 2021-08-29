@@ -5,18 +5,24 @@ use super::{EmptyToNone, EnumeratedValue, SvdError, Usage, ValidateLevel};
 #[non_exhaustive]
 pub struct EnumeratedValues {
     /// Identifier for the whole enumeration section
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub name: Option<String>,
 
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub usage: Option<Usage>,
 
     /// Makes a copy from a previously defined enumeratedValues section.
     /// No modifications are allowed
-    #[cfg_attr(feature = "serde", serde(default))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub derived_from: Option<String>,
 
     /// List of variants. The number of required items depends on the bit-width of the associated field.
