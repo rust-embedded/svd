@@ -82,8 +82,7 @@ pub fn parse(xml: &str) -> anyhow::Result<Device> {
 pub fn parse_with_config(xml: &str, config: &Config) -> anyhow::Result<Device> {
     fn get_name<'a>(node: &'a Node) -> Option<&'a str> {
         node.children()
-            .filter(|t| t.has_tag_name("name"))
-            .next()
+            .find(|t| t.has_tag_name("name"))
             .and_then(|t| t.text())
     }
 
@@ -103,12 +102,10 @@ pub fn parse_with_config(xml: &str, config: &Config) -> anyhow::Result<Device> {
             let mut res = Err(e.into());
             if tagname.is_empty() {
                 res = res.with_context(|| format!("at {}", pos))
+            } else if let Some(name) = get_name(&node) {
+                res = res.with_context(|| format!("Parsing {} `{}` at {}", tagname, name, pos))
             } else {
-                if let Some(name) = get_name(&node) {
-                    res = res.with_context(|| format!("Parsing {} `{}` at {}", tagname, name, pos))
-                } else {
-                    res = res.with_context(|| format!("Parsing unknown {} at {}", tagname, pos))
-                }
+                res = res.with_context(|| format!("Parsing unknown {} at {}", tagname, pos))
             }
             for parent in node.ancestors().skip(1) {
                 if parent.id() == NodeId::new(0) {

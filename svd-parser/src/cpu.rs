@@ -20,6 +20,6 @@ impl Parse for Cpu {
             .nvic_priority_bits(tree.get_child_u32("nvicPrioBits")?)
             .has_vendor_systick(tree.get_child_bool("vendorSystickConfig")?)
             .build(config.validate_level)
-            .map_err(|e| SVDError::from(e).at(tree.id()).into())
+            .map_err(|e| SVDError::from(e).at(tree.id()))
     }
 }
