@@ -9,7 +9,7 @@ impl Parse for ModifiedWriteValues {
     fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
         let text = tree.get_text()?;
 
-        Self::from_str(text)
+        Self::parse_str(text)
             .ok_or_else(|| SVDError::InvalidModifiedWriteValues(text.into()).at(tree.id()))
     }
 }

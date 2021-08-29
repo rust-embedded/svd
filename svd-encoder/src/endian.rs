@@ -5,7 +5,7 @@ impl Encode for crate::svd::Endian {
 
     fn encode(&self) -> Result<Element, EncodeError> {
         let mut elem = Element::new("endian");
-        elem.children.push(XMLNode::Text(self.to_str().to_string()));
+        elem.children.push(XMLNode::Text(self.as_str().to_string()));
         Ok(elem)
     }
 }

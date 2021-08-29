@@ -5,7 +5,7 @@ impl Encode for crate::svd::ModifiedWriteValues {
 
     fn encode(&self) -> Result<Element, EncodeError> {
         let mut elem = Element::new("modifiedWriteValues");
-        elem.children.push(XMLNode::Text(self.to_str().to_string()));
+        elem.children.push(XMLNode::Text(self.as_str().to_string()));
         Ok(elem)
     }
 }
