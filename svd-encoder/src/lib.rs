@@ -4,8 +4,7 @@
 use svd_rs as svd;
 
 use crate::svd::Device;
-use std::collections::HashMap;
-use xmltree::{Element, EmitterConfig};
+use xmltree::{Element, EmitterConfig, XMLNode};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum EncodeError {}
@@ -16,15 +15,18 @@ pub trait Encode {
     type Error;
     /// Encode into an XML/SVD element
     fn encode(&self) -> Result<Element, Self::Error>;
+    fn encode_node(&self) -> Result<XMLNode, Self::Error> {
+        self.encode().map(XMLNode::Element)
+    }
 }
 
-/// EncodeChildren allows SVD objects to be encoded as a list of XML elements
+/// EncodeChildren allows SVD objects to be encoded as a list of XML nodes
 /// This is typically used to merge with an existing element.
 pub trait EncodeChildren {
     /// Encoding error
     type Error;
     /// Encode into XML/SVD children to merge with existing object
-    fn encode(&self) -> Result<Vec<Element>, Self::Error>;
+    fn encode(&self) -> Result<Vec<XMLNode>, Self::Error>;
 }
 
 /// Encodes a device object to an SVD (XML) string
@@ -33,6 +35,7 @@ pub fn encode(d: &Device) -> Result<String, EncodeError> {
     let mut wr = Vec::new();
     let mut cfg = EmitterConfig::new();
     cfg.perform_indent = true;
+    cfg.pad_self_closing = false;
     root.write_with_config(&mut wr, cfg).unwrap();
     Ok(String::from_utf8(wr).unwrap())
 }
@@ -52,17 +55,11 @@ impl ElementMerge for Element {
     }
 }
 
-/// Helper to create new base xml elements
-pub(crate) fn new_element(name: &str, text: Option<String>) -> Element {
-    Element {
-        prefix: None,
-        namespace: None,
-        namespaces: None,
-        name: String::from(name),
-        attributes: HashMap::new(),
-        children: Vec::new(),
-        text,
-    }
+/// Helper to create new base xml nodes
+pub(crate) fn new_node(name: &str, text: String) -> XMLNode {
+    let mut e = Element::new(name);
+    e.children.push(XMLNode::Text(text));
+    XMLNode::Element(e)
 }
 
 mod access;

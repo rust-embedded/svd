@@ -1,21 +1,20 @@
-use super::{new_element, Element, Encode, EncodeError};
+use super::{new_node, Element, Encode, EncodeError};
 use crate::svd::DimElement;
 
 impl Encode for DimElement {
     type Error = EncodeError;
 
     fn encode(&self) -> Result<Element, EncodeError> {
-        let mut e = new_element("dimElement", None);
+        let mut e = Element::new("dimElement");
 
-        e.children
-            .push(new_element("dim", Some(format!("{}", self.dim))));
-        e.children.push(new_element(
+        e.children.push(new_node("dim", format!("{}", self.dim)));
+        e.children.push(new_node(
             "dimIncrement",
-            Some(format!("0x{:X}", self.dim_increment)),
+            format!("0x{:X}", self.dim_increment),
         ));
 
         if let Some(di) = &self.dim_index {
-            e.children.push(new_element("dimIndex", Some(di.join(","))));
+            e.children.push(new_node("dimIndex", di.join(",")));
         }
 
         Ok(e)

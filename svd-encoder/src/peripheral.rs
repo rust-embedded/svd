@@ -1,4 +1,4 @@
-use super::{new_element, Element, Encode, EncodeChildren, EncodeError};
+use super::{new_node, Element, Encode, EncodeChildren, EncodeError, XMLNode};
 
 use crate::svd::{Interrupt, Peripheral};
 
@@ -6,32 +6,27 @@ impl Encode for Peripheral {
     type Error = EncodeError;
 
     fn encode(&self) -> Result<Element, EncodeError> {
-        let mut elem = new_element("peripheral", None);
-        elem.children
-            .push(new_element("name", Some(self.name.clone())));
+        let mut elem = Element::new("peripheral");
+        elem.children.push(new_node("name", self.name.clone()));
 
         if let Some(v) = &self.display_name {
-            elem.children
-                .push(new_element("displayName", Some(v.to_string())));
+            elem.children.push(new_node("displayName", v.to_string()));
         }
 
         if let Some(v) = &self.version {
-            elem.children
-                .push(new_element("version", Some(v.to_string())));
+            elem.children.push(new_node("version", v.to_string()));
         }
 
         if let Some(v) = &self.description {
-            elem.children
-                .push(new_element("description", Some(v.to_string())));
+            elem.children.push(new_node("description", v.to_string()));
         }
 
         if let Some(v) = &self.group_name {
-            elem.children
-                .push(new_element("groupName", Some(v.to_string())));
+            elem.children.push(new_node("groupName", v.to_string()));
         }
-        elem.children.push(new_element(
+        elem.children.push(new_node(
             "baseAddress",
-            Some(format!("0x{:.08X}", self.base_address)),
+            format!("0x{:.08X}", self.base_address),
         ));
 
         elem.children
@@ -39,21 +34,22 @@ impl Encode for Peripheral {
 
         if let Some(v) = &self.address_block {
             for ab in v {
-                elem.children.push(ab.encode()?);
+                elem.children.push(ab.encode_node()?);
             }
         }
 
-        let interrupts: Result<Vec<_>, _> = self.interrupt.iter().map(Interrupt::encode).collect();
+        let interrupts: Result<Vec<_>, _> =
+            self.interrupt.iter().map(Interrupt::encode_node).collect();
 
         elem.children.append(&mut interrupts?);
 
         if let Some(v) = &self.registers {
-            let children: Result<Vec<_>, _> = v.iter().map(|e| e.encode()).collect();
+            let children: Result<Vec<_>, _> = v.iter().map(|e| e.encode_node()).collect();
 
             elem.children.push({
-                let mut e = new_element("registers", None);
+                let mut e = Element::new("registers");
                 e.children = children?;
-                e
+                XMLNode::Element(e)
             });
         }
 
