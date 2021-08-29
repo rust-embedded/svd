@@ -4,8 +4,11 @@
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Usage {
+    /// Read
     Read,
+    /// Write
     Write,
+    /// Read & Write
     ReadWrite,
 }
 
@@ -16,6 +19,7 @@ impl Default for Usage {
 }
 
 impl Usage {
+    /// Parse a string into an [Usage] value, returning [`Option::None`] if the string is not valid.
     pub fn parse_str(s: &str) -> Option<Self> {
         match s {
             "read" => Some(Self::Read),
@@ -25,6 +29,7 @@ impl Usage {
         }
     }
 
+    /// Convert this [`Usage`] into a static string.
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Read => "read",

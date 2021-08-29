@@ -3,12 +3,15 @@ use super::{
     SvdError, Usage, ValidateLevel, WriteConstraint,
 };
 
+/// Errors for [`FieldInfo::validate`]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
+    /// The enumerated value is not recognized by svd-rs.
     #[error("You can have 0, 1 or 2 enumeratedValues with different usage")]
     IncompatibleEnumeratedValues,
 }
 
+/// A partition of a [register](crate::RegisterInfo)
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[derive(Clone, Debug, PartialEq)]
@@ -37,6 +40,7 @@ pub struct FieldInfo {
     )]
     pub access: Option<Access>,
 
+    /// Describe the manipulation of data written to a field.
     #[cfg_attr(
         feature = "serde",
         serde(default, skip_serializing_if = "Option::is_none")
@@ -50,6 +54,7 @@ pub struct FieldInfo {
     )]
     pub write_constraint: Option<WriteConstraint>,
 
+    /// Describes the field
     #[cfg_attr(
         feature = "serde",
         serde(default, skip_serializing_if = "Vec::is_empty")
@@ -64,6 +69,8 @@ pub struct FieldInfo {
     )]
     pub derived_from: Option<String>,
 }
+
+/// Builder for [`FieldInfo`]
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct FieldInfoBuilder {
@@ -97,20 +104,24 @@ impl From<FieldInfo> for FieldInfoBuilder {
 }
 
 impl FieldInfoBuilder {
+    /// Set the name of the field
     pub fn name(mut self, value: String) -> Self {
         self.name = Some(value);
         self
     }
+    /// Set the description of the field
     pub fn description(mut self, value: Option<String>) -> Self {
         self.description = value;
         self
     }
+    /// Set the bit range of the field
     pub fn bit_range(mut self, value: BitRange) -> Self {
         self.bit_range = Some(value);
         self.bit_offset = None;
         self.bit_width = None;
         self
     }
+    /// Set the bit offset of the field
     pub fn bit_offset(mut self, value: u32) -> Self {
         if let Some(bit_range) = self.bit_range.as_mut() {
             bit_range.offset = value;
@@ -122,6 +133,7 @@ impl FieldInfoBuilder {
         }
         self
     }
+    /// Set the bit width of the field
     pub fn bit_width(mut self, value: u32) -> Self {
         if let Some(bit_range) = self.bit_range.as_mut() {
             bit_range.width = value;
@@ -133,26 +145,32 @@ impl FieldInfoBuilder {
         }
         self
     }
+    /// Set the access of the field
     pub fn access(mut self, value: Option<Access>) -> Self {
         self.access = value;
         self
     }
+    /// Set the modified write values of the field
     pub fn modified_write_values(mut self, value: Option<ModifiedWriteValues>) -> Self {
         self.modified_write_values = value;
         self
     }
+    /// Set the write constraint of the field
     pub fn write_constraint(mut self, value: Option<WriteConstraint>) -> Self {
         self.write_constraint = value;
         self
     }
+    /// Set the enumerated values of the field
     pub fn enumerated_values(mut self, value: Vec<EnumeratedValues>) -> Self {
         self.enumerated_values = Some(value);
         self
     }
+    /// Set the derived_from attribute of the field
     pub fn derived_from(mut self, value: Option<String>) -> Self {
         self.derived_from = value;
         self
     }
+    /// Validate and build a [`FieldInfo`].
     pub fn build(self, lvl: ValidateLevel) -> Result<FieldInfo, SvdError> {
         let mut field = FieldInfo {
             name: self
@@ -176,9 +194,11 @@ impl FieldInfoBuilder {
 }
 
 impl FieldInfo {
+    /// Make a builder for [`FieldInfo`]
     pub fn builder() -> FieldInfoBuilder {
         FieldInfoBuilder::default()
     }
+    /// Modify an existing [`FieldInfo`] based on a [builder](FieldInfoBuilder).
     pub fn modify_from(
         &mut self,
         builder: FieldInfoBuilder,
@@ -224,6 +244,7 @@ impl FieldInfo {
             Ok(())
         }
     }
+    /// Validate the [`FieldInfo`].
     pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
         if lvl.is_strict() {
             super::check_dimable_name(&self.name, "name")?;

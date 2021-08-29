@@ -1,6 +1,7 @@
 use super::{BuildError, EmptyToNone, SvdError, ValidateLevel};
 use std::borrow::Cow;
 
+/// Defines arrays and lists.
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[derive(Clone, Debug, PartialEq)]
@@ -21,6 +22,7 @@ pub struct DimElement {
     pub dim_index: Option<Vec<String>>,
 }
 
+/// Builder for [`DimElement`]
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DimElementBuilder {
     dim: Option<u32>,
@@ -39,18 +41,22 @@ impl From<DimElement> for DimElementBuilder {
 }
 
 impl DimElementBuilder {
+    /// set the dim of the elements
     pub fn dim(mut self, value: u32) -> Self {
         self.dim = Some(value);
         self
     }
+    /// set the dim increment of the elements
     pub fn dim_increment(mut self, value: u32) -> Self {
         self.dim_increment = Some(value);
         self
     }
+    /// set the dim index of the elements
     pub fn dim_index(mut self, value: Option<Vec<String>>) -> Self {
         self.dim_index = value;
         self
     }
+    /// Validate and build a [`DimElement`].
     pub fn build(self, lvl: ValidateLevel) -> Result<DimElement, SvdError> {
         let mut de = DimElement {
             dim: self
@@ -69,9 +75,11 @@ impl DimElementBuilder {
 }
 
 impl DimElement {
+    /// Make a builder for [`DimElement`]
     pub fn builder() -> DimElementBuilder {
         DimElementBuilder::default()
     }
+    /// Modify an existing [`DimElement`] based on a [builder](DimElementBuilder).
     pub fn modify_from(
         &mut self,
         builder: DimElementBuilder,
@@ -92,10 +100,16 @@ impl DimElement {
             Ok(())
         }
     }
+    /// Validate the [`DimElement`].
+    ///
+    /// # Notes
+    ///
+    /// This doesn't do anything.
     pub fn validate(&mut self, _lvl: ValidateLevel) -> Result<(), SvdError> {
         // TODO
         Ok(())
     }
+    /// Get the indexes of the array or list.
     pub fn indexes(&self) -> Indexes {
         Indexes {
             i: 0,
@@ -105,6 +119,7 @@ impl DimElement {
     }
 }
 
+/// Indexes into a [DimElement]
 pub struct Indexes<'a> {
     i: u32,
     dim: u32,

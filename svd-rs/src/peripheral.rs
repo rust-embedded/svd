@@ -4,12 +4,15 @@ use super::{
     SvdError, ValidateLevel,
 };
 
+/// Errors from [Peripheral::validate]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
+    /// The peripheral has no registers, but specified a `<registers>` tag.
     #[error("Peripheral have `registers` tag, but it is empty")]
     EmptyRegisters,
 }
 
+/// A description of a peripheral in the [device](crate::Device), describing, for example, the [memory mappings](crate::RegisterInfo).
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[derive(Clone, Debug, PartialEq)]
@@ -18,6 +21,7 @@ pub struct Peripheral {
     /// The string identifies the peripheral. Peripheral names are required to be unique for a device
     pub name: String,
 
+    /// Specifies a register name without the restrictions of an ANSI C identifier.
     #[cfg_attr(
         feature = "serde",
         serde(default, skip_serializing_if = "Option::is_none")
@@ -84,6 +88,7 @@ pub struct Peripheral {
     pub derived_from: Option<String>,
 }
 
+/// Builder for [`Peripheral`]
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct PeripheralBuilder {
     name: Option<String>,
@@ -118,50 +123,62 @@ impl From<Peripheral> for PeripheralBuilder {
 }
 
 impl PeripheralBuilder {
+    /// Set the name of the peripheral
     pub fn name(mut self, value: String) -> Self {
         self.name = Some(value);
         self
     }
+    /// Set the display name of the peripheral
     pub fn display_name(mut self, value: Option<String>) -> Self {
         self.display_name = value;
         self
     }
+    /// Set the version of the peripheral
     pub fn version(mut self, value: Option<String>) -> Self {
         self.version = value;
         self
     }
+    /// Set the description of the peripheral
     pub fn description(mut self, value: Option<String>) -> Self {
         self.description = value;
         self
     }
+    /// Set the group name of the peripheral
     pub fn group_name(mut self, value: Option<String>) -> Self {
         self.group_name = value;
         self
     }
+    /// Set the base address of the peripheral
     pub fn base_address(mut self, value: u64) -> Self {
         self.base_address = Some(value);
         self
     }
+    /// Set the default register properties of the peripheral
     pub fn default_register_properties(mut self, value: RegisterProperties) -> Self {
         self.default_register_properties = value;
         self
     }
+    /// Set the address block of the peripheral
     pub fn address_block(mut self, value: Option<Vec<AddressBlock>>) -> Self {
         self.address_block = value;
         self
     }
+    /// Set the interrupts of the peripheral
     pub fn interrupt(mut self, value: Vec<Interrupt>) -> Self {
         self.interrupt = value;
         self
     }
+    /// Set the registers of the peripheral
     pub fn registers(mut self, value: Option<Vec<RegisterCluster>>) -> Self {
         self.registers = value;
         self
     }
+    /// Set the derived_from attribute of the peripheral
     pub fn derived_from(mut self, value: Option<String>) -> Self {
         self.derived_from = value;
         self
     }
+    /// Validate and build a [`Peripheral`].
     pub fn build(self, lvl: ValidateLevel) -> Result<Peripheral, SvdError> {
         let mut per = Peripheral {
             name: self
@@ -188,9 +205,11 @@ impl PeripheralBuilder {
 }
 
 impl Peripheral {
+    /// Make a builder for [`Peripheral`]
     pub fn builder() -> PeripheralBuilder {
         PeripheralBuilder::default()
     }
+    /// Modify an existing [`Peripheral`] based on a [builder](PeripheralBuilder).
     pub fn modify_from(
         &mut self,
         builder: PeripheralBuilder,
@@ -239,6 +258,7 @@ impl Peripheral {
         }
     }
 
+    /// Validate the [`Peripheral`]
     pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
         // TODO
         if lvl.is_strict() {

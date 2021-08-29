@@ -3,12 +3,15 @@ use super::{
     ValidateLevel, WriteConstraint,
 };
 
+/// Errors from [`RegisterInfo::validate`]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
+    /// Register had no fields, but specified a `<fields>` tag.
     #[error("Register have `fields` tag, but it is empty")]
     EmptyFields,
 }
 
+/// A register is a named, programmable resource that belongs to a [peripheral](crate::Peripheral).
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[derive(Clone, Debug, PartialEq)]
@@ -18,7 +21,7 @@ pub struct RegisterInfo {
     /// Register names are required to be unique within the scope of a peripheral
     pub name: String,
 
-    /// Specifies a register name without the restritions of an ANSIS C identifier.
+    /// Specifies a register name without the restrictions of an ANSI C identifier.
     #[cfg_attr(
         feature = "serde",
         serde(default, skip_serializing_if = "Option::is_none")
@@ -84,6 +87,7 @@ pub struct RegisterInfo {
     pub derived_from: Option<String>,
 }
 
+/// Builder for [`RegisterInfo`]
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct RegisterInfoBuilder {
     name: Option<String>,
@@ -118,66 +122,82 @@ impl From<RegisterInfo> for RegisterInfoBuilder {
 }
 
 impl RegisterInfoBuilder {
+    /// Set the name of the register.
     pub fn name(mut self, value: String) -> Self {
         self.name = Some(value);
         self
     }
+    /// Set the display name of the register.
     pub fn display_name(mut self, value: Option<String>) -> Self {
         self.display_name = value;
         self
     }
+    /// Set the description of the register.
     pub fn description(mut self, value: Option<String>) -> Self {
         self.description = value;
         self
     }
+    /// Set the alternate group of the register.
     pub fn alternate_group(mut self, value: Option<String>) -> Self {
         self.alternate_group = value;
         self
     }
+    /// Set the alternate register of the register.
     pub fn alternate_register(mut self, value: Option<String>) -> Self {
         self.alternate_register = value;
         self
     }
+    /// Set the address offset of the register.
     pub fn address_offset(mut self, value: u32) -> Self {
         self.address_offset = Some(value);
         self
     }
+    /// Set the properties of the register.
     pub fn properties(mut self, value: RegisterProperties) -> Self {
         self.properties = value;
         self
     }
+    /// Set the size of the register.
     pub fn size(mut self, value: Option<u32>) -> Self {
         self.properties.size = value;
         self
     }
+    /// Set the access of the register.
     pub fn access(mut self, value: Option<Access>) -> Self {
         self.properties.access = value;
         self
     }
+    /// Set the reset value of the register.
     pub fn reset_value(mut self, value: Option<u64>) -> Self {
         self.properties.reset_value = value;
         self
     }
+    /// Set the reset mask of the register.
     pub fn reset_mask(mut self, value: Option<u64>) -> Self {
         self.properties.reset_mask = value;
         self
     }
+    /// Set the modified write values of the register.
     pub fn modified_write_values(mut self, value: Option<ModifiedWriteValues>) -> Self {
         self.modified_write_values = value;
         self
     }
+    /// Set the write constraint of the register.
     pub fn write_constraint(mut self, value: Option<WriteConstraint>) -> Self {
         self.write_constraint = value;
         self
     }
+    /// Set the fields of the register.
     pub fn fields(mut self, value: Option<Vec<Field>>) -> Self {
         self.fields = value;
         self
     }
+    /// Set the derived_from attribute of the register.
     pub fn derived_from(mut self, value: Option<String>) -> Self {
         self.derived_from = value;
         self
     }
+    /// Validate and build a [`RegisterInfo`].
     pub fn build(self, lvl: ValidateLevel) -> Result<RegisterInfo, SvdError> {
         let mut reg = RegisterInfo {
             name: self
@@ -204,9 +224,11 @@ impl RegisterInfoBuilder {
 }
 
 impl RegisterInfo {
+    /// Make a builder for [`RegisterInfo`]
     pub fn builder() -> RegisterInfoBuilder {
         RegisterInfoBuilder::default()
     }
+    /// Modify an existing [`RegisterInfo`] based on a [builder](RegisterInfoBuilder).
     pub fn modify_from(
         &mut self,
         builder: RegisterInfoBuilder,
@@ -254,6 +276,7 @@ impl RegisterInfo {
             Ok(())
         }
     }
+    /// Validate the [`RegisterInfo`]
     pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
         if lvl.is_strict() {
             super::check_dimable_name(&self.name, "name")?;

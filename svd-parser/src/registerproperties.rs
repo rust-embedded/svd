@@ -7,7 +7,7 @@ impl Parse for RegisterProperties {
     type Config = Config;
 
     fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
-        RegisterProperties::builder()
+        RegisterProperties::new()
             .size(optional::<u32>("size", tree, &())?)
             .access(optional::<Access>("access", tree, config)?)
             .reset_value(optional::<u64>("resetValue", tree, &())?)

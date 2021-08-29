@@ -1,10 +1,15 @@
+/// Endianness of a [processor](crate::Cpu).
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Endian {
+    /// Little endian.
     Little,
+    /// Big endian.
     Big,
+    /// Mixed endian.
     Selectable,
+    /// Other
     Other,
 }
 
@@ -15,6 +20,7 @@ impl Default for Endian {
 }
 
 impl Endian {
+    /// Parse a string into an [Endian] value, returning [`Option::None`] if the string is not valid.
     pub fn parse_str(s: &str) -> Option<Self> {
         match s {
             "little" => Some(Self::Little),
@@ -25,6 +31,7 @@ impl Endian {
         }
     }
 
+    /// Convert this [`Endian`] into a static string.
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Little => "little",

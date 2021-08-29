@@ -3,12 +3,15 @@ use super::{
     BuildError, EmptyToNone, RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
 };
 
+/// Errors from [`ClusterInfo::validate`]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
+    /// The cluster is can not be empty
     #[error("Cluster must contain at least one Register or Cluster")]
     EmptyCluster,
 }
 
+/// Description of a cluster
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[derive(Clone, Debug, PartialEq)]
@@ -40,6 +43,7 @@ pub struct ClusterInfo {
     #[cfg_attr(feature = "serde", serde(flatten))]
     pub default_register_properties: RegisterProperties,
 
+    /// Children/members of the cluster
     pub children: Vec<RegisterCluster>,
 
     /// Specify the cluster name from which to inherit data.
@@ -51,6 +55,7 @@ pub struct ClusterInfo {
     pub derived_from: Option<String>,
 }
 
+/// Builder for [`ClusterInfo`]
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ClusterInfoBuilder {
     name: Option<String>,
@@ -77,34 +82,42 @@ impl From<ClusterInfo> for ClusterInfoBuilder {
 }
 
 impl ClusterInfoBuilder {
+    /// Set the name of the cluster.
     pub fn name(mut self, value: String) -> Self {
         self.name = Some(value);
         self
     }
+    /// Set the description of the cluster.
     pub fn description(mut self, value: Option<String>) -> Self {
         self.description = value;
         self
     }
+    /// Set the struct type name of the cluster. If not specified, the name of the cluster should be used.
     pub fn header_struct_name(mut self, value: Option<String>) -> Self {
         self.header_struct_name = value;
         self
     }
+    /// Set the address_offset of the cluster, relative to the [`baseAddress`](crate::Peripheral::base_address) of the peripheral.
     pub fn address_offset(mut self, value: u32) -> Self {
         self.address_offset = Some(value);
         self
     }
+    /// Set the default_register_properties of the cluster.
     pub fn default_register_properties(mut self, value: RegisterProperties) -> Self {
         self.default_register_properties = value;
         self
     }
+    /// Set the children of the cluster.
     pub fn children(mut self, value: Vec<RegisterCluster>) -> Self {
         self.children = Some(value);
         self
     }
+    /// Set the derived_from of the cluster.
     pub fn derived_from(mut self, value: Option<String>) -> Self {
         self.derived_from = value;
         self
     }
+    /// Validate and build a [`ClusterInfo`].
     pub fn build(self, lvl: ValidateLevel) -> Result<ClusterInfo, SvdError> {
         let mut cluster = ClusterInfo {
             name: self
@@ -129,10 +142,12 @@ impl ClusterInfoBuilder {
 }
 
 impl ClusterInfo {
+    /// Make a builder for [`ClusterInfo`]
     pub fn builder() -> ClusterInfoBuilder {
         ClusterInfoBuilder::default()
     }
 
+    /// Modify an existing [`ClusterInfo`] based on a [builder](ClusterInfoBuilder).
     pub fn modify_from(
         &mut self,
         builder: ClusterInfoBuilder,
@@ -168,6 +183,7 @@ impl ClusterInfo {
         }
     }
 
+    /// Validate the [`ClusterInfo`]
     pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
         if lvl.is_strict() {
             super::check_dimable_name(&self.name, "name")?;
@@ -184,7 +200,7 @@ impl ClusterInfo {
 }
 
 impl ClusterInfo {
-    /// returns iterator over all registers cluster contains
+    /// returns a iterator over all registers the cluster contains
     pub fn reg_iter(&self) -> RegIter {
         let mut rem: Vec<&RegisterCluster> = Vec::with_capacity(self.children.len());
         for r in self.children.iter().rev() {
@@ -193,7 +209,7 @@ impl ClusterInfo {
         RegIter { rem }
     }
 
-    /// returns mutable iterator over all registers cluster contains
+    /// returns a mutable iterator over all registers cluster contains
     pub fn reg_iter_mut(&mut self) -> RegIterMut {
         let mut rem: Vec<&mut RegisterCluster> = Vec::with_capacity(self.children.len());
         for r in self.children.iter_mut().rev() {

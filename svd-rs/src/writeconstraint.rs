@@ -6,9 +6,11 @@ pub enum WriteConstraint {
     WriteAsRead(bool),
     /// If `true`, only the values listed in the enumeratedValues list can be written.
     UseEnumeratedValues(bool),
+    /// A range of numbers that can be written.
     Range(WriteConstraintRange),
 }
 
+/// The smallest and largest number that can be written.
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WriteConstraintRange {

@@ -1,9 +1,12 @@
 use super::{DimElement, FieldInfo};
 use core::ops::{Deref, DerefMut};
 
+/// Describes a field or fields of a [register](crate::RegisterInfo).
 #[derive(Clone, Debug, PartialEq)]
 pub enum Field {
+    /// A single field.
     Single(FieldInfo),
+    /// A field array.
     Array(FieldInfo, DimElement),
 }
 
