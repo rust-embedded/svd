@@ -124,7 +124,7 @@ mod ser_de {
                 Some(k) if k == "bitRange" => {
                     let s: String = map.next_value()?;
                     BitRange::from_bit_range(&s)
-                        .ok_or_else(|| serde::de::Error::custom(&format!("Can't parse bitRange")))
+                        .ok_or_else(|| serde::de::Error::custom("Can't parse bitRange"))
                 }
                 Some(k) if k == "bitOffset" || k == "bitWidth" => {
                     let offset;
@@ -133,17 +133,13 @@ mod ser_de {
                         offset = map.next_value()?;
                         width = match map.next_key::<&str>()? {
                             Some(k) if k == "bitWidth" => map.next_value()?,
-                            _ => {
-                                return Err(serde::de::Error::custom(&format!("Missing bitWidth")))
-                            }
+                            _ => return Err(serde::de::Error::custom("Missing bitWidth")),
                         };
                     } else {
                         width = map.next_value()?;
                         offset = match map.next_key::<&str>()? {
                             Some(k) if k == "bitOffset" => map.next_value()?,
-                            _ => {
-                                return Err(serde::de::Error::custom(&format!("Missing bitOffset")))
-                            }
+                            _ => return Err(serde::de::Error::custom("Missing bitOffset")),
                         };
                     }
                     Ok(BitRange::from_offset_width(offset, width))
@@ -155,19 +151,19 @@ mod ser_de {
                         msb = map.next_value()?;
                         lsb = match map.next_key::<&str>()? {
                             Some(k) if k == "lsb" => map.next_value()?,
-                            _ => return Err(serde::de::Error::custom(&format!("Missing lsb"))),
+                            _ => return Err(serde::de::Error::custom("Missing lsb")),
                         };
                     } else {
                         lsb = map.next_value()?;
                         msb = match map.next_key::<&str>()? {
                             Some(k) if k == "msb" => map.next_value()?,
-                            _ => return Err(serde::de::Error::custom(&format!("Missing msb"))),
+                            _ => return Err(serde::de::Error::custom("Missing msb")),
                         };
                     }
                     Ok(BitRange::from_msb_lsb(msb, lsb))
                 }
-                Some(k) => Err(serde::de::Error::custom(&format!("Invalid key: {}", k))),
-                None => Err(serde::de::Error::custom(&format!("Missing bitRange"))),
+                Some(k) => Err(serde::de::Error::custom(format!("Invalid key: {}", k))),
+                None => Err(serde::de::Error::custom("Missing bitRange")),
             }
         }
     }
