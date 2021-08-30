@@ -215,7 +215,7 @@ impl DeviceExt for Device {
         if let Some(revision) = cmod.get_str("revision") {
             cpu = cpu.revision(revision.into());
         }
-        if let Some(endian) = cmod.get_str("endian").and_then(Endian::from_str) {
+        if let Some(endian) = cmod.get_str("endian").and_then(Endian::parse_str) {
             cpu = cpu.endian(endian);
         }
         if let Some(mpu_present) = cmod.get_bool("mpuPresent") {

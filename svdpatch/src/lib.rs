@@ -202,7 +202,7 @@ fn matchsubspec<'a>(name: &str, spec: &'a str) -> Option<&'a str> {
 fn modify_register_properties(p: &mut RegisterProperties, f: &str, val: &Yaml) {
     match f {
         "size" => p.size = parse_i64(val).map(|v| v as u32),
-        "access" => p.access = val.as_str().and_then(Access::from_str),
+        "access" => p.access = val.as_str().and_then(Access::parse_str),
         "resetValue" => p.reset_value = parse_i64(val).map(|v| v as u64),
         "resetMask" => p.reset_mask = parse_i64(val).map(|v| v as u64),
         "protection" => {}
@@ -211,9 +211,9 @@ fn modify_register_properties(p: &mut RegisterProperties, f: &str, val: &Yaml) {
 }
 
 fn get_register_properties(h: &Hash) -> RegisterProperties {
-    RegisterProperties::builder()
+    RegisterProperties::new()
         .size(h.get_i64("size").map(|v| v as u32))
-        .access(h.get_str("access").and_then(Access::from_str))
+        .access(h.get_str("access").and_then(Access::parse_str))
         .reset_value(h.get_i64("resetValue").map(|v| v as u64))
         .reset_mask(h.get_i64("resetMask").map(|v| v as u64))
 }
@@ -291,7 +291,7 @@ fn make_address_block(h: &Hash) -> AddressBlock {
         size: h.get_i64("size").unwrap() as u32,
         usage: h
             .get_str("usage")
-            .and_then(AddressBlockUsage::from_str)
+            .and_then(AddressBlockUsage::parse_str)
             .unwrap(),
     }
 }
@@ -299,7 +299,7 @@ fn make_address_block(h: &Hash) -> AddressBlock {
 fn make_field(fadd: &Hash) -> FieldInfoBuilder {
     let mut fnew = FieldInfo::builder()
         .description(fadd.get_str("description").map(String::from))
-        .access(fadd.get_str("access").and_then(Access::from_str));
+        .access(fadd.get_str("access").and_then(Access::parse_str));
 
     if let Some(name) = fadd.get_str("name") {
         fnew = fnew.name(name.into());
