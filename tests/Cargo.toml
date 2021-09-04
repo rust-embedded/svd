@@ -7,9 +7,9 @@ edition = "2018"
 version = "0.10.2"
 
 [dependencies]
-svd-rs = { version = "0.10.2", path = "../svd-rs"}
-svd-parser = { version = "0.10.2", path = "../svd-parser"}
-svd-encoder = { version = "0.10.2", path = "../svd-encoder"}
+svd-rs = { path = "../svd-rs"}
+svd-parser = { path = "../svd-parser"}
+svd-encoder = { path = "../svd-encoder"}
 roxmltree = "0.14.1"
 xmltree = "0.10.3"
 anyhow = "1.0.19"

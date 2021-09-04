@@ -37,6 +37,7 @@ use crate::elementext::ElementExt;
 pub mod types;
 
 #[derive(Clone, Copy, Debug, Default)]
+#[non_exhaustive]
 pub struct Config {
     pub validate_level: ValidateLevel,
     //pub expand_arrays: bool,

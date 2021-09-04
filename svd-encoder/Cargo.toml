@@ -9,11 +9,11 @@ license = "MIT OR Apache-2.0"
 name = "svd-encoder"
 repository = "https://github.com/rust-embedded/svd"
 edition = "2018"
-version = "0.10.2"
+version = "0.11.0"
 readme = "README.md"
 
 [dependencies]
-svd-rs = { version = "0.10.2", path = "../svd-rs"}
+svd-rs = { version = "0.11.0", path = "../svd-rs"}
 anyhow = "1.0.19"
 thiserror = "1.0.5"
 

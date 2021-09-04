@@ -1,12 +1,15 @@
-# Rust SVD manipulating libraries
+[![crates.io](https://img.shields.io/crates/d/svd-parser.svg)](https://crates.io/crates/svd-parser)
+[![crates.io](https://img.shields.io/crates/v/svd-parser.svg)](https://crates.io/crates/svd-parser)
+[![Continuous Integration](https://github.com/rust-embedded/svd/workflows/Continuous%20Integration/badge.svg)](https://github.com/rust-embedded/svd/actions)
+[![Documentation](https://docs.rs/svd-parser/badge.svg)](https://docs.rs/svd-parser)
+
+# `svd-parser`
+
+> A CMSIS-SVD file parser
 
 This project is developed and maintained by the [Tools team][team].
 
-It consists of:
-
-- [`svd-rs`](https://docs.rs/svd-rs). Basic structures and builders, also (de)serializers under `serde` feature.
-- [`svd-parser`](https://docs.rs/svd-parser). Library for parsing SVD XML source in Rust `Device` structure.
-- [`svd-encoder`](https://docs.rs/svd-encoder). Library for creating SVD XML.
+## ["Documentation"](https://docs.rs/svd-parser)
 
 ## Minimum Supported Rust Version (MSRV)
 
