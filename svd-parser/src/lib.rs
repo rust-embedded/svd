@@ -43,6 +43,13 @@ pub struct Config {
     //pub expand_derived: bool,
 }
 
+impl Config {
+    pub fn validate_level(mut self, lvl: ValidateLevel) -> Self {
+        self.validate_level = lvl;
+        self
+    }
+}
+
 /// Parse trait allows SVD objects to be parsed from XML elements.
 pub trait Parse {
     /// Object returned by parse method
