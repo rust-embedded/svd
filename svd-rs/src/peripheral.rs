@@ -99,7 +99,7 @@ pub struct PeripheralBuilder {
     base_address: Option<u64>,
     default_register_properties: RegisterProperties,
     address_block: Option<Vec<AddressBlock>>,
-    interrupt: Vec<Interrupt>,
+    interrupt: Option<Vec<Interrupt>>,
     registers: Option<Vec<RegisterCluster>>,
     derived_from: Option<String>,
 }
@@ -115,7 +115,7 @@ impl From<Peripheral> for PeripheralBuilder {
             base_address: Some(p.base_address),
             default_register_properties: p.default_register_properties,
             address_block: p.address_block,
-            interrupt: p.interrupt,
+            interrupt: Some(p.interrupt),
             registers: p.registers,
             derived_from: p.derived_from,
         }
@@ -164,7 +164,7 @@ impl PeripheralBuilder {
         self
     }
     /// Set the interrupts of the peripheral
-    pub fn interrupt(mut self, value: Vec<Interrupt>) -> Self {
+    pub fn interrupt(mut self, value: Option<Vec<Interrupt>>) -> Self {
         self.interrupt = value;
         self
     }
@@ -193,7 +193,7 @@ impl PeripheralBuilder {
                 .ok_or_else(|| BuildError::Uninitialized("base_address".to_string()))?,
             default_register_properties: self.default_register_properties.build(lvl)?,
             address_block: self.address_block,
-            interrupt: self.interrupt,
+            interrupt: self.interrupt.unwrap_or_default(),
             registers: self.registers,
             derived_from: self.derived_from,
         };
@@ -233,8 +233,8 @@ impl Peripheral {
         if let Some(base_address) = builder.base_address {
             self.base_address = base_address;
         }
-        if !builder.interrupt.is_empty() {
-            self.interrupt = builder.interrupt;
+        if let Some(interrupt) = builder.interrupt {
+            self.interrupt = interrupt;
         }
         if builder.derived_from.is_some() {
             self.derived_from = builder.derived_from;

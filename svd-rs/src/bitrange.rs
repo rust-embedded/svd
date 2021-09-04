@@ -60,7 +60,7 @@ impl BitRange {
             range_type: BitRangeType::MsbLsb,
         }
     }
-    /// Construct a [`BitRange`] from string in the format `[<msb>:<lsb>]`
+    /// Construct a [`BitRange`] from a string in the format `[<msb>:<lsb>]`
     pub fn from_bit_range(text: &str) -> Option<Self> {
         if !text.starts_with('[') || !text.ends_with(']') {
             return None;

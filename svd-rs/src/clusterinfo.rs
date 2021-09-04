@@ -6,7 +6,7 @@ use super::{
 /// Errors from [`ClusterInfo::validate`]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
-    /// The cluster is can not be empty
+    /// The cluster can not be empty
     #[error("Cluster must contain at least one Register or Cluster")]
     EmptyCluster,
 }
