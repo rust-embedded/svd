@@ -38,7 +38,7 @@ impl Parse for Peripheral {
                     .filter(|t| t.is_element() && t.has_tag_name("interrupt"))
                     .map(|i| Interrupt::parse(&i, config))
                     .collect();
-                interrupt?
+                Some(interrupt?)
             })
             .registers(if let Some(registers) = tree.get_child("registers") {
                 let rs: Result<Vec<_>, _> = registers
