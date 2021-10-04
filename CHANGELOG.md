@@ -5,7 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+Newer releases see in [svd-rs/CHANGELOG.md](./svd-rs/CHANGELOG.md),
+[svd-parser/CHANGELOG.md](./svd-parser/CHANGELOG.md) and [svd-encoder/CHANGELOG.md](./svd-encoder/CHANGELOG.md).
+
+## [v0.11.0] - 2021-10-02
+
+- [breaking-change] Split `svd-parser` on `svd-rs`, `svd-parser` and `svd-encoder`
+- [breaking-change] Use `roxmltree` in `svd-parser` instead of `xmltree`
+  for fast parsing and better error debug. `Parse` trait now requires `Config`
+- [breaking-change] Bump `xmltree` in `svd-encoder` to 0.10.
+- Fixed cluster encoding
+- Added `as_str`/`parse_str` for simple enums
+- Added `indexes` iterator for `DimElement`
+- For structs with builders added `modify_from` method, `validate` now public
+- [breaking-change] `build` and `modify_from` take `ValidateLevel`
+- [breaking-change] multiple `addressBlocks` now supported in `Peripheral`
+- Added custom `serde` (de)serializers for `BitRange`, `Register`,
+  `Cluster` and `Field`. `camelCase` and `kebab-case` are used
+  where it's needed to be more like SVD.
+- [breaking-change] `Parse`, `Encode` implementation are moved
+  in separate modules, same with tests. Builders and `Encode`'s
+  use enum errors now instead of dynamical `anyhow`.
+- [breaking-change] change encode format of some numbers to be
+  more compatible with STM vendor's SVDs
+- [breaking-change] resort tags when encode
+- [breaking-change] Use `RegisterProperties` in `RegisterInfo`, `Peripheral` nd `Device`
+  instead of separate `size`, `access`, `reset_value` and `reset_mask`
 
 ## [v0.10.2] - 2021-04-30
 
@@ -141,7 +166,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Initial SVD parser
 - A `parse` utility function to parse the contents of a SVD file (XML)
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/v0.10.2...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/v0.11.0...HEAD
+[v0.11.0]: https://github.com/rust-embedded/svd/compare/v0.10.2...v0.11.0
 [v0.10.2]: https://github.com/rust-embedded/svd/compare/v0.10.1...v0.10.2
 [v0.10.1]: https://github.com/rust-embedded/svd/compare/v0.10.0...v0.10.1
 [v0.10.0]: https://github.com/rust-embedded/svd/compare/v0.9.0...v0.10.0

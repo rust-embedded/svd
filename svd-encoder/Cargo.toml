@@ -1,0 +1,22 @@
+[package]
+authors = [
+    "The Tools Team <tools@teams.rust-embedded.org>",
+]
+description = "A CMSIS-SVD file encoder"
+documentation = "https://docs.rs/svd-encoder"
+keywords = ["CMSIS", "SVD", "encoder"]
+license = "MIT OR Apache-2.0"
+name = "svd-encoder"
+repository = "https://github.com/rust-embedded/svd"
+edition = "2018"
+version = "0.11.0"
+readme = "README.md"
+
+[dependencies]
+svd-rs = { version = "0.11.0", path = "../svd-rs"}
+anyhow = "1.0.19"
+thiserror = "1.0.5"
+
+[dependencies.xmltree]
+version = "0.10.3"
+features = ["attribute-order"]

@@ -1,0 +1,38 @@
+[package]
+authors = [
+    "The Tools Team <tools@teams.rust-embedded.org>",
+]
+description = "A CMSIS-SVD base structures"
+documentation = "https://docs.rs/svd-rs"
+keywords = ["CMSIS", "SVD"]
+license = "MIT OR Apache-2.0"
+name = "svd-rs"
+repository = "https://github.com/rust-embedded/svd"
+edition = "2018"
+version = "0.11.0"
+readme = "README.md"
+
+[features]
+derive-from = []
+
+[dependencies]
+thiserror = "1.0.5"
+
+[dependencies.regex]
+version = "1"
+
+[dependencies.once_cell]
+version = "1.5.2"
+
+[dependencies.serde]
+version = "1.0"
+features = ["derive"]
+optional = true
+
+[dev-dependencies]
+serde_json = "1.0"
+svd-parser = { version = "0.11.0", path = "../svd-parser"}
+
+[[example]]
+name = "svd2json"
+required-features = ["serde"]
