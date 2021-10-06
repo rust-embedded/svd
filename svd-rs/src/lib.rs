@@ -8,7 +8,7 @@ pub use self::endian::Endian;
 
 /// Cpu objects
 pub mod cpu;
-pub use self::cpu::Cpu;
+pub use self::cpu::{Cpu, CpuBuilder};
 
 /// Interrupt objects
 pub mod interrupt;
@@ -32,11 +32,11 @@ pub use self::usage::Usage;
 
 /// Enumerated Value objects
 pub mod enumeratedvalue;
-pub use self::enumeratedvalue::EnumeratedValue;
+pub use self::enumeratedvalue::{EnumeratedValue, EnumeratedValueBuilder};
 
 /// Enumerated Values objects
 pub mod enumeratedvalues;
-pub use self::enumeratedvalues::EnumeratedValues;
+pub use self::enumeratedvalues::{EnumeratedValues, EnumeratedValuesBuilder};
 
 /// Field objects
 pub mod field;
@@ -44,11 +44,11 @@ pub use self::field::Field;
 
 /// Field Info objects
 pub mod fieldinfo;
-pub use self::fieldinfo::FieldInfo;
+pub use self::fieldinfo::{FieldInfo, FieldInfoBuilder};
 
 /// Register Info objects
 pub mod registerinfo;
-pub use self::registerinfo::RegisterInfo;
+pub use self::registerinfo::{RegisterInfo, RegisterInfoBuilder};
 
 /// Register Properties objects
 pub mod registerproperties;
@@ -64,7 +64,7 @@ pub use self::cluster::Cluster;
 
 /// Cluster Info objects
 pub mod clusterinfo;
-pub use self::clusterinfo::ClusterInfo;
+pub use self::clusterinfo::{ClusterInfo, ClusterInfoBuilder};
 
 /// Register objects
 pub mod register;
@@ -76,15 +76,15 @@ pub use self::registercluster::RegisterCluster;
 
 /// Dimelement objects
 pub mod dimelement;
-pub use self::dimelement::DimElement;
+pub use self::dimelement::{DimElement, DimElementBuilder};
 
 /// Peripheral objects
 pub mod peripheral;
-pub use self::peripheral::Peripheral;
+pub use self::peripheral::{Peripheral, PeripheralBuilder};
 
 /// Device objects
 pub mod device;
-pub use self::device::Device;
+pub use self::device::{Device, DeviceBuilder};
 
 /// Modified Write Values objects
 pub mod modifiedwritevalues;
