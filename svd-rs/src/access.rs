@@ -35,7 +35,7 @@ impl Access {
 
     /// Whether the register/field is writable at least once.
     pub fn can_write(self) -> bool {
-        matches!(self, Self::ReadOnly)
+        !matches!(self, Self::ReadOnly)
     }
 }
 
