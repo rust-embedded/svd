@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Reexport builders
 - Fix typo in Access::can_write
 
 ## [v0.11.0] - 2021-10-02
