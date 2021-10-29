@@ -190,7 +190,7 @@ pub enum SVDError {
     UnknownWriteConstraint,
     #[error("Multiple wc found")]
     MoreThanOneWriteConstraint,
-    #[error("No support for registers arrays which are derived")]
+    #[error("No support for register arrays which are derived")]
     DerivedRegisterArray,
     #[error("Unknown usage variant")]
     UnknownUsageVariant,
