@@ -16,6 +16,12 @@ impl Parse for Register {
 
         if tree.get_child("dimIncrement").is_some() {
             let array_info = DimElement::parse(tree, config)?;
+            if info.derived_from.is_some() {
+                return Err(SVDErrorAt {
+                    error: SVDError::DerivedRegisterWithArray,
+                    id: tree.id()
+                })
+            }
             check_has_placeholder(&info.name, "register").map_err(|e| e.at(tree.id()))?;
             if let Some(indexes) = &array_info.dim_index {
                 if array_info.dim as usize != indexes.len() {
