@@ -18,7 +18,7 @@ impl Parse for Register {
             let array_info = DimElement::parse(tree, config)?;
             if info.derived_from.is_some() {
                 return Err(SVDErrorAt {
-                    error: SVDError::DerivedRegisterWithArray,
+                    error: SVDError::DerivedRegisterArray,
                     id: tree.id()
                 })
             }
