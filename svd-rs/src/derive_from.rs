@@ -97,11 +97,9 @@ impl DeriveFrom for FieldInfo {
 impl DeriveFrom for Cluster {
     fn derive_from(&self, other: &Self) -> Self {
         match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => {
+            (Self::Single(info), Self::Single(other_info))
+            | (Self::Single(info), Self::Array(other_info, _)) => {
                 Self::Single(info.derive_from(other_info))
-            }
-            (Self::Single(info), Self::Array(other_info, other_dim)) => {
-                Self::Array(info.derive_from(other_info), other_dim.clone())
             }
             (Self::Array(info, dim), Self::Single(other_info))
             | (Self::Array(info, dim), Self::Array(other_info, _)) => {
@@ -114,11 +112,9 @@ impl DeriveFrom for Cluster {
 impl DeriveFrom for Register {
     fn derive_from(&self, other: &Self) -> Self {
         match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => {
+            (Self::Single(info), Self::Single(other_info))
+            | (Self::Single(info), Self::Array(other_info, _)) => {
                 Self::Single(info.derive_from(other_info))
-            }
-            (Self::Single(info), Self::Array(other_info, other_dim)) => {
-                Self::Array(info.derive_from(other_info), other_dim.clone())
             }
             (Self::Array(info, dim), Self::Single(other_info))
             | (Self::Array(info, dim), Self::Array(other_info, _)) => {
@@ -131,11 +127,9 @@ impl DeriveFrom for Register {
 impl DeriveFrom for Field {
     fn derive_from(&self, other: &Self) -> Self {
         match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => {
+            (Self::Single(info), Self::Single(other_info))
+            | (Self::Single(info), Self::Array(other_info, _)) => {
                 Self::Single(info.derive_from(other_info))
-            }
-            (Self::Single(info), Self::Array(other_info, other_dim)) => {
-                Self::Array(info.derive_from(other_info), other_dim.clone())
             }
             (Self::Array(info, dim), Self::Single(other_info))
             | (Self::Array(info, dim), Self::Array(other_info, _)) => {
