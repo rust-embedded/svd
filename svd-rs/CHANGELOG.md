@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.11.2] - 2021-11-04
+
 - Implement `DeriveFrom` for `Cluster`, `Register` and `Field`
 
 ## [v0.11.1] - 2021-10-02
