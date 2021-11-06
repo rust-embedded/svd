@@ -1,5 +1,6 @@
 use super::*;
-use crate::svd::{AddressBlock, Interrupt, Peripheral, RegisterCluster, RegisterProperties};
+use crate::elementext::ElementExt;
+use crate::svd::{DimElement, Peripheral, PeripheralInfo};
 
 impl Parse for Peripheral {
     type Object = Self;
@@ -11,47 +12,23 @@ impl Parse for Peripheral {
             return Err(SVDError::NotExpectedTag("peripheral".to_string()).at(tree.id()));
         }
 
-        Peripheral::builder()
-            .name(tree.get_child_text("name")?)
-            .display_name(tree.get_child_text_opt("displayName")?)
-            .version(tree.get_child_text_opt("version")?)
-            .description(tree.get_child_text_opt("description")?)
-            .group_name(tree.get_child_text_opt("groupName")?)
-            .base_address(tree.get_child_u64("baseAddress")?)
-            .default_register_properties(RegisterProperties::parse(tree, config)?)
-            .address_block({
-                let ab: Result<Vec<_>, _> = tree
-                    .children()
-                    .filter(|t| t.is_element() && t.has_tag_name("addressBlock"))
-                    .map(|i| AddressBlock::parse(&i, config))
-                    .collect();
-                let ab = ab?;
-                if ab.is_empty() {
-                    None
-                } else {
-                    Some(ab)
+        let info = PeripheralInfo::parse(tree, config)?;
+
+        if tree.get_child("dimIncrement").is_some() {
+            let array_info = DimElement::parse(tree, config)?;
+            check_has_placeholder(&info.name, "peripheral").map_err(|e| e.at(tree.id()))?;
+            if let Some(indexes) = &array_info.dim_index {
+                if array_info.dim as usize != indexes.len() {
+                    return Err(SVDError::IncorrectDimIndexesCount(
+                        array_info.dim as usize,
+                        indexes.len(),
+                    )
+                    .at(tree.id()));
                 }
-            })
-            .interrupt({
-                let interrupt: Result<Vec<_>, _> = tree
-                    .children()
-                    .filter(|t| t.is_element() && t.has_tag_name("interrupt"))
-                    .map(|i| Interrupt::parse(&i, config))
-                    .collect();
-                Some(interrupt?)
-            })
-            .registers(if let Some(registers) = tree.get_child("registers") {
-                let rs: Result<Vec<_>, _> = registers
-                    .children()
-                    .filter(Node::is_element)
-                    .map(|t| RegisterCluster::parse(&t, config))
-                    .collect();
-                Some(rs?)
-            } else {
-                None
-            })
-            .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
-            .build(config.validate_level)
-            .map_err(|e| SVDError::from(e).at(tree.id()))
+            }
+            Ok(Self::Array(info, array_info))
+        } else {
+            Ok(Self::Single(info))
+        }
     }
 }

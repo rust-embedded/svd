@@ -26,9 +26,9 @@ impl Parse for Field {
                     .at(tree.id()));
                 }
             }
-            Ok(Field::Array(info, array_info))
+            Ok(Self::Array(info, array_info))
         } else {
-            Ok(Field::Single(info))
+            Ok(Self::Single(info))
         }
     }
 }

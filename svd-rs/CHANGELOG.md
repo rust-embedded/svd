@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add array support for peripherals
+
 ## [v0.11.2] - 2021-11-04
 
 - Implement `DeriveFrom` for `Cluster`, `Register` and `Field`

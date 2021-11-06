@@ -80,7 +80,11 @@ pub use self::dimelement::{DimElement, DimElementBuilder};
 
 /// Peripheral objects
 pub mod peripheral;
-pub use self::peripheral::{Peripheral, PeripheralBuilder};
+pub use self::peripheral::Peripheral;
+
+/// Peripheral Info objects
+pub mod peripheralinfo;
+pub use self::peripheralinfo::{PeripheralInfo, PeripheralInfoBuilder};
 
 /// Device objects
 pub mod device;
@@ -144,7 +148,7 @@ pub enum SvdError {
     Device(#[from] device::Error),
     /// Peripheral error
     #[error("`Peripheral error: {0}")]
-    Peripheral(#[from] peripheral::Error),
+    Peripheral(#[from] peripheralinfo::Error),
     /// Cluster error
     #[error("`Cluster error: {0}")]
     Cluster(#[from] clusterinfo::Error),
