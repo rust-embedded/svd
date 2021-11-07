@@ -1,6 +1,6 @@
 use super::{
-    Access, BuildError, EmptyToNone, Field, ModifiedWriteValues, RegisterProperties, SvdError,
-    ValidateLevel, WriteConstraint,
+    Access, BuildError, DimElement, EmptyToNone, Field, ModifiedWriteValues, Register,
+    RegisterProperties, SvdError, ValidateLevel, WriteConstraint,
 };
 
 /// Errors from [`RegisterInfo::validate`]
@@ -230,6 +230,14 @@ impl RegisterInfo {
     /// Make a builder for [`RegisterInfo`]
     pub fn builder() -> RegisterInfoBuilder {
         RegisterInfoBuilder::default()
+    }
+    /// Construct single [`Register`]
+    pub const fn single(self) -> Register {
+        Register::Single(self)
+    }
+    /// Construct [`Register`] array
+    pub const fn array(self, dim: DimElement) -> Register {
+        Register::Array(self, dim)
     }
     /// Modify an existing [`RegisterInfo`] based on a [builder](RegisterInfoBuilder).
     pub fn modify_from(

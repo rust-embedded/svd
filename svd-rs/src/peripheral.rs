@@ -16,8 +16,8 @@ impl Deref for Peripheral {
 
     fn deref(&self) -> &PeripheralInfo {
         match self {
-            Peripheral::Single(info) => info,
-            Peripheral::Array(info, _) => info,
+            Self::Single(info) => info,
+            Self::Array(info, _) => info,
         }
     }
 }
@@ -25,9 +25,20 @@ impl Deref for Peripheral {
 impl DerefMut for Peripheral {
     fn deref_mut(&mut self) -> &mut PeripheralInfo {
         match self {
-            Peripheral::Single(info) => info,
-            Peripheral::Array(info, _) => info,
+            Self::Single(info) => info,
+            Self::Array(info, _) => info,
         }
+    }
+}
+
+impl Peripheral {
+    /// Return `true` if peripheral instance is single
+    pub const fn is_single(&self) -> bool {
+        matches!(self, Self::Single(_))
+    }
+    /// Return `true` if it is peripheral array
+    pub const fn is_array(&self) -> bool {
+        matches!(self, Self::Array(_, _))
     }
 }
 
@@ -53,8 +64,8 @@ mod ser_de {
             S: Serializer,
         {
             match self {
-                Peripheral::Single(info) => info.serialize(serializer),
-                Peripheral::Array(info, dim) => PeripheralArray {
+                Self::Single(info) => info.serialize(serializer),
+                Self::Array(info, dim) => PeripheralArray {
                     dim: Some(dim.clone()),
                     info: info.clone(),
                 }
@@ -70,9 +81,9 @@ mod ser_de {
         {
             let PeripheralArray { dim, info } = PeripheralArray::deserialize(deserializer)?;
             if let Some(dim) = dim {
-                Ok(Peripheral::Array(info, dim))
+                Ok(info.array(dim))
             } else {
-                Ok(Peripheral::Single(info))
+                Ok(info.single())
             }
         }
     }

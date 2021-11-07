@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add `single` and `array` for `Info` types, 
+  `is_single` and `is_array` for `Peripheral`, `Cluster`, `Register` and `Field`
 - Add array support for peripherals
 
 ## [v0.11.2] - 2021-11-04

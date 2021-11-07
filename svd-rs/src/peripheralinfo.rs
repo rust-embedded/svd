@@ -1,7 +1,7 @@
 use super::{
     register::{RegIter, RegIterMut},
-    AddressBlock, BuildError, EmptyToNone, Interrupt, RegisterCluster, RegisterProperties,
-    SvdError, ValidateLevel,
+    AddressBlock, BuildError, DimElement, EmptyToNone, Interrupt, Peripheral, RegisterCluster,
+    RegisterProperties, SvdError, ValidateLevel,
 };
 
 /// Errors from [Peripheral::validate]
@@ -208,9 +208,17 @@ impl PeripheralInfoBuilder {
 }
 
 impl PeripheralInfo {
-    /// Make a builder for [`Peripheral`]
+    /// Make a builder for [`PeripheralInfo`]
     pub fn builder() -> PeripheralInfoBuilder {
         PeripheralInfoBuilder::default()
+    }
+    /// Construct single [`Peripheral`]
+    pub const fn single(self) -> Peripheral {
+        Peripheral::Single(self)
+    }
+    /// Construct [`Peripheral`] array
+    pub const fn array(self, dim: DimElement) -> Peripheral {
+        Peripheral::Array(self, dim)
     }
     /// Modify an existing [`Peripheral`] based on a [builder](PeripheralInfoBuilder).
     pub fn modify_from(

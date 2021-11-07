@@ -1,6 +1,6 @@
 use super::{
-    bitrange, Access, BitRange, BuildError, EmptyToNone, EnumeratedValues, ModifiedWriteValues,
-    SvdError, Usage, ValidateLevel, WriteConstraint,
+    bitrange, Access, BitRange, BuildError, DimElement, EmptyToNone, EnumeratedValues, Field,
+    ModifiedWriteValues, SvdError, Usage, ValidateLevel, WriteConstraint,
 };
 
 /// Errors for [`FieldInfo::validate`]
@@ -197,6 +197,14 @@ impl FieldInfo {
     /// Make a builder for [`FieldInfo`]
     pub fn builder() -> FieldInfoBuilder {
         FieldInfoBuilder::default()
+    }
+    /// Construct single [`Field`]
+    pub const fn single(self) -> Field {
+        Field::Single(self)
+    }
+    /// Construct [`Field`] array
+    pub const fn array(self, dim: DimElement) -> Field {
+        Field::Array(self, dim)
     }
     /// Modify an existing [`FieldInfo`] based on a [builder](FieldInfoBuilder).
     pub fn modify_from(

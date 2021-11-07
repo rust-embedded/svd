@@ -16,8 +16,8 @@ impl Deref for Register {
 
     fn deref(&self) -> &RegisterInfo {
         match self {
-            Register::Single(info) => info,
-            Register::Array(info, _) => info,
+            Self::Single(info) => info,
+            Self::Array(info, _) => info,
         }
     }
 }
@@ -25,9 +25,20 @@ impl Deref for Register {
 impl DerefMut for Register {
     fn deref_mut(&mut self) -> &mut RegisterInfo {
         match self {
-            Register::Single(info) => info,
-            Register::Array(info, _) => info,
+            Self::Single(info) => info,
+            Self::Array(info, _) => info,
         }
+    }
+}
+
+impl Register {
+    /// Return `true` if register instance is single
+    pub const fn is_single(&self) -> bool {
+        matches!(self, Self::Single(_))
+    }
+    /// Return `true` if it is register array
+    pub const fn is_array(&self) -> bool {
+        matches!(self, Self::Array(_, _))
     }
 }
 
@@ -101,8 +112,8 @@ mod ser_de {
             S: Serializer,
         {
             match self {
-                Register::Single(info) => info.serialize(serializer),
-                Register::Array(info, dim) => RegisterArray {
+                Self::Single(info) => info.serialize(serializer),
+                Self::Array(info, dim) => RegisterArray {
                     dim: Some(dim.clone()),
                     info: info.clone(),
                 }
@@ -118,9 +129,9 @@ mod ser_de {
         {
             let RegisterArray { dim, info } = RegisterArray::deserialize(deserializer)?;
             if let Some(dim) = dim {
-                Ok(Register::Array(info, dim))
+                Ok(info.array(dim))
             } else {
-                Ok(Register::Single(info))
+                Ok(info.single())
             }
         }
     }
