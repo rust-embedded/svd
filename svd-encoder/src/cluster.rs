@@ -6,13 +6,14 @@ impl Encode for Cluster {
     type Error = EncodeError;
 
     fn encode(&self) -> Result<Element, EncodeError> {
-        match self {
-            Self::Single(i) => i.encode(),
-            Self::Array(i, a) => {
-                let mut e = Element::new("cluster");
-                e.merge(&a.encode()?);
-                e.merge(&i.encode()?);
-                Ok(e)
+        let info = self.info.encode();
+        match &self.dim {
+            None => info,
+            Some(array_info) => {
+                let mut base = Element::new("cluster");
+                base.merge(&array_info.encode()?);
+                base.merge(&info?);
+                Ok(base)
             }
         }
     }

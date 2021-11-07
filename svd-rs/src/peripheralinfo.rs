@@ -214,11 +214,11 @@ impl PeripheralInfo {
     }
     /// Construct single [`Peripheral`]
     pub const fn single(self) -> Peripheral {
-        Peripheral::Single(self)
+        Peripheral::single(self)
     }
     /// Construct [`Peripheral`] array
     pub const fn array(self, dim: DimElement) -> Peripheral {
-        Peripheral::Array(self, dim)
+        Peripheral::array(self, dim)
     }
     /// Modify an existing [`Peripheral`] based on a [builder](PeripheralInfoBuilder).
     pub fn modify_from(

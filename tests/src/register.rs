@@ -4,7 +4,7 @@ use crate::svd::{DimElement, Register, RegisterInfo, ValidateLevel};
 #[test]
 fn decode_encode() {
     let tests = vec![(
-        Register::Array(
+        Register::array(
             RegisterInfo::builder()
                 .name("MODE%s".to_string())
                 .address_offset(8)

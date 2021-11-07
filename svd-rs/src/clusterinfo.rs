@@ -152,11 +152,11 @@ impl ClusterInfo {
     }
     /// Construct single [`Cluster`]
     pub const fn single(self) -> Cluster {
-        Cluster::Single(self)
+        Cluster::single(self)
     }
     /// Construct [`Cluster`] array
     pub const fn array(self, dim: DimElement) -> Cluster {
-        Cluster::Array(self, dim)
+        Cluster::array(self, dim)
     }
     /// Modify an existing [`ClusterInfo`] based on a [builder](ClusterInfoBuilder).
     pub fn modify_from(

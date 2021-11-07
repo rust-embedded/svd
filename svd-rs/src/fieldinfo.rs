@@ -200,11 +200,11 @@ impl FieldInfo {
     }
     /// Construct single [`Field`]
     pub const fn single(self) -> Field {
-        Field::Single(self)
+        Field::single(self)
     }
     /// Construct [`Field`] array
     pub const fn array(self, dim: DimElement) -> Field {
-        Field::Array(self, dim)
+        Field::array(self, dim)
     }
     /// Modify an existing [`FieldInfo`] based on a [builder](FieldInfoBuilder).
     pub fn modify_from(

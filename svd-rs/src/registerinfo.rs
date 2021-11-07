@@ -233,11 +233,11 @@ impl RegisterInfo {
     }
     /// Construct single [`Register`]
     pub const fn single(self) -> Register {
-        Register::Single(self)
+        Register::single(self)
     }
     /// Construct [`Register`] array
     pub const fn array(self, dim: DimElement) -> Register {
-        Register::Array(self, dim)
+        Register::array(self, dim)
     }
     /// Modify an existing [`RegisterInfo`] based on a [builder](RegisterInfoBuilder).
     pub fn modify_from(

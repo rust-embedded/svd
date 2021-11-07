@@ -96,68 +96,44 @@ impl DeriveFrom for FieldInfo {
 
 impl DeriveFrom for Peripheral {
     fn derive_from(&self, other: &Self) -> Self {
-        match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => {
-                Self::Single(info.derive_from(other_info))
-            }
-            (Self::Single(info), Self::Array(other_info, other_dim)) => {
-                Self::Array(info.derive_from(other_info), other_dim.clone())
-            }
-            (Self::Array(info, dim), Self::Single(other_info))
-            | (Self::Array(info, dim), Self::Array(other_info, _)) => {
-                Self::Array(info.derive_from(other_info), dim.clone())
-            }
-        }
+        let info = self.info.derive_from(&other.info);
+        let dim = match (&self.dim, &other.dim) {
+            (None, other_dim) => other_dim.clone(),
+            (Some(dim), _) => Some(dim.clone()),
+        };
+        Self { info, dim }
     }
 }
 
 impl DeriveFrom for Cluster {
     fn derive_from(&self, other: &Self) -> Self {
-        match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => {
-                Self::Single(info.derive_from(other_info))
-            }
-            (Self::Single(info), Self::Array(other_info, other_dim)) => {
-                Self::Array(info.derive_from(other_info), other_dim.clone())
-            }
-            (Self::Array(info, dim), Self::Single(other_info))
-            | (Self::Array(info, dim), Self::Array(other_info, _)) => {
-                Self::Array(info.derive_from(other_info), dim.clone())
-            }
-        }
+        let info = self.info.derive_from(&other.info);
+        let dim = match (&self.dim, &other.dim) {
+            (None, other_dim) => other_dim.clone(),
+            (Some(dim), _) => Some(dim.clone()),
+        };
+        Self { info, dim }
     }
 }
 
 impl DeriveFrom for Register {
     fn derive_from(&self, other: &Self) -> Self {
-        match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => {
-                Self::Single(info.derive_from(other_info))
-            }
-            (Self::Single(info), Self::Array(other_info, other_dim)) => {
-                Self::Array(info.derive_from(other_info), other_dim.clone())
-            }
-            (Self::Array(info, dim), Self::Single(other_info))
-            | (Self::Array(info, dim), Self::Array(other_info, _)) => {
-                Self::Array(info.derive_from(other_info), dim.clone())
-            }
-        }
+        let info = self.info.derive_from(&other.info);
+        let dim = match (&self.dim, &other.dim) {
+            (None, other_dim) => other_dim.clone(),
+            (Some(dim), _) => Some(dim.clone()),
+        };
+        Self { info, dim }
     }
 }
 
 impl DeriveFrom for Field {
     fn derive_from(&self, other: &Self) -> Self {
-        match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => {
-                Self::Single(info.derive_from(other_info))
-            }
-            (Self::Single(info), Self::Array(other_info, other_dim)) => {
-                Self::Array(info.derive_from(other_info), other_dim.clone())
-            }
-            (Self::Array(info, dim), Self::Single(other_info))
-            | (Self::Array(info, dim), Self::Array(other_info, _)) => {
-                Self::Array(info.derive_from(other_info), dim.clone())
-            }
-        }
+        let info = self.info.derive_from(&other.info);
+        let dim = match (&self.dim, &other.dim) {
+            (None, other_dim) => other_dim.clone(),
+            (Some(dim), _) => Some(dim.clone()),
+        };
+        Self { info, dim }
     }
 }

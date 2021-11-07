@@ -1,7 +1,6 @@
 use super::run_test;
 use crate::svd::{
-    Access, BitRange, BitRangeType, Field, FieldInfo, ModifiedWriteValues, RegisterInfo,
-    ValidateLevel,
+    Access, BitRange, BitRangeType, FieldInfo, ModifiedWriteValues, RegisterInfo, ValidateLevel,
 };
 
 #[test]
@@ -18,19 +17,18 @@ fn decode_encode() {
             .access(Some(Access::ReadWrite))
             .reset_value(Some(0x00000000))
             .reset_mask(Some(0x00000023))
-            .fields(Some(vec![Field::Single(
-                FieldInfo::builder()
-                    .name("WREN".to_string())
-                    .description(Some("Enable Write/Erase Controller".to_string()))
-                    .bit_range(BitRange {
-                        offset: 0,
-                        width: 1,
-                        range_type: BitRangeType::OffsetWidth,
-                    })
-                    .access(Some(Access::ReadWrite))
-                    .build(ValidateLevel::Strict)
-                    .unwrap(),
-            )]))
+            .fields(Some(vec![FieldInfo::builder()
+                .name("WREN".to_string())
+                .description(Some("Enable Write/Erase Controller".to_string()))
+                .bit_range(BitRange {
+                    offset: 0,
+                    width: 1,
+                    range_type: BitRangeType::OffsetWidth,
+                })
+                .access(Some(Access::ReadWrite))
+                .build(ValidateLevel::Strict)
+                .unwrap()
+                .single()]))
             .modified_write_values(Some(ModifiedWriteValues::OneToToggle))
             .build(ValidateLevel::Strict)
             .unwrap(),

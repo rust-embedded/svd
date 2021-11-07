@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Change `Peripheral`, `Cluster`, `Register` and `Field` from enums to structs 
 - Add `single` and `array` for `Info` types, 
   `is_single` and `is_array` for `Peripheral`, `Cluster`, `Register` and `Field`
 - Add array support for peripherals

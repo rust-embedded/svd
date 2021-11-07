@@ -4,7 +4,7 @@ use crate::svd::{BitRange, BitRangeType, DimElement, Field, FieldInfo, ValidateL
 #[test]
 fn decode_encode() {
     let tests = vec![(
-        Field::Array(
+        Field::array(
             FieldInfo::builder()
                 .name("MODE%s".to_string())
                 .derived_from(Some("other_field".to_string()))

@@ -2,89 +2,53 @@ use core::ops::{Deref, DerefMut};
 
 use super::{ClusterInfo, DimElement};
 
-/// Cluster describes a sequence of neighboring registers within a peripheral.
+/// A single cluster or array of clusters
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
-pub enum Cluster {
-    /// A single cluster, without any dimension.
-    Single(ClusterInfo),
-    /// A cluster array
-    Array(ClusterInfo, DimElement),
+pub struct Cluster {
+    #[cfg_attr(feature = "serde", serde(flatten))]
+    /// A description of a cluster
+    pub info: ClusterInfo,
+    #[cfg_attr(
+        feature = "serde",
+        serde(flatten, default, skip_serializing_if = "Option::is_none")
+    )]
+    /// If `None` it is a single cluster, if `Some` specifies array attributes
+    pub dim: Option<DimElement>,
 }
 
 impl Deref for Cluster {
     type Target = ClusterInfo;
 
     fn deref(&self) -> &ClusterInfo {
-        match self {
-            Self::Single(info) => info,
-            Self::Array(info, _) => info,
-        }
+        &self.info
     }
 }
 
 impl DerefMut for Cluster {
     fn deref_mut(&mut self) -> &mut ClusterInfo {
-        match self {
-            Self::Single(info) => info,
-            Self::Array(info, _) => info,
-        }
+        &mut self.info
     }
 }
 
 impl Cluster {
+    /// Construct single [`Cluster`]
+    pub const fn single(info: ClusterInfo) -> Self {
+        Self { info, dim: None }
+    }
+    /// Construct [`Cluster`] array
+    pub const fn array(info: ClusterInfo, dim: DimElement) -> Self {
+        Self {
+            info,
+            dim: Some(dim),
+        }
+    }
     /// Return `true` if cluster instance is single
     pub const fn is_single(&self) -> bool {
-        matches!(self, Self::Single(_))
+        matches!(&self.dim, None)
     }
     /// Return `true` if it is cluster array
     pub const fn is_array(&self) -> bool {
-        matches!(self, Self::Array(_, _))
-    }
-}
-
-#[cfg(feature = "serde")]
-mod ser_de {
-    use super::*;
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
-
-    #[derive(serde::Deserialize, serde::Serialize)]
-    struct ClusterArray {
-        #[cfg_attr(
-            feature = "serde",
-            serde(flatten, default, skip_serializing_if = "Option::is_none")
-        )]
-        dim: Option<DimElement>,
-        #[cfg_attr(feature = "serde", serde(flatten))]
-        info: ClusterInfo,
-    }
-
-    impl Serialize for Cluster {
-        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-        {
-            match self {
-                Self::Single(info) => info.serialize(serializer),
-                Self::Array(info, dim) => ClusterArray {
-                    dim: Some(dim.clone()),
-                    info: info.clone(),
-                }
-                .serialize(serializer),
-            }
-        }
-    }
-
-    impl<'de> Deserialize<'de> for Cluster {
-        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where
-            D: Deserializer<'de>,
-        {
-            let ClusterArray { dim, info } = ClusterArray::deserialize(deserializer)?;
-            if let Some(dim) = dim {
-                Ok(info.array(dim))
-            } else {
-                Ok(info.single())
-            }
-        }
+        matches!(&self.dim, Some(_))
     }
 }

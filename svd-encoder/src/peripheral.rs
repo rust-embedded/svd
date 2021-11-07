@@ -6,12 +6,13 @@ impl Encode for Peripheral {
     type Error = EncodeError;
 
     fn encode(&self) -> Result<Element, EncodeError> {
-        match self {
-            Self::Single(info) => info.encode(),
-            Self::Array(info, array_info) => {
+        let info = self.info.encode();
+        match &self.dim {
+            None => info,
+            Some(array_info) => {
                 let mut base = Element::new("peripheral");
                 base.merge(&array_info.encode()?);
-                base.merge(&info.encode()?);
+                base.merge(&info?);
                 Ok(base)
             }
         }
