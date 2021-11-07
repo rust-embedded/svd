@@ -11,8 +11,11 @@ pub struct AddressBlock {
 }
 
 /// Usage of the address block.
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "kebab-case")
+)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum AddressBlockUsage {
     /// Registers
