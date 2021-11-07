@@ -1,6 +1,7 @@
 use super::{
     register::{RegIter, RegIterMut},
-    BuildError, EmptyToNone, RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
+    BuildError, Cluster, DimElement, EmptyToNone, RegisterCluster, RegisterProperties, SvdError,
+    ValidateLevel,
 };
 
 /// Errors from [`ClusterInfo::validate`]
@@ -146,7 +147,14 @@ impl ClusterInfo {
     pub fn builder() -> ClusterInfoBuilder {
         ClusterInfoBuilder::default()
     }
-
+    /// Construct single [`Cluster`]
+    pub const fn single(self) -> Cluster {
+        Cluster::Single(self)
+    }
+    /// Construct [`Cluster`] array
+    pub const fn array(self, dim: DimElement) -> Cluster {
+        Cluster::Array(self, dim)
+    }
     /// Modify an existing [`ClusterInfo`] based on a [builder](ClusterInfoBuilder).
     pub fn modify_from(
         &mut self,
@@ -197,9 +205,7 @@ impl ClusterInfo {
         }
         Ok(())
     }
-}
 
-impl ClusterInfo {
     /// returns a iterator over all registers the cluster contains
     pub fn reg_iter(&self) -> RegIter {
         let mut rem: Vec<&RegisterCluster> = Vec::with_capacity(self.children.len());

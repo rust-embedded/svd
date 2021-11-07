@@ -16,8 +16,8 @@ impl Deref for Cluster {
 
     fn deref(&self) -> &ClusterInfo {
         match self {
-            Cluster::Single(info) => info,
-            Cluster::Array(info, _) => info,
+            Self::Single(info) => info,
+            Self::Array(info, _) => info,
         }
     }
 }
@@ -25,9 +25,20 @@ impl Deref for Cluster {
 impl DerefMut for Cluster {
     fn deref_mut(&mut self) -> &mut ClusterInfo {
         match self {
-            Cluster::Single(info) => info,
-            Cluster::Array(info, _) => info,
+            Self::Single(info) => info,
+            Self::Array(info, _) => info,
         }
+    }
+}
+
+impl Cluster {
+    /// Return `true` if cluster instance is single
+    pub const fn is_single(&self) -> bool {
+        matches!(self, Self::Single(_))
+    }
+    /// Return `true` if it is cluster array
+    pub const fn is_array(&self) -> bool {
+        matches!(self, Self::Array(_, _))
     }
 }
 
@@ -53,8 +64,8 @@ mod ser_de {
             S: Serializer,
         {
             match self {
-                Cluster::Single(info) => info.serialize(serializer),
-                Cluster::Array(info, dim) => ClusterArray {
+                Self::Single(info) => info.serialize(serializer),
+                Self::Array(info, dim) => ClusterArray {
                     dim: Some(dim.clone()),
                     info: info.clone(),
                 }
@@ -70,9 +81,9 @@ mod ser_de {
         {
             let ClusterArray { dim, info } = ClusterArray::deserialize(deserializer)?;
             if let Some(dim) = dim {
-                Ok(Cluster::Array(info, dim))
+                Ok(info.array(dim))
             } else {
-                Ok(Cluster::Single(info))
+                Ok(info.single())
             }
         }
     }

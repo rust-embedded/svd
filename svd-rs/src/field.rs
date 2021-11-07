@@ -15,8 +15,8 @@ impl Deref for Field {
 
     fn deref(&self) -> &FieldInfo {
         match self {
-            Field::Single(info) => info,
-            Field::Array(info, _) => info,
+            Self::Single(info) => info,
+            Self::Array(info, _) => info,
         }
     }
 }
@@ -24,9 +24,20 @@ impl Deref for Field {
 impl DerefMut for Field {
     fn deref_mut(&mut self) -> &mut FieldInfo {
         match self {
-            Field::Single(info) => info,
-            Field::Array(info, _) => info,
+            Self::Single(info) => info,
+            Self::Array(info, _) => info,
         }
+    }
+}
+
+impl Field {
+    /// Return `true` if field instance is single
+    pub const fn is_single(&self) -> bool {
+        matches!(self, Self::Single(_))
+    }
+    /// Return `true` if it is field array
+    pub const fn is_array(&self) -> bool {
+        matches!(self, Self::Array(_, _))
     }
 }
 
@@ -52,8 +63,8 @@ mod ser_de {
             S: Serializer,
         {
             match self {
-                Field::Single(info) => info.serialize(serializer),
-                Field::Array(info, dim) => FieldArray {
+                Self::Single(info) => info.serialize(serializer),
+                Self::Array(info, dim) => FieldArray {
                     dim: Some(dim.clone()),
                     info: info.clone(),
                 }
@@ -69,9 +80,9 @@ mod ser_de {
         {
             let FieldArray { dim, info } = FieldArray::deserialize(deserializer)?;
             if let Some(dim) = dim {
-                Ok(Field::Array(info, dim))
+                Ok(info.array(dim))
             } else {
-                Ok(Field::Single(info))
+                Ok(info.single())
             }
         }
     }
