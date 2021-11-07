@@ -1,5 +1,7 @@
 use super::*;
-use crate::svd::{Field, ModifiedWriteValues, RegisterInfo, RegisterProperties, WriteConstraint};
+use crate::svd::{
+    Field, ModifiedWriteValues, ReadAction, RegisterInfo, RegisterProperties, WriteConstraint,
+};
 
 impl Parse for RegisterInfo {
     type Object = Self;
@@ -25,6 +27,7 @@ impl Parse for RegisterInfo {
                 tree,
                 config,
             )?)
+            .read_action(optional::<ReadAction>("readAction", tree, config)?)
             .fields({
                 if let Some(fields) = tree.get_child("fields") {
                     let fs: Result<Vec<_>, _> = fields

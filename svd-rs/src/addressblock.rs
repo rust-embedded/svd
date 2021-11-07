@@ -33,7 +33,7 @@ impl Default for AddressBlockUsage {
 }
 
 impl AddressBlockUsage {
-    /// Parse a string into an [AddressBlockUsage] value, returning [`Option::None`] if the string is not valid.
+    /// Parse a string into an [`AddressBlockUsage`] value, returning [`Option::None`] if the string is not valid.
     pub fn parse_str(s: &str) -> Option<Self> {
         match s {
             "registers" => Some(Self::Registers),

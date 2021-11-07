@@ -30,6 +30,10 @@ impl Encode for FieldInfo {
             elem.children.push(v.encode_node()?);
         }
 
+        if let Some(v) = &self.read_action {
+            elem.children.push(v.encode_node()?);
+        }
+
         let enumerated_values: Result<Vec<XMLNode>, EncodeError> = self
             .enumerated_values
             .iter()

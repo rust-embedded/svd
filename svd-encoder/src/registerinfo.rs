@@ -42,6 +42,10 @@ impl Encode for RegisterInfo {
             elem.children.push(v.encode_node()?);
         }
 
+        if let Some(v) = &self.read_action {
+            elem.children.push(v.encode_node()?);
+        }
+
         if let Some(v) = &self.fields {
             let children = v
                 .iter()

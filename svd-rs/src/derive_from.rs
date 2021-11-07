@@ -60,6 +60,7 @@ impl DeriveFrom for RegisterInfo {
         derived.properties = derived.properties.derive_from(&other.properties);
         derived.fields = derived.fields.or_else(|| other.fields.clone());
         derived.write_constraint = derived.write_constraint.or(other.write_constraint);
+        derived.read_action = derived.read_action.or(other.read_action);
         derived.modified_write_values = derived
             .modified_write_values
             .or(other.modified_write_values);
@@ -87,6 +88,7 @@ impl DeriveFrom for FieldInfo {
             derived.enumerated_values = other.enumerated_values.clone();
         }
         derived.write_constraint = derived.write_constraint.or(other.write_constraint);
+        derived.read_action = derived.read_action.or(other.read_action);
         derived.modified_write_values = derived
             .modified_write_values
             .or(other.modified_write_values);

@@ -1,6 +1,6 @@
 use super::*;
 use crate::svd::{
-    Access, BitRange, EnumeratedValues, FieldInfo, ModifiedWriteValues, WriteConstraint,
+    Access, BitRange, EnumeratedValues, FieldInfo, ModifiedWriteValues, ReadAction, WriteConstraint,
 };
 
 impl Parse for FieldInfo {
@@ -29,6 +29,7 @@ impl Parse for FieldInfo {
                 tree,
                 config,
             )?)
+            .read_action(optional::<ReadAction>("readAction", tree, config)?)
             .enumerated_values({
                 let values: Result<Vec<_>, _> = tree
                     .children()

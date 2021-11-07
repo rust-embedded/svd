@@ -94,6 +94,10 @@ pub use self::device::{Device, DeviceBuilder};
 pub mod modifiedwritevalues;
 pub use self::modifiedwritevalues::ModifiedWriteValues;
 
+/// Read Action objects
+pub mod readaction;
+pub use self::readaction::ReadAction;
+
 /// Level of validation
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ValidateLevel {
