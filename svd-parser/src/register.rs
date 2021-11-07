@@ -26,9 +26,9 @@ impl Parse for Register {
                     .at(tree.id()));
                 }
             }
-            Ok(Register::Array(info, array_info))
+            Ok(Self::Array(info, array_info))
         } else {
-            Ok(Register::Single(info))
+            Ok(Self::Single(info))
         }
     }
 }

@@ -78,6 +78,7 @@ mod fieldinfo;
 mod interrupt;
 mod modifiedwritevalues;
 mod peripheral;
+mod peripheralinfo;
 mod register;
 mod registercluster;
 mod registerinfo;

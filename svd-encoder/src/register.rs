@@ -7,8 +7,8 @@ impl Encode for Register {
 
     fn encode(&self) -> Result<Element, EncodeError> {
         match self {
-            Register::Single(info) => info.encode(),
-            Register::Array(info, array_info) => {
+            Self::Single(info) => info.encode(),
+            Self::Array(info, array_info) => {
                 let mut base = Element::new("register");
                 base.merge(&array_info.encode()?);
                 base.merge(&info.encode()?);
