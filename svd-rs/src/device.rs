@@ -11,8 +11,11 @@ pub enum Error {
 }
 
 /// The top element in a SVD file. Describes information specific to a device.
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "camelCase")
+)]
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub struct Device {

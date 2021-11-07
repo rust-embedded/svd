@@ -1,7 +1,10 @@
 /// Describe the manipulation of data written to a register/field.
 /// If not specified, the value written to the field is the value stored in the field
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "camelCase")
+)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ModifiedWriteValues {
     /// Write data bit of one shall clear (set to zero) the corresponding bit in the field
