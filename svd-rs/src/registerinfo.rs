@@ -1,5 +1,5 @@
 use super::{
-    Access, BuildError, DimElement, EmptyToNone, Field, ModifiedWriteValues, Register,
+    Access, BuildError, DimElement, EmptyToNone, Field, ModifiedWriteValues, ReadAction, Register,
     RegisterProperties, SvdError, ValidateLevel, WriteConstraint,
 };
 
@@ -74,6 +74,14 @@ pub struct RegisterInfo {
     )]
     pub write_constraint: Option<WriteConstraint>,
 
+    /// If set, it specifies the side effect following a read operation.
+    /// If not set, the register is not modified
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
+    pub read_action: Option<ReadAction>,
+
     /// `None` indicates that the `<fields>` node is not present
     #[cfg_attr(
         feature = "serde",
@@ -102,6 +110,7 @@ pub struct RegisterInfoBuilder {
     properties: RegisterProperties,
     modified_write_values: Option<ModifiedWriteValues>,
     write_constraint: Option<WriteConstraint>,
+    read_action: Option<ReadAction>,
     fields: Option<Vec<Field>>,
     derived_from: Option<String>,
 }
@@ -118,6 +127,7 @@ impl From<RegisterInfo> for RegisterInfoBuilder {
             properties: r.properties,
             modified_write_values: r.modified_write_values,
             write_constraint: r.write_constraint,
+            read_action: r.read_action,
             fields: r.fields,
             derived_from: r.derived_from,
         }
@@ -190,6 +200,11 @@ impl RegisterInfoBuilder {
         self.write_constraint = value;
         self
     }
+    /// Set the read action of the register.
+    pub fn read_action(mut self, value: Option<ReadAction>) -> Self {
+        self.read_action = value;
+        self
+    }
     /// Set the fields of the register.
     pub fn fields(mut self, value: Option<Vec<Field>>) -> Self {
         self.fields = value;
@@ -216,6 +231,7 @@ impl RegisterInfoBuilder {
             properties: self.properties.build(lvl)?,
             modified_write_values: self.modified_write_values,
             write_constraint: self.write_constraint,
+            read_action: self.read_action,
             fields: self.fields,
             derived_from: self.derived_from,
         };
@@ -276,6 +292,9 @@ impl RegisterInfo {
             }
             if builder.write_constraint.is_some() {
                 self.write_constraint = builder.write_constraint;
+            }
+            if builder.read_action.is_some() {
+                self.read_action = builder.read_action;
             }
             if builder.fields.is_some() {
                 self.fields = builder.fields.empty_to_none();

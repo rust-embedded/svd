@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add `readAction` parsing
 - Add array support for peripherals
 
 ## [v0.11.0] - 2021-10-02

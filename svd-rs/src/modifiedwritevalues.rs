@@ -42,7 +42,7 @@ impl Default for ModifiedWriteValues {
 }
 
 impl ModifiedWriteValues {
-    /// Parse a string into an [ModifiedWriteValues] value, returning [`Option::None`] if the string is not valid.
+    /// Parse a string into an [`ModifiedWriteValues`] value, returning [`Option::None`] if the string is not valid.
     pub fn parse_str(s: &str) -> Option<Self> {
         use self::ModifiedWriteValues::*;
         match s {

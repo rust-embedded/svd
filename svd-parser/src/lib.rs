@@ -163,6 +163,7 @@ mod interrupt;
 mod modifiedwritevalues;
 mod peripheral;
 mod peripheralinfo;
+mod readaction;
 mod register;
 mod registercluster;
 mod registerinfo;
@@ -201,6 +202,8 @@ pub enum SVDError {
     InvalidRegisterCluster(String),
     #[error("Invalid modifiedWriteValues variant, found {0}")]
     InvalidModifiedWriteValues(String),
+    #[error("Invalid readAction variant, found {0}")]
+    InvalidReadAction(String),
     #[error("The content of the element could not be parsed to a boolean value {0}: {1}")]
     InvalidBooleanValue(String, core::str::ParseBoolError),
     #[error("dimIndex tag must contain {0} indexes, found {1}")]

@@ -1,6 +1,6 @@
 use super::{
     bitrange, Access, BitRange, BuildError, DimElement, EmptyToNone, EnumeratedValues, Field,
-    ModifiedWriteValues, SvdError, Usage, ValidateLevel, WriteConstraint,
+    ModifiedWriteValues, ReadAction, SvdError, Usage, ValidateLevel, WriteConstraint,
 };
 
 /// Errors for [`FieldInfo::validate`]
@@ -54,6 +54,14 @@ pub struct FieldInfo {
     )]
     pub write_constraint: Option<WriteConstraint>,
 
+    /// If set, it specifies the side effect following a read operation.
+    /// If not set, the field is not modified
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
+    pub read_action: Option<ReadAction>,
+
     /// Describes the field
     #[cfg_attr(
         feature = "serde",
@@ -82,6 +90,7 @@ pub struct FieldInfoBuilder {
     access: Option<Access>,
     modified_write_values: Option<ModifiedWriteValues>,
     write_constraint: Option<WriteConstraint>,
+    read_action: Option<ReadAction>,
     enumerated_values: Option<Vec<EnumeratedValues>>,
     derived_from: Option<String>,
 }
@@ -97,6 +106,7 @@ impl From<FieldInfo> for FieldInfoBuilder {
             access: f.access,
             modified_write_values: f.modified_write_values,
             write_constraint: f.write_constraint,
+            read_action: f.read_action,
             enumerated_values: Some(f.enumerated_values),
             derived_from: f.derived_from,
         }
@@ -160,6 +170,11 @@ impl FieldInfoBuilder {
         self.write_constraint = value;
         self
     }
+    /// Set the read action of the register.
+    pub fn read_action(mut self, value: Option<ReadAction>) -> Self {
+        self.read_action = value;
+        self
+    }
     /// Set the enumerated values of the field
     pub fn enumerated_values(mut self, value: Vec<EnumeratedValues>) -> Self {
         self.enumerated_values = Some(value);
@@ -183,6 +198,7 @@ impl FieldInfoBuilder {
             access: self.access,
             modified_write_values: self.modified_write_values,
             write_constraint: self.write_constraint,
+            read_action: self.read_action,
             enumerated_values: self.enumerated_values.unwrap_or_default(),
             derived_from: self.derived_from,
         };
@@ -241,6 +257,9 @@ impl FieldInfo {
             }
             if builder.write_constraint.is_some() {
                 self.write_constraint = builder.write_constraint;
+            }
+            if builder.read_action.is_some() {
+                self.read_action = builder.read_action;
             }
             if let Some(enumerated_values) = builder.enumerated_values {
                 self.enumerated_values = enumerated_values;
