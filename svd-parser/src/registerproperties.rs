@@ -1,5 +1,5 @@
 use super::*;
-use crate::svd::{Access, RegisterProperties};
+use crate::svd::{Access, Protection, RegisterProperties};
 
 impl Parse for RegisterProperties {
     type Object = Self;
@@ -10,6 +10,7 @@ impl Parse for RegisterProperties {
         RegisterProperties::new()
             .size(optional::<u32>("size", tree, &())?)
             .access(optional::<Access>("access", tree, config)?)
+            .protection(optional::<Protection>("protection", tree, config)?)
             .reset_value(optional::<u64>("resetValue", tree, &())?)
             .reset_mask(optional::<u64>("resetMask", tree, &())?)
             .build(config.validate_level)

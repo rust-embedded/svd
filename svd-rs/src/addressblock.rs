@@ -1,3 +1,5 @@
+use super::Protection;
+
 ///  An uniquely mapped address block to a peripheral
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -8,6 +10,12 @@ pub struct AddressBlock {
     pub size: u32,
     /// Usage of the address block.
     pub usage: AddressBlockUsage,
+    /// Specify the security privilege to access an address region
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
+    pub protection: Option<Protection>,
 }
 
 /// Usage of the address block.

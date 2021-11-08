@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add `protection` to `RegisterProperties` and `AddressBlock`
 - Add `readAction` to `RegisterInfo` and `FieldInfo`
 - Add `single` and `array` for `Info` types, 
   `is_single` and `is_array` for `Peripheral`, `Cluster`, `Register` and `Field`

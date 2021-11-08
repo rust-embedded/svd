@@ -98,6 +98,10 @@ pub use self::modifiedwritevalues::ModifiedWriteValues;
 pub mod readaction;
 pub use self::readaction::ReadAction;
 
+/// Protection objects
+pub mod protection;
+pub use self::protection::Protection;
+
 /// Level of validation
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ValidateLevel {
