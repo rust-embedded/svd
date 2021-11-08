@@ -79,6 +79,7 @@ mod interrupt;
 mod modifiedwritevalues;
 mod peripheral;
 mod peripheralinfo;
+mod protection;
 mod readaction;
 mod register;
 mod registercluster;

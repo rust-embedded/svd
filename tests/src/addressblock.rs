@@ -8,6 +8,7 @@ fn decode_encode() {
             offset: 0,
             size: 0x00000800,
             usage: AddressBlockUsage::Registers,
+            protection: None,
         },
         "<addressBlock>
             <offset>0x0</offset>

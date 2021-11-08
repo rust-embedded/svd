@@ -16,6 +16,10 @@ impl EncodeChildren for RegisterProperties {
             children.push(v.encode_node()?);
         };
 
+        if let Some(v) = &self.protection {
+            children.push(v.encode_node()?);
+        };
+
         if let Some(v) = &self.reset_value {
             children.push(new_node(
                 "resetValue",

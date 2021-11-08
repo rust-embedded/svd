@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add `protection` parsing
 - Add `readAction` parsing
 - Add array support for peripherals
 

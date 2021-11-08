@@ -1,4 +1,4 @@
-use super::{Access, SvdError, ValidateLevel};
+use super::{Access, Protection, SvdError, ValidateLevel};
 
 /// Errors from [`RegisterProperties::validate`]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
@@ -37,6 +37,13 @@ pub struct RegisterProperties {
     )]
     pub access: Option<Access>,
 
+    /// Specify the security privilege to access an address region
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
+    pub protection: Option<Protection>,
+
     /// Register value at RESET
     #[cfg_attr(
         feature = "serde",
@@ -69,6 +76,9 @@ impl RegisterProperties {
         if builder.access.is_some() {
             self.access = builder.access;
         }
+        if builder.protection.is_some() {
+            self.protection = builder.protection;
+        }
         if builder.reset_value.is_some() {
             self.reset_value = builder.reset_value;
         }
@@ -95,6 +105,11 @@ impl RegisterProperties {
     /// Set the access of the register properties.
     pub fn access(mut self, value: Option<Access>) -> Self {
         self.access = value;
+        self
+    }
+    /// Set the protection of the register properties.
+    pub fn protection(mut self, value: Option<Protection>) -> Self {
+        self.protection = value;
         self
     }
     /// Set the reset_value of the register properties.

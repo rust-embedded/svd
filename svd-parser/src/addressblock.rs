@@ -1,5 +1,5 @@
 use super::*;
-use crate::svd::{AddressBlock, AddressBlockUsage};
+use crate::svd::{AddressBlock, AddressBlockUsage, Protection};
 
 impl Parse for AddressBlock {
     type Object = Self;
@@ -11,6 +11,7 @@ impl Parse for AddressBlock {
             offset: tree.get_child_u32("offset")?,
             size: tree.get_child_u32("size")?,
             usage: AddressBlockUsage::parse(&tree.get_child_elem("usage")?, config)?,
+            protection: optional::<Protection>("protection", tree, config)?,
         })
     }
 }
