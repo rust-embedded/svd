@@ -1,7 +1,6 @@
 use super::{new_node, Element, Encode, EncodeError};
-use crate::svd::DimElement;
 
-impl Encode for DimElement {
+impl Encode for crate::svd::DimElement {
     type Error = EncodeError;
 
     fn encode(&self) -> Result<Element, EncodeError> {
@@ -17,6 +16,32 @@ impl Encode for DimElement {
             e.children.push(new_node("dimIndex", di.join(",")));
         }
 
+        if let Some(dim_name) = &self.dim_name {
+            e.children.push(new_node("dimName", dim_name.clone()))
+        }
+
+        if let Some(v) = &self.dim_array_index {
+            e.children.push(v.encode_node()?);
+        }
+
         Ok(e)
+    }
+}
+
+impl Encode for crate::svd::DimArrayIndex {
+    type Error = EncodeError;
+
+    fn encode(&self) -> Result<Element, EncodeError> {
+        let mut base = Element::new("dimArrayIndex");
+
+        if let Some(d) = &self.header_enum_name {
+            base.children.push(new_node("headerEnumName", d.clone()));
+        }
+
+        for v in &self.values {
+            base.children.push(v.encode_node()?);
+        }
+
+        Ok(base)
     }
 }
