@@ -21,9 +21,28 @@ impl Encode for PeripheralInfo {
             elem.children.push(new_node("description", v.to_string()));
         }
 
+        if let Some(v) = &self.alternate_peripheral {
+            elem.children
+                .push(new_node("alternatePeripheral", v.to_string()));
+        }
+
         if let Some(v) = &self.group_name {
             elem.children.push(new_node("groupName", v.to_string()));
         }
+
+        if let Some(v) = &self.prepend_to_name {
+            elem.children.push(new_node("prependToName", v.to_string()));
+        }
+
+        if let Some(v) = &self.append_to_name {
+            elem.children.push(new_node("appendToName", v.to_string()));
+        }
+
+        if let Some(v) = &self.header_struct_name {
+            elem.children
+                .push(new_node("headerStructName", v.to_string()));
+        }
+
         elem.children.push(new_node(
             "baseAddress",
             format!("0x{:.08X}", self.base_address),

@@ -16,7 +16,11 @@ impl Parse for PeripheralInfo {
             .display_name(tree.get_child_text_opt("displayName")?)
             .version(tree.get_child_text_opt("version")?)
             .description(tree.get_child_text_opt("description")?)
+            .alternate_peripheral(tree.get_child_text_opt("alternatePeripheral")?)
             .group_name(tree.get_child_text_opt("groupName")?)
+            .prepend_to_name(tree.get_child_text_opt("prependToName")?)
+            .append_to_name(tree.get_child_text_opt("appendToName")?)
+            .header_struct_name(tree.get_child_text_opt("headerStructName")?)
             .base_address(tree.get_child_u64("baseAddress")?)
             .default_register_properties(RegisterProperties::parse(tree, config)?)
             .address_block({

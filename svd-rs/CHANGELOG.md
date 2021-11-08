@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add `alternate_peripheral`, `prepend_to_name`, `append_to_name`,
+  `header_struct_name` to `PeripheralInfo`, `alternate_cluster` to `ClusterInfo`
 - Add `protection` to `RegisterProperties` and `AddressBlock`
 - Add `readAction` to `RegisterInfo` and `FieldInfo`
 - Add `single` and `array` for `Info` types, 

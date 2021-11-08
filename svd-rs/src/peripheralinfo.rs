@@ -45,7 +45,13 @@ pub struct PeripheralInfo {
     )]
     pub description: Option<String>,
 
-    // alternatePeripheral
+    /// Specifies peripheral assigned to the same address blocks
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
+    pub alternate_peripheral: Option<String>,
+
     /// Assigns this peripheral to a group of peripherals. This is only used bye the System View
     #[cfg_attr(
         feature = "serde",
@@ -53,7 +59,27 @@ pub struct PeripheralInfo {
     )]
     pub group_name: Option<String>,
 
-    // headerStructName
+    /// Define a string as prefix. All register names of this peripheral get this prefix
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
+    pub prepend_to_name: Option<String>,
+
+    /// Define a string as suffix. All register names of this peripheral get this suffix
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
+    pub append_to_name: Option<String>,
+
+    /// Specify the struct type name created in the device header file
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
+    pub header_struct_name: Option<String>,
+
     /// Lowest address reserved or used by the peripheral
     pub base_address: u64,
 
@@ -98,7 +124,11 @@ pub struct PeripheralInfoBuilder {
     display_name: Option<String>,
     version: Option<String>,
     description: Option<String>,
+    alternate_peripheral: Option<String>,
     group_name: Option<String>,
+    prepend_to_name: Option<String>,
+    append_to_name: Option<String>,
+    header_struct_name: Option<String>,
     base_address: Option<u64>,
     default_register_properties: RegisterProperties,
     address_block: Option<Vec<AddressBlock>>,
@@ -114,7 +144,11 @@ impl From<PeripheralInfo> for PeripheralInfoBuilder {
             display_name: p.display_name,
             version: p.version,
             description: p.description,
+            alternate_peripheral: p.alternate_peripheral,
             group_name: p.group_name,
+            prepend_to_name: p.prepend_to_name,
+            append_to_name: p.append_to_name,
+            header_struct_name: p.header_struct_name,
             base_address: Some(p.base_address),
             default_register_properties: p.default_register_properties,
             address_block: p.address_block,
@@ -146,9 +180,29 @@ impl PeripheralInfoBuilder {
         self.description = value;
         self
     }
+    /// Set the alternate peripheral
+    pub fn alternate_peripheral(mut self, value: Option<String>) -> Self {
+        self.alternate_peripheral = value;
+        self
+    }
     /// Set the group name of the peripheral
     pub fn group_name(mut self, value: Option<String>) -> Self {
         self.group_name = value;
+        self
+    }
+    /// Set the prefix for names of all registers of the peripheral
+    pub fn prepend_to_name(mut self, value: Option<String>) -> Self {
+        self.prepend_to_name = value;
+        self
+    }
+    /// Set the suffix for names of all registers of the peripheral
+    pub fn append_to_name(mut self, value: Option<String>) -> Self {
+        self.append_to_name = value;
+        self
+    }
+    /// Set the header struct name of the peripheral
+    pub fn header_struct_name(mut self, value: Option<String>) -> Self {
+        self.header_struct_name = value;
         self
     }
     /// Set the base address of the peripheral
@@ -190,7 +244,11 @@ impl PeripheralInfoBuilder {
             display_name: self.display_name.empty_to_none(),
             version: self.version.empty_to_none(),
             description: self.description.empty_to_none(),
+            alternate_peripheral: self.alternate_peripheral.empty_to_none(),
             group_name: self.group_name.empty_to_none(),
+            prepend_to_name: self.prepend_to_name.empty_to_none(),
+            append_to_name: self.append_to_name.empty_to_none(),
+            header_struct_name: self.header_struct_name.empty_to_none(),
             base_address: self
                 .base_address
                 .ok_or_else(|| BuildError::Uninitialized("base_address".to_string()))?,
@@ -238,8 +296,20 @@ impl PeripheralInfo {
         if builder.description.is_some() {
             self.description = builder.description.empty_to_none();
         }
+        if builder.alternate_peripheral.is_some() {
+            self.alternate_peripheral = builder.alternate_peripheral.empty_to_none();
+        }
         if builder.group_name.is_some() {
             self.group_name = builder.group_name.empty_to_none();
+        }
+        if builder.prepend_to_name.is_some() {
+            self.prepend_to_name = builder.prepend_to_name.empty_to_none();
+        }
+        if builder.append_to_name.is_some() {
+            self.append_to_name = builder.append_to_name.empty_to_none();
+        }
+        if builder.header_struct_name.is_some() {
+            self.header_struct_name = builder.header_struct_name.empty_to_none();
         }
         if let Some(base_address) = builder.base_address {
             self.base_address = base_address;

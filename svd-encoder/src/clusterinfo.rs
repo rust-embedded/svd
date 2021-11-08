@@ -14,6 +14,10 @@ impl Encode for ClusterInfo {
             e.children.push(new_node("description", v.clone()));
         }
 
+        if let Some(v) = &self.alternate_cluster {
+            e.children.push(new_node("alternateCluster", v.clone()));
+        }
+
         if let Some(v) = &self.header_struct_name {
             e.children.push(new_node("headerStructName", v.clone()));
         }
