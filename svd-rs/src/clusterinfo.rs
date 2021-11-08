@@ -32,7 +32,13 @@ pub struct ClusterInfo {
     )]
     pub description: Option<String>,
 
-    // alternateCluster
+    /// Specify the name of the original cluster if this cluster provides an alternative description
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
+    pub alternate_cluster: Option<String>,
+
     /// Specify the struct type name created in the device header file
     #[cfg_attr(
         feature = "serde",
@@ -64,6 +70,7 @@ pub struct ClusterInfo {
 pub struct ClusterInfoBuilder {
     name: Option<String>,
     description: Option<String>,
+    alternate_cluster: Option<String>,
     header_struct_name: Option<String>,
     address_offset: Option<u32>,
     default_register_properties: RegisterProperties,
@@ -76,6 +83,7 @@ impl From<ClusterInfo> for ClusterInfoBuilder {
         Self {
             name: Some(c.name),
             description: c.description,
+            alternate_cluster: c.alternate_cluster,
             header_struct_name: c.header_struct_name,
             address_offset: Some(c.address_offset),
             default_register_properties: c.default_register_properties,
@@ -94,6 +102,11 @@ impl ClusterInfoBuilder {
     /// Set the description of the cluster.
     pub fn description(mut self, value: Option<String>) -> Self {
         self.description = value;
+        self
+    }
+    /// Set the alternate cluster.
+    pub fn alternate_cluster(mut self, value: Option<String>) -> Self {
+        self.alternate_cluster = value;
         self
     }
     /// Set the struct type name of the cluster. If not specified, the name of the cluster should be used.
@@ -128,6 +141,7 @@ impl ClusterInfoBuilder {
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
             description: self.description.empty_to_none(),
+            alternate_cluster: self.alternate_cluster.empty_to_none(),
             header_struct_name: self.header_struct_name.empty_to_none(),
             address_offset: self
                 .address_offset
@@ -169,6 +183,9 @@ impl ClusterInfo {
         }
         if builder.description.is_some() {
             self.description = builder.description.empty_to_none();
+        }
+        if builder.alternate_cluster.is_some() {
+            self.alternate_cluster = builder.alternate_cluster.empty_to_none();
         }
         if builder.header_struct_name.is_some() {
             self.header_struct_name = builder.header_struct_name.empty_to_none();

@@ -40,8 +40,18 @@ impl DeriveFrom for EnumeratedValues {
 impl DeriveFrom for PeripheralInfo {
     fn derive_from(&self, other: &Self) -> Self {
         let mut derived = self.clone();
-        derived.group_name = derived.group_name.or_else(|| other.group_name.clone());
+        derived.version = derived.version.or_else(|| other.version.clone());
         derived.description = derived.description.or_else(|| other.description.clone());
+        derived.group_name = derived.group_name.or_else(|| other.group_name.clone());
+        derived.prepend_to_name = derived
+            .prepend_to_name
+            .or_else(|| other.prepend_to_name.clone());
+        derived.append_to_name = derived
+            .append_to_name
+            .or_else(|| other.append_to_name.clone());
+        derived.header_struct_name = derived
+            .header_struct_name
+            .or_else(|| other.header_struct_name.clone());
         derived.default_register_properties = derived
             .default_register_properties
             .derive_from(&other.default_register_properties);
@@ -72,9 +82,10 @@ impl DeriveFrom for RegisterProperties {
     fn derive_from(&self, other: &Self) -> Self {
         let mut derived = self.clone();
         derived.size = derived.size.or(other.size);
+        derived.access = derived.access.or(other.access);
+        derived.protection = derived.protection.or(other.protection);
         derived.reset_value = derived.reset_value.or(other.reset_value);
         derived.reset_mask = derived.reset_mask.or(other.reset_mask);
-        derived.access = derived.access.or(other.access);
         derived
     }
 }

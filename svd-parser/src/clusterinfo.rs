@@ -10,6 +10,7 @@ impl Parse for ClusterInfo {
         ClusterInfo::builder()
             .name(tree.get_child_text("name")?)
             .description(tree.get_child_text_opt("description")?)
+            .alternate_cluster(tree.get_child_text_opt("alternateCluster")?)
             .header_struct_name(tree.get_child_text_opt("headerStructName")?)
             .address_offset(tree.get_child_u32("addressOffset")?)
             .default_register_properties(RegisterProperties::parse(tree, config)?)
