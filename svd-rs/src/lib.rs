@@ -76,7 +76,7 @@ pub use self::registercluster::RegisterCluster;
 
 /// Dimelement objects
 pub mod dimelement;
-pub use self::dimelement::{DimElement, DimElementBuilder};
+pub use self::dimelement::{DimArrayIndex, DimElement, DimElementBuilder};
 
 /// Peripheral objects
 pub mod peripheral;

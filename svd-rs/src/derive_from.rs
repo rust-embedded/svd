@@ -114,7 +114,9 @@ impl DeriveFrom for Peripheral {
                 Self::Single(info.derive_from(other_info))
             }
             (Self::Single(info), Self::Array(other_info, other_dim)) => {
-                Self::Array(info.derive_from(other_info), other_dim.clone())
+                let mut dim = other_dim.clone();
+                dim.dim_name = None;
+                Self::Array(info.derive_from(other_info), dim)
             }
             (Self::Array(info, dim), Self::Single(other_info))
             | (Self::Array(info, dim), Self::Array(other_info, _)) => {
@@ -131,7 +133,9 @@ impl DeriveFrom for Cluster {
                 Self::Single(info.derive_from(other_info))
             }
             (Self::Single(info), Self::Array(other_info, other_dim)) => {
-                Self::Array(info.derive_from(other_info), other_dim.clone())
+                let mut dim = other_dim.clone();
+                dim.dim_name = None;
+                Self::Array(info.derive_from(other_info), dim)
             }
             (Self::Array(info, dim), Self::Single(other_info))
             | (Self::Array(info, dim), Self::Array(other_info, _)) => {
@@ -148,7 +152,9 @@ impl DeriveFrom for Register {
                 Self::Single(info.derive_from(other_info))
             }
             (Self::Single(info), Self::Array(other_info, other_dim)) => {
-                Self::Array(info.derive_from(other_info), other_dim.clone())
+                let mut dim = other_dim.clone();
+                dim.dim_name = None;
+                Self::Array(info.derive_from(other_info), dim)
             }
             (Self::Array(info, dim), Self::Single(other_info))
             | (Self::Array(info, dim), Self::Array(other_info, _)) => {
@@ -165,7 +171,9 @@ impl DeriveFrom for Field {
                 Self::Single(info.derive_from(other_info))
             }
             (Self::Single(info), Self::Array(other_info, other_dim)) => {
-                Self::Array(info.derive_from(other_info), other_dim.clone())
+                let mut dim = other_dim.clone();
+                dim.dim_name = None;
+                Self::Array(info.derive_from(other_info), dim)
             }
             (Self::Array(info, dim), Self::Single(other_info))
             | (Self::Array(info, dim), Self::Array(other_info, _)) => {

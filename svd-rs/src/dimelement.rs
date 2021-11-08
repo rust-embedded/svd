@@ -1,4 +1,4 @@
-use super::{BuildError, EmptyToNone, SvdError, ValidateLevel};
+use super::{BuildError, EmptyToNone, EnumeratedValue, SvdError, ValidateLevel};
 use std::borrow::Cow;
 
 /// Defines arrays and lists.
@@ -23,6 +23,44 @@ pub struct DimElement {
         serde(default, skip_serializing_if = "Option::is_none")
     )]
     pub dim_index: Option<Vec<String>>,
+
+    /// Specify the name of the structure. If not defined, then the entry of the `name` element is used
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
+    pub dim_name: Option<String>,
+
+    /// Grouping element to create enumerations in the header file
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
+    pub dim_array_index: Option<DimArrayIndex>,
+}
+
+/// Grouping element to create enumerations in the header file
+///
+/// This information is used for generating an enum in the device header file.
+/// The debugger may use this information to display the identifier string
+/// as well as the description. Just like symbolic constants making source
+/// code more readable, the system view in the debugger becomes more instructive
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "camelCase")
+)]
+#[derive(Clone, Debug, PartialEq)]
+pub struct DimArrayIndex {
+    /// Specify the base name of enumerations
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
+    pub header_enum_name: Option<String>,
+
+    /// Specify the values contained in the enumeration
+    pub values: Vec<EnumeratedValue>,
 }
 
 /// Builder for [`DimElement`]
@@ -31,6 +69,8 @@ pub struct DimElementBuilder {
     dim: Option<u32>,
     dim_increment: Option<u32>,
     dim_index: Option<Vec<String>>,
+    dim_name: Option<String>,
+    dim_array_index: Option<DimArrayIndex>,
 }
 
 impl From<DimElement> for DimElementBuilder {
@@ -39,24 +79,36 @@ impl From<DimElement> for DimElementBuilder {
             dim: Some(d.dim),
             dim_increment: Some(d.dim_increment),
             dim_index: d.dim_index,
+            dim_name: d.dim_name,
+            dim_array_index: d.dim_array_index,
         }
     }
 }
 
 impl DimElementBuilder {
-    /// set the dim of the elements
+    /// Set the dim of the elements
     pub fn dim(mut self, value: u32) -> Self {
         self.dim = Some(value);
         self
     }
-    /// set the dim increment of the elements
+    /// Set the dim increment of the elements
     pub fn dim_increment(mut self, value: u32) -> Self {
         self.dim_increment = Some(value);
         self
     }
-    /// set the dim index of the elements
+    /// Set the dim index of the elements
     pub fn dim_index(mut self, value: Option<Vec<String>>) -> Self {
         self.dim_index = value;
+        self
+    }
+    /// Set the dim name of the elements
+    pub fn dim_name(mut self, value: Option<String>) -> Self {
+        self.dim_name = value;
+        self
+    }
+    /// Set the dim_array_index of the elements
+    pub fn dim_array_index(mut self, value: Option<DimArrayIndex>) -> Self {
+        self.dim_array_index = value;
         self
     }
     /// Validate and build a [`DimElement`].
@@ -69,6 +121,8 @@ impl DimElementBuilder {
                 .dim_increment
                 .ok_or_else(|| BuildError::Uninitialized("dim_increment".to_string()))?,
             dim_index: self.dim_index.empty_to_none(),
+            dim_name: self.dim_name.empty_to_none(),
+            dim_array_index: self.dim_array_index,
         };
         if !lvl.is_disabled() {
             de.validate(lvl)?;
@@ -96,6 +150,12 @@ impl DimElement {
         }
         if builder.dim_index.is_some() {
             self.dim_index = builder.dim_index.empty_to_none();
+        }
+        if builder.dim_name.is_some() {
+            self.dim_name = builder.dim_name.empty_to_none();
+        }
+        if builder.dim_array_index.is_some() {
+            self.dim_array_index = builder.dim_array_index;
         }
         if !lvl.is_disabled() {
             self.validate(lvl)

@@ -9,7 +9,7 @@ impl Encode for EnumeratedValues {
         let mut base = Element::new("enumeratedValues");
 
         if let Some(d) = &self.name {
-            base.children.push(new_node("name", (*d).clone()));
+            base.children.push(new_node("name", d.clone()));
         };
 
         if let Some(v) = &self.usage {
@@ -18,7 +18,7 @@ impl Encode for EnumeratedValues {
 
         if let Some(v) = &self.derived_from {
             base.attributes
-                .insert(String::from("derivedFrom"), (*v).clone());
+                .insert(String::from("derivedFrom"), v.clone());
         }
 
         for v in &self.values {
