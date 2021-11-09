@@ -7,12 +7,16 @@ impl Parse for AddressBlock {
     type Config = Config;
 
     fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
-        Ok(Self {
-            offset: tree.get_child_u32("offset")?,
-            size: tree.get_child_u32("size")?,
-            usage: AddressBlockUsage::parse(&tree.get_child_elem("usage")?, config)?,
-            protection: optional::<Protection>("protection", tree, config)?,
-        })
+        Self::builder()
+            .offset(tree.get_child_u32("offset")?)
+            .size(tree.get_child_u32("size")?)
+            .usage(AddressBlockUsage::parse(
+                &tree.get_child_elem("usage")?,
+                config,
+            )?)
+            .protection(optional::<Protection>("protection", tree, config)?)
+            .build(config.validate_level)
+            .map_err(|e| SVDError::from(e).at(tree.id()))
     }
 }
 
