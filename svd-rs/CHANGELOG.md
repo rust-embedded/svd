@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add `name` function to `Cluster`
 - `AddressBlock` now uses builder
 - Add `dim_name` and `dim_array_index` to `DimElement`
 - Add `alternate_peripheral`, `prepend_to_name`, `append_to_name`,
