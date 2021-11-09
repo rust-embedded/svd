@@ -40,6 +40,14 @@ impl Cluster {
     pub const fn is_array(&self) -> bool {
         matches!(self, Self::Array(_, _))
     }
+
+    /// Get the name of this cluster
+    pub fn name(&self) -> &str {
+        match self {
+            Self::Single(info) => &info.name,
+            Self::Array(info, _) => &info.name,
+        }
+    }
 }
 
 #[cfg(feature = "serde")]

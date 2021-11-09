@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add check for wrong size of `bitRange` width
 - Add `protection` parsing
 - Add `readAction` parsing
 - Add array support for peripherals
