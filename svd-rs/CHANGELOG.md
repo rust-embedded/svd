@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Don't clone when serialize
 - Add optional entries to `Cpu`
-- `AddressBlock` now uses builder
+- `AddressBlock` & `Interrupt` now use builders
 - Add `dim_name` and `dim_array_index` to `DimElement`
 - Add `alternate_peripheral`, `prepend_to_name`, `append_to_name`,
   `header_struct_name` to `PeripheralInfo`, `alternate_cluster` to `ClusterInfo`

@@ -1,14 +1,15 @@
 use super::run_test;
-use crate::svd::Interrupt;
+use crate::svd::{Interrupt, ValidateLevel};
 
 #[test]
 fn decode_encode() {
     let tests = vec![(
-        Interrupt {
-            name: String::from("test"),
-            description: Some(String::from("description")),
-            value: 14,
-        },
+        Interrupt::builder()
+            .name("test".to_string())
+            .description(Some("description".to_string()))
+            .value(14)
+            .build(ValidateLevel::Strict)
+            .unwrap(),
         "
             <interrupt>
                 <name>test</name>
