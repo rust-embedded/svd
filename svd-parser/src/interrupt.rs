@@ -6,16 +6,17 @@ impl Parse for Interrupt {
     type Error = SVDErrorAt;
     type Config = Config;
 
-    fn parse(tree: &Node, _config: &Self::Config) -> Result<Self, Self::Error> {
+    fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
         if !tree.has_tag_name("interrupt") {
             return Err(SVDError::NotExpectedTag("interrupt".to_string()).at(tree.id()));
         }
         let name = tree.get_child_text("name")?;
 
-        Ok(Interrupt {
-            name,
-            description: tree.get_child_text_opt("description")?,
-            value: tree.get_child_u32("value")?,
-        })
+        Interrupt::builder()
+            .name(name)
+            .description(tree.get_child_text_opt("description")?)
+            .value(tree.get_child_u32("value")?)
+            .build(config.validate_level)
+            .map_err(|e| SVDError::from(e).at(tree.id()))
     }
 }
