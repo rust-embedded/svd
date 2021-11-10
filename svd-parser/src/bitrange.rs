@@ -7,6 +7,7 @@ pub enum InvalidBitRange {
     ParseError,
     MsbLsb,
     Empty,
+    Size,
 }
 
 impl Parse for BitRange {
@@ -83,6 +84,9 @@ impl Parse for BitRange {
                 return Err(SVDError::InvalidBitRange(InvalidBitRange::Syntax).at(tree.id()));
             };
 
+        if start > end {
+            return Err(SVDError::InvalidBitRange(InvalidBitRange::Size).at(tree.id()));
+        }
         Ok(Self {
             offset: start,
             width: end - start + 1,

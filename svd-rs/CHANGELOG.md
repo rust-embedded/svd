@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add check for wrong size of `bitRange` width
 - Don't clone when serialize
 - Add optional entries to `Cpu`
 - `AddressBlock` & `Interrupt` now use builders
