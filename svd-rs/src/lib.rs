@@ -238,3 +238,21 @@ impl<T> EmptyToNone for Option<Vec<T>> {
         self.and_then(|v| if v.is_empty() { None } else { Some(v) })
     }
 }
+
+#[cfg(feature = "serde")]
+#[derive(serde::Serialize)]
+struct SerArray<'a, T> {
+    #[serde(flatten)]
+    dim: &'a DimElement,
+    #[serde(flatten)]
+    info: &'a T,
+}
+
+#[cfg(feature = "serde")]
+#[derive(serde::Deserialize)]
+struct DeserArray<T> {
+    #[serde(flatten, default)]
+    dim: Option<DimElement>,
+    #[serde(flatten)]
+    info: T,
+}

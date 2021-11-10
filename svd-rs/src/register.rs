@@ -93,18 +93,8 @@ impl<'a> std::iter::Iterator for RegIterMut<'a> {
 #[cfg(feature = "serde")]
 mod ser_de {
     use super::*;
+    use crate::{DeserArray, SerArray};
     use serde::{Deserialize, Deserializer, Serialize, Serializer};
-
-    #[derive(serde::Deserialize, serde::Serialize)]
-    struct RegisterArray {
-        #[cfg_attr(
-            feature = "serde",
-            serde(flatten, default, skip_serializing_if = "Option::is_none")
-        )]
-        dim: Option<DimElement>,
-        #[cfg_attr(feature = "serde", serde(flatten))]
-        info: RegisterInfo,
-    }
 
     impl Serialize for Register {
         fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -113,11 +103,7 @@ mod ser_de {
         {
             match self {
                 Self::Single(info) => info.serialize(serializer),
-                Self::Array(info, dim) => RegisterArray {
-                    dim: Some(dim.clone()),
-                    info: info.clone(),
-                }
-                .serialize(serializer),
+                Self::Array(info, dim) => SerArray { dim, info }.serialize(serializer),
             }
         }
     }
@@ -127,7 +113,7 @@ mod ser_de {
         where
             D: Deserializer<'de>,
         {
-            let RegisterArray { dim, info } = RegisterArray::deserialize(deserializer)?;
+            let DeserArray { dim, info } = DeserArray::<RegisterInfo>::deserialize(deserializer)?;
             if let Some(dim) = dim {
                 Ok(info.array(dim))
             } else {
