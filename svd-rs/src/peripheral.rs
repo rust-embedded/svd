@@ -45,18 +45,8 @@ impl Peripheral {
 #[cfg(feature = "serde")]
 mod ser_de {
     use super::*;
+    use crate::{DeserArray, SerArray};
     use serde::{Deserialize, Deserializer, Serialize, Serializer};
-
-    #[derive(serde::Deserialize, serde::Serialize)]
-    struct PeripheralArray {
-        #[cfg_attr(
-            feature = "serde",
-            serde(flatten, default, skip_serializing_if = "Option::is_none")
-        )]
-        dim: Option<DimElement>,
-        #[cfg_attr(feature = "serde", serde(flatten))]
-        info: PeripheralInfo,
-    }
 
     impl Serialize for Peripheral {
         fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -65,11 +55,7 @@ mod ser_de {
         {
             match self {
                 Self::Single(info) => info.serialize(serializer),
-                Self::Array(info, dim) => PeripheralArray {
-                    dim: Some(dim.clone()),
-                    info: info.clone(),
-                }
-                .serialize(serializer),
+                Self::Array(info, dim) => SerArray { dim, info }.serialize(serializer),
             }
         }
     }
@@ -79,7 +65,7 @@ mod ser_de {
         where
             D: Deserializer<'de>,
         {
-            let PeripheralArray { dim, info } = PeripheralArray::deserialize(deserializer)?;
+            let DeserArray { dim, info } = DeserArray::<PeripheralInfo>::deserialize(deserializer)?;
             if let Some(dim) = dim {
                 Ok(info.array(dim))
             } else {

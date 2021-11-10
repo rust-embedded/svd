@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Don't clone when serialize
 - Add optional entries to `Cpu`
 - `AddressBlock` now uses builder
 - Add `dim_name` and `dim_array_index` to `DimElement`

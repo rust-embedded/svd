@@ -110,17 +110,15 @@ impl DeriveFrom for FieldInfo {
 impl DeriveFrom for Peripheral {
     fn derive_from(&self, other: &Self) -> Self {
         match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => {
-                Self::Single(info.derive_from(other_info))
-            }
+            (Self::Single(info), Self::Single(other_info)) => info.derive_from(other_info).single(),
             (Self::Single(info), Self::Array(other_info, other_dim)) => {
                 let mut dim = other_dim.clone();
                 dim.dim_name = None;
-                Self::Array(info.derive_from(other_info), dim)
+                info.derive_from(other_info).array(dim)
             }
             (Self::Array(info, dim), Self::Single(other_info))
             | (Self::Array(info, dim), Self::Array(other_info, _)) => {
-                Self::Array(info.derive_from(other_info), dim.clone())
+                info.derive_from(other_info).array(dim.clone())
             }
         }
     }
@@ -129,17 +127,15 @@ impl DeriveFrom for Peripheral {
 impl DeriveFrom for Cluster {
     fn derive_from(&self, other: &Self) -> Self {
         match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => {
-                Self::Single(info.derive_from(other_info))
-            }
+            (Self::Single(info), Self::Single(other_info)) => info.derive_from(other_info).single(),
             (Self::Single(info), Self::Array(other_info, other_dim)) => {
                 let mut dim = other_dim.clone();
                 dim.dim_name = None;
-                Self::Array(info.derive_from(other_info), dim)
+                info.derive_from(other_info).array(dim)
             }
             (Self::Array(info, dim), Self::Single(other_info))
             | (Self::Array(info, dim), Self::Array(other_info, _)) => {
-                Self::Array(info.derive_from(other_info), dim.clone())
+                info.derive_from(other_info).array(dim.clone())
             }
         }
     }
@@ -148,17 +144,15 @@ impl DeriveFrom for Cluster {
 impl DeriveFrom for Register {
     fn derive_from(&self, other: &Self) -> Self {
         match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => {
-                Self::Single(info.derive_from(other_info))
-            }
+            (Self::Single(info), Self::Single(other_info)) => info.derive_from(other_info).single(),
             (Self::Single(info), Self::Array(other_info, other_dim)) => {
                 let mut dim = other_dim.clone();
                 dim.dim_name = None;
-                Self::Array(info.derive_from(other_info), dim)
+                info.derive_from(other_info).array(dim)
             }
             (Self::Array(info, dim), Self::Single(other_info))
             | (Self::Array(info, dim), Self::Array(other_info, _)) => {
-                Self::Array(info.derive_from(other_info), dim.clone())
+                info.derive_from(other_info).array(dim.clone())
             }
         }
     }
@@ -167,17 +161,15 @@ impl DeriveFrom for Register {
 impl DeriveFrom for Field {
     fn derive_from(&self, other: &Self) -> Self {
         match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => {
-                Self::Single(info.derive_from(other_info))
-            }
+            (Self::Single(info), Self::Single(other_info)) => info.derive_from(other_info).single(),
             (Self::Single(info), Self::Array(other_info, other_dim)) => {
                 let mut dim = other_dim.clone();
                 dim.dim_name = None;
-                Self::Array(info.derive_from(other_info), dim)
+                info.derive_from(other_info).array(dim)
             }
             (Self::Array(info, dim), Self::Single(other_info))
             | (Self::Array(info, dim), Self::Array(other_info, _)) => {
-                Self::Array(info.derive_from(other_info), dim.clone())
+                info.derive_from(other_info).array(dim.clone())
             }
         }
     }
