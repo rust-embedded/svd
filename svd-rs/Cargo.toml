@@ -9,7 +9,7 @@ license = "MIT OR Apache-2.0"
 name = "svd-rs"
 repository = "https://github.com/rust-embedded/svd"
 edition = "2018"
-version = "0.11.2"
+version = "0.12.0"
 readme = "README.md"
 
 [features]
@@ -22,7 +22,7 @@ thiserror = "1.0.5"
 version = "1"
 
 [dependencies.once_cell]
-version = "1.5.2"
+version = "1.8.0"
 
 [dependencies.serde]
 version = "1.0"
