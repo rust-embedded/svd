@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.12.0] - 2021-11-11
+
+- Bump dependencies
 - Add check for wrong size of `bitRange` width
 - Don't clone when serialize
 - Add optional entries to `Cpu`

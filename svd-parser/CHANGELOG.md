@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.12.0] - 2021-11-11
+
+- Bump `svd-rs`
 - Add `protection` parsing
 - Add `readAction` parsing
 - Add array support for peripherals

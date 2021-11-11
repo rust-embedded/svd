@@ -4,7 +4,7 @@ license = "MIT OR Apache-2.0"
 name = "svd-tests"
 repository = "https://github.com/rust-embedded/svd"
 edition = "2018"
-version = "0.11.0"
+version = "0.12.0"
 publish = false
 
 [dependencies]
@@ -13,4 +13,4 @@ svd-parser = { path = "../svd-parser"}
 svd-encoder = { path = "../svd-encoder"}
 roxmltree = "0.14.1"
 xmltree = "0.10.3"
-anyhow = "1.0.19"
+anyhow = "1.0.45"
