@@ -6,28 +6,50 @@ impl Encode for Device {
 
     fn encode(&self) -> Result<Element, EncodeError> {
         let mut elem = Element::new("device");
-        elem.children.push(new_node("name", self.name.clone()));
-
-        if let Some(v) = &self.version {
-            elem.children.push(new_node("version", v.clone()));
+        if let Some(v) = &self.vendor {
+            elem.children.push(new_node("vendor", v.clone()));
+        }
+        if let Some(v) = &self.vendor_id {
+            elem.children.push(new_node("vendorID", v.clone()));
         }
 
-        if let Some(v) = &self.description {
-            elem.children.push(new_node("description", v.clone()));
+        elem.children.push(new_node("name", self.name.clone()));
+
+        if let Some(v) = &self.series {
+            elem.children.push(new_node("series", v.clone()));
+        }
+
+        elem.children
+            .push(new_node("version", self.version.clone()));
+
+        elem.children
+            .push(new_node("description", self.description.clone()));
+
+        if let Some(v) = &self.license_text {
+            elem.children.push(new_node("licenseText", v.clone()));
         }
 
         if let Some(v) = &self.cpu {
             elem.children.push(XMLNode::Element(v.encode()?));
         }
 
-        if let Some(v) = &self.address_unit_bits {
+        if let Some(v) = &self.header_system_filename {
             elem.children
-                .push(new_node("addressUnitBits", format!("{}", v)));
+                .push(new_node("headerSystemFilename", v.clone()));
         }
 
-        if let Some(v) = &self.width {
-            elem.children.push(new_node("width", format!("{}", v)));
+        if let Some(v) = &self.header_definitions_prefix {
+            elem.children
+                .push(new_node("header_definitions_prefix", v.clone()));
         }
+
+        elem.children.push(new_node(
+            "addressUnitBits",
+            format!("{}", self.address_unit_bits),
+        ));
+
+        elem.children
+            .push(new_node("width", format!("{}", self.width)));
 
         elem.children
             .extend(self.default_register_properties.encode()?);
@@ -43,20 +65,14 @@ impl Encode for Device {
             XMLNode::Element(e)
         });
 
+        elem.attributes
+            .insert(String::from("schemaVersion"), self.schema_version.clone());
+        elem.attributes
+            .insert(String::from("xmlns:xs"), self.xmlns_xs.clone());
         elem.attributes.insert(
-            String::from("xmlns:xs"),
-            String::from("http://www.w3.org/2001/XMLSchema-instance"),
+            String::from("xs:noNamespaceSchemaLocation"),
+            self.no_namespace_schema_location.clone(),
         );
-        if let Some(schema_version) = &self.schema_version {
-            elem.attributes
-                .insert(String::from("schemaVersion"), schema_version.to_string());
-        }
-        if let Some(schema_version) = &self.schema_version {
-            elem.attributes.insert(
-                String::from("xs:noNamespaceSchemaLocation"),
-                format!("CMSIS-SVD_Schema_{}.xsd", schema_version.replace(".", "_")),
-            );
-        }
 
         Ok(elem)
     }
