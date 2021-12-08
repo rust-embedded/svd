@@ -225,4 +225,14 @@ impl Device {
         }
         Ok(())
     }
+
+    /// Get peripheral by name
+    pub fn get_peripheral(&self, name: &str) -> Option<&Peripheral> {
+        self.peripherals.iter().find(|f| f.name == name)
+    }
+
+    /// Get mutable peripheral by name
+    pub fn get_mut_peripheral(&mut self, name: &str) -> Option<&mut Peripheral> {
+        self.peripherals.iter_mut().find(|f| f.name == name)
+    }
 }
