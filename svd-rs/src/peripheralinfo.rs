@@ -1,10 +1,10 @@
 use super::{
     registercluster::{
-        AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, OptIter, RegisterIter,
+        AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, RegisterIter,
         RegisterIterMut,
     },
-    AddressBlock, BuildError, DimElement, EmptyToNone, Interrupt, Peripheral, RegisterCluster,
-    RegisterProperties, SvdError, ValidateLevel,
+    AddressBlock, BuildError, Cluster, DimElement, EmptyToNone, Interrupt, OptIter, Peripheral,
+    Register, RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
 };
 
 /// Errors from [Peripheral::validate]
@@ -428,5 +428,25 @@ impl PeripheralInfo {
         } else {
             AllRegistersIterMut { rem: Vec::new() }
         }
+    }
+
+    /// Get register by name
+    pub fn get_register(&self, name: &str) -> Option<&Register> {
+        self.registers().find(|f| f.name == name)
+    }
+
+    /// Get mutable register by name
+    pub fn get_mut_register(&mut self, name: &str) -> Option<&mut Register> {
+        self.registers_mut().find(|f| f.name == name)
+    }
+
+    /// Get cluster by name
+    pub fn get_cluster(&self, name: &str) -> Option<&Cluster> {
+        self.clusters().find(|f| f.name == name)
+    }
+
+    /// Get mutable cluster by name
+    pub fn get_mut_cluster(&mut self, name: &str) -> Option<&mut Cluster> {
+        self.clusters_mut().find(|f| f.name == name)
     }
 }

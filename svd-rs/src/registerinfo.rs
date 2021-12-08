@@ -1,6 +1,6 @@
 use super::{
-    Access, BuildError, DimElement, EmptyToNone, Field, ModifiedWriteValues, ReadAction, Register,
-    RegisterProperties, SvdError, ValidateLevel, WriteConstraint,
+    Access, BuildError, DimElement, EmptyToNone, Field, ModifiedWriteValues, OptIter, ReadAction,
+    Register, RegisterProperties, SvdError, ValidateLevel, WriteConstraint,
 };
 
 /// Errors from [`RegisterInfo::validate`]
@@ -327,5 +327,25 @@ impl RegisterInfo {
             }
         }
         Ok(())
+    }
+
+    /// Returns iterator over child fields
+    pub fn fields(&self) -> OptIter<std::slice::Iter<Field>> {
+        OptIter::new(self.fields.as_ref().map(|fields| fields.iter()))
+    }
+
+    /// Returns mutable iterator over child fields
+    pub fn fields_mut(&mut self) -> OptIter<std::slice::IterMut<Field>> {
+        OptIter::new(self.fields.as_mut().map(|fields| fields.iter_mut()))
+    }
+
+    /// Get field by name
+    pub fn get_field(&self, name: &str) -> Option<&Field> {
+        self.fields().find(|f| f.name == name)
+    }
+
+    /// Get mutable field by name
+    pub fn get_mut_field(&mut self, name: &str) -> Option<&mut Field> {
+        self.fields_mut().find(|f| f.name == name)
     }
 }
