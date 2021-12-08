@@ -1,6 +1,8 @@
 use core::ops::{Deref, DerefMut};
 
-use super::{DimElement, RegisterCluster, RegisterInfo};
+#[doc(hidden)]
+pub use super::registercluster::{AllRegistersIter as RegIter, AllRegistersIterMut as RegIterMut};
+use super::{DimElement, RegisterInfo};
 
 /// A single register or array of registers. A register is a named, programmable resource that belongs to a [peripheral](crate::Peripheral).
 #[derive(Clone, Debug, PartialEq)]
@@ -39,54 +41,6 @@ impl Register {
     /// Return `true` if it is register array
     pub const fn is_array(&self) -> bool {
         matches!(self, Self::Array(_, _))
-    }
-}
-
-/// Register iterator
-pub struct RegIter<'a> {
-    pub(crate) rem: Vec<&'a RegisterCluster>,
-}
-
-impl<'a> std::iter::Iterator for RegIter<'a> {
-    type Item = &'a Register;
-    fn next(&mut self) -> Option<Self::Item> {
-        while let Some(b) = self.rem.pop() {
-            match b {
-                RegisterCluster::Register(reg) => {
-                    return Some(reg);
-                }
-                RegisterCluster::Cluster(cluster) => {
-                    for c in cluster.children.iter().rev() {
-                        self.rem.push(c);
-                    }
-                }
-            }
-        }
-        None
-    }
-}
-
-/// Mutable register iterator
-pub struct RegIterMut<'a> {
-    pub(crate) rem: Vec<&'a mut RegisterCluster>,
-}
-
-impl<'a> std::iter::Iterator for RegIterMut<'a> {
-    type Item = &'a mut Register;
-    fn next(&mut self) -> Option<Self::Item> {
-        while let Some(b) = self.rem.pop() {
-            match b {
-                RegisterCluster::Register(reg) => {
-                    return Some(reg);
-                }
-                RegisterCluster::Cluster(cluster) => {
-                    for c in cluster.children.iter_mut().rev() {
-                        self.rem.push(c);
-                    }
-                }
-            }
-        }
-        None
     }
 }
 

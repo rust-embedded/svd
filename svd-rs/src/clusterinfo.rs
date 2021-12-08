@@ -1,5 +1,8 @@
 use super::{
-    register::{RegIter, RegIterMut},
+    registercluster::{
+        AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, RegisterIter,
+        RegisterIterMut,
+    },
     BuildError, Cluster, DimElement, EmptyToNone, RegisterCluster, RegisterProperties, SvdError,
     ValidateLevel,
 };
@@ -226,21 +229,61 @@ impl ClusterInfo {
         Ok(())
     }
 
-    /// returns a iterator over all registers the cluster contains
-    pub fn reg_iter(&self) -> RegIter {
+    /// Returns iterator over all descendant registers
+    #[deprecated(since = "0.12.1", note = "Please use `all_registers` instead")]
+    pub fn reg_iter(&self) -> AllRegistersIter {
+        self.all_registers()
+    }
+
+    /// Returns iterator over all descendant registers
+    pub fn all_registers(&self) -> AllRegistersIter {
         let mut rem: Vec<&RegisterCluster> = Vec::with_capacity(self.children.len());
         for r in self.children.iter().rev() {
             rem.push(r);
         }
-        RegIter { rem }
+        AllRegistersIter { rem }
     }
 
-    /// returns a mutable iterator over all registers cluster contains
-    pub fn reg_iter_mut(&mut self) -> RegIterMut {
+    /// Returns mutable iterator over all descendant registers
+    #[deprecated(since = "0.12.1", note = "Please use `all_registers_mut` instead")]
+    pub fn reg_iter_mut(&mut self) -> AllRegistersIterMut {
+        self.all_registers_mut()
+    }
+
+    /// Returns mutable iterator over all descendant registers
+    pub fn all_registers_mut(&mut self) -> AllRegistersIterMut {
         let mut rem: Vec<&mut RegisterCluster> = Vec::with_capacity(self.children.len());
         for r in self.children.iter_mut().rev() {
             rem.push(r);
         }
-        RegIterMut { rem }
+        AllRegistersIterMut { rem }
+    }
+
+    /// Returns iterator over child registers
+    pub fn registers(&self) -> RegisterIter {
+        RegisterIter {
+            all: self.children.iter(),
+        }
+    }
+
+    /// Returns mutable iterator over child registers
+    pub fn registers_mut(&mut self) -> RegisterIterMut {
+        RegisterIterMut {
+            all: self.children.iter_mut(),
+        }
+    }
+
+    /// Returns iterator over child clusters
+    pub fn clusters(&self) -> ClusterIter {
+        ClusterIter {
+            all: self.children.iter(),
+        }
+    }
+
+    /// Returns mutable iterator over child clusters
+    pub fn clusters_mut(&mut self) -> ClusterIterMut {
+        ClusterIterMut {
+            all: self.children.iter_mut(),
+        }
     }
 }

@@ -1,5 +1,8 @@
 use super::{
-    register::{RegIter, RegIterMut},
+    registercluster::{
+        AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, OptIter, RegisterIter,
+        RegisterIterMut,
+    },
     AddressBlock, BuildError, DimElement, EmptyToNone, Interrupt, Peripheral, RegisterCluster,
     RegisterProperties, SvdError, ValidateLevel,
 };
@@ -357,29 +360,73 @@ impl PeripheralInfo {
         Ok(())
     }
 
-    /// returns iterator over all registers peripheral contains
-    pub fn reg_iter(&self) -> RegIter {
+    /// Returns iterator over child registers
+    pub fn registers(&self) -> OptIter<RegisterIter> {
+        OptIter::new(
+            self.registers
+                .as_ref()
+                .map(|regs| RegisterIter { all: regs.iter() }),
+        )
+    }
+
+    /// Returns mutable iterator over child registers
+    pub fn registers_mut(&mut self) -> OptIter<RegisterIterMut> {
+        OptIter::new(self.registers.as_mut().map(|regs| RegisterIterMut {
+            all: regs.iter_mut(),
+        }))
+    }
+
+    /// Returns iterator over child clusters
+    pub fn clusters(&self) -> OptIter<ClusterIter> {
+        OptIter::new(
+            self.registers
+                .as_ref()
+                .map(|regs| ClusterIter { all: regs.iter() }),
+        )
+    }
+
+    /// Returns mutable iterator over child clusters
+    pub fn clusters_mut(&mut self) -> OptIter<ClusterIterMut> {
+        OptIter::new(self.registers.as_mut().map(|regs| ClusterIterMut {
+            all: regs.iter_mut(),
+        }))
+    }
+
+    /// Returns iterator over all descendant registers
+    #[deprecated(since = "0.12.1", note = "Please use `all_registers` instead")]
+    pub fn reg_iter(&self) -> AllRegistersIter {
+        self.all_registers()
+    }
+
+    /// Returns iterator over all descendant registers
+    pub fn all_registers(&self) -> AllRegistersIter {
         if let Some(regs) = &self.registers {
             let mut rem: Vec<&RegisterCluster> = Vec::with_capacity(regs.len());
             for r in regs.iter().rev() {
                 rem.push(r);
             }
-            RegIter { rem }
+            AllRegistersIter { rem }
         } else {
-            RegIter { rem: Vec::new() }
+            AllRegistersIter { rem: Vec::new() }
         }
     }
 
-    /// returns mutable iterator over all registers peripheral contains
-    pub fn reg_iter_mut(&mut self) -> RegIterMut {
+    /// Returns mutable iterator over all descendant registers
+    #[deprecated(since = "0.12.1", note = "Please use `all_registers_mut` instead")]
+    pub fn reg_iter_mut(&mut self) -> AllRegistersIterMut {
+        self.all_registers_mut()
+    }
+
+    /// Returns mutable iterator over all descendant registers
+    pub fn all_registers_mut(&mut self) -> AllRegistersIterMut {
         if let Some(regs) = &mut self.registers {
             let mut rem: Vec<&mut RegisterCluster> = Vec::with_capacity(regs.len());
             for r in regs.iter_mut().rev() {
                 rem.push(r);
             }
-            RegIterMut { rem }
+            AllRegistersIterMut { rem }
         } else {
-            RegIterMut { rem: Vec::new() }
+            AllRegistersIterMut { rem: Vec::new() }
         }
     }
 }

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Rename `reg_iter` to `all_registers`, add `registers`, `clusters` methods that create iterators
+
 ## [v0.12.0] - 2021-11-11
 
 - Bump dependencies
