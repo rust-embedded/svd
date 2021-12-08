@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
-- Rename `reg_iter` to `all_registers`, add `registers`, `clusters` methods that create iterators
+## [v0.12.1] - 2021-12-08
+
+- Rename `reg_iter` to `all_registers`,
+- Add `registers`, `clusters`, `fields` methods that create iterators
+- Add `get_register`, `get_cluster`, `get_field` (also `mut`) which take child by name
 
 ## [v0.12.0] - 2021-11-11
 
