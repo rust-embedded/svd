@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- `names`, `address_offsets`, etc. methods for arrays
 - Use generic `SingleArray` enum for types which can be either collected into SVD arrays or have only one instance
 - `Name` trait for structures that has `name` field
 - improves in iterators

@@ -1,5 +1,6 @@
 use super::{DimElement, Name};
 use core::ops::{Deref, DerefMut};
+use std::borrow::Cow;
 
 /// A single SVD instance or array of instances
 #[derive(Clone, Debug, PartialEq)]
@@ -47,6 +48,27 @@ where
 {
     fn name(&self) -> &str {
         T::name(self)
+    }
+}
+
+impl<T> SingleArray<T>
+where
+    T: Name,
+{
+    /// Returns list of single or array names
+    pub fn names(&self) -> Vec<Cow<str>> {
+        match self {
+            Self::Single(info) => vec![info.name().into()],
+            Self::Array(info, dim) => dim
+                .indexes()
+                .map(|i| {
+                    info.name()
+                        .replacen("[%s]", &i, 1)
+                        .replacen("%s", &i, 1)
+                        .into()
+                })
+                .collect(),
+        }
     }
 }
 
