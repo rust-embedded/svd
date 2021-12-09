@@ -451,4 +451,14 @@ impl PeripheralInfo {
     pub fn get_mut_cluster(&mut self, name: &str) -> Option<&mut Cluster> {
         self.clusters_mut().find(|f| f.name == name)
     }
+
+    /// Get interrupt by name
+    pub fn get_interrupt(&self, name: &str) -> Option<&Interrupt> {
+        self.interrupt.iter().find(|e| e.name == name)
+    }
+
+    /// Get mutable enumeratedValue by name
+    pub fn get_mut_interrupt(&mut self, name: &str) -> Option<&mut Interrupt> {
+        self.interrupt.iter_mut().find(|e| e.name == name)
+    }
 }
