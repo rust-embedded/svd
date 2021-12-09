@@ -1,6 +1,6 @@
 use super::{
-    Access, BuildError, DimElement, EmptyToNone, Field, ModifiedWriteValues, ReadAction, Register,
-    RegisterProperties, SvdError, ValidateLevel, WriteConstraint,
+    Access, BuildError, DimElement, EmptyToNone, Field, ModifiedWriteValues, Name, ReadAction,
+    Register, RegisterProperties, SvdError, ValidateLevel, WriteConstraint,
 };
 
 /// Errors from [`RegisterInfo::validate`]
@@ -353,5 +353,11 @@ impl RegisterInfo {
     /// Get mutable field by name
     pub fn get_mut_field(&mut self, name: &str) -> Option<&mut Field> {
         self.fields_mut().find(|f| f.name == name)
+    }
+}
+
+impl Name for RegisterInfo {
+    fn name(&self) -> &str {
+        &self.name
     }
 }

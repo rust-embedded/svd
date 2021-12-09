@@ -2,6 +2,8 @@
 //! SVD objects.
 //! This module defines components of an SVD along with parse and encode implementations
 
+mod array;
+
 /// Endian objects
 pub mod endian;
 pub use self::endian::Endian;
@@ -239,20 +241,26 @@ impl<T> EmptyToNone for Option<Vec<T>> {
     }
 }
 
-#[cfg(feature = "serde")]
-#[derive(serde::Serialize)]
-struct SerArray<'a, T> {
-    #[serde(flatten)]
-    dim: &'a DimElement,
-    #[serde(flatten)]
-    info: &'a T,
+/// Get SVD element name
+pub trait Name {
+    /// Get name
+    fn name(&self) -> &str;
 }
 
-#[cfg(feature = "serde")]
-#[derive(serde::Deserialize)]
-struct DeserArray<T> {
-    #[serde(flatten, default)]
-    dim: Option<DimElement>,
-    #[serde(flatten)]
-    info: T,
+impl<T> Name for &T
+where
+    T: Name,
+{
+    fn name(&self) -> &str {
+        T::name(*self)
+    }
+}
+
+impl<T> Name for &mut T
+where
+    T: Name,
+{
+    fn name(&self) -> &str {
+        T::name(*self)
+    }
 }

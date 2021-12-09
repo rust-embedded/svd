@@ -156,12 +156,12 @@ impl EnumeratedValues {
         self.usage.unwrap_or_default()
     }
 
-    /// Get enumeratedValue by name
+    /// Get `enumeratedValue` by name
     pub fn get_value(&self, name: &str) -> Option<&EnumeratedValue> {
         self.values.iter().find(|e| e.name == name)
     }
 
-    /// Get mutable enumeratedValue by name
+    /// Get mutable `enumeratedValue` by name
     pub fn get_mut_value(&mut self, name: &str) -> Option<&mut EnumeratedValue> {
         self.values.iter_mut().find(|e| e.name == name)
     }

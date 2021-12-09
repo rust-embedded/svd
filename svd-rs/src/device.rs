@@ -1,5 +1,5 @@
 use super::{
-    BuildError, Cpu, EmptyToNone, Peripheral, RegisterProperties, SvdError, ValidateLevel,
+    BuildError, Cpu, EmptyToNone, Name, Peripheral, RegisterProperties, SvdError, ValidateLevel,
 };
 
 /// Errors for [`Device::validate`]
@@ -234,5 +234,11 @@ impl Device {
     /// Get mutable peripheral by name
     pub fn get_mut_peripheral(&mut self, name: &str) -> Option<&mut Peripheral> {
         self.peripherals.iter_mut().find(|f| f.name == name)
+    }
+}
+
+impl Name for Device {
+    fn name(&self) -> &str {
+        &self.name
     }
 }

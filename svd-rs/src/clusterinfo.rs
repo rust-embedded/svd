@@ -3,8 +3,8 @@ use super::{
         AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, RegisterIter,
         RegisterIterMut,
     },
-    BuildError, Cluster, DimElement, EmptyToNone, Register, RegisterCluster, RegisterProperties,
-    SvdError, ValidateLevel,
+    BuildError, Cluster, DimElement, EmptyToNone, Name, Register, RegisterCluster,
+    RegisterProperties, SvdError, ValidateLevel,
 };
 
 /// Errors from [`ClusterInfo::validate`]
@@ -301,5 +301,11 @@ impl ClusterInfo {
     /// Get mutable cluster by name
     pub fn get_mut_cluster(&mut self, name: &str) -> Option<&mut Cluster> {
         self.clusters_mut().find(|f| f.name == name)
+    }
+}
+
+impl Name for ClusterInfo {
+    fn name(&self) -> &str {
+        &self.name
     }
 }

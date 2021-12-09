@@ -1,6 +1,6 @@
 use super::{
     bitrange, Access, BitRange, BuildError, DimElement, EmptyToNone, EnumeratedValues, Field,
-    ModifiedWriteValues, ReadAction, SvdError, Usage, ValidateLevel, WriteConstraint,
+    ModifiedWriteValues, Name, ReadAction, SvdError, Usage, ValidateLevel, WriteConstraint,
 };
 
 /// Errors for [`FieldInfo::validate`]
@@ -339,5 +339,11 @@ impl FieldInfo {
                 .find(|ev| ev.usage() == usage),
             _ => None,
         }
+    }
+}
+
+impl Name for FieldInfo {
+    fn name(&self) -> &str {
+        &self.name
     }
 }
