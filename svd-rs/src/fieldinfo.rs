@@ -303,6 +303,25 @@ impl FieldInfo {
         Ok(())
     }
 
+    /// Get bit offset
+    pub fn bit_offset(&self) -> u32 {
+        self.bit_range.offset
+    }
+
+    /// Get bit width
+    pub fn bit_width(&self) -> u32 {
+        self.bit_range.width
+    }
+
+    /// Get the position of the least significant bit
+    pub fn lsb(&self) -> u32 {
+        self.bit_range.lsb()
+    }
+    /// Get the position of the most significant bit
+    pub fn msb(&self) -> u32 {
+        self.bit_range.msb()
+    }
+
     /// Get enumeratedValues cluster by usage
     pub fn get_enumerated_values(&self, usage: Usage) -> Option<&EnumeratedValues> {
         match self.enumerated_values.len() {

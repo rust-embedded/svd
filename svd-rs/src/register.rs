@@ -1,4 +1,5 @@
 use core::ops::{Deref, DerefMut};
+use std::borrow::Cow;
 
 #[doc(hidden)]
 pub use super::registercluster::{AllRegistersIter as RegIter, AllRegistersIterMut as RegIterMut};
@@ -41,6 +42,25 @@ impl Register {
     /// Return `true` if it is register array
     pub const fn is_array(&self) -> bool {
         matches!(self, Self::Array(_, _))
+    }
+    /// Returns list of register or register array names
+    pub fn names(&self) -> Vec<Cow<str>> {
+        match self {
+            Self::Single(info) => vec![info.name.as_str().into()],
+            Self::Array(info, dim) => dim
+                .indexes()
+                .map(|i| info.name.replace("[%s]", &i).replace("%s", &i).into())
+                .collect(),
+        }
+    }
+    /// Returns list of register or register array address_offsets
+    pub fn address_offsets(&self) -> Vec<u32> {
+        match self {
+            Self::Single(info) => vec![info.address_offset],
+            Self::Array(info, dim) => (0..dim.dim)
+                .map(|n| info.address_offset + n * dim.dim_increment)
+                .collect(),
+        }
     }
 }
 
