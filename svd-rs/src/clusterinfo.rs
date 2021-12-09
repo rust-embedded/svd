@@ -237,11 +237,9 @@ impl ClusterInfo {
 
     /// Returns iterator over all descendant registers
     pub fn all_registers(&self) -> AllRegistersIter {
-        let mut rem: Vec<&RegisterCluster> = Vec::with_capacity(self.children.len());
-        for r in self.children.iter().rev() {
-            rem.push(r);
+        AllRegistersIter {
+            rem: self.children.iter().rev().collect(),
         }
-        AllRegistersIter { rem }
     }
 
     /// Returns mutable iterator over all descendant registers
@@ -252,11 +250,9 @@ impl ClusterInfo {
 
     /// Returns mutable iterator over all descendant registers
     pub fn all_registers_mut(&mut self) -> AllRegistersIterMut {
-        let mut rem: Vec<&mut RegisterCluster> = Vec::with_capacity(self.children.len());
-        for r in self.children.iter_mut().rev() {
-            rem.push(r);
+        AllRegistersIterMut {
+            rem: self.children.iter_mut().rev().collect(),
         }
-        AllRegistersIterMut { rem }
     }
 
     /// Returns iterator over child registers

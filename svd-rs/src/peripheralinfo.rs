@@ -3,8 +3,8 @@ use super::{
         AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, RegisterIter,
         RegisterIterMut,
     },
-    AddressBlock, BuildError, Cluster, DimElement, EmptyToNone, Interrupt, OptIter, Peripheral,
-    Register, RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
+    AddressBlock, BuildError, Cluster, DimElement, EmptyToNone, Interrupt, Peripheral, Register,
+    RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
 };
 
 /// Errors from [Peripheral::validate]
@@ -361,35 +361,43 @@ impl PeripheralInfo {
     }
 
     /// Returns iterator over child registers
-    pub fn registers(&self) -> OptIter<RegisterIter> {
-        OptIter::new(
-            self.registers
-                .as_ref()
-                .map(|regs| RegisterIter { all: regs.iter() }),
-        )
+    pub fn registers(&self) -> RegisterIter {
+        RegisterIter {
+            all: match &self.registers {
+                Some(regs) => regs.iter(),
+                None => [].iter(),
+            },
+        }
     }
 
     /// Returns mutable iterator over child registers
-    pub fn registers_mut(&mut self) -> OptIter<RegisterIterMut> {
-        OptIter::new(self.registers.as_mut().map(|regs| RegisterIterMut {
-            all: regs.iter_mut(),
-        }))
+    pub fn registers_mut(&mut self) -> RegisterIterMut {
+        RegisterIterMut {
+            all: match &mut self.registers {
+                Some(regs) => regs.iter_mut(),
+                None => [].iter_mut(),
+            },
+        }
     }
 
     /// Returns iterator over child clusters
-    pub fn clusters(&self) -> OptIter<ClusterIter> {
-        OptIter::new(
-            self.registers
-                .as_ref()
-                .map(|regs| ClusterIter { all: regs.iter() }),
-        )
+    pub fn clusters(&self) -> ClusterIter {
+        ClusterIter {
+            all: match &self.registers {
+                Some(regs) => regs.iter(),
+                None => [].iter(),
+            },
+        }
     }
 
     /// Returns mutable iterator over child clusters
-    pub fn clusters_mut(&mut self) -> OptIter<ClusterIterMut> {
-        OptIter::new(self.registers.as_mut().map(|regs| ClusterIterMut {
-            all: regs.iter_mut(),
-        }))
+    pub fn clusters_mut(&mut self) -> ClusterIterMut {
+        ClusterIterMut {
+            all: match &mut self.registers {
+                Some(regs) => regs.iter_mut(),
+                None => [].iter_mut(),
+            },
+        }
     }
 
     /// Returns iterator over all descendant registers
@@ -400,14 +408,11 @@ impl PeripheralInfo {
 
     /// Returns iterator over all descendant registers
     pub fn all_registers(&self) -> AllRegistersIter {
-        if let Some(regs) = &self.registers {
-            let mut rem: Vec<&RegisterCluster> = Vec::with_capacity(regs.len());
-            for r in regs.iter().rev() {
-                rem.push(r);
-            }
-            AllRegistersIter { rem }
-        } else {
-            AllRegistersIter { rem: Vec::new() }
+        AllRegistersIter {
+            rem: match &self.registers {
+                Some(regs) => regs.iter().rev().collect(),
+                None => Vec::new(),
+            },
         }
     }
 
@@ -419,14 +424,11 @@ impl PeripheralInfo {
 
     /// Returns mutable iterator over all descendant registers
     pub fn all_registers_mut(&mut self) -> AllRegistersIterMut {
-        if let Some(regs) = &mut self.registers {
-            let mut rem: Vec<&mut RegisterCluster> = Vec::with_capacity(regs.len());
-            for r in regs.iter_mut().rev() {
-                rem.push(r);
-            }
-            AllRegistersIterMut { rem }
-        } else {
-            AllRegistersIterMut { rem: Vec::new() }
+        AllRegistersIterMut {
+            rem: match &mut self.registers {
+                Some(regs) => regs.iter_mut().rev().collect(),
+                None => Vec::new(),
+            },
         }
     }
 
