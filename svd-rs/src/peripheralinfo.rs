@@ -3,8 +3,8 @@ use super::{
         AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, RegisterIter,
         RegisterIterMut,
     },
-    AddressBlock, BuildError, Cluster, DimElement, EmptyToNone, Interrupt, Peripheral, Register,
-    RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
+    AddressBlock, BuildError, Cluster, DimElement, EmptyToNone, Interrupt, Name, Peripheral,
+    Register, RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
 };
 
 /// Errors from [Peripheral::validate]
@@ -460,5 +460,11 @@ impl PeripheralInfo {
     /// Get mutable enumeratedValue by name
     pub fn get_mut_interrupt(&mut self, name: &str) -> Option<&mut Interrupt> {
         self.interrupt.iter_mut().find(|e| e.name == name)
+    }
+}
+
+impl Name for PeripheralInfo {
+    fn name(&self) -> &str {
+        &self.name
     }
 }
