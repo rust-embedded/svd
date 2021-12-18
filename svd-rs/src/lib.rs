@@ -3,6 +3,7 @@
 //! This module defines components of an SVD along with parse and encode implementations
 
 mod array;
+pub use array::SingleArray;
 
 /// Endian objects
 pub mod endian;

@@ -1,7 +1,7 @@
 //! Implementations of DeriveFrom, setting non-explicit fields.
 use crate::{
-    Cluster, ClusterInfo, EnumeratedValues, Field, FieldInfo, Peripheral, PeripheralInfo, Register,
-    RegisterInfo, RegisterProperties,
+    ClusterInfo, EnumeratedValues, FieldInfo, PeripheralInfo, RegisterInfo, RegisterProperties,
+    SingleArray,
 };
 
 /// Fill empty fields of structure with values of other structure
@@ -107,69 +107,23 @@ impl DeriveFrom for FieldInfo {
     }
 }
 
-impl DeriveFrom for Peripheral {
+impl<T> DeriveFrom for SingleArray<T>
+where
+    T: DeriveFrom,
+{
     fn derive_from(&self, other: &Self) -> Self {
         match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => info.derive_from(other_info).single(),
+            (Self::Single(info), Self::Single(other_info)) => {
+                Self::Single(info.derive_from(other_info))
+            }
             (Self::Single(info), Self::Array(other_info, other_dim)) => {
                 let mut dim = other_dim.clone();
                 dim.dim_name = None;
-                info.derive_from(other_info).array(dim)
+                Self::Array(info.derive_from(other_info), dim)
             }
             (Self::Array(info, dim), Self::Single(other_info))
             | (Self::Array(info, dim), Self::Array(other_info, _)) => {
-                info.derive_from(other_info).array(dim.clone())
-            }
-        }
-    }
-}
-
-impl DeriveFrom for Cluster {
-    fn derive_from(&self, other: &Self) -> Self {
-        match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => info.derive_from(other_info).single(),
-            (Self::Single(info), Self::Array(other_info, other_dim)) => {
-                let mut dim = other_dim.clone();
-                dim.dim_name = None;
-                info.derive_from(other_info).array(dim)
-            }
-            (Self::Array(info, dim), Self::Single(other_info))
-            | (Self::Array(info, dim), Self::Array(other_info, _)) => {
-                info.derive_from(other_info).array(dim.clone())
-            }
-        }
-    }
-}
-
-impl DeriveFrom for Register {
-    fn derive_from(&self, other: &Self) -> Self {
-        match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => info.derive_from(other_info).single(),
-            (Self::Single(info), Self::Array(other_info, other_dim)) => {
-                let mut dim = other_dim.clone();
-                dim.dim_name = None;
-                info.derive_from(other_info).array(dim)
-            }
-            (Self::Array(info, dim), Self::Single(other_info))
-            | (Self::Array(info, dim), Self::Array(other_info, _)) => {
-                info.derive_from(other_info).array(dim.clone())
-            }
-        }
-    }
-}
-
-impl DeriveFrom for Field {
-    fn derive_from(&self, other: &Self) -> Self {
-        match (self, other) {
-            (Self::Single(info), Self::Single(other_info)) => info.derive_from(other_info).single(),
-            (Self::Single(info), Self::Array(other_info, other_dim)) => {
-                let mut dim = other_dim.clone();
-                dim.dim_name = None;
-                info.derive_from(other_info).array(dim)
-            }
-            (Self::Array(info, dim), Self::Single(other_info))
-            | (Self::Array(info, dim), Self::Array(other_info, _)) => {
-                info.derive_from(other_info).array(dim.clone())
+                Self::Array(info.derive_from(other_info), dim.clone())
             }
         }
     }
