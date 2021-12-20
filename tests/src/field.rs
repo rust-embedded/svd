@@ -1,5 +1,8 @@
 use super::run_test;
-use crate::svd::{BitRange, BitRangeType, DimElement, Field, FieldInfo, ValidateLevel};
+use crate::svd::{
+    Access, BitRange, BitRangeType, DimElement, EnumeratedValue, EnumeratedValues, Field,
+    FieldInfo, ValidateLevel,
+};
 
 #[test]
 fn decode_encode() {
@@ -8,11 +11,7 @@ fn decode_encode() {
             FieldInfo::builder()
                 .name("MODE%s".to_string())
                 .derived_from(Some("other_field".to_string()))
-                .bit_range(BitRange {
-                    offset: 24,
-                    width: 2,
-                    range_type: BitRangeType::OffsetWidth,
-                })
+                .bit_range(BitRange::from_offset_width(24, 2))
                 .build(ValidateLevel::Strict)
                 .unwrap(),
             DimElement::builder()
@@ -34,4 +33,72 @@ fn decode_encode() {
         ",
     )];
     run_test::<Field>(&tests[..]);
+}
+
+#[test]
+fn decode_encode_info() {
+    let tests = vec![
+        (
+            FieldInfo::builder()
+                .name("MODE".to_string())
+                .description(Some("Read Mode".to_string()))
+                .bit_range(BitRange {
+                    offset: 24,
+                    width: 2,
+                    range_type: BitRangeType::OffsetWidth,
+                })
+                .access(Some(Access::ReadWrite))
+                .enumerated_values(vec![EnumeratedValues::builder()
+                    .values(vec![EnumeratedValue::builder()
+                        .name("WS0".to_string())
+                        .description(Some(
+                            "Zero wait-states inserted in fetch or read transfers".to_string(),
+                        ))
+                        .value(Some(0))
+                        .is_default(None)
+                        .build(ValidateLevel::Strict)
+                        .unwrap()])
+                    .build(ValidateLevel::Strict)
+                    .unwrap()])
+                .build(ValidateLevel::Strict)
+                .unwrap(),
+            "
+        <field>
+          <name>MODE</name>
+          <description>Read Mode</description>
+          <bitOffset>24</bitOffset>
+          <bitWidth>2</bitWidth>
+          <access>read-write</access>
+          <enumeratedValues>
+            <enumeratedValue>
+              <name>WS0</name>
+              <description>Zero wait-states inserted in fetch or read transfers</description>
+              <value>0</value>
+            </enumeratedValue>
+          </enumeratedValues>
+        </field>
+        ",
+        ),
+        (
+            FieldInfo::builder()
+                .name("MODE".to_string())
+                .derived_from(Some("other_field".to_string()))
+                .bit_range(BitRange {
+                    offset: 24,
+                    width: 2,
+                    range_type: BitRangeType::OffsetWidth,
+                })
+                .build(ValidateLevel::Strict)
+                .unwrap(),
+            "
+        <field derivedFrom=\"other_field\">
+          <name>MODE</name>
+          <bitOffset>24</bitOffset>
+          <bitWidth>2</bitWidth>
+        </field>
+        ",
+        ),
+    ];
+
+    run_test::<FieldInfo>(&tests[..]);
 }
