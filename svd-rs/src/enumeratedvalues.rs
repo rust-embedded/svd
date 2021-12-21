@@ -152,8 +152,12 @@ impl EnumeratedValues {
         Ok(())
     }
     /// Get the usage of these enumerated values.
-    pub fn usage(&self) -> Usage {
-        self.usage.unwrap_or_default()
+    pub fn usage(&self) -> Option<Usage> {
+        if self.derived_from.is_some() {
+            None
+        } else {
+            Some(self.usage.unwrap_or_default())
+        }
     }
 
     /// Get `enumeratedValue` by name

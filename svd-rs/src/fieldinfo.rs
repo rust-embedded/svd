@@ -295,8 +295,12 @@ impl FieldInfo {
         if lvl.is_strict() {
             match self.enumerated_values.as_slice() {
                 [] | [_] => {}
-                [ev1, ev2] if (ev1.usage() == Usage::Read && ev2.usage() == Usage::Write) => {}
-                [ev1, ev2] if (ev2.usage() == Usage::Read && ev1.usage() == Usage::Write) => {}
+                [ev1, ev2]
+                    if matches!(ev1.usage(), None | Some(Usage::Read))
+                        && matches!(ev2.usage(), None | Some(Usage::Write)) => {}
+                [ev1, ev2]
+                    if matches!(ev2.usage(), None | Some(Usage::Read))
+                        && matches!(ev1.usage(), None | Some(Usage::Write)) => {}
                 _ => return Err(Error::IncompatibleEnumeratedValues.into()),
             }
         }
@@ -325,7 +329,10 @@ impl FieldInfo {
     /// Get enumeratedValues cluster by usage
     pub fn get_enumerated_values(&self, usage: Usage) -> Option<&EnumeratedValues> {
         match self.enumerated_values.len() {
-            1 | 2 => self.enumerated_values.iter().find(|ev| ev.usage() == usage),
+            1 | 2 => self
+                .enumerated_values
+                .iter()
+                .find(|ev| ev.usage() == Some(usage)),
             _ => None,
         }
     }
@@ -336,7 +343,7 @@ impl FieldInfo {
             1 | 2 => self
                 .enumerated_values
                 .iter_mut()
-                .find(|ev| ev.usage() == usage),
+                .find(|ev| ev.usage() == Some(usage)),
             _ => None,
         }
     }
