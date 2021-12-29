@@ -1,4 +1,4 @@
-use super::{BuildError, SvdError, ValidateLevel};
+use super::{BuildError, Name, SvdError, ValidateLevel};
 
 /// Describes an interrupt in the device
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -104,5 +104,11 @@ impl Interrupt {
     /// This doesn't do anything.
     pub fn validate(&mut self, _lvl: ValidateLevel) -> Result<(), SvdError> {
         Ok(())
+    }
+}
+
+impl Name for Interrupt {
+    fn name(&self) -> &str {
+        &self.name
     }
 }

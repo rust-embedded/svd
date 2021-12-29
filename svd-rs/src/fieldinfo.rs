@@ -1,6 +1,6 @@
 use super::{
     bitrange, Access, BitRange, BuildError, DimElement, EmptyToNone, EnumeratedValues, Field,
-    ModifiedWriteValues, ReadAction, SvdError, Usage, ValidateLevel, WriteConstraint,
+    ModifiedWriteValues, Name, ReadAction, SvdError, Usage, ValidateLevel, WriteConstraint,
 };
 
 /// Errors for [`FieldInfo::validate`]
@@ -296,11 +296,61 @@ impl FieldInfo {
             match self.enumerated_values.as_slice() {
                 [] | [_] => {}
                 [ev1, ev2]
-                    if (ev1.usage() == Usage::Read && ev2.usage() == Usage::Write)
-                        || (ev2.usage() == Usage::Read && ev1.usage() == Usage::Write) => {}
+                    if matches!(ev1.usage(), None | Some(Usage::Read))
+                        && matches!(ev2.usage(), None | Some(Usage::Write)) => {}
+                [ev1, ev2]
+                    if matches!(ev2.usage(), None | Some(Usage::Read))
+                        && matches!(ev1.usage(), None | Some(Usage::Write)) => {}
                 _ => return Err(Error::IncompatibleEnumeratedValues.into()),
             }
         }
         Ok(())
+    }
+
+    /// Get bit offset
+    pub fn bit_offset(&self) -> u32 {
+        self.bit_range.offset
+    }
+
+    /// Get bit width
+    pub fn bit_width(&self) -> u32 {
+        self.bit_range.width
+    }
+
+    /// Get the position of the least significant bit
+    pub fn lsb(&self) -> u32 {
+        self.bit_range.lsb()
+    }
+    /// Get the position of the most significant bit
+    pub fn msb(&self) -> u32 {
+        self.bit_range.msb()
+    }
+
+    /// Get enumeratedValues cluster by usage
+    pub fn get_enumerated_values(&self, usage: Usage) -> Option<&EnumeratedValues> {
+        match self.enumerated_values.len() {
+            1 | 2 => self
+                .enumerated_values
+                .iter()
+                .find(|ev| ev.usage() == Some(usage)),
+            _ => None,
+        }
+    }
+
+    /// Get mutable enumeratedValues by usage
+    pub fn get_mut_enumerated_values(&mut self, usage: Usage) -> Option<&mut EnumeratedValues> {
+        match self.enumerated_values.len() {
+            1 | 2 => self
+                .enumerated_values
+                .iter_mut()
+                .find(|ev| ev.usage() == Some(usage)),
+            _ => None,
+        }
+    }
+}
+
+impl Name for FieldInfo {
+    fn name(&self) -> &str {
+        &self.name
     }
 }

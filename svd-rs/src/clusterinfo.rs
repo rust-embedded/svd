@@ -3,8 +3,8 @@ use super::{
         AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, RegisterIter,
         RegisterIterMut,
     },
-    BuildError, Cluster, DimElement, EmptyToNone, Register, RegisterCluster, RegisterProperties,
-    SvdError, ValidateLevel,
+    BuildError, Cluster, DimElement, EmptyToNone, Name, Register, RegisterCluster,
+    RegisterProperties, SvdError, ValidateLevel,
 };
 
 /// Errors from [`ClusterInfo::validate`]
@@ -237,11 +237,9 @@ impl ClusterInfo {
 
     /// Returns iterator over all descendant registers
     pub fn all_registers(&self) -> AllRegistersIter {
-        let mut rem: Vec<&RegisterCluster> = Vec::with_capacity(self.children.len());
-        for r in self.children.iter().rev() {
-            rem.push(r);
+        AllRegistersIter {
+            rem: self.children.iter().rev().collect(),
         }
-        AllRegistersIter { rem }
     }
 
     /// Returns mutable iterator over all descendant registers
@@ -252,11 +250,9 @@ impl ClusterInfo {
 
     /// Returns mutable iterator over all descendant registers
     pub fn all_registers_mut(&mut self) -> AllRegistersIterMut {
-        let mut rem: Vec<&mut RegisterCluster> = Vec::with_capacity(self.children.len());
-        for r in self.children.iter_mut().rev() {
-            rem.push(r);
+        AllRegistersIterMut {
+            rem: self.children.iter_mut().rev().collect(),
         }
-        AllRegistersIterMut { rem }
     }
 
     /// Returns iterator over child registers
@@ -305,5 +301,11 @@ impl ClusterInfo {
     /// Get mutable cluster by name
     pub fn get_mut_cluster(&mut self, name: &str) -> Option<&mut Cluster> {
         self.clusters_mut().find(|f| f.name == name)
+    }
+}
+
+impl Name for ClusterInfo {
+    fn name(&self) -> &str {
+        &self.name
     }
 }

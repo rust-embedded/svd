@@ -1,4 +1,4 @@
-use super::{BuildError, EmptyToNone, SvdError, ValidateLevel};
+use super::{BuildError, EmptyToNone, Name, SvdError, ValidateLevel};
 
 /// Describes a single entry in the enumeration.
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -144,5 +144,11 @@ impl EnumeratedValue {
             Some(x) if !range.contains(x) => Err(Error::OutOfRange(*x, range.clone()).into()),
             _ => Ok(()),
         }
+    }
+}
+
+impl Name for EnumeratedValue {
+    fn name(&self) -> &str {
+        &self.name
     }
 }

@@ -1,5 +1,5 @@
 use super::{
-    Access, BuildError, DimElement, EmptyToNone, Field, ModifiedWriteValues, OptIter, ReadAction,
+    Access, BuildError, DimElement, EmptyToNone, Field, ModifiedWriteValues, Name, ReadAction,
     Register, RegisterProperties, SvdError, ValidateLevel, WriteConstraint,
 };
 
@@ -330,13 +330,19 @@ impl RegisterInfo {
     }
 
     /// Returns iterator over child fields
-    pub fn fields(&self) -> OptIter<std::slice::Iter<Field>> {
-        OptIter::new(self.fields.as_ref().map(|fields| fields.iter()))
+    pub fn fields(&self) -> std::slice::Iter<Field> {
+        match &self.fields {
+            Some(fields) => fields.iter(),
+            None => [].iter(),
+        }
     }
 
     /// Returns mutable iterator over child fields
-    pub fn fields_mut(&mut self) -> OptIter<std::slice::IterMut<Field>> {
-        OptIter::new(self.fields.as_mut().map(|fields| fields.iter_mut()))
+    pub fn fields_mut(&mut self) -> std::slice::IterMut<Field> {
+        match &mut self.fields {
+            Some(fields) => fields.iter_mut(),
+            None => [].iter_mut(),
+        }
     }
 
     /// Get field by name
@@ -347,5 +353,11 @@ impl RegisterInfo {
     /// Get mutable field by name
     pub fn get_mut_field(&mut self, name: &str) -> Option<&mut Field> {
         self.fields_mut().find(|f| f.name == name)
+    }
+}
+
+impl Name for RegisterInfo {
+    fn name(&self) -> &str {
+        &self.name
     }
 }

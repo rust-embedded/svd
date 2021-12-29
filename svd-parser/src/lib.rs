@@ -146,6 +146,9 @@ fn trim_utf8_bom(s: &str) -> &str {
     }
 }
 
+mod array;
+use array::parse_array;
+
 mod access;
 mod addressblock;
 mod bitrange;

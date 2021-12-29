@@ -2,6 +2,9 @@
 //! SVD objects.
 //! This module defines components of an SVD along with parse and encode implementations
 
+mod array;
+pub use array::SingleArray;
+
 /// Endian objects
 pub mod endian;
 pub use self::endian::Endian;
@@ -239,45 +242,26 @@ impl<T> EmptyToNone for Option<Vec<T>> {
     }
 }
 
-#[cfg(feature = "serde")]
-#[derive(serde::Serialize)]
-struct SerArray<'a, T> {
-    #[serde(flatten)]
-    dim: &'a DimElement,
-    #[serde(flatten)]
-    info: &'a T,
+/// Get SVD element name
+pub trait Name {
+    /// Get name
+    fn name(&self) -> &str;
 }
 
-#[cfg(feature = "serde")]
-#[derive(serde::Deserialize)]
-struct DeserArray<T> {
-    #[serde(flatten, default)]
-    dim: Option<DimElement>,
-    #[serde(flatten)]
-    info: T,
-}
-
-/// Iterates over optional iterator
-pub struct OptIter<I>(Option<I>)
+impl<T> Name for &T
 where
-    I: Iterator;
-
-impl<I> OptIter<I>
-where
-    I: Iterator,
+    T: Name,
 {
-    /// Create new optional iterator
-    pub fn new(o: Option<I>) -> Self {
-        Self(o)
+    fn name(&self) -> &str {
+        T::name(*self)
     }
 }
 
-impl<'a, I> Iterator for OptIter<I>
+impl<T> Name for &mut T
 where
-    I: Iterator,
+    T: Name,
 {
-    type Item = I::Item;
-    fn next(&mut self) -> Option<Self::Item> {
-        self.0.as_mut().and_then(I::next)
+    fn name(&self) -> &str {
+        T::name(*self)
     }
 }

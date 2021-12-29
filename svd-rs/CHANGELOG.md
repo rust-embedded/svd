@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- `EnumeratedValues.usage()` now return `None` if it is derived, fix bug in usage check
+- Use generic `SingleArray` enum for types which can be either collected into SVD arrays or have only one instance
+- `Name` trait for structures that has `name` field
+- improves in iterators
+- `get_enumerated_values` by usage
+
 ## [v0.12.1] - 2021-12-08
 
 - Rename `reg_iter` to `all_registers`,

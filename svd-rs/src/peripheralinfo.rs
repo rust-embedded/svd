@@ -3,7 +3,7 @@ use super::{
         AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, RegisterIter,
         RegisterIterMut,
     },
-    AddressBlock, BuildError, Cluster, DimElement, EmptyToNone, Interrupt, OptIter, Peripheral,
+    AddressBlock, BuildError, Cluster, DimElement, EmptyToNone, Interrupt, Name, Peripheral,
     Register, RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
 };
 
@@ -361,35 +361,43 @@ impl PeripheralInfo {
     }
 
     /// Returns iterator over child registers
-    pub fn registers(&self) -> OptIter<RegisterIter> {
-        OptIter::new(
-            self.registers
-                .as_ref()
-                .map(|regs| RegisterIter { all: regs.iter() }),
-        )
+    pub fn registers(&self) -> RegisterIter {
+        RegisterIter {
+            all: match &self.registers {
+                Some(regs) => regs.iter(),
+                None => [].iter(),
+            },
+        }
     }
 
     /// Returns mutable iterator over child registers
-    pub fn registers_mut(&mut self) -> OptIter<RegisterIterMut> {
-        OptIter::new(self.registers.as_mut().map(|regs| RegisterIterMut {
-            all: regs.iter_mut(),
-        }))
+    pub fn registers_mut(&mut self) -> RegisterIterMut {
+        RegisterIterMut {
+            all: match &mut self.registers {
+                Some(regs) => regs.iter_mut(),
+                None => [].iter_mut(),
+            },
+        }
     }
 
     /// Returns iterator over child clusters
-    pub fn clusters(&self) -> OptIter<ClusterIter> {
-        OptIter::new(
-            self.registers
-                .as_ref()
-                .map(|regs| ClusterIter { all: regs.iter() }),
-        )
+    pub fn clusters(&self) -> ClusterIter {
+        ClusterIter {
+            all: match &self.registers {
+                Some(regs) => regs.iter(),
+                None => [].iter(),
+            },
+        }
     }
 
     /// Returns mutable iterator over child clusters
-    pub fn clusters_mut(&mut self) -> OptIter<ClusterIterMut> {
-        OptIter::new(self.registers.as_mut().map(|regs| ClusterIterMut {
-            all: regs.iter_mut(),
-        }))
+    pub fn clusters_mut(&mut self) -> ClusterIterMut {
+        ClusterIterMut {
+            all: match &mut self.registers {
+                Some(regs) => regs.iter_mut(),
+                None => [].iter_mut(),
+            },
+        }
     }
 
     /// Returns iterator over all descendant registers
@@ -400,14 +408,11 @@ impl PeripheralInfo {
 
     /// Returns iterator over all descendant registers
     pub fn all_registers(&self) -> AllRegistersIter {
-        if let Some(regs) = &self.registers {
-            let mut rem: Vec<&RegisterCluster> = Vec::with_capacity(regs.len());
-            for r in regs.iter().rev() {
-                rem.push(r);
-            }
-            AllRegistersIter { rem }
-        } else {
-            AllRegistersIter { rem: Vec::new() }
+        AllRegistersIter {
+            rem: match &self.registers {
+                Some(regs) => regs.iter().rev().collect(),
+                None => Vec::new(),
+            },
         }
     }
 
@@ -419,14 +424,11 @@ impl PeripheralInfo {
 
     /// Returns mutable iterator over all descendant registers
     pub fn all_registers_mut(&mut self) -> AllRegistersIterMut {
-        if let Some(regs) = &mut self.registers {
-            let mut rem: Vec<&mut RegisterCluster> = Vec::with_capacity(regs.len());
-            for r in regs.iter_mut().rev() {
-                rem.push(r);
-            }
-            AllRegistersIterMut { rem }
-        } else {
-            AllRegistersIterMut { rem: Vec::new() }
+        AllRegistersIterMut {
+            rem: match &mut self.registers {
+                Some(regs) => regs.iter_mut().rev().collect(),
+                None => Vec::new(),
+            },
         }
     }
 
@@ -448,5 +450,21 @@ impl PeripheralInfo {
     /// Get mutable cluster by name
     pub fn get_mut_cluster(&mut self, name: &str) -> Option<&mut Cluster> {
         self.clusters_mut().find(|f| f.name == name)
+    }
+
+    /// Get interrupt by name
+    pub fn get_interrupt(&self, name: &str) -> Option<&Interrupt> {
+        self.interrupt.iter().find(|e| e.name == name)
+    }
+
+    /// Get mutable enumeratedValue by name
+    pub fn get_mut_interrupt(&mut self, name: &str) -> Option<&mut Interrupt> {
+        self.interrupt.iter_mut().find(|e| e.name == name)
+    }
+}
+
+impl Name for PeripheralInfo {
+    fn name(&self) -> &str {
+        &self.name
     }
 }
