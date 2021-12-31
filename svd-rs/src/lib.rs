@@ -43,15 +43,7 @@ pub use self::enumeratedvalues::{EnumeratedValues, EnumeratedValuesBuilder};
 
 /// Field objects
 pub mod field;
-pub use self::field::Field;
-
-/// Field Info objects
-pub mod fieldinfo;
-pub use self::fieldinfo::{FieldInfo, FieldInfoBuilder};
-
-/// Register Info objects
-pub mod registerinfo;
-pub use self::registerinfo::{RegisterInfo, RegisterInfoBuilder};
+pub use self::field::{Field, FieldInfo, FieldInfoBuilder};
 
 /// Register Properties objects
 pub mod registerproperties;
@@ -63,15 +55,11 @@ pub use self::addressblock::{AddressBlock, AddressBlockUsage};
 
 /// Cluster objects
 pub mod cluster;
-pub use self::cluster::Cluster;
-
-/// Cluster Info objects
-pub mod clusterinfo;
-pub use self::clusterinfo::{ClusterInfo, ClusterInfoBuilder};
+pub use self::cluster::{Cluster, ClusterInfo, ClusterInfoBuilder};
 
 /// Register objects
 pub mod register;
-pub use self::register::Register;
+pub use self::register::{Register, RegisterInfo, RegisterInfoBuilder};
 
 /// Register Cluster objects
 pub mod registercluster;
@@ -83,11 +71,7 @@ pub use self::dimelement::{DimArrayIndex, DimElement, DimElementBuilder};
 
 /// Peripheral objects
 pub mod peripheral;
-pub use self::peripheral::Peripheral;
-
-/// Peripheral Info objects
-pub mod peripheralinfo;
-pub use self::peripheralinfo::{PeripheralInfo, PeripheralInfoBuilder};
+pub use self::peripheral::{Peripheral, PeripheralInfo, PeripheralInfoBuilder};
 
 /// Device objects
 pub mod device;
@@ -159,16 +143,16 @@ pub enum SvdError {
     Device(#[from] device::Error),
     /// Peripheral error
     #[error("`Peripheral error: {0}")]
-    Peripheral(#[from] peripheralinfo::Error),
+    Peripheral(#[from] peripheral::Error),
     /// Cluster error
     #[error("`Cluster error: {0}")]
-    Cluster(#[from] clusterinfo::Error),
+    Cluster(#[from] cluster::Error),
     /// Register error
     #[error("`Register error: {0}")]
-    Register(#[from] registerinfo::Error),
+    Register(#[from] register::Error),
     /// Field error
     #[error("`Field error: {0}")]
-    Field(#[from] fieldinfo::Error),
+    Field(#[from] field::Error),
     /// BitRange error
     #[error("`BitRange error: {0}")]
     BitRange(#[from] bitrange::Error),
