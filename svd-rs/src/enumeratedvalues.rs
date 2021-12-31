@@ -28,6 +28,10 @@ pub struct EnumeratedValues {
     pub derived_from: Option<String>,
 
     /// List of variants. The number of required items depends on the bit-width of the associated field.
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Vec::is_empty")
+    )]
     pub values: Vec<EnumeratedValue>,
 }
 
