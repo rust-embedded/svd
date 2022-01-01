@@ -1,5 +1,9 @@
 /// Define constraints for writing values to a field
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "camelCase")
+)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum WriteConstraint {
     /// If `true`, only the last read value can be written.

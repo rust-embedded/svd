@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 
 - merge `register` with `registerinfo` modules same as other `info`s
+- camelCase for WriteConstraint serialization
 - `EnumeratedValues.usage()` now return `None` if it is derived, fix bug in usage check
 - Use generic `SingleArray` enum for types which can be either collected into SVD arrays or have only one instance
 - `Name` trait for structures that has `name` field
