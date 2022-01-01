@@ -29,7 +29,7 @@ impl DeriveFrom for ClusterInfo {
 impl DeriveFrom for EnumeratedValues {
     fn derive_from(&self, other: &Self) -> Self {
         let mut derived = self.clone();
-        derived.usage = derived.usage.or_else(|| other.usage.clone());
+        derived.usage = derived.usage.or(other.usage);
         if derived.values.is_empty() {
             derived.values = other.values.clone();
         }
@@ -80,7 +80,7 @@ impl DeriveFrom for RegisterInfo {
 
 impl DeriveFrom for RegisterProperties {
     fn derive_from(&self, other: &Self) -> Self {
-        let mut derived = self.clone();
+        let mut derived = *self;
         derived.size = derived.size.or(other.size);
         derived.access = derived.access.or(other.access);
         derived.protection = derived.protection.or(other.protection);
