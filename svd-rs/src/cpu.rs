@@ -25,26 +25,53 @@ pub struct Cpu {
 
     /// Indicate whether the processor is equipped with a double precision floating point unit.
     /// This element is valid only when `fpu_present` is set to `true`
-    #[cfg_attr(feature = "serde", serde(rename = "fpuDP"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none", rename = "fpuDP")
+    )]
     pub fpu_double_precision: Option<bool>,
 
     /// Indicates whether the processor implements the optional SIMD DSP extensions (DSP)
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub dsp_present: Option<bool>,
 
     /// Indicate whether the processor has an instruction cache
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub icache_present: Option<bool>,
 
     /// Indicate whether the processor has a data cache
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub dcache_present: Option<bool>,
 
     /// Indicate whether the processor has an instruction tightly coupled memory
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub itcm_present: Option<bool>,
 
     /// Indicate whether the processor has a data tightly coupled memory
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub dtcm_present: Option<bool>,
 
     /// Indicate whether the Vector Table Offset Register (VTOR) is implemented.
     /// If not specified, then VTOR is assumed to be present
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub vtor_present: Option<bool>,
 
     /// Define the number of bits available in the Nested Vectored Interrupt Controller (NVIC) for configuring priority
@@ -56,9 +83,17 @@ pub struct Cpu {
     pub has_vendor_systick: bool,
 
     /// Add 1 to the highest interrupt number and specify this number in here
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub device_num_interrupts: Option<u32>,
 
     /// Indicate the amount of regions in the Security Attribution Unit (SAU)
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
     pub sau_num_regions: Option<u32>,
     // sauRegionsConfig
 }

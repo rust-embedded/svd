@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- skip serializing optional fields in `Cpu` if empty
 - skip serializing `values` in `EnumeratedValues` if empty
 - add missing fields in `Device`, require `version`, `description`, `address_unit_bits` and `width`,
   also `schema_version` is required, but skipped during (de)serialization
