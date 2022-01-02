@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.13.0] - 2022-01-04
+
 - fixed `BitRange` deserializing
 - skip serializing optional fields in `Cpu` if empty
 - skip serializing `values` in `EnumeratedValues` if empty
@@ -57,4 +59,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Splitted from `svd-parser`
 
 Previous versions in common [changelog][../CHANGELOG.md].
+
+[Unreleased]: https://github.com/rust-embedded/svd/compare/v0.13.0...HEAD
+[v0.13.0]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.12.1...v0.13.0
+[v0.12.1]: https://github.com/rust-embedded/svd/compare/v0.12.0...svd-rs-v0.12.1
+[v0.12.0]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.11.2...v0.12.0
+[v0.11.2]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.11.1...svd-rs-v0.11.2
+[v0.11.1]: https://github.com/rust-embedded/svd/compare/v0.11.0...svd-rs-v0.11.1
+[v0.11.0]: https://github.com/rust-embedded/svd/compare/v0.10.2...v0.11.0
 
