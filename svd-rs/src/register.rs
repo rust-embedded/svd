@@ -101,6 +101,14 @@ pub struct RegisterInfo {
     pub derived_from: Option<String>,
 }
 
+/// Return iterator over address offsets of each register in array
+pub fn address_offsets<'a>(
+    info: &'a RegisterInfo,
+    dim: &'a DimElement,
+) -> impl Iterator<Item = u32> + 'a {
+    (0..dim.dim).map(move |i| info.address_offset + i * dim.dim_increment)
+}
+
 /// Builder for [`RegisterInfo`]
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct RegisterInfoBuilder {

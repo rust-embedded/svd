@@ -123,6 +123,14 @@ pub struct PeripheralInfo {
     pub derived_from: Option<String>,
 }
 
+/// Return iterator over base addresses of each peripheral in array
+pub fn base_addresses<'a>(
+    info: &'a PeripheralInfo,
+    dim: &'a DimElement,
+) -> impl Iterator<Item = u64> + 'a {
+    (0..dim.dim as u64).map(move |i| info.base_address + i * dim.dim_increment as u64)
+}
+
 /// Builder for [`Peripheral`]
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct PeripheralInfoBuilder {

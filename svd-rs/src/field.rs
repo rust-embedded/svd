@@ -81,6 +81,11 @@ pub struct FieldInfo {
     pub derived_from: Option<String>,
 }
 
+/// Return iterator over bit offsets of each field in array
+pub fn bit_offsets<'a>(info: &'a FieldInfo, dim: &'a DimElement) -> impl Iterator<Item = u32> + 'a {
+    (0..dim.dim).map(move |i| info.bit_offset() + i * dim.dim_increment)
+}
+
 /// Builder for [`FieldInfo`]
 
 #[derive(Clone, Debug, Default, PartialEq)]

@@ -71,6 +71,14 @@ pub struct ClusterInfo {
     pub derived_from: Option<String>,
 }
 
+/// Return iterator over address offsets of each cluster in array
+pub fn address_offsets<'a>(
+    info: &'a ClusterInfo,
+    dim: &'a DimElement,
+) -> impl Iterator<Item = u32> + 'a {
+    (0..dim.dim).map(move |i| info.address_offset + i * dim.dim_increment)
+}
+
 /// Builder for [`ClusterInfo`]
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ClusterInfoBuilder {
