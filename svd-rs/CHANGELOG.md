@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 
 - skip serializing `values` in `EnumeratedValues` if empty
-- add `names` function for arrays
+- add `names` function for arrays, `base_addresses` for `Peripheral`,
+  `address_offsets` for `Register` and `Cluster`, `bit_offsets` for `Field` arrays
 - add missing fields in `Device`, require `version`, `description`, `address_unit_bits` and `width`,
   also `schema_version` is required, but skipped during (de)serialization
 - merge `register` with `registerinfo` modules same as other `info`s
