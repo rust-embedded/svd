@@ -1,7 +1,7 @@
 use super::*;
-use svd_rs::{DimElement, Name, SingleArray};
+use svd_rs::{DimElement, MaybeArray, Name};
 
-pub fn parse_array<T>(tag: &str, tree: &Node, config: &Config) -> Result<SingleArray<T>, SVDErrorAt>
+pub fn parse_array<T>(tag: &str, tree: &Node, config: &Config) -> Result<MaybeArray<T>, SVDErrorAt>
 where
     T: Parse<Object = T, Error = SVDErrorAt, Config = Config> + Name,
 {
@@ -23,8 +23,8 @@ where
                 .at(tree.id()));
             }
         }
-        Ok(SingleArray::Array(info, array_info))
+        Ok(MaybeArray::Array(info, array_info))
     } else {
-        Ok(SingleArray::Single(info))
+        Ok(MaybeArray::Single(info))
     }
 }

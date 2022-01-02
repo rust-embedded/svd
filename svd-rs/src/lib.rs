@@ -2,8 +2,9 @@
 //! SVD objects.
 //! This module defines components of an SVD along with parse and encode implementations
 
-mod array;
-pub use array::SingleArray;
+/// Common things for structures which can be collected in arrays
+pub mod array;
+pub use array::MaybeArray;
 
 /// Endian objects
 pub mod endian;

@@ -1,10 +1,10 @@
 use super::{
-    array::SingleArray, Access, BuildError, DimElement, EmptyToNone, Field, ModifiedWriteValues,
-    Name, ReadAction, RegisterProperties, SvdError, ValidateLevel, WriteConstraint,
+    Access, BuildError, DimElement, EmptyToNone, Field, MaybeArray, ModifiedWriteValues, Name,
+    ReadAction, RegisterProperties, SvdError, ValidateLevel, WriteConstraint,
 };
 
 /// A single register or array of registers. A register is a named, programmable resource that belongs to a [peripheral](crate::Peripheral).
-pub type Register = SingleArray<RegisterInfo>;
+pub type Register = MaybeArray<RegisterInfo>;
 
 /// Errors from [`RegisterInfo::validate`]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]

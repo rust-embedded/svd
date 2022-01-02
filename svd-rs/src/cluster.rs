@@ -1,15 +1,14 @@
 use super::{
-    array::SingleArray,
     registercluster::{
         AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, RegisterIter,
         RegisterIterMut,
     },
-    BuildError, DimElement, EmptyToNone, Name, Register, RegisterCluster, RegisterProperties,
-    SvdError, ValidateLevel,
+    BuildError, DimElement, EmptyToNone, MaybeArray, Name, Register, RegisterCluster,
+    RegisterProperties, SvdError, ValidateLevel,
 };
 
 /// Cluster describes a sequence of neighboring registers within a peripheral.
-pub type Cluster = SingleArray<ClusterInfo>;
+pub type Cluster = MaybeArray<ClusterInfo>;
 
 /// Errors from [`ClusterInfo::validate`]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]

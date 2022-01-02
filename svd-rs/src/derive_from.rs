@@ -1,7 +1,7 @@
 //! Implementations of DeriveFrom, setting non-explicit fields.
 use crate::{
-    ClusterInfo, EnumeratedValues, FieldInfo, PeripheralInfo, RegisterInfo, RegisterProperties,
-    SingleArray,
+    ClusterInfo, EnumeratedValues, FieldInfo, MaybeArray, PeripheralInfo, RegisterInfo,
+    RegisterProperties,
 };
 
 /// Fill empty fields of structure with values of other structure
@@ -107,7 +107,7 @@ impl DeriveFrom for FieldInfo {
     }
 }
 
-impl<T> DeriveFrom for SingleArray<T>
+impl<T> DeriveFrom for MaybeArray<T>
 where
     T: DeriveFrom,
 {
