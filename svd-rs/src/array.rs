@@ -3,14 +3,14 @@ use core::ops::{Deref, DerefMut};
 
 /// A single SVD instance or array of instances
 #[derive(Clone, Debug, PartialEq)]
-pub enum SingleArray<T> {
+pub enum MaybeArray<T> {
     /// A single instance
     Single(T),
     /// An array of instances
     Array(T, DimElement),
 }
 
-impl<T> Deref for SingleArray<T> {
+impl<T> Deref for MaybeArray<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -21,7 +21,7 @@ impl<T> Deref for SingleArray<T> {
     }
 }
 
-impl<T> DerefMut for SingleArray<T> {
+impl<T> DerefMut for MaybeArray<T> {
     fn deref_mut(&mut self) -> &mut T {
         match self {
             Self::Single(info) => info,
@@ -30,7 +30,7 @@ impl<T> DerefMut for SingleArray<T> {
     }
 }
 
-impl<T> SingleArray<T> {
+impl<T> MaybeArray<T> {
     /// Return `true` if instance is single
     pub const fn is_single(&self) -> bool {
         matches!(self, Self::Single(_))
@@ -41,13 +41,20 @@ impl<T> SingleArray<T> {
     }
 }
 
-impl<T> Name for SingleArray<T>
+impl<T> Name for MaybeArray<T>
 where
     T: Name,
 {
     fn name(&self) -> &str {
         T::name(self)
     }
+}
+
+/// Return list of names of instances in array
+pub fn names<'a, T: Name>(info: &'a T, dim: &'a DimElement) -> impl Iterator<Item = String> + 'a {
+    let name = info.name();
+    dim.indexes()
+        .map(move |i| name.replace("[%s]", &i).replace("%s", &i))
 }
 
 #[cfg(feature = "serde")]
@@ -71,7 +78,7 @@ mod ser_de {
         info: T,
     }
 
-    impl<T> Serialize for SingleArray<T>
+    impl<T> Serialize for MaybeArray<T>
     where
         T: Serialize,
     {
@@ -86,7 +93,7 @@ mod ser_de {
         }
     }
 
-    impl<'de, T> Deserialize<'de> for SingleArray<T>
+    impl<'de, T> Deserialize<'de> for MaybeArray<T>
     where
         T: Deserialize<'de>,
     {

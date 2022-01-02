@@ -1,15 +1,14 @@
 use super::{
-    array::SingleArray,
     registercluster::{
         AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, RegisterIter,
         RegisterIterMut,
     },
-    AddressBlock, BuildError, Cluster, DimElement, EmptyToNone, Interrupt, Name, Register,
-    RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
+    AddressBlock, BuildError, Cluster, DimElement, EmptyToNone, Interrupt, MaybeArray, Name,
+    Register, RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
 };
 
 /// A single peripheral or array of peripherals
-pub type Peripheral = SingleArray<PeripheralInfo>;
+pub type Peripheral = MaybeArray<PeripheralInfo>;
 
 /// Errors from [Peripheral::validate]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]

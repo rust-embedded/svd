@@ -1,11 +1,10 @@
 use super::{
-    array::SingleArray, bitrange, Access, BitRange, BuildError, DimElement, EmptyToNone,
-    EnumeratedValues, ModifiedWriteValues, Name, ReadAction, SvdError, Usage, ValidateLevel,
-    WriteConstraint,
+    bitrange, Access, BitRange, BuildError, DimElement, EmptyToNone, EnumeratedValues, MaybeArray,
+    ModifiedWriteValues, Name, ReadAction, SvdError, Usage, ValidateLevel, WriteConstraint,
 };
 
 /// Describes a field or fields of a [register](crate::RegisterInfo).
-pub type Field = SingleArray<FieldInfo>;
+pub type Field = MaybeArray<FieldInfo>;
 
 /// Errors for [`FieldInfo::validate`]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
