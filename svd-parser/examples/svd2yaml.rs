@@ -1,11 +1,11 @@
-use serde_json as json;
+use serde_yaml as yaml;
 use svd_parser as svd;
 
-use json::Value;
 use std::env::args;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
+use yaml::Value;
 
 fn main() {
     // Collect command-line arguments.
@@ -15,7 +15,7 @@ fn main() {
     let svd_fn = if let (Some(_), Some(arg1), None) = (args.next(), args.next(), args.next()) {
         PathBuf::from(arg1)
     } else {
-        println!("Usage: (svd2json) file.svd");
+        println!("Usage: (svd2yaml) file.svd");
         return;
     };
 
@@ -29,15 +29,15 @@ fn main() {
     // Use the 'svd_parser' crate to parse the file.
     let device = svd::parse(&mut svd_xml).expect("Failed to parse the SVD file into Rust structs");
 
-    // Convert the parsed data into JSON format.
+    // Convert the parsed data into YAML format.
     let v: Value =
-        json::to_value(device).expect("Failed to serialize Rust structs into JSON format");
+        yaml::to_value(device).expect("Failed to serialize Rust structs into YAML format");
 
-    // Write the JSON-formatted device description to a file.
-    let mut json_fn = svd_fn.to_path_buf();
-    json_fn.set_extension("json");
-    File::create(json_fn)
-        .expect("Failed to open JSON output file")
-        .write_all(json::to_string_pretty(&v).unwrap().as_bytes())
-        .expect("Failed to write to JSON output file");
+    // Write the YAML-formatted device description to a file.
+    let mut yaml_fn = svd_fn.clone();
+    yaml_fn.set_extension("yaml");
+    File::create(&yaml_fn)
+        .expect("Failed to open YAML output file")
+        .write_all(yaml::to_string(&v).unwrap().as_bytes())
+        .expect("Failed to write to YAML output file");
 }
