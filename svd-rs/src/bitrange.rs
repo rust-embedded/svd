@@ -83,22 +83,31 @@ mod ser_de {
 
     #[derive(serde::Serialize, serde::Deserialize)]
     #[serde(untagged)]
-    #[allow(non_snake_case)]
     enum SerBitRange {
-        BitRange { bitRange: String },
-        OffsetWidth { bitOffset: u32, bitWidth: u32 },
-        MsbLsb { lsb: u32, msb: u32 },
+        #[serde(rename_all = "camelCase")]
+        BitRange {
+            bit_range: String,
+        },
+        #[serde(rename_all = "camelCase")]
+        OffsetWidth {
+            bit_offset: u32,
+            bit_width: u32,
+        },
+        MsbLsb {
+            lsb: u32,
+            msb: u32,
+        },
     }
 
     impl From<BitRange> for SerBitRange {
         fn from(br: BitRange) -> Self {
             match br.range_type {
                 BitRangeType::BitRange => SerBitRange::BitRange {
-                    bitRange: br.bit_range(),
+                    bit_range: br.bit_range(),
                 },
                 BitRangeType::OffsetWidth => SerBitRange::OffsetWidth {
-                    bitOffset: br.offset,
-                    bitWidth: br.width,
+                    bit_offset: br.offset,
+                    bit_width: br.width,
                 },
                 BitRangeType::MsbLsb => SerBitRange::MsbLsb {
                     msb: br.msb(),
@@ -124,12 +133,12 @@ mod ser_de {
             D: Deserializer<'de>,
         {
             match SerBitRange::deserialize(deserializer)? {
-                SerBitRange::BitRange { bitRange } => BitRange::from_bit_range(&bitRange)
+                SerBitRange::BitRange { bit_range } => BitRange::from_bit_range(&bit_range)
                     .ok_or_else(|| serde::de::Error::custom("Can't parse bitRange")),
                 SerBitRange::OffsetWidth {
-                    bitOffset,
-                    bitWidth,
-                } => Ok(BitRange::from_offset_width(bitOffset, bitWidth)),
+                    bit_offset,
+                    bit_width,
+                } => Ok(BitRange::from_offset_width(bit_offset, bit_width)),
                 SerBitRange::MsbLsb { msb, lsb } => Ok(BitRange::from_msb_lsb(msb, lsb)),
             }
         }
