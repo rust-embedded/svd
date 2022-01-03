@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- fixed `BitRange` deserializing
 - skip serializing optional fields in `Cpu` if empty
 - skip serializing `values` in `EnumeratedValues` if empty
 - add `names` function for arrays, `base_addresses` for `Peripheral`,

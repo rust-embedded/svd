@@ -79,34 +79,42 @@ impl BitRange {
 #[cfg(feature = "serde")]
 mod ser_de {
     use super::*;
-    use serde::ser::SerializeMap;
-    use serde::{de::MapAccess, de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
-    use std::fmt;
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    #[derive(serde::Serialize, serde::Deserialize)]
+    #[serde(untagged)]
+    #[allow(non_snake_case)]
+    enum SerBitRange {
+        BitRange { bitRange: String },
+        OffsetWidth { bitOffset: u32, bitWidth: u32 },
+        MsbLsb { lsb: u32, msb: u32 },
+    }
+
+    impl From<BitRange> for SerBitRange {
+        fn from(br: BitRange) -> Self {
+            match br.range_type {
+                BitRangeType::BitRange => SerBitRange::BitRange {
+                    bitRange: br.bit_range(),
+                },
+                BitRangeType::OffsetWidth => SerBitRange::OffsetWidth {
+                    bitOffset: br.offset,
+                    bitWidth: br.width,
+                },
+                BitRangeType::MsbLsb => SerBitRange::MsbLsb {
+                    msb: br.msb(),
+                    lsb: br.lsb(),
+                },
+            }
+        }
+    }
 
     impl Serialize for BitRange {
         fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
             S: Serializer,
         {
-            match self.range_type {
-                BitRangeType::BitRange => {
-                    let mut seq = serializer.serialize_map(Some(4))?;
-                    seq.serialize_entry("bitRange", &self.bit_range())?;
-                    seq.end()
-                }
-                BitRangeType::OffsetWidth => {
-                    let mut seq = serializer.serialize_map(Some(2))?;
-                    seq.serialize_entry("bitOffset", &self.offset)?;
-                    seq.serialize_entry("bitWidth", &self.width)?;
-                    seq.end()
-                }
-                BitRangeType::MsbLsb => {
-                    let mut seq = serializer.serialize_map(Some(2))?;
-                    seq.serialize_entry("lsb", &self.lsb())?;
-                    seq.serialize_entry("msb", &self.msb())?;
-                    seq.end()
-                }
-            }
+            let bit_range = SerBitRange::from(*self);
+            bit_range.serialize(serializer)
         }
     }
 
@@ -115,70 +123,14 @@ mod ser_de {
         where
             D: Deserializer<'de>,
         {
-            deserializer.deserialize_map(CustomVisitor)
-        }
-    }
-
-    struct CustomVisitor;
-
-    impl<'de> Visitor<'de> for CustomVisitor {
-        type Value = BitRange;
-
-        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-            write!(
-                formatter,
-                "a map with keys 'bitRange' or 'bitOffset' and 'bitWidth' or 'lsb' and 'msb'"
-            )
-        }
-
-        fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
-        where
-            M: MapAccess<'de>,
-        {
-            match map.next_key::<&str>()? {
-                Some(k) if k == "bitRange" => {
-                    let s: String = map.next_value()?;
-                    BitRange::from_bit_range(&s)
-                        .ok_or_else(|| serde::de::Error::custom("Can't parse bitRange"))
-                }
-                Some(k) if k == "bitOffset" || k == "bitWidth" => {
-                    let offset;
-                    let width;
-                    if k == "bitOffset" {
-                        offset = map.next_value()?;
-                        width = match map.next_key::<&str>()? {
-                            Some(k) if k == "bitWidth" => map.next_value()?,
-                            _ => return Err(serde::de::Error::custom("Missing bitWidth")),
-                        };
-                    } else {
-                        width = map.next_value()?;
-                        offset = match map.next_key::<&str>()? {
-                            Some(k) if k == "bitOffset" => map.next_value()?,
-                            _ => return Err(serde::de::Error::custom("Missing bitOffset")),
-                        };
-                    }
-                    Ok(BitRange::from_offset_width(offset, width))
-                }
-                Some(k) if k == "lsb" || k == "msb" => {
-                    let msb;
-                    let lsb;
-                    if k == "msb" {
-                        msb = map.next_value()?;
-                        lsb = match map.next_key::<&str>()? {
-                            Some(k) if k == "lsb" => map.next_value()?,
-                            _ => return Err(serde::de::Error::custom("Missing lsb")),
-                        };
-                    } else {
-                        lsb = map.next_value()?;
-                        msb = match map.next_key::<&str>()? {
-                            Some(k) if k == "msb" => map.next_value()?,
-                            _ => return Err(serde::de::Error::custom("Missing msb")),
-                        };
-                    }
-                    Ok(BitRange::from_msb_lsb(msb, lsb))
-                }
-                Some(k) => Err(serde::de::Error::custom(format!("Invalid key: {}", k))),
-                None => Err(serde::de::Error::custom("Missing bitRange")),
+            match SerBitRange::deserialize(deserializer)? {
+                SerBitRange::BitRange { bitRange } => BitRange::from_bit_range(&bitRange)
+                    .ok_or_else(|| serde::de::Error::custom("Can't parse bitRange")),
+                SerBitRange::OffsetWidth {
+                    bitOffset,
+                    bitWidth,
+                } => Ok(BitRange::from_offset_width(bitOffset, bitWidth)),
+                SerBitRange::MsbLsb { msb, lsb } => Ok(BitRange::from_msb_lsb(msb, lsb)),
             }
         }
     }
