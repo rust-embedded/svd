@@ -19,14 +19,10 @@ impl Parse for Device {
             .vendor_id(tree.get_child_text_opt("vendorID")?)
             .name(tree.get_child_text("name")?)
             .series(tree.get_child_text_opt("series")?)
-            .version(tree.get_child_text("version")?)
-            .description(tree.get_child_text("description")?)
             .license_text(tree.get_child_text_opt("licenseText")?)
             .cpu(optional::<Cpu>("cpu", tree, config)?)
             .header_system_filename(tree.get_child_text_opt("headerSystemFilename")?)
             .header_definitions_prefix(tree.get_child_text_opt("headerDefinitionsPrefix")?)
-            .address_unit_bits(tree.get_child_u32("addressUnitBits")?)
-            .width(tree.get_child_u32("width")?)
             .default_register_properties(RegisterProperties::parse(tree, config)?)
             .peripherals({
                 let ps: Result<Vec<_>, _> = tree
@@ -37,6 +33,18 @@ impl Parse for Device {
                     .collect();
                 ps?
             });
+        if let Some(version) = tree.get_child_text_opt("version")? {
+            device = device.version(version)
+        }
+        if let Some(description) = tree.get_child_text_opt("description")? {
+            device = device.description(description)
+        }
+        if let Some(bits) = optional::<u32>("addressUnitBits", tree, &())? {
+            device = device.address_unit_bits(bits)
+        }
+        if let Some(width) = optional::<u32>("width", tree, &())? {
+            device = device.width(width)
+        }
         if let Some(xmlns_xs) = tree.attribute("xmlns:xs") {
             device = device.xmlns_xs(xmlns_xs.to_string());
         }
