@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.13.0] - 2022-01-02
+
+- Bump `svd-rs`
+
 ## [v0.12.0] - 2021-11-11
 
 - Bump `svd-rs`
@@ -18,3 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Splitted from `svd-parser`
 
 Previous versions in common [changelog][../CHANGELOG.md].
+
+[Unreleased]: https://github.com/rust-embedded/svd/compare/v0.13.0...HEAD
+[v0.13.0]: https://github.com/rust-embedded/svd/compare/v0.12.0...v0.13.0
+[v0.12.0]: https://github.com/rust-embedded/svd/compare/v0.11.0...v0.12.0
+[v0.11.0]: https://github.com/rust-embedded/svd/compare/v0.10.2...v0.11.0
