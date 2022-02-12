@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- add `indexes_as_range` for `DimElement`
+
 ## [v0.13.0] - 2022-01-04
 
 - fixed `BitRange` deserializing

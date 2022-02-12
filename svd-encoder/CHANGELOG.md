@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Encode "dimIndex" ranges
+
 ## [v0.13.0] - 2022-01-02
 
 - Bump `svd-rs`
