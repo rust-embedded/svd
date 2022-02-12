@@ -1,5 +1,6 @@
 use super::{BuildError, EmptyToNone, EnumeratedValue, SvdError, ValidateLevel};
 use std::borrow::Cow;
+use std::ops::RangeInclusive;
 
 /// Defines arrays and lists.
 #[cfg_attr(
@@ -135,6 +136,24 @@ impl DimElement {
     /// Make a builder for [`DimElement`]
     pub fn builder() -> DimElementBuilder {
         DimElementBuilder::default()
+    }
+    /// Try to represent [`DimElement`] as range of integer indexes
+    pub fn indexes_as_range(&self) -> Option<RangeInclusive<u32>> {
+        let mut integers = Vec::with_capacity(self.dim as usize);
+        for idx in self.indexes() {
+            integers.push(idx.parse::<u32>().ok()?);
+        }
+        let min = *integers.iter().min()?;
+        let max = *integers.iter().max()?;
+        if max - min + 1 != self.dim {
+            return None;
+        }
+        for (&i, r) in integers.iter().zip(min..=max) {
+            if i != r {
+                return None;
+            }
+        }
+        Some(min..=max)
     }
     /// Modify an existing [`DimElement`] based on a [builder](DimElementBuilder).
     pub fn modify_from(

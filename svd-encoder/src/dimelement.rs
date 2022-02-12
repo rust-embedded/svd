@@ -13,7 +13,12 @@ impl Encode for crate::svd::DimElement {
         ));
 
         if let Some(di) = &self.dim_index {
-            e.children.push(new_node("dimIndex", di.join(",")));
+            e.children
+                .push(if let Some(range) = self.indexes_as_range() {
+                    new_node("dimIndex", format!("{}-{}", range.start(), range.end()))
+                } else {
+                    new_node("dimIndex", di.join(","))
+                });
         }
 
         if let Some(dim_name) = &self.dim_name {
