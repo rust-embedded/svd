@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.13.1] - 2022-02-12
+
 - add `indexes_as_range` for `DimElement`
 
 ## [v0.13.0] - 2022-01-04
@@ -60,9 +62,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [v0.11.0] - 2021-10-02
 - Splitted from `svd-parser`
 
-Previous versions in common [changelog][../CHANGELOG.md].
+Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.13.1...HEAD
+[v0.13.1]: https://github.com/rust-embedded/svd/compare/svd-parser-v0.13.1...svd-rs-v0.13.1
 [v0.13.0]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.12.1...v0.13.0
 [v0.12.1]: https://github.com/rust-embedded/svd/compare/v0.12.0...svd-rs-v0.12.1
 [v0.12.0]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.11.2...v0.12.0

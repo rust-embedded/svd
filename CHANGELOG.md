@@ -166,7 +166,6 @@ Newer releases see in [svd-rs/CHANGELOG.md](./svd-rs/CHANGELOG.md),
 - Initial SVD parser
 - A `parse` utility function to parse the contents of a SVD file (XML)
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/v0.11.0...HEAD
 [v0.11.0]: https://github.com/rust-embedded/svd/compare/v0.10.2...v0.11.0
 [v0.10.2]: https://github.com/rust-embedded/svd/compare/v0.10.1...v0.10.2
 [v0.10.1]: https://github.com/rust-embedded/svd/compare/v0.10.0...v0.10.1
