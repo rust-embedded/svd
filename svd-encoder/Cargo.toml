@@ -13,7 +13,7 @@ version = "0.13.1"
 readme = "README.md"
 
 [dependencies]
-svd-rs = { version = "0.13.0", path = "../svd-rs"}
+svd-rs = { version = "0.13.1", path = "../svd-rs"}
 thiserror = "1.0.30"
 
 [dependencies.xmltree]

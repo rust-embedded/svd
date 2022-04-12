@@ -91,16 +91,32 @@ pub struct Device {
     pub peripherals: Vec<Peripheral>,
 
     /// Specify the underlying XML schema to which the CMSIS-SVD schema is compliant.
-    #[cfg_attr(feature = "serde", serde(skip))]
+    #[cfg_attr(feature = "serde", serde(skip, default = "default_xmlns_xs"))]
     pub xmlns_xs: String,
 
     /// Specify the file path and file name of the CMSIS-SVD Schema
-    #[cfg_attr(feature = "serde", serde(skip))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(skip, default = "default_no_namespace_schema_location")
+    )]
     pub no_namespace_schema_location: String,
 
     /// Specify the compliant CMSIS-SVD schema version
-    #[cfg_attr(feature = "serde", serde(skip))]
+    #[cfg_attr(feature = "serde", serde(skip, default = "default_schema_version"))]
     pub schema_version: String,
+}
+
+fn default_xmlns_xs() -> String {
+    "http://www.w3.org/2001/XMLSchema-instance".into()
+}
+fn default_no_namespace_schema_location() -> String {
+    format!(
+        "CMSIS-SVD_Schema_{}.xsd",
+        default_schema_version().replace('.', "_")
+    )
+}
+fn default_schema_version() -> String {
+    "1.1".into()
 }
 
 /// Builder for [`Device`]
@@ -237,7 +253,7 @@ impl DeviceBuilder {
     }
     /// Validate and build a [`Device`].
     pub fn build(self, lvl: ValidateLevel) -> Result<Device, SvdError> {
-        let schema_version = self.schema_version.unwrap_or_else(|| "1.1".into());
+        let schema_version = self.schema_version.unwrap_or_else(default_schema_version);
         let mut device = Device {
             vendor: self.vendor,
             vendor_id: self.vendor_id,
@@ -281,12 +297,10 @@ impl DeviceBuilder {
             peripherals: self
                 .peripherals
                 .ok_or_else(|| BuildError::Uninitialized("peripherals".to_string()))?,
-            xmlns_xs: self
-                .xmlns_xs
-                .unwrap_or_else(|| "http://www.w3.org/2001/XMLSchema-instance".into()),
-            no_namespace_schema_location: self.no_namespace_schema_location.unwrap_or_else(|| {
-                format!("CMSIS-SVD_Schema_{}.xsd", schema_version.replace(".", "_"))
-            }),
+            xmlns_xs: self.xmlns_xs.unwrap_or_else(default_xmlns_xs),
+            no_namespace_schema_location: self
+                .no_namespace_schema_location
+                .unwrap_or_else(default_no_namespace_schema_location),
             schema_version,
         };
         if !lvl.is_disabled() {
