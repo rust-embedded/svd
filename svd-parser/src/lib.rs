@@ -42,6 +42,7 @@ pub struct Config {
     pub validate_level: ValidateLevel,
     #[cfg(feature = "expand")]
     pub expand: bool,
+    pub ignore_enums: bool,
 }
 
 impl Config {
@@ -52,6 +53,11 @@ impl Config {
     #[cfg(feature = "expand")]
     pub fn expand(mut self, val: bool) -> Self {
         self.expand = val;
+        self
+    }
+
+    pub fn ignore_enums(mut self, val: bool) -> Self {
+        self.ignore_enums = val;
         self
     }
 }
