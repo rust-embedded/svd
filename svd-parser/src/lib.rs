@@ -38,15 +38,35 @@ pub mod types;
 
 #[derive(Clone, Copy, Debug, Default)]
 #[non_exhaustive]
+/// Advanced parser options
 pub struct Config {
+    /// SVD error check level
     pub validate_level: ValidateLevel,
-    //pub expand_arrays: bool,
-    //pub expand_derived: bool,
+    #[cfg(feature = "expand")]
+    /// Expand arrays and resolve derivedFrom
+    // TODO: split it on several independent options
+    pub expand: bool,
+    /// Skip parsing and emitting `enumeratedValues` and `writeConstraint` in `Field`
+    pub ignore_enums: bool,
 }
 
 impl Config {
+    /// SVD error check level
     pub fn validate_level(mut self, lvl: ValidateLevel) -> Self {
         self.validate_level = lvl;
+        self
+    }
+
+    #[cfg(feature = "expand")]
+    /// Expand arrays and derive
+    pub fn expand(mut self, val: bool) -> Self {
+        self.expand = val;
+        self
+    }
+
+    /// Skip parsing `enumeratedValues` and `writeConstraint` in `Field`
+    pub fn ignore_enums(mut self, val: bool) -> Self {
+        self.ignore_enums = val;
         self
     }
 }
@@ -97,10 +117,12 @@ pub fn parse_with_config(xml: &str, config: &Config) -> anyhow::Result<Device> {
     let xml = trim_utf8_bom(xml);
     let tree = Document::parse(xml)?;
     let root = tree.root();
-    let device = root
+    let xmldevice = root
         .get_child("device")
         .ok_or_else(|| SVDError::MissingTag("device".to_string()).at(root.id()))?;
-    match Device::parse(&device, config) {
+
+    #[allow(unused_mut)]
+    let mut device = match Device::parse(&xmldevice, config) {
         Ok(o) => Ok(o),
         Err(e) => {
             let id = e.id;
@@ -134,7 +156,13 @@ pub fn parse_with_config(xml: &str, config: &Config) -> anyhow::Result<Device> {
             }
             res
         }
+    }?;
+
+    #[cfg(feature = "expand")]
+    if config.expand {
+        device = expand::expand(&device)?;
     }
+    Ok(device)
 }
 
 /// Return the &str trimmed UTF-8 BOM if the input &str contains the BOM.
@@ -170,6 +198,9 @@ mod registercluster;
 mod registerproperties;
 mod usage;
 mod writeconstraint;
+
+#[cfg(feature = "expand")]
+mod expand;
 
 /// SVD parse Errors.
 #[derive(Clone, Debug, PartialEq, thiserror::Error)]

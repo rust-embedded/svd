@@ -35,19 +35,21 @@ impl Parse for FieldInfo {
                 tree,
                 config,
             )?)
-            .write_constraint(optional::<WriteConstraint>(
-                "writeConstraint",
-                tree,
-                config,
-            )?)
+            .write_constraint(if !config.ignore_enums {
+                optional::<WriteConstraint>("writeConstraint", tree, config)?
+            } else {
+                None
+            })
             .read_action(optional::<ReadAction>("readAction", tree, config)?)
-            .enumerated_values({
+            .enumerated_values(if !config.ignore_enums {
                 let values: Result<Vec<_>, _> = tree
                     .children()
                     .filter(|t| t.is_element() && t.has_tag_name("enumeratedValues"))
                     .map(|t| EnumeratedValues::parse(&t, config))
                     .collect();
                 values?
+            } else {
+                Vec::new()
             })
             .derived_from(tree.attribute("derivedFrom").map(|s| s.to_owned()))
             .build(config.validate_level)

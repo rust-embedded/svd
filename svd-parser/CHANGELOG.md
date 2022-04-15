@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add `expand` (under `expand` feature) and `ignore_enums` options
+
 ## [v0.13.1] - 2022-01-04
 
 - Make `version`, `description`, `width` and `address_unit_bits` on `Device` optional again
