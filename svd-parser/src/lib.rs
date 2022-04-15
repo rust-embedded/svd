@@ -41,7 +41,9 @@ pub mod types;
 pub struct Config {
     pub validate_level: ValidateLevel,
     #[cfg(feature = "expand")]
+    /// Expand arrays and derive
     pub expand: bool,
+    /// Skip parsing `enumeratedValues` and `writeConstraint` in `Field`
     pub ignore_enums: bool,
 }
 
@@ -50,12 +52,15 @@ impl Config {
         self.validate_level = lvl;
         self
     }
+
     #[cfg(feature = "expand")]
+    /// Expand arrays and derive
     pub fn expand(mut self, val: bool) -> Self {
         self.expand = val;
         self
     }
 
+    /// Skip parsing `enumeratedValues` and `writeConstraint` in `Field`
     pub fn ignore_enums(mut self, val: bool) -> Self {
         self.ignore_enums = val;
         self
