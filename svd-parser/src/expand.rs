@@ -2,8 +2,8 @@ use anyhow::{anyhow, Result};
 use std::collections::HashMap;
 use std::mem::take;
 use svd_rs::{
-    array::names, cluster, field, peripheral, register, BitRange, Cluster, DeriveFrom, Device,
-    EnumeratedValues, Field, Peripheral, Register, RegisterCluster,
+    array::names, cluster, field, peripheral, register, BitRange, Cluster, ClusterInfo, DeriveFrom,
+    Device, EnumeratedValues, Field, Peripheral, Register, RegisterCluster,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -125,96 +125,121 @@ fn expand_register_cluster(
     index: &Index,
 ) -> Result<()> {
     match rc {
-        RegisterCluster::Cluster(mut c) => {
-            let cpath = if let Some(dpath) = c.derived_from.as_ref() {
-                let cpath = dpath.to_string();
-                if let Some(d) = index
-                    .clusters
-                    .get(dpath)
-                    .or_else(|| index.clusters.get(&format!("{}.{}", path, dpath)))
-                {
-                    if d.derived_from.is_some() {
-                        return Err(anyhow!("Multiple derive for {} is not supported", dpath));
-                    }
-                    c = c.derive_from(d);
-                    c.derived_from = None;
-                } else {
-                    return Err(anyhow!("Cluster {} not found", dpath));
-                }
-                cpath
-            } else {
-                format!("{}.{}", path, c.name)
-            };
+        RegisterCluster::Cluster(c) => expand_cluster_array(regs, c, path, index)?,
+        RegisterCluster::Register(r) => expand_register_array(regs, r, path, index)?,
+    }
+    Ok(())
+}
 
-            let rcs = take(&mut c.children);
-            for rc in rcs {
-                expand_register_cluster(&mut c.children, rc, &cpath, index)?;
+fn expand_cluster_array(
+    regs: &mut Vec<RegisterCluster>,
+    mut c: Cluster,
+    path: &str,
+    index: &Index,
+) -> Result<()> {
+    let cpath = if let Some(dpath) = c.derived_from.as_ref() {
+        let cpath = dpath.to_string();
+        if let Some(d) = index
+            .clusters
+            .get(dpath)
+            .or_else(|| index.clusters.get(&format!("{}.{}", path, dpath)))
+        {
+            if d.derived_from.is_some() {
+                return Err(anyhow!("Multiple derive for {} is not supported", dpath));
             }
+            c = c.derive_from(d);
+            c.derived_from = None;
+        } else {
+            return Err(anyhow!("Cluster {} not found", dpath));
+        }
+        cpath
+    } else {
+        format!("{}.{}", path, c.name)
+    };
 
-            match c {
-                Cluster::Single(_) => {
-                    regs.push(RegisterCluster::Cluster(c));
-                }
-                Cluster::Array(info, dim) => {
-                    for cx in names(&info, &dim)
-                        .zip(cluster::address_offsets(&info, &dim))
-                        .map(|(name, address_offset)| {
-                            let mut info = info.clone();
-                            info.name = name;
-                            info.address_offset = address_offset;
-                            Cluster::Single(info)
-                        })
-                    {
-                        regs.push(RegisterCluster::Cluster(cx));
-                    }
-                }
+    for rc in take(&mut c.children) {
+        expand_register_cluster(&mut c.children, rc, &cpath, index)?;
+    }
+
+    match c {
+        Cluster::Single(c) => expand_cluster(regs, c),
+        Cluster::Array(info, dim) => {
+            for c in names(&info, &dim)
+                .zip(cluster::address_offsets(&info, &dim))
+                .map(|(name, address_offset)| {
+                    let mut info = info.clone();
+                    info.name = name;
+                    info.address_offset = address_offset;
+                    info
+                })
+            {
+                expand_cluster(regs, c);
             }
         }
-        RegisterCluster::Register(mut r) => {
-            let rpath = if let Some(dpath) = r.derived_from.as_ref() {
-                let rpath = dpath.to_string();
-                if let Some(d) = index
-                    .registers
-                    .get(dpath)
-                    .or_else(|| index.registers.get(&format!("{}.{}", path, dpath)))
-                {
-                    if d.derived_from.is_some() {
-                        return Err(anyhow!("Multiple derive for {} is not supported", dpath));
-                    }
-                    r = r.derive_from(d);
-                    r.derived_from = None;
-                } else {
-                    return Err(anyhow!("Register {} not found", dpath));
-                }
-                rpath
-            } else {
-                format!("{}.{}", path, r.name)
-            };
+    }
+    Ok(())
+}
 
-            if let Some(field) = r.fields.as_mut() {
-                let fs = take(field);
-                for f in fs {
-                    expand_field(field, f, path, &rpath, index)?;
-                }
+fn expand_cluster(regs: &mut Vec<RegisterCluster>, c: ClusterInfo) {
+    for rc in c.children {
+        match rc {
+            RegisterCluster::Cluster(_) => unreachable!(),
+            RegisterCluster::Register(mut r) => {
+                r.name = format!("{}_{}", c.name, r.name);
+                r.address_offset = c.address_offset + r.address_offset;
+                regs.push(RegisterCluster::Register(r));
             }
+        }
+    }
+}
 
-            match r {
-                Register::Single(_) => {
-                    regs.push(RegisterCluster::Register(r));
-                }
-                Register::Array(info, dim) => {
-                    for rx in names(&info, &dim)
-                        .zip(register::address_offsets(&info, &dim))
-                        .map(|(name, address_offset)| {
-                            let mut info = info.clone();
-                            info.name = name;
-                            info.address_offset = address_offset;
-                            Register::Single(info)
-                        })
-                    {
-                        regs.push(RegisterCluster::Register(rx));
-                    }
-                }
+fn expand_register_array(
+    regs: &mut Vec<RegisterCluster>,
+    mut r: Register,
+    path: &str,
+    index: &Index,
+) -> Result<()> {
+    let rpath = if let Some(dpath) = r.derived_from.as_ref() {
+        let rpath = dpath.to_string();
+        if let Some(d) = index
+            .registers
+            .get(dpath)
+            .or_else(|| index.registers.get(&format!("{}.{}", path, dpath)))
+        {
+            if d.derived_from.is_some() {
+                return Err(anyhow!("Multiple derive for {} is not supported", dpath));
+            }
+            r = r.derive_from(d);
+            r.derived_from = None;
+        } else {
+            return Err(anyhow!("Register {} not found", dpath));
+        }
+        rpath
+    } else {
+        format!("{}.{}", path, r.name)
+    };
+
+    if let Some(field) = r.fields.as_mut() {
+        for f in take(field) {
+            expand_field(field, f, path, &rpath, index)?;
+        }
+    }
+
+    match r {
+        Register::Single(_) => {
+            regs.push(RegisterCluster::Register(r));
+        }
+        Register::Array(info, dim) => {
+            for rx in names(&info, &dim)
+                .zip(register::address_offsets(&info, &dim))
+                .map(|(name, address_offset)| {
+                    let mut info = info.clone();
+                    info.name = name;
+                    info.address_offset = address_offset;
+                    Register::Single(info)
+                })
+            {
+                regs.push(RegisterCluster::Register(rx));
             }
         }
     }
@@ -343,8 +368,7 @@ pub fn expand(indevice: &Device) -> Result<Device> {
             }
         }
         if let Some(regs) = p.registers.as_mut() {
-            let rcs = take(regs);
-            for rc in rcs {
+            for rc in take(regs) {
                 expand_register_cluster(regs, rc, &path, &index)?;
             }
         }
