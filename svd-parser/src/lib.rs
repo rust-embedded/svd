@@ -202,6 +202,8 @@ mod writeconstraint;
 #[cfg(feature = "expand")]
 mod expand;
 
+#[cfg(feature = "expand")]
+pub use expand::expand;
 /// SVD parse Errors.
 #[derive(Clone, Debug, PartialEq, thiserror::Error)]
 pub enum SVDError {
