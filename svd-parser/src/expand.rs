@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::mem::take;
 use svd_rs::{
     array::names, cluster, field, peripheral, register, BitRange, Cluster, ClusterInfo, DeriveFrom,
-    Device, EnumeratedValues, Field, Peripheral, Register, RegisterCluster,
+    Device, EnumeratedValues, Field, Peripheral, Register, RegisterCluster, RegisterProperties,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -397,4 +397,39 @@ pub fn expand(indevice: &Device) -> Result<Device> {
     }
 
     Ok(device)
+}
+
+/// Takes register `size`, `access`, `reset_value` and `reset_mask`
+/// from peripheral or device properties if absent in register
+pub fn expand_properties(device: &mut Device) {
+    let default = device.default_register_properties.clone();
+    for p in &mut device.peripherals {
+        if p.derived_from.is_some() {
+            continue;
+        }
+        let default = p.default_register_properties.derive_from(&default);
+        if let Some(regs) = p.registers.as_mut() {
+            expand_properties_registers(regs, &default);
+        }
+    }
+}
+
+fn expand_properties_registers(regs: &mut [RegisterCluster], default: &RegisterProperties) {
+    for rc in regs {
+        match rc {
+            RegisterCluster::Cluster(c) => {
+                if c.derived_from.is_some() {
+                    continue;
+                }
+                let default = c.default_register_properties.derive_from(&default);
+                expand_properties_registers(&mut c.children, &default);
+            }
+            RegisterCluster::Register(r) => {
+                if r.derived_from.is_some() {
+                    continue;
+                }
+                r.properties = r.properties.derive_from(default);
+            }
+        }
+    }
 }

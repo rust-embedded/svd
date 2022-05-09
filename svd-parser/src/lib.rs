@@ -46,6 +46,8 @@ pub struct Config {
     /// Expand arrays and resolve derivedFrom
     // TODO: split it on several independent options
     pub expand: bool,
+    /// Derive register properties from parents
+    pub expand_properties: bool,
     /// Skip parsing and emitting `enumeratedValues` and `writeConstraint` in `Field`
     pub ignore_enums: bool,
 }
@@ -61,6 +63,14 @@ impl Config {
     /// Expand arrays and derive
     pub fn expand(mut self, val: bool) -> Self {
         self.expand = val;
+        self
+    }
+
+    #[cfg(feature = "expand")]
+    /// Takes register `size`, `access`, `reset_value` and `reset_mask`
+    /// from peripheral or device properties if absent in register
+    pub fn expand_properties(mut self, val: bool) -> Self {
+        self.expand_properties = val;
         self
     }
 
@@ -159,6 +169,11 @@ pub fn parse_with_config(xml: &str, config: &Config) -> anyhow::Result<Device> {
     }?;
 
     #[cfg(feature = "expand")]
+    if config.expand_properties {
+        expand::expand_properties(&mut device);
+    }
+
+    #[cfg(feature = "expand")]
     if config.expand {
         device = expand::expand(&device)?;
     }
@@ -203,7 +218,7 @@ mod writeconstraint;
 mod expand;
 
 #[cfg(feature = "expand")]
-pub use expand::expand;
+pub use expand::{expand, expand_properties};
 /// SVD parse Errors.
 #[derive(Clone, Debug, PartialEq, thiserror::Error)]
 pub enum SVDError {
