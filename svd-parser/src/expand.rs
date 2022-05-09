@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::mem::take;
 use svd_rs::{
     array::names, cluster, field, peripheral, register, BitRange, Cluster, ClusterInfo, DeriveFrom,
-    Device, EnumeratedValues, Field, Peripheral, Register, RegisterCluster,
+    Device, EnumeratedValues, Field, Peripheral, Register, RegisterCluster, RegisterProperties,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -397,4 +397,32 @@ pub fn expand(indevice: &Device) -> Result<Device> {
     }
 
     Ok(device)
+}
+
+/// Takes register `size`, `access`, `reset_value` and `reset_mask`
+/// from peripheral or device properties if absent in register
+pub fn expand_properties(device: &mut Device) {
+    let default = device.default_register_properties.clone();
+    for p in &mut device.peripherals {
+        let default = p.default_register_properties.derive_from(&default);
+        if let Some(regs) = p.registers.as_mut() {
+            for rc in regs {
+                expand_properties_register_cluster(rc, &default);
+            }
+        }
+    }
+}
+
+fn expand_properties_register_cluster(rc: &mut RegisterCluster, default: &RegisterProperties) {
+    match rc {
+        RegisterCluster::Cluster(c) => {
+            let default = c.default_register_properties.derive_from(&default);
+            for rc in &mut c.children {
+                expand_properties_register_cluster(rc, &default);
+            }
+        }
+        RegisterCluster::Register(r) => {
+            r.properties = r.properties.derive_from(default);
+        }
+    }
 }

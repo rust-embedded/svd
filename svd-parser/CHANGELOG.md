@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add `expand_properties` (under `expand` feature)
+
 ## [v0.13.2] - 2022-04-23
 
 - Add `expand` (under `expand` feature) and `ignore_enums` options
