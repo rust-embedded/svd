@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.13.3] - 2022-05-09
+
 - Add `expand_properties` (under `expand` feature)
 
 ## [v0.13.2] - 2022-04-23
@@ -33,7 +35,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-parser-v0.13.2...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-parser-v0.13.3...HEAD
+[v0.13.3]: https://github.com/rust-embedded/svd/compare/svd-parser-v0.13.3...svd-parser-v0.13.2
 [v0.13.2]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.13.2...svd-parser-v0.13.2
 [v0.13.1]: https://github.com/rust-embedded/svd/compare/v0.13.0...svd-parser-v0.13.1
 [v0.13.0]: https://github.com/rust-embedded/svd/compare/v0.12.0...v0.13.0
