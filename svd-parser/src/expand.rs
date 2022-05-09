@@ -404,25 +404,32 @@ pub fn expand(indevice: &Device) -> Result<Device> {
 pub fn expand_properties(device: &mut Device) {
     let default = device.default_register_properties.clone();
     for p in &mut device.peripherals {
+        if p.derived_from.is_some() {
+            continue;
+        }
         let default = p.default_register_properties.derive_from(&default);
         if let Some(regs) = p.registers.as_mut() {
-            for rc in regs {
-                expand_properties_register_cluster(rc, &default);
-            }
+            expand_properties_registers(regs, &default);
         }
     }
 }
 
-fn expand_properties_register_cluster(rc: &mut RegisterCluster, default: &RegisterProperties) {
-    match rc {
-        RegisterCluster::Cluster(c) => {
-            let default = c.default_register_properties.derive_from(&default);
-            for rc in &mut c.children {
-                expand_properties_register_cluster(rc, &default);
+fn expand_properties_registers(regs: &mut [RegisterCluster], default: &RegisterProperties) {
+    for rc in regs {
+        match rc {
+            RegisterCluster::Cluster(c) => {
+                if c.derived_from.is_some() {
+                    continue;
+                }
+                let default = c.default_register_properties.derive_from(&default);
+                expand_properties_registers(&mut c.children, &default);
             }
-        }
-        RegisterCluster::Register(r) => {
-            r.properties = r.properties.derive_from(default);
+            RegisterCluster::Register(r) => {
+                if r.derived_from.is_some() {
+                    continue;
+                }
+                r.properties = r.properties.derive_from(default);
+            }
         }
     }
 }

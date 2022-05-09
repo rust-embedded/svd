@@ -169,13 +169,13 @@ pub fn parse_with_config(xml: &str, config: &Config) -> anyhow::Result<Device> {
     }?;
 
     #[cfg(feature = "expand")]
-    if config.expand {
-        device = expand::expand(&device)?;
+    if config.expand_properties {
+        expand::expand_properties(&mut device);
     }
 
     #[cfg(feature = "expand")]
-    if config.expand_properties {
-        expand::expand_properties(&mut device);
+    if config.expand {
+        device = expand::expand(&device)?;
     }
     Ok(device)
 }
