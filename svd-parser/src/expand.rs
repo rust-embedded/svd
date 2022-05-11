@@ -139,24 +139,25 @@ fn expand_cluster_array(
     path: &str,
     index: &Index,
 ) -> Result<()> {
-    let cpath = if let Some(dpath) = c.derived_from.as_ref() {
-        let cpath = dpath.to_string();
-        if let Some(d) = index
+    let cpath;
+    if let Some(dpath) = c.derived_from.as_ref() {
+        let d = index
             .clusters
             .get(dpath)
             .or_else(|| index.clusters.get(&format!("{}.{}", path, dpath)))
-        {
-            if d.derived_from.is_some() {
-                return Err(anyhow!("Multiple derive for {} is not supported", dpath));
-            }
-            c = c.derive_from(d);
-            c.derived_from = None;
+            .ok_or_else(|| anyhow!("Cluster {} not found", dpath))?;
+        cpath = if c.children.is_empty() {
+            dpath.to_string()
         } else {
-            return Err(anyhow!("Cluster {} not found", dpath));
+            format!("{}.{}", path, c.name)
+        };
+        if d.derived_from.is_some() {
+            return Err(anyhow!("Multiple derive for {} is not supported", dpath));
         }
-        cpath
+        c = c.derive_from(d);
+        c.derived_from = None;
     } else {
-        format!("{}.{}", path, c.name)
+        cpath = format!("{}.{}", path, c.name);
     };
 
     for rc in take(&mut c.children) {
@@ -201,24 +202,25 @@ fn expand_register_array(
     path: &str,
     index: &Index,
 ) -> Result<()> {
-    let rpath = if let Some(dpath) = r.derived_from.as_ref() {
-        let rpath = dpath.to_string();
-        if let Some(d) = index
+    let rpath;
+    if let Some(dpath) = r.derived_from.as_ref() {
+        let d = index
             .registers
             .get(dpath)
             .or_else(|| index.registers.get(&format!("{}.{}", path, dpath)))
-        {
-            if d.derived_from.is_some() {
-                return Err(anyhow!("multiple derive for {} is not supported", dpath));
-            }
-            r = r.derive_from(d);
-            r.derived_from = None;
+            .ok_or_else(|| anyhow!("register {} not found", dpath))?;
+        rpath = if r.fields.is_none() {
+            dpath.to_string()
         } else {
-            return Err(anyhow!("register {} not found", dpath));
+            format!("{}.{}", path, r.name)
+        };
+        if d.derived_from.is_some() {
+            return Err(anyhow!("multiple derive for {} is not supported", dpath));
         }
-        rpath
+        r = r.derive_from(d);
+        r.derived_from = None;
     } else {
-        format!("{}.{}", path, r.name)
+        rpath = format!("{}.{}", path, r.name);
     };
 
     if let Some(field) = r.fields.as_mut() {
@@ -255,24 +257,25 @@ fn expand_field(
     rpath: &str,
     index: &Index,
 ) -> Result<()> {
-    let fpath = if let Some(dpath) = f.derived_from.as_ref() {
-        let fpath = dpath.to_string();
-        if let Some(d) = index
+    let fpath;
+    if let Some(dpath) = f.derived_from.as_ref() {
+        let d = index
             .fields
             .get(dpath)
             .or_else(|| index.fields.get(&format!("{}.{}", rpath, dpath)))
-        {
-            if d.derived_from.is_some() {
-                return Err(anyhow!("multiple derive for {} is not supported", dpath));
-            }
-            f = f.derive_from(d);
-            f.derived_from = None;
+            .ok_or_else(|| anyhow!("field {} not found", dpath))?;
+        fpath = if f.enumerated_values.is_empty() {
+            dpath.to_string()
         } else {
-            return Err(anyhow!("field {} not found", dpath));
+            format!("{}.{}", rpath, f.name)
+        };
+        if d.derived_from.is_some() {
+            return Err(anyhow!("multiple derive for {} is not supported", dpath));
         }
-        fpath
+        f = f.derive_from(d);
+        f.derived_from = None;
     } else {
-        format!("{}.{}", rpath, f.name)
+        fpath = format!("{}.{}", rpath, f.name);
     };
 
     for ev in &mut f.enumerated_values {
@@ -361,15 +364,21 @@ pub fn expand(indevice: &Device) -> Result<Device> {
 
     let peripherals = take(&mut device.peripherals);
     for mut p in peripherals {
-        let mut path = p.name.to_string();
+        let path;
         if let Some(dpath) = p.derived_from.as_ref() {
-            path = dpath.into();
             if let Some(d) = index.get_base_peripheral(dpath) {
+                path = if p.registers.is_none() {
+                    dpath.to_string()
+                } else {
+                    p.name.to_string()
+                };
                 p = p.derive_from(d);
                 p.derived_from = None;
             } else {
                 return Err(anyhow!("peripheral {} not found", dpath));
             }
+        } else {
+            path = p.name.to_string();
         }
         if let Some(regs) = p.registers.as_mut() {
             for rc in take(regs) {
