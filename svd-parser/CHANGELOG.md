@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Support nested `derivedFrom` for `expand`
+
 ## [v0.13.3] - 2022-05-09
 
 - Add `expand_properties` (under `expand` feature)

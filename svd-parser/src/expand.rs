@@ -8,43 +8,96 @@ use svd_rs::{
     Device, EnumeratedValues, Field, Peripheral, Register, RegisterCluster, RegisterProperties,
 };
 
+#[derive(Clone, Debug, PartialEq, Hash, Eq)]
+pub struct RegisterPath {
+    peripheral: String,
+    path: Vec<String>,
+}
+
+impl RegisterPath {
+    pub fn new(p: &str) -> Self {
+        Self {
+            peripheral: p.into(),
+            path: Vec::new(),
+        }
+    }
+    pub fn new_child(&self, name: &str) -> Self {
+        let mut child = self.clone();
+        child.path.push(name.into());
+        child
+    }
+    pub fn split_str(s: &str) -> (Option<Self>, String) {
+        Self::split_vec(s.split('.').collect())
+    }
+    pub fn split_vec(mut v: Vec<&str>) -> (Option<Self>, String) {
+        let name = v.pop().unwrap().to_string();
+        if v.is_empty() {
+            (None, name)
+        } else {
+            let mut rpath = Self::new(v[0]);
+            rpath.path = v[1..].iter().map(|c| c.to_string()).collect();
+            (Some(rpath), name)
+        }
+    }
+    pub fn parent(&self) -> Self {
+        let mut parent = self.clone();
+        parent.path.pop();
+        parent
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Hash, Eq)]
+pub struct FieldPath {
+    register: RegisterPath,
+    name: String,
+}
+
+impl FieldPath {
+    pub fn new(r: &RegisterPath, name: &str) -> Self {
+        Self {
+            register: r.clone(),
+            name: name.into(),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default)]
 struct Index<'a> {
     peripherals: HashMap<String, &'a Peripheral>,
-    clusters: HashMap<String, &'a Cluster>,
-    registers: HashMap<String, &'a Register>,
-    fields: HashMap<String, &'a Field>,
-    evs: HashMap<String, &'a EnumeratedValues>,
+    clusters: HashMap<RegisterPath, &'a Cluster>,
+    registers: HashMap<RegisterPath, &'a Register>,
+    fields: HashMap<FieldPath, &'a Field>,
+    evs: HashMap<(FieldPath, String), &'a EnumeratedValues>,
 }
 
 impl<'a> Index<'a> {
     fn add_peripheral(&mut self, p: &'a Peripheral) {
-        let path = &p.name;
         if let Peripheral::Array(info, dim) = p {
             for name in names(info, dim) {
-                let path = name;
+                let path = RegisterPath::new(&name);
                 for r in p.registers() {
                     self.add_register(&path, r);
                 }
                 for c in p.clusters() {
                     self.add_cluster(&path, c);
                 }
-                self.peripherals.insert(path, p);
+                self.peripherals.insert(name, p);
             }
         }
+        let path = RegisterPath::new(&p.name);
         for r in p.registers() {
-            self.add_register(path, r);
+            self.add_register(&path, r);
         }
         for c in p.clusters() {
-            self.add_cluster(path, c);
+            self.add_cluster(&path, c);
         }
-        self.peripherals.insert(path.into(), p);
+        self.peripherals.insert(p.name.clone(), p);
     }
 
-    fn add_cluster(&mut self, path: &str, c: &'a Cluster) {
+    fn add_cluster(&mut self, path: &RegisterPath, c: &'a Cluster) {
         if let Cluster::Array(info, dim) = c {
             for name in names(info, dim) {
-                let cpath = format!("{}.{}", path, name);
+                let cpath = RegisterPath::new_child(path, &name);
                 for r in c.registers() {
                     self.add_register(&cpath, r);
                 }
@@ -54,7 +107,7 @@ impl<'a> Index<'a> {
                 self.clusters.insert(cpath, c);
             }
         }
-        let cpath = format!("{}.{}", path, c.name);
+        let cpath = RegisterPath::new_child(path, &c.name);
         for r in c.registers() {
             self.add_register(&cpath, r);
         }
@@ -63,40 +116,38 @@ impl<'a> Index<'a> {
         }
         self.clusters.insert(cpath, c);
     }
-    fn add_register(&mut self, path: &str, r: &'a Register) {
+    fn add_register(&mut self, path: &RegisterPath, r: &'a Register) {
         if let Register::Array(info, dim) = r {
             for name in names(info, dim) {
-                let rpath = format!("{}.{}", path, name);
+                let rpath = RegisterPath::new_child(path, &name);
                 for f in r.fields() {
                     self.add_field(&rpath, f);
                 }
                 self.registers.insert(rpath, r);
             }
         }
-        let rpath = format!("{}.{}", path, r.name);
+        let rpath = RegisterPath::new_child(path, &r.name);
         for f in r.fields() {
             self.add_field(&rpath, f);
         }
         self.registers.insert(rpath, r);
     }
-    fn add_field(&mut self, path: &str, f: &'a Field) {
+    fn add_field(&mut self, path: &RegisterPath, f: &'a Field) {
         if let Field::Array(info, dim) = f {
             for name in names(info, dim) {
-                let fpath = format!("{}.{}", path, name);
+                let fpath = FieldPath::new(path, &name);
                 for evs in &f.enumerated_values {
                     if let Some(name) = evs.name.as_ref() {
-                        let epath = format!("{}.{}", fpath, name);
-                        self.evs.insert(epath, evs);
+                        self.evs.insert((fpath.clone(), name.to_string()), evs);
                     }
                 }
                 self.fields.insert(fpath, f);
             }
         }
-        let fpath = format!("{}.{}", path, f.name);
+        let fpath = FieldPath::new(path, &f.name);
         for evs in &f.enumerated_values {
             if let Some(name) = evs.name.as_ref() {
-                let epath = format!("{}.{}", fpath, name);
-                self.evs.insert(epath, evs);
+                self.evs.insert((fpath.clone(), name.to_string()), evs);
             }
         }
         self.fields.insert(fpath, f);
@@ -109,21 +160,12 @@ impl<'a> Index<'a> {
         }
         index
     }
-
-    pub fn get_base_peripheral(&self, path: &str) -> Option<&Peripheral> {
-        self.peripherals
-            .get(path)
-            .and_then(|&p| match &p.derived_from {
-                None => Some(p),
-                Some(dp) => self.get_base_peripheral(dp),
-            })
-    }
 }
 
 fn expand_register_cluster(
     regs: &mut Vec<RegisterCluster>,
     rc: RegisterCluster,
-    path: &str,
+    path: &RegisterPath,
     index: &Index,
 ) -> Result<()> {
     match rc {
@@ -136,28 +178,16 @@ fn expand_register_cluster(
 fn expand_cluster_array(
     regs: &mut Vec<RegisterCluster>,
     mut c: Cluster,
-    path: &str,
+    path: &RegisterPath,
     index: &Index,
 ) -> Result<()> {
-    let cpath = if let Some(dpath) = c.derived_from.as_ref() {
-        let cpath = dpath.to_string();
-        if let Some(d) = index
-            .clusters
-            .get(dpath)
-            .or_else(|| index.clusters.get(&format!("{}.{}", path, dpath)))
-        {
-            if d.derived_from.is_some() {
-                return Err(anyhow!("Multiple derive for {} is not supported", dpath));
-            }
-            c = c.derive_from(d);
-            c.derived_from = None;
-        } else {
-            return Err(anyhow!("Cluster {} not found", dpath));
-        }
-        cpath
-    } else {
-        format!("{}.{}", path, c.name)
-    };
+    let mut cpath = None;
+    if let Some(dpath) = c.derived_from.as_ref() {
+        let dpath = dpath.to_string();
+        cpath = derive_cluster(&mut c, &dpath, path, index)?;
+        c.derived_from = None;
+    }
+    let cpath = cpath.unwrap_or_else(|| RegisterPath::new_child(path, &c.name));
 
     for rc in take(&mut c.children) {
         expand_register_cluster(&mut c.children, rc, &cpath, index)?;
@@ -182,13 +212,106 @@ fn expand_cluster_array(
     Ok(())
 }
 
+fn derive_cluster(
+    c: &mut Cluster,
+    dpath: &str,
+    path: &RegisterPath,
+    index: &Index,
+) -> Result<Option<RegisterPath>> {
+    let (dparent, dname) = RegisterPath::split_str(dpath);
+    let rdpath;
+    let cluster_path;
+    let d = (if let Some(dparent) = dparent {
+        cluster_path = RegisterPath::new_child(&dparent, &dname);
+        rdpath = dparent;
+        index.clusters.get(&cluster_path)
+    } else {
+        cluster_path = RegisterPath::new_child(path, &dname);
+        rdpath = path.clone();
+        index.clusters.get(&cluster_path)
+    })
+    .ok_or_else(|| anyhow!("cluster {} not found", dpath))?;
+
+    let mut cpath = None;
+    if c.children.is_empty() {
+        cpath = Some(cluster_path);
+    }
+    *c = c.derive_from(d);
+    if let Some(dpath) = d.derived_from.as_ref() {
+        cpath = derive_cluster(c, dpath, &rdpath, index)?;
+    }
+    Ok(cpath)
+}
+
+fn derive_register(
+    r: &mut Register,
+    dpath: &str,
+    path: &RegisterPath,
+    index: &Index,
+) -> Result<Option<RegisterPath>> {
+    let (dparent, dname) = RegisterPath::split_str(dpath);
+    let rdpath;
+    let reg_path;
+    let d = (if let Some(dparent) = dparent {
+        reg_path = RegisterPath::new_child(&dparent, &dname);
+        rdpath = dparent;
+        index.registers.get(&reg_path)
+    } else {
+        reg_path = RegisterPath::new_child(path, &dname);
+        rdpath = path.clone();
+        index.registers.get(&reg_path)
+    })
+    .ok_or_else(|| anyhow!("register {} not found", dpath))?;
+
+    let mut rpath = None;
+    if r.fields.is_none() {
+        rpath = Some(reg_path);
+    }
+    *r = r.derive_from(d);
+    if let Some(dpath) = d.derived_from.as_ref() {
+        rpath = derive_register(r, dpath, &rdpath, index)?;
+    }
+    Ok(rpath)
+}
+
+fn derive_field(
+    f: &mut Field,
+    dpath: &str,
+    rpath: &RegisterPath,
+    index: &Index,
+) -> Result<Option<FieldPath>> {
+    let (dparent, dname) = RegisterPath::split_str(dpath);
+    let rdpath;
+    let field_path;
+    let d = (if let Some(dparent) = dparent {
+        field_path = FieldPath::new(&dparent, &dname);
+        rdpath = dparent;
+        index.fields.get(&field_path)
+    } else {
+        field_path = FieldPath::new(rpath, &dname);
+        rdpath = rpath.clone();
+        index.fields.get(&field_path)
+    })
+    .ok_or_else(|| anyhow!("field {} not found", dpath))?;
+
+    let mut fpath = None;
+    if f.enumerated_values.is_empty() {
+        fpath = Some(field_path);
+    }
+    *f = f.derive_from(d);
+    if let Some(dpath) = d.derived_from.as_ref() {
+        fpath = derive_field(f, dpath, &rdpath, index)?;
+    }
+    Ok(fpath)
+}
+
 fn expand_cluster(regs: &mut Vec<RegisterCluster>, c: ClusterInfo) {
     for rc in c.children {
         match rc {
             RegisterCluster::Cluster(_) => unreachable!(),
             RegisterCluster::Register(mut r) => {
                 r.name = format!("{}_{}", c.name, r.name);
-                r.address_offset = c.address_offset + r.address_offset;
+                r.address_offset += c.address_offset;
                 regs.push(RegisterCluster::Register(r));
             }
         }
@@ -198,32 +321,20 @@ fn expand_cluster(regs: &mut Vec<RegisterCluster>, c: ClusterInfo) {
 fn expand_register_array(
     regs: &mut Vec<RegisterCluster>,
     mut r: Register,
-    path: &str,
+    path: &RegisterPath,
     index: &Index,
 ) -> Result<()> {
-    let rpath = if let Some(dpath) = r.derived_from.as_ref() {
-        let rpath = dpath.to_string();
-        if let Some(d) = index
-            .registers
-            .get(dpath)
-            .or_else(|| index.registers.get(&format!("{}.{}", path, dpath)))
-        {
-            if d.derived_from.is_some() {
-                return Err(anyhow!("multiple derive for {} is not supported", dpath));
-            }
-            r = r.derive_from(d);
-            r.derived_from = None;
-        } else {
-            return Err(anyhow!("register {} not found", dpath));
-        }
-        rpath
-    } else {
-        format!("{}.{}", path, r.name)
-    };
+    let mut rpath = None;
+    if let Some(dpath) = r.derived_from.as_ref() {
+        let dpath = dpath.to_string();
+        rpath = derive_register(&mut r, &dpath, path, index)?;
+        r.derived_from = None;
+    }
+    let rpath = rpath.unwrap_or_else(|| RegisterPath::new_child(path, &r.name));
 
     if let Some(field) = r.fields.as_mut() {
         for f in take(field) {
-            expand_field(field, f, path, &rpath, index)?;
+            expand_field(field, f, &rpath, index)?;
         }
     }
 
@@ -251,32 +362,23 @@ fn expand_register_array(
 fn expand_field(
     fields: &mut Vec<Field>,
     mut f: Field,
-    regparent: &str,
-    rpath: &str,
+    rpath: &RegisterPath,
     index: &Index,
 ) -> Result<()> {
-    let fpath = if let Some(dpath) = f.derived_from.as_ref() {
-        let fpath = dpath.to_string();
-        if let Some(d) = index
-            .fields
-            .get(dpath)
-            .or_else(|| index.fields.get(&format!("{}.{}", rpath, dpath)))
-        {
-            if d.derived_from.is_some() {
-                return Err(anyhow!("multiple derive for {} is not supported", dpath));
-            }
-            f = f.derive_from(d);
-            f.derived_from = None;
-        } else {
-            return Err(anyhow!("field {} not found", dpath));
-        }
-        fpath
-    } else {
-        format!("{}.{}", rpath, f.name)
-    };
+    let mut fpath = None;
+    if let Some(dpath) = f.derived_from.as_ref() {
+        let dpath = dpath.to_string();
+        fpath = derive_field(&mut f, &dpath, rpath, index)?;
+        f.derived_from = None;
+    }
+    let fpath = fpath.unwrap_or_else(|| FieldPath::new(rpath, &f.name));
 
     for ev in &mut f.enumerated_values {
-        derive_enumerated_values(ev, regparent, rpath, &fpath, index)?;
+        if let Some(dpath) = ev.derived_from.as_ref() {
+            let dpath = dpath.to_string();
+            derive_enumerated_values(ev, &dpath, &fpath, index)?;
+            ev.derived_from = None;
+        }
     }
 
     match f {
@@ -304,52 +406,83 @@ fn expand_field(
 
 fn derive_enumerated_values(
     ev: &mut EnumeratedValues,
-    regparent: &str,
-    rpath: &str,
-    fpath: &str,
+    dpath: &str,
+    fpath: &FieldPath,
     index: &Index,
 ) -> Result<()> {
-    if let Some(dpath) = ev.derived_from.as_ref() {
-        let d = match dpath.chars().filter(|&c| c == '.').count() {
-            // Only EVNAME: Must be in one of fields in same register
-            0 => {
-                if let Some(r) = index.registers.get(rpath) {
-                    let mut found = None;
-                    'outer: for f in r.fields() {
-                        for e in &f.enumerated_values {
-                            if e.name.as_deref() == Some(dpath) {
-                                found = Some(e);
-                                break 'outer;
-                            }
-                        }
-                    }
-                    found
-                } else {
-                    None
+    let mut v: Vec<&str> = dpath.split('.').collect();
+    let dname = v.pop().unwrap().to_string();
+    let d = if v.is_empty() {
+        // Only EVNAME: Must be in one of fields in same register
+        let rdpath = &fpath.register;
+        if let Some(r) = index.registers.get(rdpath) {
+            let mut found = None;
+            for f in r.fields() {
+                let fdpath = FieldPath::new(rdpath, &f.name);
+                if let Some(d) = index.evs.get(&(fdpath.clone(), dname.clone())) {
+                    found = Some((d, fdpath));
+                    break;
                 }
             }
-            // FIELD.EVNAME: Search in same field
-            1 => index.evs.get(&format!("{}.{}", rpath, dpath)).copied(),
-            // FULL.PATH.EVNAME:
-            2 => index.evs.get(&format!("{}.{}", regparent, dpath)).copied(),
-            _ => index.evs.get(dpath).copied(),
-        };
-        if let Some(d) = d {
-            if d.derived_from.is_some() {
-                return Err(anyhow!("multiple derive for {} is not supported", dpath));
-            }
-            *ev = ev.derive_from(d);
-            ev.derived_from = None;
+            found
         } else {
-            return Err(anyhow!(
-                "enumeratedValues {} not found, parent field: {}, regparent: {}",
-                dpath,
-                fpath,
-                regparent,
-            ));
+            None
         }
+    } else {
+        let fdname = v.pop().unwrap().to_string();
+        let fdpath = if v.is_empty() {
+            // FIELD.EVNAME
+            FieldPath::new(&fpath.register, &fdname)
+        } else {
+            let (rdpath, rdname) = RegisterPath::split_vec(v);
+            let rdpath = if let Some(rdpath) = rdpath {
+                // FULL.PATH.EVNAME:
+                rdpath
+            } else {
+                // REG.FIELD.EVNAME
+                let mut rdpath = fpath.register.parent();
+                rdpath.path.push(rdname);
+                rdpath
+            };
+            FieldPath::new(&rdpath, &fdname)
+        };
+        index.evs.get(&(fdpath.clone(), dname)).map(|d| (d, fdpath))
+    };
+
+    if let Some((d, fdpath)) = d {
+        *ev = ev.derive_from(d);
+        if let Some(dpath) = d.derived_from.as_ref() {
+            derive_enumerated_values(ev, dpath, &fdpath, index)?;
+        }
+    } else {
+        return Err(anyhow!(
+            "enumeratedValues {} not found, parent field: {:?}",
+            dpath,
+            fpath,
+        ));
     }
     Ok(())
+}
+
+fn derive_peripheral(
+    p: &mut Peripheral,
+    dpath: &str,
+    index: &Index,
+) -> Result<Option<RegisterPath>> {
+    let mut path = None;
+    let d = index
+        .peripherals
+        .get(dpath)
+        .ok_or_else(|| anyhow!("peripheral {} not found", dpath))?;
+    if p.registers.is_none() {
+        path = Some(RegisterPath::new(dpath));
+    }
+    *p = p.derive_from(d);
+    if let Some(dpath) = d.derived_from.as_ref() {
+        path = derive_peripheral(p, dpath, index)?;
+        p.derived_from = None;
+    }
+    Ok(path)
 }
 
 /// Creates clone of device with expanded arrays of peripherals, clusters, registers and fields.
@@ -357,20 +490,16 @@ fn derive_enumerated_values(
 pub fn expand(indevice: &Device) -> Result<Device> {
     let mut device = indevice.clone();
 
-    let index = Index::create(&indevice);
+    let index = Index::create(indevice);
 
     let peripherals = take(&mut device.peripherals);
     for mut p in peripherals {
-        let mut path = p.name.to_string();
+        let mut path = None;
         if let Some(dpath) = p.derived_from.as_ref() {
-            path = dpath.into();
-            if let Some(d) = index.get_base_peripheral(dpath) {
-                p = p.derive_from(d);
-                p.derived_from = None;
-            } else {
-                return Err(anyhow!("peripheral {} not found", dpath));
-            }
+            let dpath = dpath.to_string();
+            path = derive_peripheral(&mut p, &dpath, &index)?;
         }
+        let path = path.unwrap_or_else(|| RegisterPath::new(&p.name));
         if let Some(regs) = p.registers.as_mut() {
             for rc in take(regs) {
                 expand_register_cluster(regs, rc, &path, &index)?;
@@ -402,7 +531,7 @@ pub fn expand(indevice: &Device) -> Result<Device> {
 /// Takes register `size`, `access`, `reset_value` and `reset_mask`
 /// from peripheral or device properties if absent in register
 pub fn expand_properties(device: &mut Device) {
-    let default = device.default_register_properties.clone();
+    let default = device.default_register_properties;
     for p in &mut device.peripherals {
         if p.derived_from.is_some() {
             continue;
@@ -421,7 +550,7 @@ fn expand_properties_registers(regs: &mut [RegisterCluster], default: &RegisterP
                 if c.derived_from.is_some() {
                     continue;
                 }
-                let default = c.default_register_properties.derive_from(&default);
+                let default = c.default_register_properties.derive_from(default);
                 expand_properties_registers(&mut c.children, &default);
             }
             RegisterCluster::Register(r) => {
