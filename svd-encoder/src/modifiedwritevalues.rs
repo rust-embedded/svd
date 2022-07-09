@@ -1,9 +1,9 @@
-use super::{Element, Encode, EncodeError, XMLNode};
+use super::{Config, Element, Encode, EncodeError, XMLNode};
 
 impl Encode for crate::svd::ModifiedWriteValues {
     type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element, EncodeError> {
+    fn encode_with_config(&self, _config: &Config) -> Result<Element, EncodeError> {
         let mut elem = Element::new("modifiedWriteValues");
         elem.children.push(XMLNode::Text(self.as_str().to_string()));
         Ok(elem)

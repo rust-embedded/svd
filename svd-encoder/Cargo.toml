@@ -1,7 +1,5 @@
 [package]
-authors = [
-    "The Tools Team <tools@teams.rust-embedded.org>",
-]
+authors = ["The Tools Team <tools@teams.rust-embedded.org>"]
 description = "A CMSIS-SVD file encoder"
 documentation = "https://docs.rs/svd-encoder"
 keywords = ["CMSIS", "SVD", "encoder"]
@@ -14,6 +12,7 @@ version = "0.13.1"
 readme = "README.md"
 
 [dependencies]
+convert_case = "0.5.0"
 svd-rs = { version = "0.13.1", path = "../svd-rs" }
 thiserror = "1.0.30"
 

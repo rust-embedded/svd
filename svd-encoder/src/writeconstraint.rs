@@ -1,11 +1,11 @@
-use super::{new_node, Element, Encode, EncodeError};
+use super::{new_node, Config, Element, Encode, EncodeError};
 
 use crate::svd::{WriteConstraint, WriteConstraintRange};
 
 impl Encode for WriteConstraint {
     type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element, EncodeError> {
+    fn encode_with_config(&self, _config: &Config) -> Result<Element, EncodeError> {
         let v = match *self {
             WriteConstraint::WriteAsRead(v) => new_node("writeAsRead", format!("{}", v)),
             WriteConstraint::UseEnumeratedValues(v) => {
@@ -23,7 +23,7 @@ impl Encode for WriteConstraint {
 impl Encode for WriteConstraintRange {
     type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element, EncodeError> {
+    fn encode_with_config(&self, _config: &Config) -> Result<Element, EncodeError> {
         let mut elem = Element::new("range");
         elem.children = vec![
             new_node("minimum", format!("{}", self.min)),

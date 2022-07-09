@@ -1,18 +1,19 @@
-use super::{new_node, Element, ElementMerge, Encode, EncodeError, XMLNode};
+use super::{new_node, Config, Element, ElementMerge, Encode, EncodeError, XMLNode};
 use crate::bitrange::encode_bitrange;
 
+use crate::config::change_case;
 use crate::svd::{Field, FieldInfo};
 
 impl Encode for Field {
     type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element, EncodeError> {
+    fn encode_with_config(&self, config: &Config) -> Result<Element, EncodeError> {
         match self {
-            Self::Single(info) => info.encode(),
+            Self::Single(info) => info.encode_with_config(config),
             Self::Array(info, array_info) => {
                 let mut base = Element::new("field");
-                base.merge(&array_info.encode()?);
-                base.merge(&info.encode()?);
+                base.merge(&array_info.encode_with_config(config)?);
+                base.merge(&info.encode_with_config(config)?);
                 Ok(base)
             }
         }
@@ -22,9 +23,10 @@ impl Encode for Field {
 impl Encode for FieldInfo {
     type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element, EncodeError> {
+    fn encode_with_config(&self, config: &Config) -> Result<Element, EncodeError> {
         let mut elem = Element::new("field");
-        elem.children.push(new_node("name", self.name.clone()));
+        elem.children
+            .push(new_node("name", change_case(&self.name, config.field_name)));
 
         if let Some(description) = &self.description {
             elem.children
@@ -32,7 +34,8 @@ impl Encode for FieldInfo {
         }
 
         // Add bit range
-        elem.children.append(&mut encode_bitrange(&self.bit_range)?);
+        elem.children
+            .append(&mut encode_bitrange(&self.bit_range, config)?);
 
         if let Some(v) = &self.access {
             elem.children.push(v.encode_node()?);
@@ -53,13 +56,15 @@ impl Encode for FieldInfo {
         let enumerated_values: Result<Vec<XMLNode>, EncodeError> = self
             .enumerated_values
             .iter()
-            .map(|v| v.encode_node())
+            .map(|v| v.encode_node_with_config(config))
             .collect();
         elem.children.append(&mut enumerated_values?);
 
         if let Some(v) = &self.derived_from {
-            elem.attributes
-                .insert(String::from("derivedFrom"), v.to_string());
+            elem.attributes.insert(
+                String::from("derivedFrom"),
+                change_case(v, config.field_name),
+            );
         }
 
         Ok(elem)
