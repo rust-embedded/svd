@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Fix parsing `xs:noNamespaceSchemaLocation`
+
 ## [v0.13.4] - 2022-05-13
 
 - Support nested `derivedFrom` for `expand`
