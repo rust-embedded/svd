@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Bump MSRV to 1.56.0 (2021)
+
 ## [v0.13.1] - 2022-02-12
 
 - Encode "dimIndex" ranges
