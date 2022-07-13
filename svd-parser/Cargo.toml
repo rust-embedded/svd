@@ -9,7 +9,8 @@ keywords = ["CMSIS", "SVD", "parser"]
 license = "MIT OR Apache-2.0"
 name = "svd-parser"
 repository = "https://github.com/rust-embedded/svd"
-edition = "2018"
+edition = "2021"
+rust-version = "1.56.0"
 version = "0.13.4"
 readme = "README.md"
 
@@ -18,7 +19,7 @@ derive-from = ["svd-rs/derive-from"]
 expand = ["derive-from"]
 
 [dependencies]
-svd-rs = { version = "0.13.2", path = "../svd-rs"}
+svd-rs = { version = "0.13.2", path = "../svd-rs" }
 roxmltree = "0.14.1"
 anyhow = "1.0.45"
 thiserror = "1.0.30"

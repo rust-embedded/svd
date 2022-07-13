@@ -45,11 +45,13 @@ impl Parse for Device {
         if let Some(width) = optional::<u32>("width", tree, &())? {
             device = device.width(width)
         }
-        if let Some(xmlns_xs) = tree.attribute("xmlns:xs") {
+        // TODO: accept namespace other than `xs`
+        // Now assert `xs` exists and `noNamespaceSchemaLocation` is under `xs`
+        if let Some(xmlns_xs) = tree.lookup_namespace_uri(Some("xs")) {
             device = device.xmlns_xs(xmlns_xs.to_string());
-        }
-        if let Some(location) = tree.attribute("xs:noNamespaceSchemaLocation") {
-            device = device.no_namespace_schema_location(location.to_string());
+            if let Some(location) = tree.attribute((xmlns_xs, "noNamespaceSchemaLocation")) {
+                device = device.no_namespace_schema_location(location.to_string());
+            }
         }
         if let Some(schema_version) = tree.attribute("schemaVersion") {
             device = device.schema_version(schema_version.to_string());

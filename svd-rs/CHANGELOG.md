@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Bump MSRV to 1.56.0 (2021)
+
 ## [v0.13.2] - 2022-04-12
 
 - Fix `schema_version` deserialization
