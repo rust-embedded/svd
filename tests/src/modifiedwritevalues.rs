@@ -7,7 +7,8 @@ fn decode_encode() {
     let tests = vec![(
         ModifiedWriteValues::OneToToggle,
         "<modifiedWriteValues>oneToToggle</modifiedWriteValues>",
+        "<modifiedWriteValues>oneToToggle</modifiedWriteValues>",
     )];
 
-    run_test::<ModifiedWriteValues>(&tests[..]);
+    run_test::<ModifiedWriteValues>(&tests[..], None, None);
 }

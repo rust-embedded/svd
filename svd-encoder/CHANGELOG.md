@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Bump MSRV to 1.56.0 (2021)
 - Add advanced encoder options `Config`
-  - BREAKING: `Encode` trait needs to implement `encode_with_config`
+- BREAKING: `Encode` trait needs to implement `encode_with_config`
 
 ## [v0.13.1] - 2022-02-12
 

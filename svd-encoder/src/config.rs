@@ -18,10 +18,10 @@ pub enum IdentifierFormat {
     ///
     /// `a_snake_case_example`
     Snake,
-    /// `UpperSnake` case
+    /// `Constant` case
     ///
-    /// `AN_UPPER_SNAKE_CASE_EXAMPLE`
-    UpperSnake,
+    /// `A_CONSTANT_CASE_EXAMPLE`
+    Constant,
 }
 
 impl FromStr for IdentifierFormat {
@@ -32,7 +32,7 @@ impl FromStr for IdentifierFormat {
             "Camel" => Ok(IdentifierFormat::Camel),
             "Pascal" => Ok(IdentifierFormat::Pascal),
             "Snake" => Ok(IdentifierFormat::Snake),
-            "UpperSnake" => Ok(IdentifierFormat::UpperSnake),
+            "Constant" => Ok(IdentifierFormat::Constant),
             _ => Err(()),
         }
     }
@@ -55,7 +55,7 @@ pub fn change_case(s: &str, case: Option<IdentifierFormat>) -> String {
                 IdentifierFormat::Camel => Case::Camel,
                 IdentifierFormat::Pascal => Case::Pascal,
                 IdentifierFormat::Snake => Case::Snake,
-                IdentifierFormat::UpperSnake => Case::UpperSnake,
+                IdentifierFormat::Constant => Case::UpperSnake,
             })
         }
     }

@@ -16,8 +16,14 @@ fn decode_encode() {
             <dimIndex>10,20</dimIndex>
         </dimElement>
         ",
+        "<dimElement>
+            <dim>2</dim>
+            <dimIncrement>0x4</dimIncrement>
+            <dimIndex>10,20</dimIndex>
+        </dimElement>
+        ",
     )];
-    run_test::<DimElement>(&tests[..]);
+    run_test::<DimElement>(&tests[..], None, None);
 
     let tests = vec![(
         DimElement::builder()
@@ -36,8 +42,14 @@ fn decode_encode() {
             <dimIndex>3-5</dimIndex>
         </dimElement>
         ",
+        "<dimElement>
+            <dim>3</dim>
+            <dimIncrement>0x4</dimIncrement>
+            <dimIndex>3-5</dimIndex>
+        </dimElement>
+        ",
     )];
-    run_test::<DimElement>(&tests[..]);
+    run_test::<DimElement>(&tests[..], None, None);
 
     let tests = vec![(
         DimElement::builder()
@@ -56,8 +68,14 @@ fn decode_encode() {
             <dimIndex>3,5,4</dimIndex>
         </dimElement>
         ",
+        "<dimElement>
+            <dim>3</dim>
+            <dimIncrement>0x4</dimIncrement>
+            <dimIndex>3,5,4</dimIndex>
+        </dimElement>
+        ",
     )];
-    run_test::<DimElement>(&tests[..]);
+    run_test::<DimElement>(&tests[..], None, None);
 
     let tests = vec![(
         DimElement::builder()
@@ -72,8 +90,39 @@ fn decode_encode() {
             <dimIndex>3-3</dimIndex>
         </dimElement>
         ",
+        "<dimElement>
+            <dim>1</dim>
+            <dimIncrement>0x0</dimIncrement>
+            <dimIndex>3-3</dimIndex>
+        </dimElement>
+        ",
     )];
-    run_test::<DimElement>(&tests[..]);
+    run_test::<DimElement>(&tests[..], None, None);
+
+    let parse_config = svd_parser::Config::default();
+    let mut encode_config = svd_encoder::Config::default();
+    encode_config.update("dim_dim", "UpperHex");
+    encode_config.update("dim_increment", "LowerHex");
+
+    let tests = vec![(
+        DimElement::builder()
+            .dim(14)
+            .dim_increment(15)
+            .build(ValidateLevel::Strict)
+            .unwrap(),
+        "<dimElement>
+            <dim>14</dim>
+            <dimIncrement>0xF</dimIncrement>
+        </dimElement>
+        ",
+        "<dimElement>
+            <dim>0xE</dim>
+            <dimIncrement>0xf</dimIncrement>
+        </dimElement>
+        ",
+    )];
+
+    run_test::<DimElement>(&tests[..], Some(parse_config), Some(encode_config));
 }
 
 #[test]
