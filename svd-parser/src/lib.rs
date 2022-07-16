@@ -215,7 +215,7 @@ mod usage;
 mod writeconstraint;
 
 #[cfg(feature = "expand")]
-mod expand;
+pub mod expand;
 
 #[cfg(feature = "expand")]
 pub use expand::{expand, expand_properties};
