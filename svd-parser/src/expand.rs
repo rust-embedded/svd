@@ -453,8 +453,9 @@ fn derive_enumerated_values(
             FieldPath::new(&fpath.register, &fdname)
         } else {
             let (rdpath, rdname) = RegisterPath::split_vec(v);
-            let rdpath = if let Some(rdpath) = rdpath {
+            let rdpath = if let Some(mut rdpath) = rdpath {
                 // FULL.PATH.EVNAME:
+                rdpath.path.push(rdname.into());
                 rdpath
             } else {
                 // REG.FIELD.EVNAME
