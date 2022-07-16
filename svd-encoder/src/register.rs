@@ -34,16 +34,15 @@ impl Encode for RegisterInfo {
         ));
 
         if let Some(v) = &self.display_name {
-            elem.children.push(new_node("displayName", v.clone()));
+            elem.children.push(new_node("displayName", v));
         }
 
         if let Some(v) = &self.description {
-            elem.children.push(new_node("description", v.clone()));
+            elem.children.push(new_node("description", v));
         }
 
         if let Some(v) = &self.alternate_group {
-            elem.children
-                .push(new_node("alternateGroup", v.to_string()));
+            elem.children.push(new_node("alternateGroup", v));
         }
 
         if let Some(v) = &self.alternate_register {

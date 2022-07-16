@@ -6,8 +6,8 @@ impl Encode for Cpu {
 
     fn encode_with_config(&self, _config: &Config) -> Result<Element, EncodeError> {
         let mut children = vec![
-            new_node("name", self.name.clone()),
-            new_node("revision", self.revision.clone()),
+            new_node("name", self.name),
+            new_node("revision", self.revision),
             self.endian.encode_node()?,
             new_node("mpuPresent", format!("{}", self.mpu_present)),
             new_node("fpuPresent", format!("{}", self.fpu_present)),

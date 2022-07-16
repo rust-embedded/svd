@@ -25,7 +25,7 @@ impl Encode for crate::svd::DimElement {
         }
 
         if let Some(dim_name) = &self.dim_name {
-            e.children.push(new_node("dimName", dim_name.clone()))
+            e.children.push(new_node("dimName", dim_name))
         }
 
         if let Some(v) = &self.dim_array_index {

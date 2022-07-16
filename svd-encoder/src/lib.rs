@@ -74,9 +74,9 @@ impl ElementMerge for Element {
 }
 
 /// Helper to create new base xml nodes
-pub(crate) fn new_node(name: &str, text: String) -> XMLNode {
+pub(crate) fn new_node(name: &str, text: impl Into<String>) -> XMLNode {
     let mut e = Element::new(name);
-    e.children.push(XMLNode::Text(text));
+    e.children.push(XMLNode::Text(text.into()));
     XMLNode::Element(e)
 }
 

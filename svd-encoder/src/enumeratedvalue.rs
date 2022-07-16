@@ -16,7 +16,7 @@ impl Encode for EnumeratedValue {
         ));
 
         if let Some(d) = &self.description {
-            base.children.push(new_node("description", d.clone()));
+            base.children.push(new_node("description", d));
         };
 
         if let Some(v) = &self.value {

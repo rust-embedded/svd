@@ -34,15 +34,15 @@ impl Encode for PeripheralInfo {
         ));
 
         if let Some(v) = &self.display_name {
-            elem.children.push(new_node("displayName", v.to_string()));
+            elem.children.push(new_node("displayName", v));
         }
 
         if let Some(v) = &self.version {
-            elem.children.push(new_node("version", v.to_string()));
+            elem.children.push(new_node("version", v));
         }
 
         if let Some(v) = &self.description {
-            elem.children.push(new_node("description", v.to_string()));
+            elem.children.push(new_node("description", v));
         }
 
         if let Some(v) = &self.alternate_peripheral {
@@ -53,7 +53,7 @@ impl Encode for PeripheralInfo {
         }
 
         if let Some(v) = &self.group_name {
-            elem.children.push(new_node("groupName", v.to_string()));
+            elem.children.push(new_node("groupName", v));
         }
 
         if let Some(v) = &self.prepend_to_name {

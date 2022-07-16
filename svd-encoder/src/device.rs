@@ -7,26 +7,25 @@ impl Encode for Device {
     fn encode_with_config(&self, config: &Config) -> Result<Element, EncodeError> {
         let mut elem = Element::new("device");
         if let Some(v) = &self.vendor {
-            elem.children.push(new_node("vendor", v.clone()));
+            elem.children.push(new_node("vendor", v));
         }
         if let Some(v) = &self.vendor_id {
-            elem.children.push(new_node("vendorID", v.clone()));
+            elem.children.push(new_node("vendorID", v));
         }
 
-        elem.children.push(new_node("name", self.name.clone()));
+        elem.children.push(new_node("name", self.name));
 
         if let Some(v) = &self.series {
-            elem.children.push(new_node("series", v.clone()));
+            elem.children.push(new_node("series", v));
         }
 
-        elem.children
-            .push(new_node("version", self.version.clone()));
+        elem.children.push(new_node("version", self.version));
 
         elem.children
-            .push(new_node("description", self.description.clone()));
+            .push(new_node("description", self.description));
 
         if let Some(v) = &self.license_text {
-            elem.children.push(new_node("licenseText", v.clone()));
+            elem.children.push(new_node("licenseText", v));
         }
 
         if let Some(v) = &self.cpu {
@@ -35,13 +34,11 @@ impl Encode for Device {
         }
 
         if let Some(v) = &self.header_system_filename {
-            elem.children
-                .push(new_node("headerSystemFilename", v.clone()));
+            elem.children.push(new_node("headerSystemFilename", v));
         }
 
         if let Some(v) = &self.header_definitions_prefix {
-            elem.children
-                .push(new_node("header_definitions_prefix", v.clone()));
+            elem.children.push(new_node("header_definitions_prefix", v));
         }
 
         elem.children.push(new_node(

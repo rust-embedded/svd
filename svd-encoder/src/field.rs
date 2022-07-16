@@ -29,8 +29,7 @@ impl Encode for FieldInfo {
             .push(new_node("name", change_case(&self.name, config.field_name)));
 
         if let Some(description) = &self.description {
-            elem.children
-                .push(new_node("description", description.clone()))
+            elem.children.push(new_node("description", description))
         }
 
         // Add bit range
