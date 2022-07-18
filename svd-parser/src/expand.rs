@@ -2,6 +2,7 @@
 
 use anyhow::{anyhow, Result};
 use std::collections::HashMap;
+use std::fmt;
 use std::mem::take;
 use svd_rs::{
     array::names, cluster, field, peripheral, register, BitRange, Cluster, ClusterInfo, DeriveFrom,
@@ -50,6 +51,17 @@ impl BlockPath {
     }
 }
 
+impl fmt::Display for BlockPath {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.peripheral)?;
+        for p in &self.path {
+            f.write_str(".")?;
+            f.write_str(p)?;
+        }
+        Ok(())
+    }
+}
+
 /// Path to `register` element
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
 pub struct RegisterPath {
@@ -75,6 +87,15 @@ impl RegisterPath {
     }
     pub fn peripheral(&self) -> &String {
         &self.block.peripheral
+    }
+}
+
+impl fmt::Display for RegisterPath {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.block.fmt(f)?;
+        f.write_str(".")?;
+        f.write_str(&self.name)?;
+        Ok(())
     }
 }
 
@@ -116,6 +137,15 @@ impl FieldPath {
     }
 }
 
+impl fmt::Display for FieldPath {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.register.fmt(f)?;
+        f.write_str(".")?;
+        f.write_str(&self.name)?;
+        Ok(())
+    }
+}
+
 /// Path to `enumeratedValues` element
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
 pub struct EnumPath {
@@ -138,6 +168,15 @@ impl EnumPath {
     }
     pub fn peripheral(&self) -> &String {
         &self.field.peripheral()
+    }
+}
+
+impl fmt::Display for EnumPath {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.field.fmt(f)?;
+        f.write_str(".")?;
+        f.write_str(&self.name)?;
+        Ok(())
     }
 }
 
