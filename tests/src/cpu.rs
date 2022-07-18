@@ -25,7 +25,18 @@ fn decode_encode() {
                     <vendorSystickConfig>false</vendorSystickConfig>
                 </cpu>
             ",
+        "
+                <cpu>
+                    <name>EFM32JG12B500F512GM48</name>  
+                    <revision>5.1.1</revision>
+                    <endian>little</endian>
+                    <mpuPresent>true</mpuPresent>
+                    <fpuPresent>true</fpuPresent>
+                    <nvicPrioBits>8</nvicPrioBits>
+                    <vendorSystickConfig>false</vendorSystickConfig>
+                </cpu>
+            ",
     )];
 
-    run_test::<Cpu>(&tests[..]);
+    run_test::<Cpu>(&tests[..], None, None);
 }

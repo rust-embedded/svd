@@ -1,17 +1,22 @@
-use super::{new_node, Element, ElementMerge, Encode, EncodeChildren, EncodeError, XMLNode};
+use super::{
+    new_node, Config, Element, ElementMerge, Encode, EncodeChildren, EncodeError, XMLNode,
+};
 
-use crate::svd::{Field, Register, RegisterInfo};
+use crate::{
+    config::{change_case, format_number},
+    svd::{Register, RegisterInfo},
+};
 
 impl Encode for Register {
     type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element, EncodeError> {
+    fn encode_with_config(&self, config: &Config) -> Result<Element, EncodeError> {
         match self {
-            Self::Single(info) => info.encode(),
+            Self::Single(info) => info.encode_with_config(config),
             Self::Array(info, array_info) => {
                 let mut base = Element::new("register");
-                base.merge(&array_info.encode()?);
-                base.merge(&info.encode()?);
+                base.merge(&array_info.encode_with_config(config)?);
+                base.merge(&info.encode_with_config(config)?);
                 Ok(base)
             }
         }
@@ -21,9 +26,12 @@ impl Encode for Register {
 impl Encode for RegisterInfo {
     type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element, EncodeError> {
+    fn encode_with_config(&self, config: &Config) -> Result<Element, EncodeError> {
         let mut elem = Element::new("register");
-        elem.children.push(new_node("name", self.name.clone()));
+        elem.children.push(new_node(
+            "name",
+            change_case(&self.name, config.register_name),
+        ));
 
         if let Some(v) = &self.display_name {
             elem.children.push(new_node("displayName", v.clone()));
@@ -39,19 +47,22 @@ impl Encode for RegisterInfo {
         }
 
         if let Some(v) = &self.alternate_register {
-            elem.children
-                .push(new_node("alternateRegister", v.to_string()));
+            elem.children.push(new_node(
+                "alternateRegister",
+                change_case(v, config.register_name),
+            ));
         }
 
         elem.children.push(new_node(
             "addressOffset",
-            format!("0x{:X}", self.address_offset),
+            format_number(self.address_offset, config.register_address_offset),
         ));
 
-        elem.children.extend(self.properties.encode()?);
+        elem.children
+            .extend(self.properties.encode_with_config(config)?);
 
         if let Some(v) = &self.modified_write_values {
-            elem.children.push(v.encode_node()?);
+            elem.children.push(v.encode_node_with_config(config)?);
         }
 
         if let Some(v) = &self.write_constraint {
@@ -65,7 +76,7 @@ impl Encode for RegisterInfo {
         if let Some(v) = &self.fields {
             let children = v
                 .iter()
-                .map(Field::encode_node)
+                .map(|field| field.encode_node_with_config(config))
                 .collect::<Result<Vec<_>, EncodeError>>()?;
             if !children.is_empty() {
                 let mut fields = Element::new("fields");
@@ -75,8 +86,10 @@ impl Encode for RegisterInfo {
         }
 
         if let Some(v) = &self.derived_from {
-            elem.attributes
-                .insert(String::from("derivedFrom"), v.to_string());
+            elem.attributes.insert(
+                String::from("derivedFrom"),
+                change_case(v, config.register_name),
+            );
         }
 
         Ok(elem)

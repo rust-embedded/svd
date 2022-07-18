@@ -1,10 +1,10 @@
-use super::{new_node, Element, Encode, EncodeChildren, EncodeError, XMLNode};
-use crate::svd::{Device, Peripheral};
+use super::{new_node, Config, Element, Encode, EncodeChildren, EncodeError, XMLNode};
+use crate::svd::Device;
 
 impl Encode for Device {
     type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element, EncodeError> {
+    fn encode_with_config(&self, config: &Config) -> Result<Element, EncodeError> {
         let mut elem = Element::new("device");
         if let Some(v) = &self.vendor {
             elem.children.push(new_node("vendor", v.clone()));
@@ -30,7 +30,8 @@ impl Encode for Device {
         }
 
         if let Some(v) = &self.cpu {
-            elem.children.push(XMLNode::Element(v.encode()?));
+            elem.children
+                .push(XMLNode::Element(v.encode_with_config(config)?));
         }
 
         if let Some(v) = &self.header_system_filename {
@@ -51,13 +52,15 @@ impl Encode for Device {
         elem.children
             .push(new_node("width", format!("{}", self.width)));
 
-        elem.children
-            .extend(self.default_register_properties.encode()?);
+        elem.children.extend(
+            self.default_register_properties
+                .encode_with_config(config)?,
+        );
 
         let peripherals: Result<Vec<_>, _> = self
             .peripherals
             .iter()
-            .map(Peripheral::encode_node)
+            .map(|peripheral| peripheral.encode_node_with_config(config))
             .collect();
         elem.children.push({
             let mut e = Element::new("peripherals");

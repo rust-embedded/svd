@@ -1,12 +1,15 @@
-use super::{new_node, Element, Encode, EncodeError};
+use super::{new_node, Config, Element, Encode, EncodeError};
 
-use crate::svd::Interrupt;
+use crate::{config::change_case, svd::Interrupt};
 
 impl Encode for Interrupt {
     type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element, EncodeError> {
-        let mut children = vec![new_node("name", self.name.clone())];
+    fn encode_with_config(&self, config: &Config) -> Result<Element, EncodeError> {
+        let mut children = vec![new_node(
+            "name",
+            change_case(&self.name, config.interrupt_name),
+        )];
         if let Some(d) = self.description.clone() {
             children.push(new_node("description", d));
         }

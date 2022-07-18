@@ -6,6 +6,8 @@ use svd_rs as svd;
 use crate::svd::Device;
 use xmltree::{Element, EmitterConfig, XMLNode};
 
+pub use crate::config::{Config, IdentifierFormat, NumberFormat};
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum EncodeError {}
 
@@ -14,9 +16,16 @@ pub trait Encode {
     /// Encoding error
     type Error;
     /// Encode into an XML/SVD element
-    fn encode(&self) -> Result<Element, Self::Error>;
+    fn encode(&self) -> Result<Element, Self::Error> {
+        self.encode_with_config(&Config::default())
+    }
+    /// Encode into an XML/SVD element with a custom configuration
+    fn encode_with_config(&self, config: &Config) -> Result<Element, Self::Error>;
     fn encode_node(&self) -> Result<XMLNode, Self::Error> {
         self.encode().map(XMLNode::Element)
+    }
+    fn encode_node_with_config(&self, config: &Config) -> Result<XMLNode, Self::Error> {
+        self.encode_with_config(config).map(XMLNode::Element)
     }
 }
 
@@ -26,12 +35,21 @@ pub trait EncodeChildren {
     /// Encoding error
     type Error;
     /// Encode into XML/SVD children to merge with existing object
-    fn encode(&self) -> Result<Vec<XMLNode>, Self::Error>;
+    fn encode(&self) -> Result<Vec<XMLNode>, Self::Error> {
+        self.encode_with_config(&Config::default())
+    }
+    /// Encode into XML/SVD children to merge with existing object with a custom configuration
+    fn encode_with_config(&self, config: &Config) -> Result<Vec<XMLNode>, Self::Error>;
 }
 
 /// Encodes a device object to an SVD (XML) string
 pub fn encode(d: &Device) -> Result<String, EncodeError> {
-    let root = d.encode()?;
+    encode_with_config(d, &Config::default())
+}
+
+/// Encodes a device object to an SVD (XML) string
+pub fn encode_with_config(d: &Device, config: &Config) -> Result<String, EncodeError> {
+    let root = d.encode_with_config(config)?;
     let mut wr = Vec::new();
     let mut cfg = EmitterConfig::new();
     cfg.perform_indent = true;
@@ -66,6 +84,7 @@ mod access;
 mod addressblock;
 mod bitrange;
 mod cluster;
+mod config;
 mod cpu;
 mod device;
 mod dimelement;

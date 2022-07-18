@@ -1,10 +1,10 @@
-use super::{new_node, Element, Encode, EncodeError};
+use super::{new_node, Config, Element, Encode, EncodeError};
 
 use crate::svd::Cpu;
 impl Encode for Cpu {
     type Error = EncodeError;
 
-    fn encode(&self) -> Result<Element, EncodeError> {
+    fn encode_with_config(&self, _config: &Config) -> Result<Element, EncodeError> {
         let mut children = vec![
             new_node("name", self.name.clone()),
             new_node("revision", self.revision.clone()),
