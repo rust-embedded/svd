@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.14.0] - 2022-07-19
+
+- Make `expand::Index`, pathes & `derive_peripheral`, etc. public
 - Fix parsing `xs:noNamespaceSchemaLocation`
 - Bump MSRV to 1.56.0 (2021)
 
@@ -42,7 +45,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-parser-v0.13.4...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/v0.14.0...HEAD
+[v0.13.4]: https://github.com/rust-embedded/svd/compare/svd-parser-v0.13.4...v0.14.0
 [v0.13.4]: https://github.com/rust-embedded/svd/compare/svd-parser-v0.13.3...svd-parser-v0.13.4
 [v0.13.3]: https://github.com/rust-embedded/svd/compare/svd-parser-v0.13.2...svd-parser-v0.13.3
 [v0.13.2]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.13.2...svd-parser-v0.13.2
