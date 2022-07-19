@@ -133,7 +133,7 @@ impl FieldPath {
         &self.register
     }
     pub fn peripheral(&self) -> &String {
-        &self.register.peripheral()
+        self.register.peripheral()
     }
 }
 
@@ -167,7 +167,7 @@ impl EnumPath {
         &self.field.register
     }
     pub fn peripheral(&self) -> &String {
-        &self.field.peripheral()
+        self.field.peripheral()
     }
 }
 
