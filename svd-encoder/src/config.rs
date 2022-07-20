@@ -51,12 +51,14 @@ pub fn change_case(s: &str, case: Option<IdentifierFormat>) -> String {
                 Boundary::Acronym,
             ];
 
-            s.with_boundaries(&boundary).to_case(match case {
-                IdentifierFormat::Camel => Case::Camel,
-                IdentifierFormat::Pascal => Case::Pascal,
-                IdentifierFormat::Snake => Case::Snake,
-                IdentifierFormat::Constant => Case::UpperSnake,
-            })
+            s.with_boundaries(&boundary)
+                .to_case(match case {
+                    IdentifierFormat::Camel => Case::Camel,
+                    IdentifierFormat::Pascal => Case::Pascal,
+                    IdentifierFormat::Snake => Case::Snake,
+                    IdentifierFormat::Constant => Case::UpperSnake,
+                })
+                .replace("%S", "%s")
         }
     }
 }
