@@ -1,7 +1,7 @@
 /// Defines access rights for fields on the device, though it may be specified at a
 /// higher level than individual fields.
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Access {
     /// Read access is permitted. Write operations have an undefined effect.
     #[cfg_attr(feature = "serde", serde(rename = "read-only"))]

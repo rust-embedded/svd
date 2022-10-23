@@ -2,7 +2,7 @@ use super::{EmptyToNone, EnumeratedValue, SvdError, Usage, ValidateLevel};
 
 /// A map describing unsigned integers and their description and name.
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct EnumeratedValues {
     /// Identifier for the whole enumeration section
@@ -44,7 +44,7 @@ pub enum Error {
 }
 
 /// Builder for [`EnumeratedValues`]
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct EnumeratedValuesBuilder {
     name: Option<String>,
     usage: Option<Usage>,

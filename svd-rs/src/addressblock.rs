@@ -2,7 +2,7 @@ use super::{BuildError, Protection, SvdError, ValidateLevel};
 
 ///  An uniquely mapped address block to a peripheral
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct AddressBlock {
     /// Specifies the start address of an address block relative to the peripheral [`baseAddress`](crate::Peripheral::base_address).
@@ -63,7 +63,7 @@ impl AddressBlockUsage {
 }
 
 /// Builder for [`AddressBlock`]
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct AddressBlockBuilder {
     offset: Option<u32>,
     size: Option<u32>,

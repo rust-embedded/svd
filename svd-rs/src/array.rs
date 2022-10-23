@@ -2,7 +2,7 @@ use super::{DimElement, Name};
 use core::ops::{Deref, DerefMut};
 
 /// A single SVD instance or array of instances
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum MaybeArray<T> {
     /// A single instance
     Single(T),

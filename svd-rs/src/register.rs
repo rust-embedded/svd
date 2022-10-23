@@ -20,7 +20,7 @@ pub enum Error {
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct RegisterInfo {
     /// String to identify the register.
@@ -110,7 +110,7 @@ pub fn address_offsets<'a>(
 }
 
 /// Builder for [`RegisterInfo`]
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct RegisterInfoBuilder {
     name: Option<String>,
     display_name: Option<String>,

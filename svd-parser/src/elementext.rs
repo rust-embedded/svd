@@ -34,12 +34,7 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
     where
         K: AsRef<str>,
     {
-        for c in self.children() {
-            if c.has_tag_name(k.as_ref()) {
-                return Some(c);
-            }
-        }
-        None
+        self.children().find(|&c| c.has_tag_name(k.as_ref()))
     }
     fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>, SVDErrorAt>
     where

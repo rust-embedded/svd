@@ -5,7 +5,7 @@
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ModifiedWriteValues {
     /// Write data bit of one shall clear (set to zero) the corresponding bit in the field
     OneToClear,

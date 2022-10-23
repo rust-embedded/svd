@@ -91,7 +91,7 @@ pub mod protection;
 pub use self::protection::Protection;
 
 /// Level of validation
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ValidateLevel {
     /// No validation.
     Disabled,

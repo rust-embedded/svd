@@ -5,7 +5,7 @@ use super::{BuildError, Endian, SvdError, ValidateLevel};
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct Cpu {
     /// Processor architecture
@@ -99,7 +99,7 @@ pub struct Cpu {
 }
 
 /// Builder for [`Cpu`]
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct CpuBuilder {
     name: Option<String>,
     revision: Option<String>,

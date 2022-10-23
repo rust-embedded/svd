@@ -4,7 +4,7 @@
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "kebab-case")
 )]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Endian {
     /// Little endian.
     Little,

@@ -7,7 +7,7 @@ pub enum Error {
 }
 
 /// A bit range, describing the [least significant bit](Self::lsb) and [most significant bit](Self::msb)
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct BitRange {
     /// Value defining the position of the least significant bit of the field within the register
     pub offset: u32,
@@ -20,7 +20,7 @@ pub struct BitRange {
 }
 
 /// The style of bit range that describes a [BitRange]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum BitRangeType {
     /// A bit range in the format: `[<msb>:<lsb>]`
     BitRange,

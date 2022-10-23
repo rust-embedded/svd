@@ -3,7 +3,7 @@
 
 use roxmltree::Node;
 
-use super::{Config, ElementExt, Parse, SVDError, SVDErrorAt};
+use super::{ElementExt, Parse, SVDError, SVDErrorAt};
 
 impl Parse for u32 {
     type Object = u32;
@@ -81,35 +81,6 @@ impl Parse for BoolParse {
                 Ok(b) => Ok(b),
                 Err(e) => Err(SVDError::InvalidBooleanValue(text.into(), e).at(tree.id())),
             },
-        }
-    }
-}
-
-pub struct DimIndex;
-
-impl Parse for DimIndex {
-    type Object = Vec<String>;
-    type Error = SVDErrorAt;
-    type Config = Config;
-
-    fn parse(tree: &Node, _config: &Self::Config) -> Result<Vec<String>, Self::Error> {
-        let text = tree.get_text()?;
-        if text.contains('-') {
-            let mut parts = text.splitn(2, '-');
-            let start = parts
-                .next()
-                .ok_or_else(|| SVDError::DimIndexParse.at(tree.id()))?
-                .parse::<u32>()
-                .map_err(|e| SVDError::from(e).at(tree.id()))?;
-            let end = parts
-                .next()
-                .ok_or_else(|| SVDError::DimIndexParse.at(tree.id()))?
-                .parse::<u32>()
-                .map_err(|e| SVDError::from(e).at(tree.id()))?;
-
-            Ok((start..=end).map(|i| i.to_string()).collect())
-        } else {
-            Ok(text.split(',').map(|s| s.to_string()).collect())
         }
     }
 }

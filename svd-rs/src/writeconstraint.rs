@@ -4,7 +4,7 @@
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum WriteConstraint {
     /// If `true`, only the last read value can be written.
     WriteAsRead(bool),
@@ -16,7 +16,7 @@ pub enum WriteConstraint {
 
 /// The smallest and largest number that can be written.
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct WriteConstraintRange {
     /// Specify the smallest number to be written to the field
     #[cfg_attr(feature = "serde", serde(rename = "minimum"))]

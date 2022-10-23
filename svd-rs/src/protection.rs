@@ -4,7 +4,7 @@
 /// when no universal access permissions have been granted.
 /// If no specific information is provided, an address region is accessible in any mode
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Protection {
     /// Secure permission required for access
     #[cfg_attr(feature = "serde", serde(rename = "s"))]

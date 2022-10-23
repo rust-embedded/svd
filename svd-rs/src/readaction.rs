@@ -4,7 +4,7 @@
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ReadAction {
     /// The register/field is cleared (set to zero) following a read operation
     Clear,

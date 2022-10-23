@@ -8,7 +8,7 @@ use std::ops::RangeInclusive;
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct DimElement {
     /// Defines the number of elements in an array or list
@@ -21,7 +21,11 @@ pub struct DimElement {
     /// By default, <dimIndex> is a value starting with 0
     #[cfg_attr(
         feature = "serde",
-        serde(default, skip_serializing_if = "Option::is_none")
+        serde(
+            deserialize_with = "ser_de::deserialize_dim_index",
+            serialize_with = "ser_de::serialize_dim_index",
+            skip_serializing_if = "Option::is_none"
+        )
     )]
     pub dim_index: Option<Vec<String>>,
 
@@ -51,7 +55,7 @@ pub struct DimElement {
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DimArrayIndex {
     /// Specify the base name of enumerations
     #[cfg_attr(
@@ -65,7 +69,7 @@ pub struct DimArrayIndex {
 }
 
 /// Builder for [`DimElement`]
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct DimElementBuilder {
     dim: Option<u32>,
     dim_increment: Option<u32>,
@@ -136,6 +140,19 @@ impl DimElement {
     /// Make a builder for [`DimElement`]
     pub fn builder() -> DimElementBuilder {
         DimElementBuilder::default()
+    }
+
+    /// Get array of indexes from string
+    pub fn parse_indexes(text: &str) -> Option<Vec<String>> {
+        if text.contains('-') {
+            let mut parts = text.splitn(2, '-');
+            let start = parts.next()?.parse::<u32>().ok()?;
+            let end = parts.next()?.parse::<u32>().ok()?;
+
+            Some((start..=end).map(|i| i.to_string()).collect())
+        } else {
+            Some(text.split(',').map(|s| s.to_string()).collect())
+        }
     }
     /// Try to represent [`DimElement`] as range of integer indexes
     pub fn indexes_as_range(&self) -> Option<RangeInclusive<u32>> {
@@ -221,5 +238,38 @@ impl<'a> Iterator for Indexes<'a> {
         } else {
             Some(i.to_string().into())
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+mod ser_de {
+    use super::*;
+    use serde::{de, Deserialize, Deserializer, Serializer};
+    #[derive(serde::Serialize, serde::Deserialize)]
+    #[serde(untagged)]
+    enum DimIndex {
+        Array(Vec<String>),
+        String(String),
+    }
+
+    pub fn deserialize_dim_index<'de, D>(deserializer: D) -> Result<Option<Vec<String>>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(match Option::<DimIndex>::deserialize(deserializer)? {
+            None => None,
+            Some(DimIndex::Array(a)) => Some(a),
+            Some(DimIndex::String(s)) => Some(
+                DimElement::parse_indexes(&s)
+                    .ok_or_else(|| de::Error::custom("Failed to deserialize dimIndex"))?,
+            ),
+        })
+    }
+
+    pub fn serialize_dim_index<S>(val: &Option<Vec<String>>, s: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        s.serialize_str(&val.as_ref().unwrap().join(","))
     }
 }

@@ -2,7 +2,7 @@ use super::{BuildError, EmptyToNone, Name, SvdError, ValidateLevel};
 
 /// Describes a single entry in the enumeration.
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct EnumeratedValue {
     /// String describing the semantics of the value. Can be displayed instead of the value
@@ -42,7 +42,7 @@ pub enum Error {
 }
 
 /// Builder for [`EnumeratedValue`]
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct EnumeratedValueBuilder {
     name: Option<String>,
     description: Option<String>,
