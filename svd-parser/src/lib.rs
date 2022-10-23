@@ -220,7 +220,7 @@ pub mod expand;
 #[cfg(feature = "expand")]
 pub use expand::{expand, expand_properties};
 /// SVD parse Errors.
-#[derive(Clone, Debug, PartialEq, thiserror::Error)]
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum SVDError {
     #[error("{0}")]
     Svd(#[from] svd::SvdError),

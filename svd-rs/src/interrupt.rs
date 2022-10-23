@@ -2,7 +2,7 @@ use super::{BuildError, Name, SvdError, ValidateLevel};
 
 /// Describes an interrupt in the device
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct Interrupt {
     /// The string represents the interrupt name
@@ -20,7 +20,7 @@ pub struct Interrupt {
 }
 
 /// Builder for [`Interrupt`]
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct InterruptBuilder {
     name: Option<String>,
     description: Option<String>,

@@ -20,7 +20,7 @@ pub enum Error {
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct RegisterProperties {
     /// Bit-width of register

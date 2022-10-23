@@ -17,7 +17,7 @@ pub enum Error {
 /// A partition of a [register](crate::RegisterInfo)
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct FieldInfo {
     /// Name string used to identify the field.
@@ -88,7 +88,7 @@ pub fn bit_offsets<'a>(info: &'a FieldInfo, dim: &'a DimElement) -> impl Iterato
 
 /// Builder for [`FieldInfo`]
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct FieldInfoBuilder {
     name: Option<String>,
     description: Option<String>,

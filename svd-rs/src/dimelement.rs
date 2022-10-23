@@ -8,7 +8,7 @@ use std::ops::RangeInclusive;
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct DimElement {
     /// Defines the number of elements in an array or list
@@ -55,7 +55,7 @@ pub struct DimElement {
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DimArrayIndex {
     /// Specify the base name of enumerations
     #[cfg_attr(
@@ -69,7 +69,7 @@ pub struct DimArrayIndex {
 }
 
 /// Builder for [`DimElement`]
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct DimElementBuilder {
     dim: Option<u32>,
     dim_increment: Option<u32>,

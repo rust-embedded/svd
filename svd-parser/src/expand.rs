@@ -571,11 +571,11 @@ pub fn derive_enumerated_values(
             Ok(epath)
         }
     } else {
-        return Err(anyhow!(
+        Err(anyhow!(
             "enumeratedValues {} not found, parent field: {:?}",
             dpath,
             fpath,
-        ));
+        ))
     }
 }
 
