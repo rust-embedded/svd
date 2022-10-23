@@ -23,6 +23,7 @@ pub struct DimElement {
         feature = "serde",
         serde(
             deserialize_with = "ser_de::deserialize_dim_index",
+            serialize_with = "ser_de::serialize_dim_index",
             skip_serializing_if = "Option::is_none"
         )
     )]
@@ -243,7 +244,7 @@ impl<'a> Iterator for Indexes<'a> {
 #[cfg(feature = "serde")]
 mod ser_de {
     use super::*;
-    use serde::{de, Deserialize, Deserializer};
+    use serde::{de, Deserialize, Deserializer, Serializer};
     #[derive(serde::Serialize, serde::Deserialize)]
     #[serde(untagged)]
     enum DimIndex {
@@ -263,5 +264,12 @@ mod ser_de {
                     .ok_or_else(|| de::Error::custom("Failed to deserialize dimIndex"))?,
             ),
         })
+    }
+
+    pub fn serialize_dim_index<S>(val: &Option<Vec<String>>, s: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        s.serialize_str(&val.as_ref().unwrap().join(","))
     }
 }

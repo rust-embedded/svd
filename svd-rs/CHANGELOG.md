@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- (De)serialize `dimIndex` (from)to string 
+
 ## [v0.14.0] - 2022-07-19
 
 - Bump MSRV to 1.56.0 (2021)
