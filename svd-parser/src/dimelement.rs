@@ -1,4 +1,3 @@
-use super::types::DimIndex;
 use super::*;
 use crate::svd::{DimArrayIndex, DimElement, EnumeratedValue};
 
@@ -42,5 +41,18 @@ impl Parse for DimArrayIndex {
                 values?
             },
         })
+    }
+}
+
+struct DimIndex;
+
+impl Parse for DimIndex {
+    type Object = Vec<String>;
+    type Error = SVDErrorAt;
+    type Config = Config;
+
+    fn parse(tree: &Node, _config: &Self::Config) -> Result<Vec<String>, Self::Error> {
+        DimElement::parse_indexes(tree.get_text()?)
+            .ok_or_else(|| SVDError::DimIndexParse.at(tree.id()))
     }
 }
