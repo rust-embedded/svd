@@ -10,7 +10,7 @@ name = "svd-rs"
 repository = "https://github.com/rust-embedded/svd"
 edition = "2021"
 rust-version = "1.56.0"
-version = "0.14.0"
+version = "0.14.1"
 readme = "README.md"
 
 [features]

@@ -49,6 +49,11 @@ impl BlockPath {
     pub fn name(&self) -> &String {
         self.path.last().unwrap()
     }
+    pub fn parent(&self) -> Option<Self> {
+        let mut p = self.clone();
+        p.path.pop()?;
+        Some(p)
+    }
 }
 
 impl fmt::Display for BlockPath {
