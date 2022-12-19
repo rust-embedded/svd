@@ -41,7 +41,7 @@ impl Encode for Device {
 
         if let Some(v) = &self.header_definitions_prefix {
             elem.children
-                .push(new_node("header_definitions_prefix", v.clone()));
+                .push(new_node("headerDefinitionsPrefix", v.clone()));
         }
 
         elem.children.push(new_node(

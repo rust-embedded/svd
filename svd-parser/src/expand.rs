@@ -259,7 +259,7 @@ impl<'a> Index<'a> {
     fn add_field(&mut self, path: &RegisterPath, f: &'a Field) {
         if let Field::Array(info, dim) = f {
             for name in names(info, dim) {
-                let fpath = path.new_field(&name);
+                let fpath = path.new_field(name);
                 for evs in &f.enumerated_values {
                     if let Some(name) = evs.name.as_ref() {
                         self.evs.insert(fpath.new_enum(name), evs);
