@@ -8,11 +8,11 @@ name = "svd-encoder"
 repository = "https://github.com/rust-embedded/svd"
 edition = "2021"
 rust-version = "1.56.0"
-version = "0.14.1"
+version = "0.14.2"
 readme = "README.md"
 
 [dependencies]
-convert_case = "0.5.0"
+convert_case = "0.6.0"
 svd-rs = { version = "0.14.0", path = "../svd-rs" }
 thiserror = "1.0.31"
 
