@@ -7,6 +7,7 @@ use super::{Cluster, Register};
     serde(rename_all = "lowercase")
 )]
 #[derive(Clone, Debug, PartialEq)]
+#[allow(clippy::large_enum_variant)]
 pub enum RegisterCluster {
     /// Register
     Register(Register),
