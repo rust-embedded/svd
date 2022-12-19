@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.14.2] - 2022-12-19
+
+- Fix typo in `headerDefinitionsPrefix`
+- Update `convert_case` dependency
+
 ## [v0.14.1] - 2022-07-23
 
 - Fix uppercased names of arrays
@@ -37,7 +42,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-encoder-v0.14.1...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-encoder-v0.14.2...HEAD
+[v0.14.2]: https://github.com/rust-embedded/svd/compare/svd-encoder-v0.14.1..svd-encoder-v0.14.2
 [v0.14.1]: https://github.com/rust-embedded/svd/compare/v0.14.0..svd-encoder-v0.14.1
 [v0.14.0]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.13.1..v0.14.0
 [v0.13.1]: https://github.com/rust-embedded/svd/compare/svd-parser-v0.13.1...svd-rs-v0.13.1
