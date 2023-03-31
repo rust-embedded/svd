@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add `name`, `description`, `address_offset` for `RegisterCluster`
+
 ## [v0.14.1] - 2022-10-23
 
 - (De)serialize `dimIndex` (from)to string 

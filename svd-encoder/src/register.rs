@@ -3,7 +3,7 @@ use super::{
 };
 
 use crate::{
-    config::{change_case, format_number},
+    config::{change_case, format_number, Sorting},
     svd::{Register, RegisterInfo},
 };
 
@@ -74,10 +74,24 @@ impl Encode for RegisterInfo {
         }
 
         if let Some(v) = &self.fields {
-            let children = v
-                .iter()
-                .map(|field| field.encode_node_with_config(config))
-                .collect::<Result<Vec<_>, EncodeError>>()?;
+            let children: Result<Vec<_>, _> = if let Some(sorting) = config.field_sorting {
+                let mut refs = v.iter().collect::<Vec<_>>();
+                match sorting {
+                    Sorting::Offset => refs.sort_by_key(|f| f.bit_offset()),
+                    Sorting::OffsetReversed => {
+                        refs.sort_by_key(|f| -(f.bit_offset() as i32));
+                    }
+                    Sorting::Name => refs.sort_by_key(|f| &f.name),
+                }
+                refs.into_iter()
+                    .map(|field| field.encode_node_with_config(config))
+                    .collect()
+            } else {
+                v.iter()
+                    .map(|field| field.encode_node_with_config(config))
+                    .collect()
+            };
+            let children = children?;
             if !children.is_empty() {
                 let mut fields = Element::new("fields");
                 fields.children = children;

@@ -17,13 +17,37 @@ pub enum RegisterCluster {
 
 impl From<Register> for RegisterCluster {
     fn from(reg: Register) -> Self {
-        RegisterCluster::Register(reg)
+        Self::Register(reg)
     }
 }
 
 impl From<Cluster> for RegisterCluster {
     fn from(cluser: Cluster) -> Self {
-        RegisterCluster::Cluster(cluser)
+        Self::Cluster(cluser)
+    }
+}
+
+impl RegisterCluster {
+    /// Name of register or cluster
+    pub fn name(&self) -> &String {
+        match self {
+            Self::Register(r) => &r.name,
+            Self::Cluster(c) => &c.name,
+        }
+    }
+    /// Description of register or cluster
+    pub fn description(&self) -> &Option<String> {
+        match self {
+            Self::Register(r) => &r.description,
+            Self::Cluster(c) => &c.description,
+        }
+    }
+    /// Address offset of register or cluster
+    pub fn address_offset(&self) -> u32 {
+        match self {
+            Self::Register(r) => r.address_offset,
+            Self::Cluster(c) => c.address_offset,
+        }
     }
 }
 

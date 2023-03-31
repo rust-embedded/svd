@@ -1,5 +1,5 @@
 use super::{new_node, Config, Element, Encode, EncodeChildren, EncodeError, XMLNode};
-use crate::svd::Device;
+use crate::{config::Sorting, svd::Device};
 
 impl Encode for Device {
     type Error = EncodeError;
@@ -57,11 +57,24 @@ impl Encode for Device {
                 .encode_with_config(config)?,
         );
 
-        let peripherals: Result<Vec<_>, _> = self
-            .peripherals
-            .iter()
-            .map(|peripheral| peripheral.encode_node_with_config(config))
-            .collect();
+        let peripherals: Result<Vec<_>, _> = if let Some(sorting) = config.peripheral_sorting {
+            let mut refs = self.peripherals.iter().collect::<Vec<_>>();
+            match sorting {
+                Sorting::Offset => refs.sort_by_key(|p| p.base_address),
+                Sorting::OffsetReversed => {
+                    refs.sort_by_key(|p| -(p.base_address as i32));
+                }
+                Sorting::Name => refs.sort_by_key(|p| &p.name),
+            }
+            refs.into_iter()
+                .map(|peripheral| peripheral.encode_node_with_config(config))
+                .collect()
+        } else {
+            self.peripherals
+                .iter()
+                .map(|peripheral| peripheral.encode_node_with_config(config))
+                .collect()
+        };
         elem.children.push({
             let mut e = Element::new("peripherals");
             e.children = peripherals?;
