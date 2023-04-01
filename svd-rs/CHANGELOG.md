@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add support of `a-Z` for `dimIndex`
 - Add `name`, `description`, `address_offset` for `RegisterCluster`
 
 ## [v0.14.1] - 2022-10-23
