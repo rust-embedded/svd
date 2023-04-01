@@ -4,7 +4,7 @@ use convert_case::{Boundary, Case, Casing};
 
 use crate::svd::BitRangeType;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum IdentifierFormat {
     /// `Camel` case
     ///
@@ -63,7 +63,7 @@ pub fn change_case(s: &str, case: Option<IdentifierFormat>) -> String {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum NumberFormat {
     /// `UpperHex` format
     ///
@@ -186,6 +186,24 @@ impl FromStr for Sorting {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RegistersOrClustersFirst {
+    Registers,
+    Clusters,
+}
+
+impl FromStr for RegistersOrClustersFirst {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "Registers" => Ok(Self::Registers),
+            "Clusters" => Ok(Self::Clusters),
+            _ => Err(()),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 #[non_exhaustive]
 /// Advanced encoder options
@@ -234,6 +252,9 @@ pub struct Config {
 
     /// Sort registers and clusters in specified order
     pub register_cluster_sorting: Option<Sorting>,
+
+    /// First write registers or clusters
+    pub registers_or_clusters_first: Option<RegistersOrClustersFirst>,
 
     /// Format of register's name-kind elements
     /// - `derivedFrom`
@@ -314,6 +335,7 @@ impl Default for Config {
             cluster_name: None,
             cluster_address_offset: NumberFormat::UpperHex,
             register_cluster_sorting: None,
+            registers_or_clusters_first: None,
             register_name: None,
             register_address_offset: NumberFormat::UpperHex,
             register_size: NumberFormat::LowerHex,
@@ -348,6 +370,9 @@ impl Config {
             "cluster_address_offset" => self.cluster_address_offset = value.parse().unwrap(),
             "register_cluster_sorting" => {
                 self.register_cluster_sorting = Some(value.parse().unwrap())
+            }
+            "registers_or_clusters_first" => {
+                self.registers_or_clusters_first = Some(value.parse().unwrap())
             }
             "register_name" => self.register_name = Some(value.parse().unwrap()),
             "register_address_offset" => self.register_address_offset = value.parse().unwrap(),
@@ -434,6 +459,14 @@ impl Config {
     /// `None` means keep the original order
     pub fn register_cluster_sorting(mut self, val: Option<Sorting>) -> Self {
         self.register_cluster_sorting = val;
+        self
+    }
+
+    /// First write registers or clusters
+    ///
+    /// `None` means only `register_cluster_sorting` does matter
+    pub fn registers_or_clusters_first(mut self, val: Option<RegistersOrClustersFirst>) -> Self {
+        self.registers_or_clusters_first = val;
         self
     }
 
