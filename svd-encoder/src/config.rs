@@ -150,7 +150,7 @@ where
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FieldBitRangeFormat(pub BitRangeType);
 
 impl FromStr for FieldBitRangeFormat {
@@ -167,9 +167,14 @@ impl FromStr for FieldBitRangeFormat {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
+/// Apply a kind of sorting
 pub enum Sorting {
+    /// Sort by addresses of offsets
     Offset,
+    /// Same as [`Sorting::Offset`], but reversed
     OffsetReversed,
+    /// Sort by name
     Name,
 }
 
@@ -225,6 +230,9 @@ pub struct Config {
     /// Sort peripherals in specified order
     pub peripheral_sorting: Option<Sorting>,
 
+    /// Place derived peripherals in the end
+    pub peripheral_derived_last: bool,
+
     /// Format of addressBlock's offset element
     ///
     /// format: hex, dec
@@ -255,6 +263,9 @@ pub struct Config {
 
     /// First write registers or clusters
     pub registers_or_clusters_first: Option<RegistersOrClustersFirst>,
+
+    /// Place derived registers and clusters in the end
+    pub register_cluster_derived_last: bool,
 
     /// Format of register's name-kind elements
     /// - `derivedFrom`
@@ -295,6 +306,9 @@ pub struct Config {
     /// Sort fields in specified order
     pub field_sorting: Option<Sorting>,
 
+    /// Place derived fields in the end
+    pub field_derived_last: bool,
+
     /// Format of enumeratedValues's name-kind elements
     /// - `derivedFrom`
     /// - `name`
@@ -329,6 +343,7 @@ impl Default for Config {
             peripheral_name: None,
             peripheral_base_address: NumberFormat::UpperHex8,
             peripheral_sorting: None,
+            peripheral_derived_last: false,
             address_block_offset: NumberFormat::UpperHex,
             address_block_size: NumberFormat::UpperHex,
             interrupt_name: None,
@@ -336,6 +351,7 @@ impl Default for Config {
             cluster_address_offset: NumberFormat::UpperHex,
             register_cluster_sorting: None,
             registers_or_clusters_first: None,
+            register_cluster_derived_last: false,
             register_name: None,
             register_address_offset: NumberFormat::UpperHex,
             register_size: NumberFormat::LowerHex,
@@ -344,6 +360,7 @@ impl Default for Config {
             field_name: None,
             field_bit_range: None,
             field_sorting: None,
+            field_derived_last: false,
             enumerated_values_name: None,
             enumerated_value_name: None,
             enumerated_value_value: NumberFormat::Dec,
@@ -363,6 +380,7 @@ impl Config {
             "peripheral_name" => self.peripheral_name = Some(value.parse().unwrap()),
             "peripheral_base_address" => self.peripheral_base_address = value.parse().unwrap(),
             "peripheral_sorting" => self.peripheral_sorting = Some(value.parse().unwrap()),
+            "peripheral_derived_last" => self.peripheral_derived_last = value.parse().unwrap(),
             "address_block_offset" => self.address_block_offset = value.parse().unwrap(),
             "address_block_size" => self.address_block_size = value.parse().unwrap(),
             "interrupt_name" => self.interrupt_name = Some(value.parse().unwrap()),
@@ -374,6 +392,9 @@ impl Config {
             "registers_or_clusters_first" => {
                 self.registers_or_clusters_first = Some(value.parse().unwrap())
             }
+            "register_cluster_derived_last" => {
+                self.register_cluster_derived_last = value.parse().unwrap()
+            }
             "register_name" => self.register_name = Some(value.parse().unwrap()),
             "register_address_offset" => self.register_address_offset = value.parse().unwrap(),
             "register_size" => self.register_size = value.parse().unwrap(),
@@ -382,6 +403,7 @@ impl Config {
             "field_name" => self.field_name = Some(value.parse().unwrap()),
             "field_bit_range" => self.field_bit_range = Some(value.parse().unwrap()),
             "field_sorting" => self.field_sorting = Some(value.parse().unwrap()),
+            "field_derived_last" => self.field_derived_last = value.parse().unwrap(),
             "enumerated_values_name" => self.enumerated_values_name = Some(value.parse().unwrap()),
             "enumerated_value_name" => self.enumerated_value_name = Some(value.parse().unwrap()),
             "enumerated_value_value" => self.enumerated_value_value = value.parse().unwrap(),
@@ -415,6 +437,14 @@ impl Config {
     /// `None` means keep the original order
     pub fn peripheral_sorting(mut self, val: Option<Sorting>) -> Self {
         self.peripheral_sorting = val;
+        self
+    }
+
+    /// Place derived peripherals in the end
+    ///
+    /// `false` means keep the original order
+    pub fn peripheral_derived_last(mut self, val: bool) -> Self {
+        self.peripheral_derived_last = val;
         self
     }
 
@@ -467,6 +497,14 @@ impl Config {
     /// `None` means only `register_cluster_sorting` does matter
     pub fn registers_or_clusters_first(mut self, val: Option<RegistersOrClustersFirst>) -> Self {
         self.registers_or_clusters_first = val;
+        self
+    }
+
+    /// Place derived registers and clusters in the end
+    ///
+    /// `false` means keep the original order
+    pub fn register_cluster_derived_last(mut self, val: bool) -> Self {
+        self.register_cluster_derived_last = val;
         self
     }
 
@@ -527,6 +565,14 @@ impl Config {
     /// `None` means keep the original order
     pub fn field_sorting(mut self, val: Option<Sorting>) -> Self {
         self.field_sorting = val;
+        self
+    }
+
+    /// Place derived fields in the end
+    ///
+    /// `false` means keep the original order
+    pub fn field_derived_last(mut self, val: bool) -> Self {
+        self.field_derived_last = val;
         self
     }
 

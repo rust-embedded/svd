@@ -42,6 +42,13 @@ impl RegisterCluster {
             Self::Cluster(c) => &c.description,
         }
     }
+    /// Specify the name from which to inherit data
+    pub fn derived_from(&self) -> &Option<String> {
+        match self {
+            Self::Register(r) => &r.derived_from,
+            Self::Cluster(c) => &c.derived_from,
+        }
+    }
     /// Address offset of register or cluster
     pub fn address_offset(&self) -> u32 {
         match self {

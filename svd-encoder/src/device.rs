@@ -1,3 +1,5 @@
+use svd_rs::Peripheral;
+
 use super::{new_node, Config, Element, Encode, EncodeChildren, EncodeError, XMLNode};
 use crate::{config::Sorting, svd::Device};
 
@@ -57,24 +59,23 @@ impl Encode for Device {
                 .encode_with_config(config)?,
         );
 
-        let peripherals: Result<Vec<_>, _> = if let Some(sorting) = config.peripheral_sorting {
-            let mut refs = self.peripherals.iter().collect::<Vec<_>>();
-            match sorting {
-                Sorting::Offset => refs.sort_by_key(|p| p.base_address),
-                Sorting::OffsetReversed => {
-                    refs.sort_by_key(|p| -(p.base_address as i32));
-                }
-                Sorting::Name => refs.sort_by_key(|p| &p.name),
-            }
-            refs.into_iter()
+        let peripherals: Result<Vec<_>, _> =
+            if !config.peripheral_derived_last && config.peripheral_sorting.is_none() {
+                self.peripherals
+                    .iter()
+                    .map(|peripheral| peripheral.encode_node_with_config(config))
+                    .collect()
+            } else {
+                sort_derived_peripherals(
+                    &self.peripherals,
+                    config.peripheral_sorting,
+                    config.peripheral_derived_last,
+                )
+                .into_iter()
                 .map(|peripheral| peripheral.encode_node_with_config(config))
                 .collect()
-        } else {
-            self.peripherals
-                .iter()
-                .map(|peripheral| peripheral.encode_node_with_config(config))
-                .collect()
-        };
+            };
+
         elem.children.push({
             let mut e = Element::new("peripherals");
             e.children = peripherals?;
@@ -91,5 +92,42 @@ impl Encode for Device {
         );
 
         Ok(elem)
+    }
+}
+
+fn sort_peripherals(refs: &mut [&Peripheral], sorting: Option<Sorting>) {
+    if let Some(sorting) = sorting {
+        match sorting {
+            Sorting::Offset => refs.sort_by_key(|p| p.base_address),
+            Sorting::OffsetReversed => {
+                refs.sort_by_key(|p| -(p.base_address as i32));
+            }
+            Sorting::Name => refs.sort_by_key(|p| &p.name),
+        }
+    }
+}
+
+fn sort_derived_peripherals(
+    peripherals: &[Peripheral],
+    sorting: Option<Sorting>,
+    derived_last: bool,
+) -> Vec<&Peripheral> {
+    if derived_last {
+        let mut common_refs = peripherals
+            .iter()
+            .filter(|p| p.derived_from.is_none())
+            .collect::<Vec<_>>();
+        let mut derived_refs = peripherals
+            .iter()
+            .filter(|p| p.derived_from.is_some())
+            .collect::<Vec<_>>();
+        sort_peripherals(&mut common_refs, sorting);
+        sort_peripherals(&mut derived_refs, sorting);
+        common_refs.extend(derived_refs);
+        common_refs
+    } else {
+        let mut refs = peripherals.iter().collect::<Vec<_>>();
+        sort_peripherals(&mut refs, sorting);
+        refs
     }
 }

@@ -1,3 +1,5 @@
+use svd_rs::Field;
+
 use super::{
     new_node, Config, Element, ElementMerge, Encode, EncodeChildren, EncodeError, XMLNode,
 };
@@ -74,23 +76,18 @@ impl Encode for RegisterInfo {
         }
 
         if let Some(v) = &self.fields {
-            let children: Result<Vec<_>, _> = if let Some(sorting) = config.field_sorting {
-                let mut refs = v.iter().collect::<Vec<_>>();
-                match sorting {
-                    Sorting::Offset => refs.sort_by_key(|f| f.bit_offset()),
-                    Sorting::OffsetReversed => {
-                        refs.sort_by_key(|f| -(f.bit_offset() as i32));
-                    }
-                    Sorting::Name => refs.sort_by_key(|f| &f.name),
-                }
-                refs.into_iter()
-                    .map(|field| field.encode_node_with_config(config))
-                    .collect()
-            } else {
-                v.iter()
-                    .map(|field| field.encode_node_with_config(config))
-                    .collect()
-            };
+            let children: Result<Vec<_>, _> =
+                if !config.field_derived_last && config.field_sorting.is_none() {
+                    v.iter()
+                        .map(|field| field.encode_node_with_config(config))
+                        .collect()
+                } else {
+                    sort_derived_fields(v, config.field_sorting, config.field_derived_last)
+                        .into_iter()
+                        .map(|field| field.encode_node_with_config(config))
+                        .collect()
+                };
+
             let children = children?;
             if !children.is_empty() {
                 let mut fields = Element::new("fields");
@@ -107,5 +104,50 @@ impl Encode for RegisterInfo {
         }
 
         Ok(elem)
+    }
+}
+
+fn sort_fields(refs: &mut [&Field], sorting: Option<Sorting>) {
+    if let Some(sorting) = sorting {
+        match sorting {
+            Sorting::Offset => refs.sort_by_key(|f| f.bit_offset()),
+            Sorting::OffsetReversed => {
+                refs.sort_by_key(|f| -(f.bit_offset() as i32));
+            }
+            Sorting::Name => refs.sort_by_key(|f| &f.name),
+        }
+    }
+}
+
+fn sort_derived_fields(v: &[Field], sorting: Option<Sorting>, derived_last: bool) -> Vec<&Field> {
+    if derived_last {
+        let mut common_refs = Vec::with_capacity(v.len());
+        let mut derived_refs = Vec::new();
+        for f in v.iter() {
+            if f.derived_from.is_some() {
+                derived_refs.push(f);
+            } else {
+                let mut derived = false;
+                for ev in &f.enumerated_values {
+                    if ev.derived_from.is_some() {
+                        derived_refs.push(f);
+                        derived = true;
+                        break;
+                    }
+                }
+                if !derived {
+                    common_refs.push(f);
+                }
+            }
+        }
+        sort_fields(&mut common_refs, sorting);
+        sort_fields(&mut derived_refs, sorting);
+        common_refs.extend(derived_refs);
+
+        common_refs
+    } else {
+        let mut refs = v.iter().collect::<Vec<_>>();
+        sort_fields(&mut refs, sorting);
+        refs
     }
 }
