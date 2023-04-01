@@ -1,7 +1,10 @@
 use svd_rs::Peripheral;
 
 use super::{new_node, Config, Element, Encode, EncodeChildren, EncodeError, XMLNode};
-use crate::{config::Sorting, svd::Device};
+use crate::{
+    config::{DerivableSorting, Sorting},
+    svd::Device,
+};
 
 impl Encode for Device {
     type Error = EncodeError;
@@ -60,20 +63,16 @@ impl Encode for Device {
         );
 
         let peripherals: Result<Vec<_>, _> =
-            if !config.peripheral_derived_last && config.peripheral_sorting.is_none() {
+            if config.peripheral_sorting == DerivableSorting::Unchanged(None) {
                 self.peripherals
                     .iter()
                     .map(|peripheral| peripheral.encode_node_with_config(config))
                     .collect()
             } else {
-                sort_derived_peripherals(
-                    &self.peripherals,
-                    config.peripheral_sorting,
-                    config.peripheral_derived_last,
-                )
-                .into_iter()
-                .map(|peripheral| peripheral.encode_node_with_config(config))
-                .collect()
+                sort_derived_peripherals(&self.peripherals, config.peripheral_sorting)
+                    .into_iter()
+                    .map(|peripheral| peripheral.encode_node_with_config(config))
+                    .collect()
             };
 
         elem.children.push({
@@ -109,25 +108,27 @@ fn sort_peripherals(refs: &mut [&Peripheral], sorting: Option<Sorting>) {
 
 fn sort_derived_peripherals(
     peripherals: &[Peripheral],
-    sorting: Option<Sorting>,
-    derived_last: bool,
+    sorting: DerivableSorting,
 ) -> Vec<&Peripheral> {
-    if derived_last {
-        let mut common_refs = peripherals
-            .iter()
-            .filter(|p| p.derived_from.is_none())
-            .collect::<Vec<_>>();
-        let mut derived_refs = peripherals
-            .iter()
-            .filter(|p| p.derived_from.is_some())
-            .collect::<Vec<_>>();
-        sort_peripherals(&mut common_refs, sorting);
-        sort_peripherals(&mut derived_refs, sorting);
-        common_refs.extend(derived_refs);
-        common_refs
-    } else {
-        let mut refs = peripherals.iter().collect::<Vec<_>>();
-        sort_peripherals(&mut refs, sorting);
-        refs
+    match sorting {
+        DerivableSorting::Unchanged(sorting) => {
+            let mut refs = peripherals.iter().collect::<Vec<_>>();
+            sort_peripherals(&mut refs, sorting);
+            refs
+        }
+        DerivableSorting::DeriveLast(sorting) => {
+            let mut common_refs = peripherals
+                .iter()
+                .filter(|p| p.derived_from.is_none())
+                .collect::<Vec<_>>();
+            let mut derived_refs = peripherals
+                .iter()
+                .filter(|p| p.derived_from.is_some())
+                .collect::<Vec<_>>();
+            sort_peripherals(&mut common_refs, sorting);
+            sort_peripherals(&mut derived_refs, sorting);
+            common_refs.extend(derived_refs);
+            common_refs
+        }
     }
 }

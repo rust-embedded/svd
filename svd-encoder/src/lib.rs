@@ -7,7 +7,7 @@ use crate::svd::Device;
 use xmltree::{Element, EmitterConfig, XMLNode};
 
 pub use crate::config::{
-    Config, IdentifierFormat, NumberFormat, RegistersOrClustersFirst, Sorting,
+    Config, DerivableSorting, IdentifierFormat, NumberFormat, RcSorting, Sorting,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, thiserror::Error)]

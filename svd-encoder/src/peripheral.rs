@@ -5,7 +5,7 @@ use super::{
 };
 
 use crate::{
-    config::{change_case, format_number, Sorting},
+    config::{change_case, format_number, DerivableSorting, RcSorting, Sorting},
     svd::{Peripheral, PeripheralInfo},
 };
 
@@ -104,52 +104,21 @@ impl Encode for PeripheralInfo {
         elem.children.append(&mut interrupts?);
 
         if let Some(v) = &self.registers {
-            let children: Result<Vec<_>, _> = if config.registers_or_clusters_first.is_none()
-                && !config.register_cluster_derived_last
-                && config.register_cluster_sorting.is_none()
-            {
-                v.iter()
+            let children: Result<Vec<_>, _> = match config.register_cluster_sorting {
+                RcSorting::Unchanged(DerivableSorting::Unchanged(None)) => v
+                    .iter()
                     .map(|e| e.encode_node_with_config(config))
-                    .collect()
-            } else if let Some(first) = config.registers_or_clusters_first {
-                let reg_refs = v
-                    .iter()
-                    .filter(|rc| matches!(rc, RegisterCluster::Register(_)))
-                    .collect::<Vec<_>>();
-                let reg_refs = sort_derived_register_cluster(
-                    reg_refs,
-                    config.register_cluster_sorting,
-                    config.register_cluster_derived_last,
-                );
-
-                let c_refs = v
-                    .iter()
-                    .filter(|rc| matches!(rc, RegisterCluster::Cluster(_)))
-                    .collect::<Vec<_>>();
-                let c_refs = sort_derived_register_cluster(
-                    c_refs,
-                    config.register_cluster_sorting,
-                    config.register_cluster_derived_last,
-                );
-                match first {
-                    crate::RegistersOrClustersFirst::Registers => {
-                        reg_refs.into_iter().chain(c_refs.into_iter())
-                    }
-                    crate::RegistersOrClustersFirst::Clusters => {
-                        c_refs.into_iter().chain(reg_refs.into_iter())
-                    }
-                }
-                .map(|e| e.encode_node_with_config(config))
-                .collect()
-            } else {
-                sort_derived_register_cluster(
-                    v,
-                    config.register_cluster_sorting,
-                    config.register_cluster_derived_last,
-                )
-                .into_iter()
-                .map(|e| e.encode_node_with_config(config))
-                .collect()
+                    .collect(),
+                RcSorting::Unchanged(sorting) => sort_derived_register_cluster(v, sorting)
+                    .into_iter()
+                    .map(|e| e.encode_node_with_config(config))
+                    .collect(),
+                RcSorting::RegistersFirst(sorting) => rc_sort(v, sorting, true)
+                    .map(|e| e.encode_node_with_config(config))
+                    .collect(),
+                RcSorting::ClustersFirst(sorting) => rc_sort(v, sorting, false)
+                    .map(|e| e.encode_node_with_config(config))
+                    .collect(),
             };
 
             elem.children.push({
@@ -184,26 +153,51 @@ fn sort_register_cluster(refs: &mut [&RegisterCluster], sorting: Option<Sorting>
 
 fn sort_derived_register_cluster<'a>(
     rcs: impl IntoIterator<Item = &'a RegisterCluster>,
-    sorting: Option<Sorting>,
-    derived_last: bool,
+    sorting: DerivableSorting,
 ) -> Vec<&'a RegisterCluster> {
-    if derived_last {
-        let mut common_refs = Vec::new();
-        let mut derived_refs = Vec::new();
-        for rc in rcs {
-            if rc.derived_from().is_some() {
-                derived_refs.push(rc);
-            } else {
-                common_refs.push(rc);
-            }
+    match sorting {
+        DerivableSorting::Unchanged(sorting) => {
+            let mut refs = rcs.into_iter().collect::<Vec<_>>();
+            sort_register_cluster(&mut refs, sorting);
+            refs
         }
-        sort_register_cluster(&mut common_refs, sorting);
-        sort_register_cluster(&mut derived_refs, sorting);
-        common_refs.extend(derived_refs);
-        common_refs
+        DerivableSorting::DeriveLast(sorting) => {
+            let mut common_refs = Vec::new();
+            let mut derived_refs = Vec::new();
+            for rc in rcs {
+                if rc.derived_from().is_some() {
+                    derived_refs.push(rc);
+                } else {
+                    common_refs.push(rc);
+                }
+            }
+            sort_register_cluster(&mut common_refs, sorting);
+            sort_register_cluster(&mut derived_refs, sorting);
+            common_refs.extend(derived_refs);
+            common_refs
+        }
+    }
+}
+
+fn rc_sort(
+    v: &[RegisterCluster],
+    sorting: DerivableSorting,
+    register_first: bool,
+) -> impl Iterator<Item = &RegisterCluster> {
+    let reg_refs = v
+        .iter()
+        .filter(|rc| matches!(rc, RegisterCluster::Register(_)))
+        .collect::<Vec<_>>();
+    let reg_refs = sort_derived_register_cluster(reg_refs, sorting);
+
+    let c_refs = v
+        .iter()
+        .filter(|rc| matches!(rc, RegisterCluster::Cluster(_)))
+        .collect::<Vec<_>>();
+    let c_refs = sort_derived_register_cluster(c_refs, sorting);
+    if register_first {
+        reg_refs.into_iter().chain(c_refs.into_iter())
     } else {
-        let mut refs = rcs.into_iter().collect::<Vec<_>>();
-        sort_register_cluster(&mut refs, sorting);
-        refs
+        c_refs.into_iter().chain(reg_refs.into_iter())
     }
 }

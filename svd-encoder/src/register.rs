@@ -5,7 +5,7 @@ use super::{
 };
 
 use crate::{
-    config::{change_case, format_number, Sorting},
+    config::{change_case, format_number, DerivableSorting, Sorting},
     svd::{Register, RegisterInfo},
 };
 
@@ -77,12 +77,12 @@ impl Encode for RegisterInfo {
 
         if let Some(v) = &self.fields {
             let children: Result<Vec<_>, _> =
-                if !config.field_derived_last && config.field_sorting.is_none() {
+                if config.field_sorting == DerivableSorting::Unchanged(None) {
                     v.iter()
                         .map(|field| field.encode_node_with_config(config))
                         .collect()
                 } else {
-                    sort_derived_fields(v, config.field_sorting, config.field_derived_last)
+                    sort_derived_fields(v, config.field_sorting)
                         .into_iter()
                         .map(|field| field.encode_node_with_config(config))
                         .collect()
@@ -119,35 +119,38 @@ fn sort_fields(refs: &mut [&Field], sorting: Option<Sorting>) {
     }
 }
 
-fn sort_derived_fields(v: &[Field], sorting: Option<Sorting>, derived_last: bool) -> Vec<&Field> {
-    if derived_last {
-        let mut common_refs = Vec::with_capacity(v.len());
-        let mut derived_refs = Vec::new();
-        for f in v.iter() {
-            if f.derived_from.is_some() {
-                derived_refs.push(f);
-            } else {
-                let mut derived = false;
-                for ev in &f.enumerated_values {
-                    if ev.derived_from.is_some() {
-                        derived_refs.push(f);
-                        derived = true;
-                        break;
+fn sort_derived_fields(v: &[Field], sorting: DerivableSorting) -> Vec<&Field> {
+    match sorting {
+        DerivableSorting::Unchanged(sorting) => {
+            let mut refs = v.iter().collect::<Vec<_>>();
+            sort_fields(&mut refs, sorting);
+            refs
+        }
+        DerivableSorting::DeriveLast(sorting) => {
+            let mut common_refs = Vec::with_capacity(v.len());
+            let mut derived_refs = Vec::new();
+            for f in v.iter() {
+                if f.derived_from.is_some() {
+                    derived_refs.push(f);
+                } else {
+                    let mut derived = false;
+                    for ev in &f.enumerated_values {
+                        if ev.derived_from.is_some() {
+                            derived_refs.push(f);
+                            derived = true;
+                            break;
+                        }
+                    }
+                    if !derived {
+                        common_refs.push(f);
                     }
                 }
-                if !derived {
-                    common_refs.push(f);
-                }
             }
-        }
-        sort_fields(&mut common_refs, sorting);
-        sort_fields(&mut derived_refs, sorting);
-        common_refs.extend(derived_refs);
+            sort_fields(&mut common_refs, sorting);
+            sort_fields(&mut derived_refs, sorting);
+            common_refs.extend(derived_refs);
 
-        common_refs
-    } else {
-        let mut refs = v.iter().collect::<Vec<_>>();
-        sort_fields(&mut refs, sorting);
-        refs
+            common_refs
+        }
     }
 }
