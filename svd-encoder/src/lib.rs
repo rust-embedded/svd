@@ -6,7 +6,9 @@ use svd_rs as svd;
 use crate::svd::Device;
 use xmltree::{Element, EmitterConfig, XMLNode};
 
-pub use crate::config::{Config, IdentifierFormat, NumberFormat};
+pub use crate::config::{
+    Config, DerivableSorting, IdentifierFormat, NumberFormat, RcSorting, Sorting,
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum EncodeError {}

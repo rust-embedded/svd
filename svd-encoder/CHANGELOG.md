@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add `Sorting` options to `Config`
+
 ## [v0.14.2] - 2022-12-19
 
 - Fix typo in `headerDefinitionsPrefix`
