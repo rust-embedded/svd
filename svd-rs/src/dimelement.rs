@@ -144,15 +144,27 @@ impl DimElement {
 
     /// Get array of indexes from string
     pub fn parse_indexes(text: &str) -> Option<Vec<String>> {
-        if text.contains('-') {
-            let mut parts = text.splitn(2, '-');
-            let start = parts.next()?.parse::<u32>().ok()?;
-            let end = parts.next()?.parse::<u32>().ok()?;
-
-            Some((start..=end).map(|i| i.to_string()).collect())
+        (if text.contains('-') {
+            let (start, end) = text.split_once('-')?;
+            if let (Ok(start), Ok(end)) = (start.parse::<u32>(), end.parse::<u32>()) {
+                Some((start..=end).map(|i| i.to_string()).collect::<Vec<_>>())
+            } else {
+                let mut start = start.bytes();
+                let mut end = end.bytes();
+                match (start.next(), start.next(), end.next(), end.next()) {
+                    (Some(start), None, Some(end), None)
+                        if (start.is_ascii_lowercase() && end.is_ascii_lowercase())
+                            || (start.is_ascii_uppercase() && end.is_ascii_uppercase()) =>
+                    {
+                        Some((start..=end).map(|c| char::from(c).to_string()).collect())
+                    }
+                    _ => None,
+                }
+            }
         } else {
             Some(text.split(',').map(|s| s.to_string()).collect())
-        }
+        })
+        .filter(|v| !v.is_empty())
     }
     /// Try to represent [`DimElement`] as range of integer indexes
     pub fn indexes_as_range(&self) -> Option<RangeInclusive<u32>> {
