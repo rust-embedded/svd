@@ -3,6 +3,9 @@ use super::{Access, Protection, SvdError, ValidateLevel};
 /// Errors from [`RegisterProperties::validate`]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
+    /// NonByteWiseSize
+    #[error("Size {0} is not ")]
+    NonByteWiseSize(u32),
     /// Value is too large
     #[error("Reset value 0x{0:x} doesn't fit in {1} bits")]
     ValueTooLarge(u64, u32),
@@ -94,6 +97,7 @@ impl RegisterProperties {
 
     /// Validate the [`RegisterProperties`]
     pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        check_size(self.size, lvl)?;
         check_reset_value(self.size, self.reset_value, self.reset_mask, lvl)?;
         Ok(())
     }
@@ -129,6 +133,17 @@ impl RegisterProperties {
         }
         Ok(self)
     }
+}
+
+fn check_size(size: Option<u32>, lvl: ValidateLevel) -> Result<(), Error> {
+    if lvl.is_strict() {
+        if let Some(size) = size {
+            if size % 8 != 0 {
+                return Err(Error::NonByteWiseSize(size));
+            }
+        }
+    }
+    Ok(())
 }
 
 pub(crate) fn check_reset_value(
