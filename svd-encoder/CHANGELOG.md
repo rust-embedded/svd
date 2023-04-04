@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.14.3] - 2023-04-04
+
 - Add `Sorting` options to `Config`
 
 ## [v0.14.2] - 2022-12-19
@@ -44,7 +46,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-encoder-v0.14.2...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.2...HEAD
+[v0.14.3]: https://github.com/rust-embedded/svd/compare/svd-encoder-v0.14.2..svd-rs-v0.14.2
 [v0.14.2]: https://github.com/rust-embedded/svd/compare/svd-encoder-v0.14.1..svd-encoder-v0.14.2
 [v0.14.1]: https://github.com/rust-embedded/svd/compare/v0.14.0..svd-encoder-v0.14.1
 [v0.14.0]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.13.1..v0.14.0
