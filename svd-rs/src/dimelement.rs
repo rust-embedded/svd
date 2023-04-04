@@ -153,7 +153,8 @@ impl DimElement {
                 let mut end = end.bytes();
                 match (start.next(), start.next(), end.next(), end.next()) {
                     (Some(start), None, Some(end), None)
-                        if start.is_ascii_alphabetic() && end.is_ascii_alphabetic() =>
+                        if (start.is_ascii_lowercase() && end.is_ascii_lowercase())
+                            || (start.is_ascii_uppercase() && end.is_ascii_uppercase()) =>
                     {
                         Some((start..=end).map(|c| char::from(c).to_string()).collect())
                     }
