@@ -2,3 +2,6 @@
 [._]*.sw[a-p]
 Cargo.lock
 target
+cmsis-svd/
+tests/src/cmsis_tests.rs
+tests/src/cmsis_tests/

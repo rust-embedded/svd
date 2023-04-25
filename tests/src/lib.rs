@@ -59,5 +59,6 @@ mod interrupt;
 mod modifiedwritevalues;
 mod register;
 //mod registerproperties;
+mod cmsis_tests;
 mod usage;
 mod writeconstraint;

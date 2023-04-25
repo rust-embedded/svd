@@ -41,6 +41,8 @@ jobs:
           toolchain: stable
           profile: minimal
           override: true
+      - name: Generate test for SVDs from cmsis-svd repository
+        run: bash generate-tests.sh
       - uses: actions-rs/cargo@v1
         with:
           command: test
