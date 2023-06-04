@@ -9,7 +9,7 @@ license = "MIT OR Apache-2.0"
 name = "svd-rs"
 repository = "https://github.com/rust-embedded/svd"
 edition = "2021"
-rust-version = "1.56.0"
+rust-version = "1.58.0"
 version = "0.14.2"
 readme = "README.md"
 

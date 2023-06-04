@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Bump MSRV to 1.58.0
+
 ## [v0.14.2] - 2023-04-04
 
 - Add support of `a-Z` for `dimIndex`
@@ -14,7 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [v0.14.1] - 2022-10-23
 
-- (De)serialize `dimIndex` (from)to string 
+- (De)serialize `dimIndex` (from)to string
 
 ## [v0.14.0] - 2022-07-19
 
@@ -63,7 +65,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   `header_struct_name` to `PeripheralInfo`, `alternate_cluster` to `ClusterInfo`
 - Add `protection` to `RegisterProperties` and `AddressBlock`
 - Add `readAction` to `RegisterInfo` and `FieldInfo`
-- Add `single` and `array` for `Info` types, 
+- Add `single` and `array` for `Info` types,
   `is_single` and `is_array` for `Peripheral`, `Cluster`, `Register` and `Field`
 - Add array support for peripherals
 
