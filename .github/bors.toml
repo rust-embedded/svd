@@ -7,5 +7,4 @@ status = [
   "build (stable)",
   "test",
   "test-strict",
-  "clippy_check",
 ]
