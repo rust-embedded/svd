@@ -19,9 +19,7 @@
 //! - [SVD Schema file](https://www.keil.com/pack/doc/CMSIS/SVD/html/schema_1_2_gr.html)
 //! - [SVD file database](https://github.com/posborne/cmsis-svd/tree/master/data)
 //! - [Sample SVD file](https://www.keil.com/pack/doc/CMSIS/SVD/html/svd_Example_pg.html)
-
-#![deny(warnings)]
-
+//!
 //! Parse traits.
 //! These support parsing of SVD types from XML
 
