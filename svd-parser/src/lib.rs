@@ -178,6 +178,14 @@ pub fn parse_with_config(xml: &str, config: &Config) -> anyhow::Result<Device> {
     Ok(device)
 }
 
+fn trim_spaces<'a>(s: &'a str, config: &Config) -> Result<&'a str, SVDError> {
+    let st = s.trim();
+    if config.validate_level == ValidateLevel::Strict && st.len() != s.len() {
+        return Err(SVDError::ExtraWhiteSpace);
+    }
+    Ok(st)
+}
+
 /// Return the &str trimmed UTF-8 BOM if the input &str contains the BOM.
 fn trim_utf8_bom(s: &str) -> &str {
     if s.len() > 2 && s.as_bytes().starts_with(b"\xef\xbb\xbf") {
@@ -260,6 +268,8 @@ pub enum SVDError {
     DimIndexParse,
     #[error("Name `{0}` in tag `{1}` is missing a %s placeholder")]
     MissingPlaceholder(String, String),
+    #[error("Tag content starts or ends with whitespace")]
+    ExtraWhiteSpace,
 }
 
 #[derive(Clone, Debug, PartialEq)]
