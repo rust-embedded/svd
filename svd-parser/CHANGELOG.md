@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 
 - Bump MSRV to 1.58.0
+- Ignore whitespaces around tag contents
 
 ## [v0.14.1] - 2022-10-23
 
