@@ -70,7 +70,8 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
     /// Get text contained by an XML Element
     fn get_text(&self) -> Result<&str, SVDErrorAt> {
         match self.text() {
-            Some(s) => Ok(s),
+            // TODO: return error on `strict`
+            Some(s) => Ok(s.trim()),
             // FIXME: Doesn't look good because SVDError doesn't format by itself. We already
             // capture the element and this information can be used for getting the name
             // This would fix ParseError
