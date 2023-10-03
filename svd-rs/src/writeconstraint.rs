@@ -46,7 +46,7 @@ impl WriteConstraintRange {
         }
         for v in [&self.min, &self.max] {
             if !range.contains(v) {
-                return Err(Error::OutOfRange(*v, range.clone()).into());
+                return Err(Error::OutOfRange(*v, range).into());
             }
         }
         Ok(())

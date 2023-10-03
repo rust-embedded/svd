@@ -196,8 +196,8 @@ fn rc_sort(
         .collect::<Vec<_>>();
     let c_refs = sort_derived_register_cluster(c_refs, sorting);
     if register_first {
-        reg_refs.into_iter().chain(c_refs.into_iter())
+        reg_refs.into_iter().chain(c_refs)
     } else {
-        c_refs.into_iter().chain(reg_refs.into_iter())
+        c_refs.into_iter().chain(reg_refs)
     }
 }
