@@ -34,10 +34,16 @@ pub enum Error {
     /// The value is not in range.
     #[error("Value {0} out of range {1:?}")]
     OutOfRange(u64, core::ops::Range<u64>),
+    /// Minimum is greater than maximum.
+    #[error("Range minimum {0} is greater than maximum {1}")]
+    ReversedRange(u64, u64),
 }
 
 impl WriteConstraintRange {
     pub(crate) fn check_range(&self, range: core::ops::Range<u64>) -> Result<(), SvdError> {
+        if self.min > self.max {
+            return Err(Error::ReversedRange(self.min, self.max).into());
+        }
         for v in [&self.min, &self.max] {
             if !range.contains(v) {
                 return Err(Error::OutOfRange(*v, range.clone()).into());
