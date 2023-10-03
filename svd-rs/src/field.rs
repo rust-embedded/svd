@@ -312,6 +312,11 @@ impl FieldInfo {
                 _ => return Err(Error::IncompatibleEnumeratedValues.into()),
             }
         }
+
+        if let Some(WriteConstraint::Range(constraint)) = self.write_constraint {
+            constraint.check_range(0..2_u64.pow(self.bit_range.width))?;
+        }
+
         Ok(())
     }
 

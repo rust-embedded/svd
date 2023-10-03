@@ -1,3 +1,5 @@
+use super::SvdError;
+
 /// Define constraints for writing values to a field
 #[cfg_attr(
     feature = "serde",
@@ -24,4 +26,23 @@ pub struct WriteConstraintRange {
     /// Specify the largest number to be written to the field.
     #[cfg_attr(feature = "serde", serde(rename = "maximum"))]
     pub max: u64,
+}
+
+/// Errors for [`WriteConstraintRange::check_range`]
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum Error {
+    /// The value is not in range.
+    #[error("Value {0} out of range {1:?}")]
+    OutOfRange(u64, core::ops::Range<u64>),
+}
+
+impl WriteConstraintRange {
+    pub(crate) fn check_range(&self, range: core::ops::Range<u64>) -> Result<(), SvdError> {
+        for v in [&self.min, &self.max] {
+            if !range.contains(v) {
+                return Err(Error::OutOfRange(*v, range.clone()).into());
+            }
+        }
+        Ok(())
+    }
 }

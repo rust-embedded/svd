@@ -166,6 +166,9 @@ pub enum SvdError {
     /// RegisterProperties error
     #[error("`RegisterProperties error: {0}")]
     RegisterProperties(#[from] registerproperties::Error),
+    /// WriteConstraint error
+    #[error("`WriteConstraint error: {0}")]
+    WriteConstraint(#[from] writeconstraint::Error),
 }
 
 /// Errors from a builder
