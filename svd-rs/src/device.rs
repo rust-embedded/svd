@@ -1,5 +1,6 @@
 use super::{
-    BuildError, Cpu, EmptyToNone, Name, Peripheral, RegisterProperties, SvdError, ValidateLevel,
+    BuildError, Cpu, Description, EmptyToNone, Name, Peripheral, RegisterProperties, SvdError,
+    ValidateLevel,
 };
 
 /// Errors for [`Device::validate`]
@@ -400,5 +401,11 @@ impl Device {
 impl Name for Device {
     fn name(&self) -> &str {
         &self.name
+    }
+}
+
+impl Description for Device {
+    fn description(&self) -> Option<&str> {
+        Some(&self.description)
     }
 }

@@ -1,6 +1,7 @@
 use super::{
-    bitrange, Access, BitRange, BuildError, DimElement, EmptyToNone, EnumeratedValues, MaybeArray,
-    ModifiedWriteValues, Name, ReadAction, SvdError, Usage, ValidateLevel, WriteConstraint,
+    bitrange, Access, BitRange, BuildError, Description, DimElement, EmptyToNone, EnumeratedValues,
+    MaybeArray, ModifiedWriteValues, Name, ReadAction, SvdError, Usage, ValidateLevel,
+    WriteConstraint,
 };
 
 /// Describes a field or fields of a [register](crate::RegisterInfo).
@@ -365,5 +366,11 @@ impl FieldInfo {
 impl Name for FieldInfo {
     fn name(&self) -> &str {
         &self.name
+    }
+}
+
+impl Description for FieldInfo {
+    fn description(&self) -> Option<&str> {
+        self.description.as_deref()
     }
 }

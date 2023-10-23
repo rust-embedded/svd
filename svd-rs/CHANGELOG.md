@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Bump MSRV to 1.58.0
 
 - `array::names` returns custom names if specified
+- add `Description` trait and `array::descriptions`
 
 ## [v0.14.2] - 2023-04-04
 

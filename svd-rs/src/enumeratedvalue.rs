@@ -1,4 +1,4 @@
-use super::{BuildError, EmptyToNone, Name, SvdError, ValidateLevel};
+use super::{BuildError, Description, EmptyToNone, Name, SvdError, ValidateLevel};
 
 /// Describes a single entry in the enumeration.
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -150,5 +150,11 @@ impl EnumeratedValue {
 impl Name for EnumeratedValue {
     fn name(&self) -> &str {
         &self.name
+    }
+}
+
+impl Description for EnumeratedValue {
+    fn description(&self) -> Option<&str> {
+        self.description.as_deref()
     }
 }

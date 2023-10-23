@@ -3,7 +3,7 @@ use super::{
         AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, RegisterIter,
         RegisterIterMut,
     },
-    BuildError, DimElement, EmptyToNone, MaybeArray, Name, Register, RegisterCluster,
+    BuildError, Description, DimElement, EmptyToNone, MaybeArray, Name, Register, RegisterCluster,
     RegisterProperties, SvdError, ValidateLevel,
 };
 
@@ -318,5 +318,11 @@ impl ClusterInfo {
 impl Name for ClusterInfo {
     fn name(&self) -> &str {
         &self.name
+    }
+}
+
+impl Description for ClusterInfo {
+    fn description(&self) -> Option<&str> {
+        self.description.as_deref()
     }
 }

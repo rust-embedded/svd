@@ -253,3 +253,27 @@ where
         T::name(*self)
     }
 }
+
+/// Get SVD element description
+pub trait Description {
+    /// Get description
+    fn description(&self) -> Option<&str>;
+}
+
+impl<T> Description for &T
+where
+    T: Description,
+{
+    fn description(&self) -> Option<&str> {
+        T::description(*self)
+    }
+}
+
+impl<T> Description for &mut T
+where
+    T: Description,
+{
+    fn description(&self) -> Option<&str> {
+        T::description(*self)
+    }
+}
