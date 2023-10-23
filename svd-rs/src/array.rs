@@ -53,8 +53,18 @@ where
 /// Return list of names of instances in array
 pub fn names<'a, T: Name>(info: &'a T, dim: &'a DimElement) -> impl Iterator<Item = String> + 'a {
     let name = info.name();
-    dim.indexes()
-        .map(move |i| name.replace("[%s]", &i).replace("%s", &i))
+    dim.indexes().map(move |i| {
+        dim.dim_array_index
+            .as_ref()
+            .map(|dai| {
+                dai.values
+                    .iter()
+                    .find(|e| e.value.map(|v| v.to_string().as_str() == i.deref()) == Some(true))
+            })
+            .flatten()
+            .map(|n| n.name.clone())
+            .unwrap_or_else(|| name.replace("[%s]", &i).replace("%s", &i))
+    })
 }
 
 #[cfg(feature = "serde")]
