@@ -1,6 +1,7 @@
 use super::{
-    Access, BuildError, DimElement, EmptyToNone, Field, MaybeArray, ModifiedWriteValues, Name,
-    ReadAction, RegisterProperties, SvdError, ValidateLevel, WriteConstraint,
+    Access, BuildError, Description, DimElement, EmptyToNone, Field, MaybeArray,
+    ModifiedWriteValues, Name, ReadAction, RegisterProperties, SvdError, ValidateLevel,
+    WriteConstraint,
 };
 
 /// A single register or array of registers. A register is a named, programmable resource that belongs to a [peripheral](crate::Peripheral).
@@ -370,5 +371,11 @@ impl RegisterInfo {
 impl Name for RegisterInfo {
     fn name(&self) -> &str {
         &self.name
+    }
+}
+
+impl Description for RegisterInfo {
+    fn description(&self) -> Option<&str> {
+        self.description.as_deref()
     }
 }

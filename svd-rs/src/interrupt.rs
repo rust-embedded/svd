@@ -1,4 +1,4 @@
-use super::{BuildError, Name, SvdError, ValidateLevel};
+use super::{BuildError, Description, Name, SvdError, ValidateLevel};
 
 /// Describes an interrupt in the device
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -110,5 +110,11 @@ impl Interrupt {
 impl Name for Interrupt {
     fn name(&self) -> &str {
         &self.name
+    }
+}
+
+impl Description for Interrupt {
+    fn description(&self) -> Option<&str> {
+        self.description.as_deref()
     }
 }

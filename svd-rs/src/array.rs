@@ -1,4 +1,4 @@
-use super::{DimElement, Name};
+use super::{Description, DimElement, Name};
 use core::ops::{Deref, DerefMut};
 
 /// A single SVD instance or array of instances
@@ -50,11 +50,48 @@ where
     }
 }
 
+impl<T> Description for MaybeArray<T>
+where
+    T: Description,
+{
+    fn description(&self) -> Option<&str> {
+        T::description(self)
+    }
+}
+
 /// Return list of names of instances in array
 pub fn names<'a, T: Name>(info: &'a T, dim: &'a DimElement) -> impl Iterator<Item = String> + 'a {
     let name = info.name();
-    dim.indexes()
-        .map(move |i| name.replace("[%s]", &i).replace("%s", &i))
+    dim.indexes().map(move |i| {
+        dim.dim_array_index
+            .as_ref()
+            .and_then(|dai| {
+                dai.values
+                    .iter()
+                    .find(|e| e.value.map(|v| v.to_string().as_str() == i.deref()) == Some(true))
+            })
+            .map(|n| n.name.clone())
+            .unwrap_or_else(|| name.replace("[%s]", &i).replace("%s", &i))
+    })
+}
+
+/// Return list of descriptions of instances in array
+pub fn descriptions<'a, T: Description>(
+    info: &'a T,
+    dim: &'a DimElement,
+) -> impl Iterator<Item = Option<String>> + 'a {
+    let description = info.description();
+    dim.indexes().map(move |i| {
+        dim.dim_array_index
+            .as_ref()
+            .and_then(|dai| {
+                dai.values
+                    .iter()
+                    .find(|e| e.value.map(|v| v.to_string().as_str() == i.deref()) == Some(true))
+            })
+            .and_then(|n| n.description.clone())
+            .or_else(|| description.map(|d| d.replace("[%s]", &i).replace("%s", &i)))
+    })
 }
 
 #[cfg(feature = "serde")]

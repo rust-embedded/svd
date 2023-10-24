@@ -3,8 +3,8 @@ use super::{
         AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, RegisterIter,
         RegisterIterMut,
     },
-    AddressBlock, BuildError, Cluster, DimElement, EmptyToNone, Interrupt, MaybeArray, Name,
-    Register, RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
+    AddressBlock, BuildError, Cluster, Description, DimElement, EmptyToNone, Interrupt, MaybeArray,
+    Name, Register, RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
 };
 
 /// A single peripheral or array of peripherals
@@ -477,5 +477,11 @@ impl PeripheralInfo {
 impl Name for PeripheralInfo {
     fn name(&self) -> &str {
         &self.name
+    }
+}
+
+impl Description for PeripheralInfo {
+    fn description(&self) -> Option<&str> {
+        self.description.as_deref()
     }
 }
