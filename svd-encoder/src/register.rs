@@ -36,11 +36,15 @@ impl Encode for RegisterInfo {
         ));
 
         if let Some(v) = &self.display_name {
-            elem.children.push(new_node("displayName", v.clone()));
+            if v.ne(&self.name) {
+                elem.children.push(new_node("displayName", v.clone()));
+            }
         }
 
         if let Some(v) = &self.description {
-            elem.children.push(new_node("description", v.clone()));
+            if v.ne(&self.name) {
+                elem.children.push(new_node("description", v.clone()));
+            }
         }
 
         if let Some(v) = &self.alternate_group {
@@ -49,10 +53,12 @@ impl Encode for RegisterInfo {
         }
 
         if let Some(v) = &self.alternate_register {
-            elem.children.push(new_node(
-                "alternateRegister",
-                change_case(v, config.register_name),
-            ));
+            if v.ne(&self.name) {
+                elem.children.push(new_node(
+                    "alternateRegister",
+                    change_case(v, config.register_name),
+                ));
+            }
         }
 
         elem.children.push(new_node(

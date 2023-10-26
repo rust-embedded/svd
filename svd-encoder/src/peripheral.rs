@@ -36,7 +36,9 @@ impl Encode for PeripheralInfo {
         ));
 
         if let Some(v) = &self.display_name {
-            elem.children.push(new_node("displayName", v.to_string()));
+            if v.ne(&self.name) {
+                elem.children.push(new_node("displayName", v.to_string()));
+            }
         }
 
         if let Some(v) = &self.version {
@@ -44,18 +46,24 @@ impl Encode for PeripheralInfo {
         }
 
         if let Some(v) = &self.description {
-            elem.children.push(new_node("description", v.to_string()));
+            if v.ne(&self.name) {
+                elem.children.push(new_node("description", v.to_string()));
+            }
         }
 
         if let Some(v) = &self.alternate_peripheral {
-            elem.children.push(new_node(
-                "alternatePeripheral",
-                change_case(v, config.peripheral_name),
-            ));
+            if v.ne(&self.name) {
+                elem.children.push(new_node(
+                    "alternatePeripheral",
+                    change_case(v, config.peripheral_name),
+                ));
+            }
         }
 
         if let Some(v) = &self.group_name {
-            elem.children.push(new_node("groupName", v.to_string()));
+            if v.ne(&self.name) {
+                elem.children.push(new_node("groupName", v.to_string()));
+            }
         }
 
         if let Some(v) = &self.prepend_to_name {
@@ -73,10 +81,12 @@ impl Encode for PeripheralInfo {
         }
 
         if let Some(v) = &self.header_struct_name {
-            elem.children.push(new_node(
-                "headerStructName",
-                change_case(v, config.peripheral_name),
-            ));
+            if v.ne(&self.name) {
+                elem.children.push(new_node(
+                    "headerStructName",
+                    change_case(v, config.peripheral_name),
+                ));
+            }
         }
 
         elem.children.push(new_node(
