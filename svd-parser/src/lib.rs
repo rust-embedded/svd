@@ -44,6 +44,7 @@ pub struct Config {
     /// Expand arrays and resolve derivedFrom
     // TODO: split it on several independent options
     pub expand: bool,
+    #[cfg(feature = "expand")]
     /// Derive register properties from parents
     pub expand_properties: bool,
     /// Skip parsing and emitting `enumeratedValues` and `writeConstraint` in `Field`
