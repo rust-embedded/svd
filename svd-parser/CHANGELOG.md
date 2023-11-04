@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Correctly place `expand_properties` under `expand` feature
+
 ## [v0.14.2] - 2023-09-17
 
 - Bump MSRV to 1.58.0
