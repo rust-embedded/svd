@@ -1,4 +1,5 @@
 use super::{
+    array::{descriptions, names},
     registercluster::{
         AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, RegisterIter,
         RegisterIterMut,
@@ -77,6 +78,23 @@ pub fn address_offsets<'a>(
     dim: &'a DimElement,
 ) -> impl Iterator<Item = u32> + 'a {
     (0..dim.dim).map(move |i| info.address_offset + i * dim.dim_increment)
+}
+
+/// Extract `ClusterInfo` items from array
+pub fn expand<'a>(
+    info: &'a ClusterInfo,
+    dim: &'a DimElement,
+) -> impl Iterator<Item = ClusterInfo> + 'a {
+    names(info, dim)
+        .zip(descriptions(info, dim))
+        .zip(address_offsets(info, dim))
+        .map(|((name, description), address_offset)| {
+            let mut info = info.clone();
+            info.name = name;
+            info.description = description;
+            info.address_offset = address_offset;
+            info
+        })
 }
 
 /// Builder for [`ClusterInfo`]

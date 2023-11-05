@@ -1,4 +1,5 @@
 use super::{
+    array::{descriptions, names},
     Access, BuildError, Description, DimElement, EmptyToNone, Field, MaybeArray,
     ModifiedWriteValues, Name, ReadAction, RegisterProperties, SvdError, ValidateLevel,
     WriteConstraint,
@@ -108,6 +109,27 @@ pub fn address_offsets<'a>(
     dim: &'a DimElement,
 ) -> impl Iterator<Item = u32> + 'a {
     (0..dim.dim).map(move |i| info.address_offset + i * dim.dim_increment)
+}
+
+/// Extract `RegisterInfo` items from array
+pub fn expand<'a>(
+    info: &'a RegisterInfo,
+    dim: &'a DimElement,
+) -> impl Iterator<Item = RegisterInfo> + 'a {
+    dim.indexes()
+        .zip(names(info, dim))
+        .zip(descriptions(info, dim))
+        .zip(address_offsets(info, dim))
+        .map(|(((idx, name), description), address_offset)| {
+            let mut info = info.clone();
+            info.name = name;
+            info.description = description;
+            info.address_offset = address_offset;
+            info.display_name = info
+                .display_name
+                .map(|d| d.replace("[%s]", &idx).replace("%s", &idx));
+            info
+        })
 }
 
 /// Builder for [`RegisterInfo`]

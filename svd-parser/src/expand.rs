@@ -5,8 +5,7 @@ use std::collections::HashMap;
 use std::fmt;
 use std::mem::take;
 use svd_rs::{
-    array::{descriptions, names},
-    cluster, field, peripheral, register, BitRange, Cluster, ClusterInfo, DeriveFrom, Device,
+    array::names, cluster, field, peripheral, register, Cluster, ClusterInfo, DeriveFrom, Device,
     EnumeratedValues, Field, Peripheral, Register, RegisterCluster, RegisterProperties,
 };
 
@@ -320,17 +319,7 @@ fn expand_cluster_array(
     match c {
         Cluster::Single(c) => expand_cluster(regs, c),
         Cluster::Array(info, dim) => {
-            for c in names(&info, &dim)
-                .zip(descriptions(&info, &dim))
-                .zip(cluster::address_offsets(&info, &dim))
-                .map(|((name, description), address_offset)| {
-                    let mut info = info.clone();
-                    info.name = name;
-                    info.description = description;
-                    info.address_offset = address_offset;
-                    info
-                })
-            {
+            for c in cluster::expand(&info, &dim) {
                 expand_cluster(regs, c);
             }
         }
@@ -468,19 +457,7 @@ fn expand_register_array(
             regs.push(r.into());
         }
         Register::Array(info, dim) => {
-            for rx in names(&info, &dim)
-                .zip(descriptions(&info, &dim))
-                .zip(register::address_offsets(&info, &dim))
-                .map(|((name, description), address_offset)| {
-                    let mut info = info.clone();
-                    info.name = name;
-                    info.description = description;
-                    info.address_offset = address_offset;
-                    info.single()
-                })
-            {
-                regs.push(rx.into());
-            }
+            regs.extend(register::expand(&info, &dim).map(|r| r.single().into()));
         }
     }
     Ok(())
@@ -511,19 +488,7 @@ fn expand_field(
             fields.push(f);
         }
         Field::Array(info, dim) => {
-            for fx in names(&info, &dim)
-                .zip(descriptions(&info, &dim))
-                .zip(field::bit_offsets(&info, &dim))
-                .map(|((name, description), bit_offset)| {
-                    let mut info = info.clone();
-                    info.name = name;
-                    info.description = description;
-                    info.bit_range = BitRange::from_offset_width(bit_offset, info.bit_width());
-                    Field::Single(info)
-                })
-            {
-                fields.push(fx);
-            }
+            fields.extend(field::expand(&info, &dim).map(Field::Single));
         }
     }
 
@@ -636,19 +601,9 @@ pub fn expand(indevice: &Device) -> Result<Device> {
                 device.peripherals.push(p);
             }
             Peripheral::Array(info, dim) => {
-                for px in names(&info, &dim)
-                    .zip(descriptions(&info, &dim))
-                    .zip(peripheral::base_addresses(&info, &dim))
-                    .map(|((name, description), base_address)| {
-                        let mut info = info.clone();
-                        info.name = name;
-                        info.description = description;
-                        info.base_address = base_address;
-                        Peripheral::Single(info)
-                    })
-                {
-                    device.peripherals.push(px);
-                }
+                device
+                    .peripherals
+                    .extend(peripheral::expand(&info, &dim).map(Peripheral::Single));
             }
         }
     }
