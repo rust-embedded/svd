@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Fix `indexes_as_range`
+
 ## [v0.14.3] - 2023-04-04
 
 - Bump MSRV to 1.58.0

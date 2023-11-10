@@ -170,7 +170,11 @@ impl DimElement {
     pub fn indexes_as_range(&self) -> Option<RangeInclusive<u32>> {
         let mut integers = Vec::with_capacity(self.dim as usize);
         for idx in self.indexes() {
-            integers.push(idx.parse::<u32>().ok()?);
+            let val = idx.parse::<u32>().ok()?;
+            if val.to_string() != idx {
+                return None;
+            }
+            integers.push(val);
         }
         let min = *integers.iter().min()?;
         let max = *integers.iter().max()?;
