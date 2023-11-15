@@ -9,8 +9,8 @@ impl Parse for RegisterCluster {
 
     fn parse(tree: &Node, config: &Self::Config) -> Result<Self, Self::Error> {
         match tree.tag_name().name() {
-            "register" => Register::parse(tree, config).map(RegisterCluster::Register),
-            "cluster" => Cluster::parse(tree, config).map(RegisterCluster::Cluster),
+            "register" => Register::parse(tree, config).map(Into::into),
+            "cluster" => Cluster::parse(tree, config).map(Into::into),
             _ => Err(
                 SVDError::InvalidRegisterCluster(tree.tag_name().name().to_string()).at(tree.id()),
             ),

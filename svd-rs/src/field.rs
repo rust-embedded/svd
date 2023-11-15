@@ -1,4 +1,5 @@
 use super::{
+    array::{descriptions, names},
     bitrange, Access, BitRange, BuildError, Description, DimElement, EmptyToNone, EnumeratedValues,
     MaybeArray, ModifiedWriteValues, Name, ReadAction, SvdError, Usage, ValidateLevel,
     WriteConstraint,
@@ -84,7 +85,24 @@ pub struct FieldInfo {
 
 /// Return iterator over bit offsets of each field in array
 pub fn bit_offsets<'a>(info: &'a FieldInfo, dim: &'a DimElement) -> impl Iterator<Item = u32> + 'a {
-    (0..dim.dim).map(move |i| info.bit_offset() + i * dim.dim_increment)
+    (0..dim.dim).map(|i| info.bit_offset() + i * dim.dim_increment)
+}
+
+/// Extract `FieldInfo` items from array
+pub fn expand<'a>(
+    info: &'a FieldInfo,
+    dim: &'a DimElement,
+) -> impl Iterator<Item = FieldInfo> + 'a {
+    names(info, dim)
+        .zip(descriptions(info, dim))
+        .zip(bit_offsets(info, dim))
+        .map(|((name, description), bit_offset)| {
+            let mut info = info.clone();
+            info.name = name;
+            info.description = description;
+            info.bit_range = BitRange::from_offset_width(bit_offset, info.bit_width());
+            info
+        })
 }
 
 /// Builder for [`FieldInfo`]

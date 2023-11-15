@@ -27,7 +27,7 @@ thiserror = "1.0.31"
 [dev-dependencies]
 serde_json = { version = "1.0", features = ["preserve_order"] }
 serde_yaml = "0.8.26"
-svd-rs = { version = "0.14.1", path = "../svd-rs", features = ["serde"] }
+svd-rs = { version = "0.14.3", path = "../svd-rs", features = ["serde"] }
 
 [[example]]
 name = "svd2json"

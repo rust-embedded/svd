@@ -1,4 +1,5 @@
 use super::{
+    array::{descriptions, names},
     registercluster::{
         AllRegistersIter, AllRegistersIterMut, ClusterIter, ClusterIterMut, RegisterIter,
         RegisterIterMut,
@@ -128,7 +129,28 @@ pub fn base_addresses<'a>(
     info: &'a PeripheralInfo,
     dim: &'a DimElement,
 ) -> impl Iterator<Item = u64> + 'a {
-    (0..dim.dim as u64).map(move |i| info.base_address + i * dim.dim_increment as u64)
+    (0..dim.dim as u64).map(|i| info.base_address + i * dim.dim_increment as u64)
+}
+
+/// Extract `PeripheralInfo` items from array
+pub fn expand<'a>(
+    info: &'a PeripheralInfo,
+    dim: &'a DimElement,
+) -> impl Iterator<Item = PeripheralInfo> + 'a {
+    dim.indexes()
+        .zip(names(info, dim))
+        .zip(descriptions(info, dim))
+        .zip(base_addresses(info, dim))
+        .map(|(((idx, name), description), base_address)| {
+            let mut info = info.clone();
+            info.name = name;
+            info.description = description;
+            info.base_address = base_address;
+            info.display_name = info
+                .display_name
+                .map(|d| d.replace("[%s]", &idx).replace("%s", &idx));
+            info
+        })
 }
 
 /// Builder for [`Peripheral`]

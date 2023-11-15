@@ -5,8 +5,8 @@ use std::collections::HashMap;
 use std::fmt;
 use std::mem::take;
 use svd_rs::{
-    array::names, cluster, field, peripheral, register, BitRange, Cluster, ClusterInfo, DeriveFrom,
-    Device, EnumeratedValues, Field, Peripheral, Register, RegisterCluster, RegisterProperties,
+    array::names, cluster, field, peripheral, register, Cluster, ClusterInfo, DeriveFrom, Device,
+    EnumeratedValues, Field, Peripheral, Register, RegisterCluster, RegisterProperties,
 };
 
 /// Path to `peripheral` or `cluster` element
@@ -319,15 +319,7 @@ fn expand_cluster_array(
     match c {
         Cluster::Single(c) => expand_cluster(regs, c),
         Cluster::Array(info, dim) => {
-            for c in names(&info, &dim)
-                .zip(cluster::address_offsets(&info, &dim))
-                .map(|(name, address_offset)| {
-                    let mut info = info.clone();
-                    info.name = name;
-                    info.address_offset = address_offset;
-                    info
-                })
-            {
+            for c in cluster::expand(&info, &dim) {
                 expand_cluster(regs, c);
             }
         }
@@ -435,7 +427,7 @@ fn expand_cluster(regs: &mut Vec<RegisterCluster>, c: ClusterInfo) {
             RegisterCluster::Register(mut r) => {
                 r.name = format!("{}_{}", c.name, r.name);
                 r.address_offset += c.address_offset;
-                regs.push(RegisterCluster::Register(r));
+                regs.push(r.into());
             }
         }
     }
@@ -462,20 +454,10 @@ fn expand_register_array(
 
     match r {
         Register::Single(_) => {
-            regs.push(RegisterCluster::Register(r));
+            regs.push(r.into());
         }
         Register::Array(info, dim) => {
-            for rx in names(&info, &dim)
-                .zip(register::address_offsets(&info, &dim))
-                .map(|(name, address_offset)| {
-                    let mut info = info.clone();
-                    info.name = name;
-                    info.address_offset = address_offset;
-                    Register::Single(info)
-                })
-            {
-                regs.push(RegisterCluster::Register(rx));
-            }
+            regs.extend(register::expand(&info, &dim).map(|r| r.single().into()));
         }
     }
     Ok(())
@@ -506,18 +488,7 @@ fn expand_field(
             fields.push(f);
         }
         Field::Array(info, dim) => {
-            for fx in
-                names(&info, &dim)
-                    .zip(field::bit_offsets(&info, &dim))
-                    .map(|(name, bit_offset)| {
-                        let mut info = info.clone();
-                        info.name = name;
-                        info.bit_range = BitRange::from_offset_width(bit_offset, info.bit_width());
-                        Field::Single(info)
-                    })
-            {
-                fields.push(fx);
-            }
+            fields.extend(field::expand(&info, &dim).map(Field::Single));
         }
     }
 
@@ -630,17 +601,9 @@ pub fn expand(indevice: &Device) -> Result<Device> {
                 device.peripherals.push(p);
             }
             Peripheral::Array(info, dim) => {
-                for px in names(&info, &dim)
-                    .zip(peripheral::base_addresses(&info, &dim))
-                    .map(|(name, base_address)| {
-                        let mut info = info.clone();
-                        info.name = name;
-                        info.base_address = base_address;
-                        Peripheral::Single(info)
-                    })
-                {
-                    device.peripherals.push(px);
-                }
+                device
+                    .peripherals
+                    .extend(peripheral::expand(&info, &dim).map(Peripheral::Single));
             }
         }
     }
