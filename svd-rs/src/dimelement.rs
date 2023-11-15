@@ -170,7 +170,13 @@ impl DimElement {
     pub fn indexes_as_range(&self) -> Option<RangeInclusive<u32>> {
         let mut integers = Vec::with_capacity(self.dim as usize);
         for idx in self.indexes() {
-            integers.push(idx.parse::<u32>().ok()?);
+            // XXX: indexes that begin with leading zero are not compatible with range (`0-x`) syntax in serialization
+            // see https://github.com/rust-embedded/svdtools/pull/178#issuecomment-1801433808
+            let val = idx.parse::<u32>().ok()?;
+            if val.to_string() != idx {
+                return None;
+            }
+            integers.push(val);
         }
         let min = *integers.iter().min()?;
         let max = *integers.iter().max()?;
