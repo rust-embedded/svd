@@ -100,6 +100,16 @@ impl EnumeratedValuesBuilder {
 }
 
 impl EnumeratedValues {
+    /// Return default value if present
+    pub fn default_value(&self) -> Option<&EnumeratedValue> {
+        for v in &self.values {
+            if let Some(true) = v.is_default {
+                return Some(v);
+            }
+        }
+        None
+    }
+
     /// Make a builder for [`EnumeratedValues`]
     pub fn builder() -> EnumeratedValuesBuilder {
         EnumeratedValuesBuilder::default()

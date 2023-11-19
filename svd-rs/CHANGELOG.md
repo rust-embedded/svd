@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- `default_value` for `EnumeratedValues`
+
 ## [v0.14.4] - 2023-11-15
 
 - Add `expand` functions for arrays
