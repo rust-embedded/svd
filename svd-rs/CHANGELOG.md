@@ -7,8 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.14.5] - 2023-11-22
+
 - `default_value` for `EnumeratedValues`
-- move `EnumeratedValue` check to `strict` mode and fix it
+- moved `isDefault` and `value` check on `EnumeratedValue` to strict mode
 
 ## [v0.14.4] - 2023-11-15
 
@@ -96,7 +98,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.4...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.5...HEAD
+[v0.14.5]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.4...svd-rs-v0.14.5
 [v0.14.4]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.3...svd-rs-v0.14.4
 [v0.14.3]: https://github.com/rust-embedded/svd/compare/svd-parser-v0.14.2...svd-rs-v0.14.3
 [v0.14.2]: https://github.com/rust-embedded/svd/compare/svd-encoder-v0.14.2...svd-rs-v0.14.2
