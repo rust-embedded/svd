@@ -141,11 +141,9 @@ impl EnumeratedValue {
         if lvl.is_strict() {
             super::check_name(&self.name, "name")?;
         }
-        match (&self.value, &self.is_default) {
-            (None, None) | (None, Some(false)) => Err(Error::AbsentValue.into()),
-            (Some(_), Some(true)) if lvl.is_strict() => {
-                Err(Error::ValueAndDefault(self.value).into())
-            }
+        match (self.value.is_some(), self.is_default()) {
+            (false, false) => Err(Error::AbsentValue.into()),
+            (true, true) if lvl.is_strict() => Err(Error::ValueAndDefault(self.value).into()),
             _ => Ok(()),
         }
     }

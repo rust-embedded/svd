@@ -103,7 +103,7 @@ impl EnumeratedValues {
     /// Return default value if present
     pub fn default_value(&self) -> Option<&EnumeratedValue> {
         for v in &self.values {
-            if let Some(true) = v.is_default {
+            if v.is_default() {
                 return Some(v);
             }
         }
