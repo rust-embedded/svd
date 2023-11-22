@@ -34,8 +34,11 @@ pub struct EnumeratedValue {
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum Error {
     /// No value was specified
-    #[error("EnumeratedValue must contain one of `value` (passed {0:?}) or `is_default` (passed {1:?}) tags")]
-    AbsentValue(Option<u64>, Option<bool>),
+    #[error("EnumeratedValue has no `value` or `is_default`")]
+    AbsentValue,
+    /// Passed both value and isDefault
+    #[error("EnumeratedValue with `value` (passed {0:?}) should not have `is_default(True)`")]
+    ValueAndDefault(Option<u64>),
     /// The value is not in range.
     #[error("Value {0} out of range {1:?}")]
     OutOfRange(u64, core::ops::Range<u64>),
@@ -101,6 +104,10 @@ impl EnumeratedValueBuilder {
 }
 
 impl EnumeratedValue {
+    /// Enumerated value is defaulted for non-explicit values
+    pub fn is_default(&self) -> bool {
+        matches!(self.is_default, Some(true))
+    }
     /// Make a builder for [`EnumeratedValue`]
     pub fn builder() -> EnumeratedValueBuilder {
         EnumeratedValueBuilder::default()
@@ -135,8 +142,11 @@ impl EnumeratedValue {
             super::check_name(&self.name, "name")?;
         }
         match (&self.value, &self.is_default) {
-            (Some(_), None) | (None, Some(_)) => Ok(()),
-            _ => Err(Error::AbsentValue(self.value, self.is_default).into()),
+            (None, None) | (None, Some(false)) => Err(Error::AbsentValue.into()),
+            (Some(_), Some(true)) if lvl.is_strict() => {
+                Err(Error::ValueAndDefault(self.value).into())
+            }
+            _ => Ok(()),
         }
     }
     pub(crate) fn check_range(&self, range: &core::ops::Range<u64>) -> Result<(), SvdError> {
