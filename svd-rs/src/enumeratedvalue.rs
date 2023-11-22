@@ -36,7 +36,7 @@ pub enum Error {
     /// No value was specified
     #[error("EnumeratedValue has no `value` or `is_default`")]
     AbsentValue,
-    /// Passed both value and isDefault
+    /// Passed both value and isDefault, only checked in strict mode
     #[error("EnumeratedValue with `value` (passed {0:?}) should not have `is_default(True)`")]
     ValueAndDefault(Option<u64>),
     /// The value is not in range.
