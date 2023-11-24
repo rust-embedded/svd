@@ -10,19 +10,31 @@ use super::{Cluster, Register};
 #[allow(clippy::large_enum_variant)]
 pub enum RegisterCluster {
     /// Register
-    Register(Register),
+    Register(Box<Register>),
     /// Cluster
-    Cluster(Cluster),
+    Cluster(Box<Cluster>),
 }
 
 impl From<Register> for RegisterCluster {
     fn from(reg: Register) -> Self {
-        Self::Register(reg)
+        Self::Register(Box::new(reg))
     }
 }
 
 impl From<Cluster> for RegisterCluster {
     fn from(cluser: Cluster) -> Self {
+        Self::Cluster(Box::new(cluser))
+    }
+}
+
+impl From<Box<Register>> for RegisterCluster {
+    fn from(reg: Box<Register>) -> Self {
+        Self::Register(reg)
+    }
+}
+
+impl From<Box<Cluster>> for RegisterCluster {
+    fn from(cluser: Box<Cluster>) -> Self {
         Self::Cluster(cluser)
     }
 }
