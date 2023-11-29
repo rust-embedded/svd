@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- fix `validate` on `Disabled` level, remove `mut`
+- add `validate_all` for `Device` and childrens for recursive tree check
+
 ## [v0.14.5] - 2023-11-22
 
 - `default_value` for `EnumeratedValues`

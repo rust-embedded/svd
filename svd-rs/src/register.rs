@@ -4,6 +4,7 @@ use super::{
     ModifiedWriteValues, Name, ReadAction, RegisterProperties, SvdError, ValidateLevel,
     WriteConstraint,
 };
+use std::ops::Deref;
 
 /// A single register or array of registers. A register is a named, programmable resource that belongs to a [peripheral](crate::Peripheral).
 pub type Register = MaybeArray<RegisterInfo>;
@@ -358,6 +359,14 @@ impl RegisterInfo {
         }
         Ok(())
     }
+    /// Validate the [`RegisterInfo`] recursively
+    pub fn validate_all(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        self.properties.validate(lvl)?;
+        for f in self.fields() {
+            f.validate_all(lvl)?;
+        }
+        self.validate(lvl)
+    }
 
     /// Returns iterator over child fields
     pub fn fields(&self) -> std::slice::Iter<Field> {
@@ -383,6 +392,16 @@ impl RegisterInfo {
     /// Get mutable field by name
     pub fn get_mut_field(&mut self, name: &str) -> Option<&mut Field> {
         self.fields_mut().find(|f| f.name == name)
+    }
+}
+
+impl Register {
+    /// Validate the [`Register`] recursively
+    pub fn validate_all(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if let Self::Array(_, dim) = self {
+            dim.validate(lvl)?;
+        }
+        self.deref().validate_all(lvl)
     }
 }
 

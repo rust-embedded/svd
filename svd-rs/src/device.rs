@@ -372,6 +372,7 @@ impl Device {
         }
         self.validate(lvl)
     }
+
     /// Validate the [`Device`]
     pub fn validate(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
         if !lvl.is_disabled() {
@@ -381,6 +382,17 @@ impl Device {
             }
         }
         Ok(())
+    }
+    /// Validate the [`Device`] recursively
+    pub fn validate_all(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if let Some(cpu) = self.cpu.as_ref() {
+            cpu.validate(lvl)?;
+        }
+        self.default_register_properties.validate(lvl)?;
+        for p in &self.peripherals {
+            p.validate_all(lvl)?;
+        }
+        self.validate(lvl)
     }
 
     /// Get peripheral by name

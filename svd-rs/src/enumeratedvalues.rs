@@ -100,12 +100,7 @@ impl EnumeratedValuesBuilder {
 impl EnumeratedValues {
     /// Return default value if present
     pub fn default_value(&self) -> Option<&EnumeratedValue> {
-        for v in &self.values {
-            if v.is_default() {
-                return Some(v);
-            }
-        }
-        None
+        self.values.iter().find(|&v| v.is_default())
     }
 
     /// Make a builder for [`EnumeratedValues`]
@@ -135,7 +130,7 @@ impl EnumeratedValues {
         }
         self.validate(lvl)
     }
-    /// Validate the [`EnumeratedValues`].
+    /// Validate the [`EnumeratedValues`]
     pub fn validate(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
         if !lvl.is_disabled() {
             if lvl.is_strict() {
@@ -156,6 +151,13 @@ impl EnumeratedValues {
         } else {
             Ok(())
         }
+    }
+    /// Validate the [`EnumeratedValues`] recursively.
+    pub fn validate_all(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        for ev in &self.values {
+            ev.validate(lvl)?;
+        }
+        self.validate(lvl)
     }
     pub(crate) fn check_range(&self, range: core::ops::Range<u64>) -> Result<(), SvdError> {
         for v in self.values.iter() {

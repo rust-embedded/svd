@@ -7,6 +7,7 @@ use super::{
     AddressBlock, BuildError, Cluster, Description, DimElement, EmptyToNone, Interrupt, MaybeArray,
     Name, Register, RegisterCluster, RegisterProperties, SvdError, ValidateLevel,
 };
+use std::ops::Deref;
 
 /// A single peripheral or array of peripherals
 pub type Peripheral = MaybeArray<PeripheralInfo>;
@@ -369,7 +370,7 @@ impl PeripheralInfo {
         self.validate(lvl)
     }
 
-    /// Validate the [`Peripheral`]
+    /// Validate the [`PeripheralInfo`]
     pub fn validate(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
         if !lvl.is_disabled() {
             // TODO
@@ -387,6 +388,25 @@ impl PeripheralInfo {
             }
         }
         Ok(())
+    }
+    /// Validate the [`PeripheralInfo`] recursively
+    pub fn validate_all(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if let Some(abs) = self.address_block.as_ref() {
+            for ab in abs {
+                ab.validate(lvl)?;
+            }
+        }
+        for i in &self.interrupt {
+            i.validate(lvl)?;
+        }
+        self.default_register_properties.validate(lvl)?;
+        for r in self.registers() {
+            r.validate_all(lvl)?;
+        }
+        for c in self.clusters() {
+            c.validate_all(lvl)?;
+        }
+        self.validate(lvl)
     }
 
     /// Returns iterator over child registers
@@ -489,6 +509,16 @@ impl PeripheralInfo {
     /// Get mutable enumeratedValue by name
     pub fn get_mut_interrupt(&mut self, name: &str) -> Option<&mut Interrupt> {
         self.interrupt.iter_mut().find(|e| e.name == name)
+    }
+}
+
+impl Peripheral {
+    /// Validate the [`Peripheral`] recursively
+    pub fn validate_all(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if let Self::Array(_, dim) = self {
+            dim.validate(lvl)?;
+        }
+        self.deref().validate_all(lvl)
     }
 }
 
