@@ -7,6 +7,7 @@ use super::{
     BuildError, Description, DimElement, EmptyToNone, MaybeArray, Name, Register, RegisterCluster,
     RegisterProperties, SvdError, ValidateLevel,
 };
+use std::ops::Deref;
 
 /// Cluster describes a sequence of neighboring registers within a peripheral.
 pub type Cluster = MaybeArray<ClusterInfo>;
@@ -253,6 +254,17 @@ impl ClusterInfo {
         }
         Ok(())
     }
+    /// Validate the [`ClusterInfo`] recursively
+    pub fn validate_all(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        self.default_register_properties.validate(lvl)?;
+        for r in self.registers() {
+            r.validate_all(lvl)?;
+        }
+        for c in self.clusters() {
+            c.validate_all(lvl)?;
+        }
+        self.validate(lvl)
+    }
 
     /// Returns iterator over all descendant registers
     #[deprecated(since = "0.12.1", note = "Please use `all_registers` instead")]
@@ -326,6 +338,16 @@ impl ClusterInfo {
     /// Get mutable cluster by name
     pub fn get_mut_cluster(&mut self, name: &str) -> Option<&mut Cluster> {
         self.clusters_mut().find(|f| f.name == name)
+    }
+}
+
+impl Cluster {
+    /// Validate the [`Cluster`] recursively
+    pub fn validate_all(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if let Self::Array(_, dim) = self {
+            dim.validate(lvl)?;
+        }
+        self.deref().validate_all(lvl)
     }
 }
 

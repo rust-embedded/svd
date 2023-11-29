@@ -4,6 +4,7 @@ use super::{
     MaybeArray, ModifiedWriteValues, Name, ReadAction, SvdError, Usage, ValidateLevel,
     WriteConstraint,
 };
+use std::ops::Deref;
 
 /// Describes a field or fields of a [register](crate::RegisterInfo).
 pub type Field = MaybeArray<FieldInfo>;
@@ -334,6 +335,13 @@ impl FieldInfo {
 
         Ok(())
     }
+    /// Validate the [`FieldInfo`] recursively
+    pub fn validate_all(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        for evs in &self.enumerated_values {
+            evs.validate_all(lvl)?;
+        }
+        self.validate(lvl)
+    }
 
     /// Get bit offset
     pub fn bit_offset(&self) -> u32 {
@@ -374,6 +382,16 @@ impl FieldInfo {
                 .find(|ev| ev.usage() == Some(usage)),
             _ => None,
         }
+    }
+}
+
+impl Field {
+    /// Validate the [`Field`] recursively
+    pub fn validate_all(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if let Self::Array(_, dim) = self {
+            dim.validate(lvl)?;
+        }
+        self.deref().validate_all(lvl)
     }
 }
 
