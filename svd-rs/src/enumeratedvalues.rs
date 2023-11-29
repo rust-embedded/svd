@@ -86,15 +86,13 @@ impl EnumeratedValuesBuilder {
     }
     /// Validate and build a [`EnumeratedValues`].
     pub fn build(self, lvl: ValidateLevel) -> Result<EnumeratedValues, SvdError> {
-        let mut evs = EnumeratedValues {
+        let evs = EnumeratedValues {
             name: self.name.empty_to_none(),
             usage: self.usage,
             derived_from: self.derived_from,
             values: self.values.unwrap_or_default(),
         };
-        if !lvl.is_disabled() {
-            evs.validate(lvl)?;
-        }
+        evs.validate(lvl)?;
         Ok(evs)
     }
 }
@@ -135,26 +133,26 @@ impl EnumeratedValues {
                 self.values = values;
             }
         }
-        if !lvl.is_disabled() {
-            self.validate(lvl)
-        } else {
-            Ok(())
-        }
+        self.validate(lvl)
     }
     /// Validate the [`EnumeratedValues`].
-    pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
-        if lvl.is_strict() {
-            if let Some(name) = self.name.as_ref() {
-                super::check_name(name, "name")?;
-            }
-        }
-        if let Some(_dname) = self.derived_from.as_ref() {
+    pub fn validate(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if !lvl.is_disabled() {
             if lvl.is_strict() {
-                super::check_derived_name(_dname, "derivedFrom")?;
+                if let Some(name) = self.name.as_ref() {
+                    super::check_name(name, "name")?;
+                }
             }
-            Ok(())
-        } else if self.values.is_empty() {
-            Err(Error::Empty.into())
+            if let Some(_dname) = self.derived_from.as_ref() {
+                if lvl.is_strict() {
+                    super::check_derived_name(_dname, "derivedFrom")?;
+                }
+                Ok(())
+            } else if self.values.is_empty() {
+                Err(Error::Empty.into())
+            } else {
+                Ok(())
+            }
         } else {
             Ok(())
         }

@@ -255,7 +255,7 @@ impl DeviceBuilder {
     /// Validate and build a [`Device`].
     pub fn build(self, lvl: ValidateLevel) -> Result<Device, SvdError> {
         let schema_version = self.schema_version.unwrap_or_else(default_schema_version);
-        let mut device = Device {
+        let device = Device {
             vendor: self.vendor,
             vendor_id: self.vendor_id,
             name: self
@@ -304,9 +304,7 @@ impl DeviceBuilder {
                 .unwrap_or_else(default_no_namespace_schema_location),
             schema_version,
         };
-        if !lvl.is_disabled() {
-            device.validate(lvl)?;
-        }
+        device.validate(lvl)?;
         Ok(device)
     }
 }
@@ -372,17 +370,15 @@ impl Device {
         if let Some(schema_version) = builder.schema_version {
             self.schema_version = schema_version;
         }
-        if !lvl.is_disabled() {
-            self.validate(lvl)
-        } else {
-            Ok(())
-        }
+        self.validate(lvl)
     }
     /// Validate the [`Device`]
-    pub fn validate(&mut self, _lvl: ValidateLevel) -> Result<(), SvdError> {
-        // TODO
-        if self.peripherals.is_empty() {
-            return Err(Error::EmptyDevice.into());
+    pub fn validate(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if !lvl.is_disabled() {
+            // TODO
+            if self.peripherals.is_empty() {
+                return Err(Error::EmptyDevice.into());
+            }
         }
         Ok(())
     }

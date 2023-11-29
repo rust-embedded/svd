@@ -88,7 +88,7 @@ impl EnumeratedValueBuilder {
     }
     /// Validate and build a [`EnumeratedValue`].
     pub fn build(self, lvl: ValidateLevel) -> Result<EnumeratedValue, SvdError> {
-        let mut ev = EnumeratedValue {
+        let ev = EnumeratedValue {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
@@ -96,9 +96,7 @@ impl EnumeratedValueBuilder {
             value: self.value,
             is_default: self.is_default,
         };
-        if !lvl.is_disabled() {
-            ev.validate(lvl)?;
-        }
+        ev.validate(lvl)?;
         Ok(ev)
     }
 }
@@ -130,21 +128,21 @@ impl EnumeratedValue {
         if builder.is_default.is_some() {
             self.is_default = builder.is_default;
         }
-        if !lvl.is_disabled() {
-            self.validate(lvl)
-        } else {
-            Ok(())
-        }
+        self.validate(lvl)
     }
     /// Validate the [`EnumeratedValue`].
-    pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
-        if lvl.is_strict() {
-            super::check_name(&self.name, "name")?;
-        }
-        match (self.value.is_some(), self.is_default()) {
-            (false, false) => Err(Error::AbsentValue.into()),
-            (true, true) if lvl.is_strict() => Err(Error::ValueAndDefault(self.value).into()),
-            _ => Ok(()),
+    pub fn validate(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if !lvl.is_disabled() {
+            if lvl.is_strict() {
+                super::check_name(&self.name, "name")?;
+            }
+            match (self.value.is_some(), self.is_default()) {
+                (false, false) => Err(Error::AbsentValue.into()),
+                (true, true) if lvl.is_strict() => Err(Error::ValueAndDefault(self.value).into()),
+                _ => Ok(()),
+            }
+        } else {
+            Ok(())
         }
     }
     pub(crate) fn check_range(&self, range: &core::ops::Range<u64>) -> Result<(), SvdError> {

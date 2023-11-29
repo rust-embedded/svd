@@ -105,7 +105,7 @@ impl AddressBlockBuilder {
     }
     /// Validate and build a [`AddressBlock`].
     pub fn build(self, lvl: ValidateLevel) -> Result<AddressBlock, SvdError> {
-        let mut de = AddressBlock {
+        let de = AddressBlock {
             offset: self
                 .offset
                 .ok_or_else(|| BuildError::Uninitialized("offset".to_string()))?,
@@ -117,9 +117,7 @@ impl AddressBlockBuilder {
                 .ok_or_else(|| BuildError::Uninitialized("usage".to_string()))?,
             protection: self.protection,
         };
-        if !lvl.is_disabled() {
-            de.validate(lvl)?;
-        }
+        de.validate(lvl)?;
         Ok(de)
     }
 }
@@ -147,18 +145,14 @@ impl AddressBlock {
         if builder.protection.is_some() {
             self.protection = builder.protection;
         }
-        if !lvl.is_disabled() {
-            self.validate(lvl)
-        } else {
-            Ok(())
-        }
+        self.validate(lvl)
     }
     /// Validate the [`AddressBlock`].
     ///
     /// # Notes
     ///
     /// This doesn't do anything.
-    pub fn validate(&mut self, _lvl: ValidateLevel) -> Result<(), SvdError> {
+    pub fn validate(&self, _lvl: ValidateLevel) -> Result<(), SvdError> {
         Ok(())
     }
 }

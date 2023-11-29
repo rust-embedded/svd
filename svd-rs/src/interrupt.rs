@@ -55,7 +55,7 @@ impl InterruptBuilder {
     }
     /// Validate and build a [`Interrupt`].
     pub fn build(self, lvl: ValidateLevel) -> Result<Interrupt, SvdError> {
-        let mut de = Interrupt {
+        let de = Interrupt {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
@@ -64,9 +64,7 @@ impl InterruptBuilder {
                 .value
                 .ok_or_else(|| BuildError::Uninitialized("value".to_string()))?,
         };
-        if !lvl.is_disabled() {
-            de.validate(lvl)?;
-        }
+        de.validate(lvl)?;
         Ok(de)
     }
 }
@@ -91,18 +89,14 @@ impl Interrupt {
         if let Some(value) = builder.value {
             self.value = value;
         }
-        if !lvl.is_disabled() {
-            self.validate(lvl)
-        } else {
-            Ok(())
-        }
+        self.validate(lvl)
     }
     /// Validate the [`Interrupt`].
     ///
     /// # Notes
     ///
     /// This doesn't do anything.
-    pub fn validate(&mut self, _lvl: ValidateLevel) -> Result<(), SvdError> {
+    pub fn validate(&self, _lvl: ValidateLevel) -> Result<(), SvdError> {
         Ok(())
     }
 }

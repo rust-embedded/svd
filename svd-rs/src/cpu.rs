@@ -225,7 +225,7 @@ impl CpuBuilder {
     }
     /// Validate and build a [`Cpu`].
     pub fn build(self, lvl: ValidateLevel) -> Result<Cpu, SvdError> {
-        let mut cpu = Cpu {
+        let cpu = Cpu {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
@@ -257,9 +257,7 @@ impl CpuBuilder {
             device_num_interrupts: self.device_num_interrupts,
             sau_num_regions: self.sau_num_regions,
         };
-        if !lvl.is_disabled() {
-            cpu.validate(lvl)?;
-        }
+        cpu.validate(lvl)?;
         Ok(cpu)
     }
 }
@@ -319,14 +317,10 @@ impl Cpu {
         if builder.sau_num_regions.is_some() {
             self.sau_num_regions = builder.sau_num_regions;
         }
-        if !lvl.is_disabled() {
-            self.validate(lvl)
-        } else {
-            Ok(())
-        }
+        self.validate(lvl)
     }
     /// Validate the [`Cpu`]
-    pub fn validate(&mut self, _lvl: ValidateLevel) -> Result<(), SvdError> {
+    pub fn validate(&self, _lvl: ValidateLevel) -> Result<(), SvdError> {
         // TODO
         Ok(())
     }

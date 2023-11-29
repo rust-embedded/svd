@@ -85,16 +85,14 @@ impl RegisterProperties {
         if builder.reset_mask.is_some() {
             self.reset_mask = builder.reset_mask;
         }
-        if !lvl.is_disabled() {
-            self.validate(lvl)
-        } else {
-            Ok(())
-        }
+        self.validate(lvl)
     }
 
     /// Validate the [`RegisterProperties`]
-    pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
-        check_reset_value(self.size, self.reset_value, self.reset_mask, lvl)?;
+    pub fn validate(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if !lvl.is_disabled() {
+            check_reset_value(self.size, self.reset_value, self.reset_mask, lvl)?;
+        }
         Ok(())
     }
     /// Set the size of the register properties.
@@ -123,10 +121,8 @@ impl RegisterProperties {
         self
     }
     /// Validate and build a [`RegisterProperties`].
-    pub fn build(mut self, lvl: ValidateLevel) -> Result<RegisterProperties, SvdError> {
-        if !lvl.is_disabled() {
-            self.validate(lvl)?;
-        }
+    pub fn build(self, lvl: ValidateLevel) -> Result<RegisterProperties, SvdError> {
+        self.validate(lvl)?;
         Ok(self)
     }
 }
