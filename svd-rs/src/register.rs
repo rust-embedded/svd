@@ -251,7 +251,7 @@ impl RegisterInfoBuilder {
     }
     /// Validate and build a [`RegisterInfo`].
     pub fn build(self, lvl: ValidateLevel) -> Result<RegisterInfo, SvdError> {
-        let mut reg = RegisterInfo {
+        let reg = RegisterInfo {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
@@ -269,9 +269,7 @@ impl RegisterInfoBuilder {
             fields: self.fields,
             derived_from: self.derived_from,
         };
-        if !lvl.is_disabled() {
-            reg.validate(lvl)?;
-        }
+        reg.validate(lvl)?;
         Ok(reg)
     }
 }
@@ -334,30 +332,28 @@ impl RegisterInfo {
                 self.fields = builder.fields.empty_to_none();
             }
         }
-        if !lvl.is_disabled() {
-            self.validate(lvl)
-        } else {
-            Ok(())
-        }
+        self.validate(lvl)
     }
     /// Validate the [`RegisterInfo`]
-    pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
-        if lvl.is_strict() {
-            super::check_dimable_name(&self.name, "name")?;
-            if let Some(name) = self.alternate_group.as_ref() {
-                super::check_name(name, "alternateGroup")?;
-            }
-            if let Some(name) = self.alternate_register.as_ref() {
-                super::check_dimable_name(name, "alternateRegister")?;
-            }
-        }
-        if let Some(name) = self.derived_from.as_ref() {
+    pub fn validate(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if !lvl.is_disabled() {
             if lvl.is_strict() {
-                super::check_derived_name(name, "derivedFrom")?;
+                super::check_dimable_name(&self.name, "name")?;
+                if let Some(name) = self.alternate_group.as_ref() {
+                    super::check_name(name, "alternateGroup")?;
+                }
+                if let Some(name) = self.alternate_register.as_ref() {
+                    super::check_dimable_name(name, "alternateRegister")?;
+                }
             }
-        } else if let Some(fields) = self.fields.as_ref() {
-            if fields.is_empty() && lvl.is_strict() {
-                return Err(Error::EmptyFields.into());
+            if let Some(name) = self.derived_from.as_ref() {
+                if lvl.is_strict() {
+                    super::check_derived_name(name, "derivedFrom")?;
+                }
+            } else if let Some(fields) = self.fields.as_ref() {
+                if fields.is_empty() && lvl.is_strict() {
+                    return Err(Error::EmptyFields.into());
+                }
             }
         }
         Ok(())

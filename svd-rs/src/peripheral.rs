@@ -273,7 +273,7 @@ impl PeripheralInfoBuilder {
     }
     /// Validate and build a [`PeripheralInfo`].
     pub fn build(self, lvl: ValidateLevel) -> Result<PeripheralInfo, SvdError> {
-        let mut per = PeripheralInfo {
+        let per = PeripheralInfo {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
@@ -294,9 +294,7 @@ impl PeripheralInfoBuilder {
             registers: self.registers,
             derived_from: self.derived_from,
         };
-        if !lvl.is_disabled() {
-            per.validate(lvl)?;
-        }
+        per.validate(lvl)?;
         Ok(per)
     }
 }
@@ -368,26 +366,24 @@ impl PeripheralInfo {
                 self.registers = builder.registers.empty_to_none();
             }
         }
-        if !lvl.is_disabled() {
-            self.validate(lvl)
-        } else {
-            Ok(())
-        }
+        self.validate(lvl)
     }
 
     /// Validate the [`Peripheral`]
-    pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
-        // TODO
-        if lvl.is_strict() {
-            super::check_dimable_name(&self.name, "name")?;
-        }
-        if let Some(name) = self.derived_from.as_ref() {
+    pub fn validate(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if !lvl.is_disabled() {
+            // TODO
             if lvl.is_strict() {
-                super::check_dimable_name(name, "derivedFrom")?;
+                super::check_dimable_name(&self.name, "name")?;
             }
-        } else if let Some(registers) = self.registers.as_ref() {
-            if registers.is_empty() && lvl.is_strict() {
-                return Err(Error::EmptyRegisters.into());
+            if let Some(name) = self.derived_from.as_ref() {
+                if lvl.is_strict() {
+                    super::check_dimable_name(name, "derivedFrom")?;
+                }
+            } else if let Some(registers) = self.registers.as_ref() {
+                if registers.is_empty() && lvl.is_strict() {
+                    return Err(Error::EmptyRegisters.into());
+                }
             }
         }
         Ok(())

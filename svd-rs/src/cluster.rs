@@ -168,7 +168,7 @@ impl ClusterInfoBuilder {
     }
     /// Validate and build a [`ClusterInfo`].
     pub fn build(self, lvl: ValidateLevel) -> Result<ClusterInfo, SvdError> {
-        let mut cluster = ClusterInfo {
+        let cluster = ClusterInfo {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
@@ -184,9 +184,7 @@ impl ClusterInfoBuilder {
                 .ok_or_else(|| BuildError::Uninitialized("children".to_string()))?,
             derived_from: self.derived_from,
         };
-        if !lvl.is_disabled() {
-            cluster.validate(lvl)?;
-        }
+        cluster.validate(lvl)?;
         Ok(cluster)
     }
 }
@@ -236,24 +234,22 @@ impl ClusterInfo {
                 self.children = children;
             }
         }
-        if !lvl.is_disabled() {
-            self.validate(lvl)
-        } else {
-            Ok(())
-        }
+        self.validate(lvl)
     }
 
     /// Validate the [`ClusterInfo`]
-    pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
-        if lvl.is_strict() {
-            super::check_dimable_name(&self.name, "name")?;
-        }
-        if let Some(name) = self.derived_from.as_ref() {
+    pub fn validate(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if !lvl.is_disabled() {
             if lvl.is_strict() {
-                super::check_derived_name(name, "derivedFrom")?;
+                super::check_dimable_name(&self.name, "name")?;
             }
-        } else if self.children.is_empty() && lvl.is_strict() {
-            return Err(Error::EmptyCluster.into());
+            if let Some(name) = self.derived_from.as_ref() {
+                if lvl.is_strict() {
+                    super::check_derived_name(name, "derivedFrom")?;
+                }
+            } else if self.children.is_empty() && lvl.is_strict() {
+                return Err(Error::EmptyCluster.into());
+            }
         }
         Ok(())
     }

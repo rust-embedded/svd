@@ -214,7 +214,7 @@ impl FieldInfoBuilder {
     }
     /// Validate and build a [`FieldInfo`].
     pub fn build(self, lvl: ValidateLevel) -> Result<FieldInfo, SvdError> {
-        let mut field = FieldInfo {
+        let field = FieldInfo {
             name: self
                 .name
                 .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
@@ -229,9 +229,7 @@ impl FieldInfoBuilder {
             enumerated_values: self.enumerated_values.unwrap_or_default(),
             derived_from: self.derived_from,
         };
-        if !lvl.is_disabled() {
-            field.validate(lvl)?;
-        }
+        field.validate(lvl)?;
         Ok(field)
     }
 }
@@ -292,48 +290,46 @@ impl FieldInfo {
                 self.enumerated_values = enumerated_values;
             }
         }
-        if !lvl.is_disabled() {
-            self.validate(lvl)
-        } else {
-            Ok(())
-        }
+        self.validate(lvl)
     }
     /// Validate the [`FieldInfo`].
-    pub fn validate(&mut self, lvl: ValidateLevel) -> Result<(), SvdError> {
-        if lvl.is_strict() {
-            super::check_dimable_name(&self.name, "name")?;
-            if let Some(name) = self.derived_from.as_ref() {
-                super::check_derived_name(name, "derivedFrom")?;
+    pub fn validate(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
+        if !lvl.is_disabled() {
+            if lvl.is_strict() {
+                super::check_dimable_name(&self.name, "name")?;
+                if let Some(name) = self.derived_from.as_ref() {
+                    super::check_derived_name(name, "derivedFrom")?;
+                }
             }
-        }
 
-        if self.bit_range.width == 0 {
-            return Err(bitrange::Error::ZeroWidth.into());
-        }
-
-        // If the bit_range has its maximum width, all enumerated values will of
-        // course fit in so we can skip validation.
-        if self.bit_range.width < 64 {
-            for ev in &self.enumerated_values {
-                ev.check_range(0..2_u64.pow(self.bit_range.width))?;
+            if self.bit_range.width == 0 {
+                return Err(bitrange::Error::ZeroWidth.into());
             }
-        }
 
-        if lvl.is_strict() {
-            match self.enumerated_values.as_slice() {
-                [] | [_] => {}
-                [ev1, ev2]
-                    if matches!(ev1.usage(), None | Some(Usage::Read))
-                        && matches!(ev2.usage(), None | Some(Usage::Write)) => {}
-                [ev1, ev2]
-                    if matches!(ev2.usage(), None | Some(Usage::Read))
-                        && matches!(ev1.usage(), None | Some(Usage::Write)) => {}
-                _ => return Err(Error::IncompatibleEnumeratedValues.into()),
+            // If the bit_range has its maximum width, all enumerated values will of
+            // course fit in so we can skip validation.
+            if self.bit_range.width < 64 {
+                for ev in &self.enumerated_values {
+                    ev.check_range(0..2_u64.pow(self.bit_range.width))?;
+                }
             }
-        }
 
-        if let Some(WriteConstraint::Range(constraint)) = self.write_constraint {
-            constraint.check_range(0..2_u64.pow(self.bit_range.width))?;
+            if lvl.is_strict() {
+                match self.enumerated_values.as_slice() {
+                    [] | [_] => {}
+                    [ev1, ev2]
+                        if matches!(ev1.usage(), None | Some(Usage::Read))
+                            && matches!(ev2.usage(), None | Some(Usage::Write)) => {}
+                    [ev1, ev2]
+                        if matches!(ev2.usage(), None | Some(Usage::Read))
+                            && matches!(ev1.usage(), None | Some(Usage::Write)) => {}
+                    _ => return Err(Error::IncompatibleEnumeratedValues.into()),
+                }
+            }
+
+            if let Some(WriteConstraint::Range(constraint)) = self.write_constraint {
+                constraint.check_range(0..2_u64.pow(self.bit_range.width))?;
+            }
         }
 
         Ok(())

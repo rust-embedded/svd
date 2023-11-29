@@ -118,7 +118,7 @@ impl DimElementBuilder {
     }
     /// Validate and build a [`DimElement`].
     pub fn build(self, lvl: ValidateLevel) -> Result<DimElement, SvdError> {
-        let mut de = DimElement {
+        let de = DimElement {
             dim: self
                 .dim
                 .ok_or_else(|| BuildError::Uninitialized("dim".to_string()))?,
@@ -129,9 +129,7 @@ impl DimElementBuilder {
             dim_name: self.dim_name.empty_to_none(),
             dim_array_index: self.dim_array_index,
         };
-        if !lvl.is_disabled() {
-            de.validate(lvl)?;
-        }
+        de.validate(lvl)?;
         Ok(de)
     }
 }
@@ -211,18 +209,14 @@ impl DimElement {
         if builder.dim_array_index.is_some() {
             self.dim_array_index = builder.dim_array_index;
         }
-        if !lvl.is_disabled() {
-            self.validate(lvl)
-        } else {
-            Ok(())
-        }
+        self.validate(lvl)
     }
     /// Validate the [`DimElement`].
     ///
     /// # Notes
     ///
     /// This doesn't do anything.
-    pub fn validate(&mut self, _lvl: ValidateLevel) -> Result<(), SvdError> {
+    pub fn validate(&self, _lvl: ValidateLevel) -> Result<(), SvdError> {
         // TODO
         Ok(())
     }
