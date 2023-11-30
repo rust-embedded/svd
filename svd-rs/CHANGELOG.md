@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.14.6] - 2023-11-29
+
 - fix `validate` on `Disabled` level, remove `mut`
 - add `validate_all` for `Device` and childrens for recursive tree check
 
@@ -101,7 +103,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.5...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.6...HEAD
+[v0.14.6]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.5...svd-rs-v0.14.6
 [v0.14.5]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.4...svd-rs-v0.14.5
 [v0.14.4]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.3...svd-rs-v0.14.4
 [v0.14.3]: https://github.com/rust-embedded/svd/compare/svd-parser-v0.14.2...svd-rs-v0.14.3
