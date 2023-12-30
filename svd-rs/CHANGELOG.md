@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- use close range in `EnumeratedValue` error message
+
 ## [v0.14.6] - 2023-11-29
 
 - fix `validate` on `Disabled` level, remove `mut`
