@@ -40,7 +40,7 @@ pub enum Error {
     #[error("EnumeratedValue with `value` (passed {0:?}) should not have `is_default(True)`")]
     ValueAndDefault(Option<u64>),
     /// The value is not in range.
-    #[error("Value {0} out of range {1:?}")]
+    #[error("Value {0} out of range [{} - {}]", .1.start, .1.end - 1)]
     OutOfRange(u64, core::ops::Range<u64>),
 }
 
