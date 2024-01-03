@@ -29,7 +29,7 @@ jobs:
           - rust: nightly
             experimental: true
           # MSRV
-          - rust: 1.58.0
+          - rust: 1.61.0
             name: "MSRV"
     steps:
       - name: Checkout repository

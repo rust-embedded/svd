@@ -128,7 +128,10 @@ impl FieldPath {
         let name = v.pop().unwrap();
         let register = if !v.is_empty() {
             let (block, rname) = RegisterPath::parse_vec(v);
-            Some(RegisterPath::new(block.unwrap(), rname))
+            Some(RegisterPath::new(
+                block.expect("Full qualifying field path is expected"),
+                rname,
+            ))
         } else {
             None
         };

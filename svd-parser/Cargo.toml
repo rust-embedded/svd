@@ -10,8 +10,8 @@ license = "MIT OR Apache-2.0"
 name = "svd-parser"
 repository = "https://github.com/rust-embedded/svd"
 edition = "2021"
-rust-version = "1.58.0"
-version = "0.14.4"
+rust-version = "1.61.0"
+version = "0.14.5"
 readme = "README.md"
 
 [features]
@@ -19,15 +19,15 @@ derive-from = ["svd-rs/derive-from"]
 expand = ["derive-from"]
 
 [dependencies]
-svd-rs = { version = "0.14.4", path = "../svd-rs" }
-roxmltree = "0.18"
+svd-rs = { version = "0.14.7", path = "../svd-rs" }
+roxmltree = "0.19"
 anyhow = "1.0.58"
 thiserror = "1.0.31"
 
 [dev-dependencies]
 serde_json = { version = "1.0", features = ["preserve_order"] }
 serde_yaml = "0.8.26"
-svd-rs = { version = "0.14.4", path = "../svd-rs", features = ["serde"] }
+svd-rs = { version = "0.14.7", path = "../svd-rs", features = ["serde"] }
 
 [[example]]
 name = "svd2json"
