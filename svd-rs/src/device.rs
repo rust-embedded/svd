@@ -105,6 +105,10 @@ pub struct Device {
     /// Specify the compliant CMSIS-SVD schema version
     #[cfg_attr(feature = "serde", serde(skip, default = "default_schema_version"))]
     pub schema_version: String,
+
+    /// XML global comments (usually license)
+    #[cfg_attr(feature = "serde", serde(skip, default))]
+    pub comments: Vec<String>,
 }
 
 fn default_xmlns_xs() -> String {
@@ -140,6 +144,7 @@ pub struct DeviceBuilder {
     xmlns_xs: Option<String>,
     no_namespace_schema_location: Option<String>,
     schema_version: Option<String>,
+    comments: Vec<String>,
 }
 
 impl From<Device> for DeviceBuilder {
@@ -162,6 +167,7 @@ impl From<Device> for DeviceBuilder {
             xmlns_xs: Some(d.xmlns_xs),
             no_namespace_schema_location: Some(d.no_namespace_schema_location),
             schema_version: Some(d.schema_version),
+            comments: d.comments,
         }
     }
 }
@@ -252,6 +258,13 @@ impl DeviceBuilder {
         self.schema_version = Some(value);
         self
     }
+
+    /// XML global comments (usually license)
+    pub fn comments(mut self, value: Vec<String>) -> Self {
+        self.comments = value;
+        self
+    }
+
     /// Validate and build a [`Device`].
     pub fn build(self, lvl: ValidateLevel) -> Result<Device, SvdError> {
         let schema_version = self.schema_version.unwrap_or_else(default_schema_version);
@@ -303,6 +316,7 @@ impl DeviceBuilder {
                 .no_namespace_schema_location
                 .unwrap_or_else(default_no_namespace_schema_location),
             schema_version,
+            comments: self.comments,
         };
         device.validate(lvl)?;
         Ok(device)

@@ -112,3 +112,23 @@ impl<'a, 'input> ElementExt for Node<'a, 'input> {
         println!("</{}>", name);
     }
 }
+
+pub trait Comments {
+    fn comments(self) -> Vec<String>;
+}
+
+impl Comments for Node<'_, '_> {
+    fn comments(self) -> Vec<String> {
+        let mut v = Vec::new();
+        let mut tree = self;
+        while let Some(t) = tree.prev_sibling() {
+            if t.is_comment() {
+                v.push(t.text().unwrap().to_string());
+                tree = t;
+            } else {
+                break;
+            }
+        }
+        v
+    }
+}

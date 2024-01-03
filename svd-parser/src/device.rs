@@ -1,6 +1,7 @@
 use super::*;
-use crate::svd::{
-    cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties, Device,
+use crate::{
+    elementext::Comments,
+    svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties, Device},
 };
 
 /// Parses a SVD file
@@ -32,7 +33,8 @@ impl Parse for Device {
                     .map(|t| Peripheral::parse(&t, config))
                     .collect();
                 ps?
-            });
+            })
+            .comments(tree.comments());
         if let Some(version) = tree.get_child_text_opt("version")? {
             device = device.version(version)
         }
