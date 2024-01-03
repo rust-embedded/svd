@@ -20,7 +20,7 @@ derive-from = []
 thiserror = "1.0.31"
 
 [dependencies.regex]
-version = "1.9"
+version = "=1.9.6"
 
 [dependencies.once_cell]
 version = "1.17.2"
