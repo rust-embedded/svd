@@ -10,7 +10,7 @@ name = "svd-rs"
 repository = "https://github.com/rust-embedded/svd"
 edition = "2021"
 rust-version = "1.58.0"
-version = "0.14.6"
+version = "0.14.7"
 readme = "README.md"
 
 [features]
@@ -20,10 +20,10 @@ derive-from = []
 thiserror = "1.0.31"
 
 [dependencies.regex]
-version = "1"
+version = "1.9"
 
 [dependencies.once_cell]
-version = "1.17.1"
+version = "1.17.2"
 
 [dependencies.serde]
 version = "1.0"

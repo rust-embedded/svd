@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.14.7] - 2024-01-03
+
 - use close range in `EnumeratedValue` error message
 
 ## [v0.14.6] - 2023-11-29
@@ -105,7 +107,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.6...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.7...HEAD
+[v0.14.7]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.6...svd-rs-v0.14.7
 [v0.14.6]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.5...svd-rs-v0.14.6
 [v0.14.5]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.4...svd-rs-v0.14.5
 [v0.14.4]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.3...svd-rs-v0.14.4
