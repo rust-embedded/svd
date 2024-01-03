@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [v0.14.5] - 2024-01-03
 
-- Bump MSRV to 1.60.0
+- Bump MSRV to 1.61.0
 - Bump svd-rs to 0.14.7, roxmltree to 0.19
 
 ## [v0.14.4] - 2023-11-15

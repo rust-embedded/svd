@@ -10,7 +10,7 @@ It consists of:
 
 ## Minimum Supported Rust Version (MSRV)
 
-This crate is guaranteed to compile on stable Rust 1.58.0 and up. It *might*
+This crate is guaranteed to compile on stable Rust 1.61.0 and up. It *might*
 compile with older versions but that may change in any new patch release.
 
 ## License

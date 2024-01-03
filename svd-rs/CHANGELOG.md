@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [v0.14.7] - 2024-01-03
 
+- Bump MSRV to 1.61.0
 - use close range in `EnumeratedValue` error message
 
 ## [v0.14.6] - 2023-11-29
