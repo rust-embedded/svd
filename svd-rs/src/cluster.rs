@@ -203,6 +203,14 @@ impl ClusterInfo {
     pub const fn array(self, dim: DimElement) -> Cluster {
         Cluster::Array(self, dim)
     }
+    /// Construct single [`Cluster`] or array
+    pub fn maybe_array(self, dim: Option<DimElement>) -> Cluster {
+        if let Some(dim) = dim {
+            self.array(dim)
+        } else {
+            self.single()
+        }
+    }
     /// Modify an existing [`ClusterInfo`] based on a [builder](ClusterInfoBuilder).
     pub fn modify_from(
         &mut self,
