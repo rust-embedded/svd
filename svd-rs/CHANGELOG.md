@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Bump MSRV to 1.65.0
+- Bump `regex` to 1.10
+
 ## [v0.14.7] - 2024-01-03
 
 - Bump MSRV to 1.61.0

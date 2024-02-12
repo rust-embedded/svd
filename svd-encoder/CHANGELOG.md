@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Bump MSRV to 1.65.0
+
 ## [v0.14.3] - 2023-11-15
 
 - Bump `svd-rs` to 0.14.4
