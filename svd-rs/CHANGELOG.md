@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.14.8] - 2024-02-13
+
 - add `maybe_array` constructors
 - Bump MSRV to 1.65.0
 - Bump `regex` to 1.10
@@ -112,7 +114,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.7...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.8...HEAD
+[v0.14.8]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.7...svd-rs-v0.14.8
 [v0.14.7]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.6...svd-rs-v0.14.7
 [v0.14.6]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.5...svd-rs-v0.14.6
 [v0.14.5]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.4...svd-rs-v0.14.5
