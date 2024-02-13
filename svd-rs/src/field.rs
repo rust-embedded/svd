@@ -248,6 +248,14 @@ impl FieldInfo {
     pub const fn array(self, dim: DimElement) -> Field {
         Field::Array(self, dim)
     }
+    /// Construct single [`Field`] or array
+    pub fn maybe_array(self, dim: Option<DimElement>) -> Field {
+        if let Some(dim) = dim {
+            self.array(dim)
+        } else {
+            self.single()
+        }
+    }
     /// Modify an existing [`FieldInfo`] based on a [builder](FieldInfoBuilder).
     pub fn modify_from(
         &mut self,

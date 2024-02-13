@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- add `maybe_array` constructors
 - Bump MSRV to 1.65.0
 - Bump `regex` to 1.10
 
