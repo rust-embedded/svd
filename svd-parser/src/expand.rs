@@ -56,6 +56,28 @@ impl BlockPath {
     }
 }
 
+impl PartialEq<str> for BlockPath {
+    fn eq(&self, other: &str) -> bool {
+        if other.split('.').count() != self.path.len() + 1 {
+            return false;
+        }
+        let mut parts = other.split('.');
+        if let Some(part1) = parts.next() {
+            if self.peripheral != part1 {
+                return false;
+            }
+            for p in parts.zip(self.path.iter()) {
+                if p.0 != p.1 {
+                    return false;
+                }
+            }
+            true
+        } else {
+            false
+        }
+    }
+}
+
 impl fmt::Display for BlockPath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.peripheral)?;
@@ -92,6 +114,16 @@ impl RegisterPath {
     }
     pub fn peripheral(&self) -> &String {
         &self.block.peripheral
+    }
+}
+
+impl PartialEq<str> for RegisterPath {
+    fn eq(&self, other: &str) -> bool {
+        if let Some((block, reg)) = other.rsplit_once('.') {
+            self.name == reg && &self.block == block
+        } else {
+            false
+        }
     }
 }
 
@@ -145,6 +177,16 @@ impl FieldPath {
     }
 }
 
+impl PartialEq<str> for FieldPath {
+    fn eq(&self, other: &str) -> bool {
+        if let Some((reg, field)) = other.rsplit_once('.') {
+            self.name == field && &self.register == reg
+        } else {
+            false
+        }
+    }
+}
+
 impl fmt::Display for FieldPath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.register.fmt(f)?;
@@ -176,6 +218,16 @@ impl EnumPath {
     }
     pub fn peripheral(&self) -> &String {
         self.field.peripheral()
+    }
+}
+
+impl PartialEq<str> for EnumPath {
+    fn eq(&self, other: &str) -> bool {
+        if let Some((field, evs)) = other.rsplit_once('.') {
+            self.name == evs && &self.field == field
+        } else {
+            false
+        }
     }
 }
 
