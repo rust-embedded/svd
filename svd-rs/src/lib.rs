@@ -90,6 +90,10 @@ pub use self::readaction::ReadAction;
 pub mod protection;
 pub use self::protection::Protection;
 
+/// DataType objects
+pub mod datatype;
+pub use self::datatype::DataType;
+
 /// Level of validation
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ValidateLevel {

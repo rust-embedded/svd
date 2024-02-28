@@ -88,6 +88,7 @@ mod bitrange;
 mod cluster;
 mod config;
 mod cpu;
+mod datatype;
 mod device;
 mod dimelement;
 mod endian;

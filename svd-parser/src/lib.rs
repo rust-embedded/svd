@@ -196,6 +196,7 @@ mod addressblock;
 mod bitrange;
 mod cluster;
 mod cpu;
+mod datatype;
 mod device;
 mod dimelement;
 mod endian;
@@ -247,6 +248,8 @@ pub enum SVDError {
     NotExpectedTag(String),
     #[error("Invalid RegisterCluster (expected register or cluster), found {0}")]
     InvalidRegisterCluster(String),
+    #[error("Invalid datatype variant, found {0}")]
+    InvalidDatatype(String),
     #[error("Invalid modifiedWriteValues variant, found {0}")]
     InvalidModifiedWriteValues(String),
     #[error("Invalid readAction variant, found {0}")]

@@ -1,7 +1,5 @@
 use super::*;
-use crate::svd::{
-    cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties, Device,
-};
+use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties};
 
 /// Parses a SVD file
 impl Parse for Device {

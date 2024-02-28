@@ -63,6 +63,10 @@ impl Encode for RegisterInfo {
         elem.children
             .extend(self.properties.encode_with_config(config)?);
 
+        if let Some(v) = &self.datatype {
+            elem.children.push(v.encode_node_with_config(config)?);
+        }
+
         if let Some(v) = &self.modified_write_values {
             elem.children.push(v.encode_node_with_config(config)?);
         }

@@ -1,6 +1,6 @@
 use super::{
     array::{descriptions, names},
-    Access, BuildError, Description, DimElement, EmptyToNone, Field, MaybeArray,
+    Access, BuildError, DataType, Description, DimElement, EmptyToNone, Field, MaybeArray,
     ModifiedWriteValues, Name, ReadAction, RegisterProperties, SvdError, ValidateLevel,
     WriteConstraint,
 };
@@ -65,6 +65,13 @@ pub struct RegisterInfo {
     /// Specifies register size, access permission and reset value
     #[cfg_attr(feature = "serde", serde(flatten))]
     pub properties: RegisterProperties,
+
+    /// Register data type
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
+    pub datatype: Option<DataType>,
 
     /// Specifies the write side effects
     #[cfg_attr(
@@ -143,6 +150,7 @@ pub struct RegisterInfoBuilder {
     alternate_register: Option<String>,
     address_offset: Option<u32>,
     properties: RegisterProperties,
+    datatype: Option<DataType>,
     modified_write_values: Option<ModifiedWriteValues>,
     write_constraint: Option<WriteConstraint>,
     read_action: Option<ReadAction>,
@@ -160,6 +168,7 @@ impl From<RegisterInfo> for RegisterInfoBuilder {
             alternate_register: r.alternate_register,
             address_offset: Some(r.address_offset),
             properties: r.properties,
+            datatype: r.datatype,
             modified_write_values: r.modified_write_values,
             write_constraint: r.write_constraint,
             read_action: r.read_action,
@@ -203,6 +212,11 @@ impl RegisterInfoBuilder {
     /// Set the properties of the register.
     pub fn properties(mut self, value: RegisterProperties) -> Self {
         self.properties = value;
+        self
+    }
+    /// Set the datatype of the register.
+    pub fn datatype(mut self, value: Option<DataType>) -> Self {
+        self.datatype = value;
         self
     }
     /// Set the size of the register.
@@ -264,6 +278,7 @@ impl RegisterInfoBuilder {
                 .address_offset
                 .ok_or_else(|| BuildError::Uninitialized("address_offset".to_string()))?,
             properties: self.properties.build(lvl)?,
+            datatype: self.datatype,
             modified_write_values: self.modified_write_values,
             write_constraint: self.write_constraint,
             read_action: self.read_action,
@@ -324,10 +339,14 @@ impl RegisterInfo {
             self.derived_from = builder.derived_from;
             self.fields = None;
             self.properties = RegisterProperties::default();
+            self.datatype = None;
             self.modified_write_values = None;
             self.write_constraint = None;
         } else {
             self.properties.modify_from(builder.properties, lvl)?;
+            if builder.datatype.is_some() {
+                self.datatype = builder.datatype;
+            }
             if builder.modified_write_values.is_some() {
                 self.modified_write_values = builder.modified_write_values;
             }

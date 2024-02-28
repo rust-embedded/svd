@@ -1,6 +1,6 @@
 use super::*;
 use crate::svd::{
-    Field, ModifiedWriteValues, ReadAction, Register, RegisterInfo, RegisterProperties,
+    DataType, Field, ModifiedWriteValues, ReadAction, Register, RegisterInfo, RegisterProperties,
     WriteConstraint,
 };
 
@@ -28,6 +28,7 @@ impl Parse for RegisterInfo {
             .alternate_register(tree.get_child_text_opt("alternateRegister")?)
             .address_offset(tree.get_child_u32("addressOffset")?)
             .properties(RegisterProperties::parse(tree, config)?)
+            .datatype(optional::<DataType>("dataType", tree, config)?)
             .modified_write_values(optional::<ModifiedWriteValues>(
                 "modifiedWriteValues",
                 tree,
