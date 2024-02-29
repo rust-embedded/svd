@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add `DataType`
+
 ## [v0.14.8] - 2024-02-13
 
 - add `maybe_array` constructors
