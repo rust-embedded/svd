@@ -1,7 +1,7 @@
 //! Provides [expand] method to convert arrays, clusters and derived items in regular instances
 
 use anyhow::{anyhow, Result};
-use std::{collections::HashMap, fmt, mem::take, ops::Deref};
+use std::{collections::HashMap, fmt, mem::take, ops::Deref, rc::Rc};
 use svd_rs::{
     array::names, cluster, field, peripheral, register, Cluster, ClusterInfo, DeriveFrom, Device,
     EnumeratedValues, Field, Peripheral, Register, RegisterCluster, RegisterProperties,
@@ -10,23 +10,23 @@ use svd_rs::{
 /// Path to `peripheral` or `cluster` element
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
 pub struct BlockPath {
-    pub peripheral: String,
-    pub path: Vec<String>,
+    pub peripheral: Rc<str>,
+    pub path: Vec<Rc<str>>,
 }
 
 impl BlockPath {
-    pub fn new(p: impl Into<String>) -> Self {
+    pub fn new(p: impl Into<Rc<str>>) -> Self {
         Self {
             peripheral: p.into(),
             path: Vec::new(),
         }
     }
-    pub fn new_cluster(&self, name: impl Into<String>) -> Self {
+    pub fn new_cluster(&self, name: impl Into<Rc<str>>) -> Self {
         let mut child = self.clone();
         child.path.push(name.into());
         child
     }
-    pub fn new_register(&self, name: impl Into<String>) -> RegisterPath {
+    pub fn new_register(&self, name: impl Into<Rc<str>>) -> RegisterPath {
         RegisterPath::new(self.clone(), name)
     }
     pub fn parse_str(s: &str) -> (Option<Self>, &str) {
@@ -44,7 +44,7 @@ impl BlockPath {
         };
         (block, name)
     }
-    pub fn name(&self) -> &String {
+    pub fn name(&self) -> &str {
         self.path.last().unwrap()
     }
     pub fn parent(&self) -> Option<Self> {
@@ -91,17 +91,17 @@ impl fmt::Display for BlockPath {
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
 pub struct RegisterPath {
     pub block: BlockPath,
-    pub name: String,
+    pub name: Rc<str>,
 }
 
 impl RegisterPath {
-    pub fn new(block: BlockPath, name: impl Into<String>) -> Self {
+    pub fn new(block: BlockPath, name: impl Into<Rc<str>>) -> Self {
         Self {
             block,
             name: name.into(),
         }
     }
-    pub fn new_field(&self, name: impl Into<String>) -> FieldPath {
+    pub fn new_field(&self, name: impl Into<Rc<str>>) -> FieldPath {
         FieldPath::new(self.clone(), name)
     }
     pub fn parse_str(s: &str) -> (Option<BlockPath>, &str) {
@@ -110,7 +110,7 @@ impl RegisterPath {
     pub fn parse_vec(v: Vec<&str>) -> (Option<BlockPath>, &str) {
         BlockPath::parse_vec(v)
     }
-    pub fn peripheral(&self) -> &String {
+    pub fn peripheral(&self) -> &str {
         &self.block.peripheral
     }
 }
@@ -138,17 +138,17 @@ impl fmt::Display for RegisterPath {
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
 pub struct FieldPath {
     pub register: RegisterPath,
-    pub name: String,
+    pub name: Rc<str>,
 }
 
 impl FieldPath {
-    pub fn new(register: RegisterPath, name: impl Into<String>) -> Self {
+    pub fn new(register: RegisterPath, name: impl Into<Rc<str>>) -> Self {
         Self {
             register,
             name: name.into(),
         }
     }
-    pub fn new_enum(&self, name: impl Into<String>) -> EnumPath {
+    pub fn new_enum(&self, name: impl Into<Rc<str>>) -> EnumPath {
         EnumPath::new(self.clone(), name)
     }
     pub fn parse_str(s: &str) -> (Option<RegisterPath>, &str) {
@@ -170,7 +170,7 @@ impl FieldPath {
     pub fn register(&self) -> &RegisterPath {
         &self.register
     }
-    pub fn peripheral(&self) -> &String {
+    pub fn peripheral(&self) -> &str {
         self.register.peripheral()
     }
 }
@@ -198,11 +198,11 @@ impl fmt::Display for FieldPath {
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
 pub struct EnumPath {
     pub field: FieldPath,
-    pub name: String,
+    pub name: Rc<str>,
 }
 
 impl EnumPath {
-    pub fn new(field: FieldPath, name: impl Into<String>) -> Self {
+    pub fn new(field: FieldPath, name: impl Into<Rc<str>>) -> Self {
         Self {
             field,
             name: name.into(),
@@ -214,7 +214,7 @@ impl EnumPath {
     pub fn register(&self) -> &RegisterPath {
         &self.field.register
     }
-    pub fn peripheral(&self) -> &String {
+    pub fn peripheral(&self) -> &str {
         self.field.peripheral()
     }
 }
