@@ -1,6 +1,6 @@
 use super::{
-    BuildError, Cpu, Description, EmptyToNone, Name, Peripheral, RegisterProperties, SvdError,
-    ValidateLevel,
+    BuildError, Cpu, Description, EmptyToNone, Name, Peripheral, RegisterProperties, Riscv,
+    SvdError, ValidateLevel,
 };
 
 /// Errors for [`Device::validate`]
@@ -105,6 +105,13 @@ pub struct Device {
     /// Specify the compliant CMSIS-SVD schema version
     #[cfg_attr(feature = "serde", serde(skip, default = "default_schema_version"))]
     pub schema_version: String,
+
+    /// Describe the processor included in the device
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Option::is_none")
+    )]
+    pub riscv: Option<Riscv>,
 }
 
 fn default_xmlns_xs() -> String {
@@ -130,6 +137,7 @@ pub struct DeviceBuilder {
     version: Option<String>,
     description: Option<String>,
     license_text: Option<String>,
+    riscv: Option<Riscv>,
     cpu: Option<Cpu>,
     header_system_filename: Option<String>,
     header_definitions_prefix: Option<String>,
@@ -152,6 +160,7 @@ impl From<Device> for DeviceBuilder {
             version: Some(d.version),
             description: Some(d.description),
             license_text: d.license_text,
+            riscv: d.riscv,
             cpu: d.cpu,
             header_system_filename: d.header_system_filename,
             header_definitions_prefix: d.header_definitions_prefix,
@@ -200,6 +209,11 @@ impl DeviceBuilder {
     /// Set the license_text of the device.
     pub fn license_text(mut self, value: Option<String>) -> Self {
         self.license_text = value;
+        self
+    }
+    /// Set the riscv of the device.
+    pub fn riscv(mut self, value: Option<Riscv>) -> Self {
+        self.riscv = value;
         self
     }
     /// Set the cpu of the device.
@@ -283,6 +297,7 @@ impl DeviceBuilder {
                 })
                 .ok_or_else(|| BuildError::Uninitialized("description".to_string()))?,
             license_text: self.license_text,
+            riscv: self.riscv,
             cpu: self.cpu,
             header_system_filename: self.header_system_filename,
             header_definitions_prefix: self.header_definitions_prefix,
@@ -340,6 +355,9 @@ impl Device {
         }
         if builder.license_text.is_some() {
             self.license_text = builder.license_text.empty_to_none();
+        }
+        if builder.riscv.is_some() {
+            self.riscv = builder.riscv;
         }
         if builder.cpu.is_some() {
             self.cpu = builder.cpu;

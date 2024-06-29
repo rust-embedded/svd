@@ -34,6 +34,12 @@ impl Encode for Device {
             elem.children.push(new_node("licenseText", v.clone()));
         }
 
+        // TODO not sure if this is the correct position
+        if let Some(v) = &self.riscv {
+            elem.children
+                .push(XMLNode::Element(v.encode_with_config(config)?));
+        }
+
         if let Some(v) = &self.cpu {
             elem.children
                 .push(XMLNode::Element(v.encode_with_config(config)?));

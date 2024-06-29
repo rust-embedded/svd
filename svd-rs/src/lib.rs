@@ -96,6 +96,7 @@ pub use self::datatype::DataType;
 
 /// Custom objects for the RISC-V ecosystem
 pub mod riscv;
+pub use self::riscv::Riscv;
 
 /// Level of validation
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

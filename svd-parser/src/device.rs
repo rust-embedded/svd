@@ -1,5 +1,7 @@
 use super::*;
-use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties};
+use crate::svd::{
+    cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties, riscv::Riscv,
+};
 
 /// Parses a SVD file
 impl Parse for Device {
@@ -18,6 +20,7 @@ impl Parse for Device {
             .name(tree.get_child_text("name")?)
             .series(tree.get_child_text_opt("series")?)
             .license_text(tree.get_child_text_opt("licenseText")?)
+            .riscv(optional::<Riscv>("riscv", tree, config)?)
             .cpu(optional::<Cpu>("cpu", tree, config)?)
             .header_system_filename(tree.get_child_text_opt("headerSystemFilename")?)
             .header_definitions_prefix(tree.get_child_text_opt("headerDefinitionsPrefix")?)
