@@ -94,6 +94,9 @@ pub use self::protection::Protection;
 pub mod datatype;
 pub use self::datatype::DataType;
 
+/// Custom objects for the RISC-V ecosystem
+pub mod riscv;
+
 /// Level of validation
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ValidateLevel {

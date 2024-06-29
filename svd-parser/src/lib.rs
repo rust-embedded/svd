@@ -211,6 +211,7 @@ mod readaction;
 mod register;
 mod registercluster;
 mod registerproperties;
+mod riscv;
 mod usage;
 mod writeconstraint;
 

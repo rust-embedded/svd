@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add `riscv` element for configuration parameters related to RISC-V targets.
 - Bump MSRV to 1.65.0
 
 ## [v0.14.5] - 2024-01-03
