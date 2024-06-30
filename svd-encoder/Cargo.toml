@@ -13,7 +13,8 @@ readme = "README.md"
 
 [dependencies]
 convert_case = "0.6.0"
-svd-rs = { version = "0.14.7", path = "../svd-rs" }
+svd-rs = { repository = "https://github.com/romancardenas/svd.git" } # TODO use crates.io
+# svd-rs = { version = "0.14.7", path = "../svd-rs" }
 thiserror = "1.0.31"
 
 [dependencies.xmltree]
