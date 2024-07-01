@@ -19,8 +19,7 @@ derive-from = ["svd-rs/derive-from"]
 expand = ["derive-from"]
 
 [dependencies]
-svd-rs = { repository = "https://github.com/romancardenas/svd.git" } # TODO use crates.io
-# svd-rs = { version = "0.14.7", path = "../svd-rs" }
+svd-rs = { version = "0.14.7", path = "../svd-rs" }
 roxmltree = "0.19"
 anyhow = "1.0.58"
 thiserror = "1.0.31"
