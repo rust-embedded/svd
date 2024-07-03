@@ -1,5 +1,3 @@
-use std::vec;
-
 use super::run_test;
 use crate::svd::{
     riscv::{Hart, Priority, Riscv},
@@ -89,8 +87,6 @@ fn decode_encode() {
 
     let tests = vec![(
         Riscv::builder()
-            .clint(Some("CLINT".to_string()))
-            .plic(Some("PLIC".to_string()))
             .core_interrupts(interrupts)
             .priorities(priorities)
             .harts(harts)
@@ -98,8 +94,6 @@ fn decode_encode() {
             .unwrap(),
         "
                 <riscv>
-                    <clint>CLINT</clint>  
-                    <plic>PLIC</plic>
                     <coreInterrupts>
                         <interrupt>
                             <name>MachineSoft</name>
@@ -170,8 +164,6 @@ fn decode_encode() {
             ",
         "
                 <riscv>
-                    <clint>CLINT</clint>  
-                    <plic>PLIC</plic>
                     <coreInterrupts>
                         <interrupt>
                             <name>MachineSoft</name>

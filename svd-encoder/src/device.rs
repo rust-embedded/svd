@@ -34,7 +34,7 @@ impl Encode for Device {
             elem.children.push(new_node("licenseText", v.clone()));
         }
 
-        // TODO not sure if this is the correct position
+        #[cfg(feature = "unstable-riscv")]
         if let Some(v) = &self.riscv {
             elem.children
                 .push(XMLNode::Element(v.encode_with_config(config)?));

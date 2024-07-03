@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 
 - Add `riscv` element for configuration parameters related to RISC-V targets.
+  You must use the `unstable-riscv` feature to enable this exeperimental element.
 - Add `DataType`
 
 ## [v0.14.8] - 2024-02-13

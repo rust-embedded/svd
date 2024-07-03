@@ -7,15 +7,6 @@ impl Encode for Riscv {
     fn encode_with_config(&self, config: &Config) -> Result<Element, EncodeError> {
         let mut elem = Element::new("riscv");
 
-        if let Some(clic) = &self.clic {
-            elem.children.push(new_node("clic", clic.clone()));
-        }
-        if let Some(clint) = &self.clint {
-            elem.children.push(new_node("clint", clint.clone()));
-        }
-        if let Some(plic) = &self.plic {
-            elem.children.push(new_node("plic", plic.clone()));
-        }
         if !self.core_interrupts.is_empty() {
             let mut interrupts = Element::new("coreInterrupts");
             for interrupt in &self.core_interrupts {

@@ -11,6 +11,9 @@ rust-version = "1.65.0"
 version = "0.14.4"
 readme = "README.md"
 
+[features]
+unstable-riscv = ["svd-rs/unstable-riscv"]
+
 [dependencies]
 convert_case = "0.6.0"
 svd-rs = { version = "0.14.7", path = "../svd-rs" }

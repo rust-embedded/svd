@@ -1,7 +1,7 @@
 use super::*;
-use crate::svd::{
-    cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties, riscv::Riscv,
-};
+#[cfg(feature = "unstable-riscv")]
+use crate::svd::riscv::Riscv;
+use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties};
 
 /// Parses a SVD file
 impl Parse for Device {
@@ -20,7 +20,6 @@ impl Parse for Device {
             .name(tree.get_child_text("name")?)
             .series(tree.get_child_text_opt("series")?)
             .license_text(tree.get_child_text_opt("licenseText")?)
-            .riscv(optional::<Riscv>("riscv", tree, config)?)
             .cpu(optional::<Cpu>("cpu", tree, config)?)
             .header_system_filename(tree.get_child_text_opt("headerSystemFilename")?)
             .header_definitions_prefix(tree.get_child_text_opt("headerDefinitionsPrefix")?)
@@ -34,6 +33,10 @@ impl Parse for Device {
                     .collect();
                 ps?
             });
+        #[cfg(feature = "unstable-riscv")]
+        if let Some(riscv) = optional::<Riscv>("riscv", tree, config)? {
+            device = device.riscv(riscv);
+        }
         if let Some(version) = tree.get_child_text_opt("version")? {
             device = device.version(version)
         }

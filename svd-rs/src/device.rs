@@ -1,6 +1,8 @@
+#[cfg(feature = "unstable-riscv")]
+use super::Riscv;
 use super::{
-    BuildError, Cpu, Description, EmptyToNone, Name, Peripheral, RegisterProperties, Riscv,
-    SvdError, ValidateLevel,
+    BuildError, Cpu, Description, EmptyToNone, Name, Peripheral, RegisterProperties, SvdError,
+    ValidateLevel,
 };
 
 /// Errors for [`Device::validate`]
@@ -111,6 +113,7 @@ pub struct Device {
         feature = "serde",
         serde(default, skip_serializing_if = "Option::is_none")
     )]
+    #[cfg(feature = "unstable-riscv")]
     pub riscv: Option<Riscv>,
 }
 
@@ -137,6 +140,7 @@ pub struct DeviceBuilder {
     version: Option<String>,
     description: Option<String>,
     license_text: Option<String>,
+    #[cfg(feature = "unstable-riscv")]
     riscv: Option<Riscv>,
     cpu: Option<Cpu>,
     header_system_filename: Option<String>,
@@ -160,6 +164,7 @@ impl From<Device> for DeviceBuilder {
             version: Some(d.version),
             description: Some(d.description),
             license_text: d.license_text,
+            #[cfg(feature = "unstable-riscv")]
             riscv: d.riscv,
             cpu: d.cpu,
             header_system_filename: d.header_system_filename,
@@ -212,8 +217,9 @@ impl DeviceBuilder {
         self
     }
     /// Set the riscv of the device.
-    pub fn riscv(mut self, value: Option<Riscv>) -> Self {
-        self.riscv = value;
+    #[cfg(feature = "unstable-riscv")]
+    pub fn riscv(mut self, value: Riscv) -> Self {
+        self.riscv = Some(value);
         self
     }
     /// Set the cpu of the device.
@@ -297,6 +303,7 @@ impl DeviceBuilder {
                 })
                 .ok_or_else(|| BuildError::Uninitialized("description".to_string()))?,
             license_text: self.license_text,
+            #[cfg(feature = "unstable-riscv")]
             riscv: self.riscv,
             cpu: self.cpu,
             header_system_filename: self.header_system_filename,
@@ -356,6 +363,7 @@ impl Device {
         if builder.license_text.is_some() {
             self.license_text = builder.license_text.empty_to_none();
         }
+        #[cfg(feature = "unstable-riscv")]
         if builder.riscv.is_some() {
             self.riscv = builder.riscv;
         }

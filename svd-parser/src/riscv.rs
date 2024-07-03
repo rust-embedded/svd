@@ -11,10 +11,7 @@ impl Parse for Riscv {
             return Err(SVDError::NotExpectedTag("riscv".to_string()).at(tree.id()));
         }
 
-        let mut builder = Riscv::builder()
-            .clic(tree.get_child_text("clic").ok())
-            .clint(tree.get_child_text("clint").ok())
-            .plic(tree.get_child_text("plic").ok());
+        let mut builder = Riscv::builder();
 
         if let Some(interrupts) = tree.get_child("coreInterrupts") {
             let interrupts: Result<Vec<_>, _> = interrupts

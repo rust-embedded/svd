@@ -7,6 +7,9 @@ edition = "2021"
 version = "0.12.0"
 publish = false
 
+[features]
+unstable-riscv = ["svd-rs/unstable-riscv", "svd-parser/unstable-riscv", "svd-encoder/unstable-riscv"]
+
 [dependencies]
 svd-rs = { path = "../svd-rs"}
 svd-parser = { path = "../svd-parser"}

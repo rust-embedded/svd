@@ -18,27 +18,6 @@ pub use priority::Priority;
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct Riscv {
-    /// Indicate the ID of the CLIC peripheral (if present).
-    #[cfg_attr(
-        feature = "serde",
-        serde(default, skip_serializing_if = "Option::is_none")
-    )]
-    pub clic: Option<String>,
-
-    /// Indicate the ID of the CLINT peripheral (if present).
-    #[cfg_attr(
-        feature = "serde",
-        serde(default, skip_serializing_if = "Option::is_none")
-    )]
-    pub clint: Option<String>,
-
-    /// Indicate the ID of the PLIC peripheral (if present).
-    #[cfg_attr(
-        feature = "serde",
-        serde(default, skip_serializing_if = "Option::is_none")
-    )]
-    pub plic: Option<String>,
-
     /// Core interrupt enumeration values
     #[cfg_attr(
         feature = "serde",
@@ -64,9 +43,6 @@ pub struct Riscv {
 /// Builder for [`Riscv`]
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct RiscvBuilder {
-    clic: Option<String>,
-    clint: Option<String>,
-    plic: Option<String>,
     core_interrupts: Option<Vec<Interrupt>>,
     priorities: Option<Vec<Priority>>,
     harts: Option<Vec<Hart>>,
@@ -75,9 +51,6 @@ pub struct RiscvBuilder {
 impl From<Riscv> for RiscvBuilder {
     fn from(riscv: Riscv) -> Self {
         Self {
-            clic: riscv.clic,
-            clint: riscv.clint,
-            plic: riscv.plic,
             core_interrupts: Some(riscv.core_interrupts),
             priorities: Some(riscv.priorities),
             harts: Some(riscv.harts),
@@ -86,24 +59,6 @@ impl From<Riscv> for RiscvBuilder {
 }
 
 impl RiscvBuilder {
-    /// Set the ID of the CLIC peripheral
-    pub fn clic(mut self, clic: Option<String>) -> Self {
-        self.clic = clic;
-        self
-    }
-
-    /// Set the ID of the CLINT peripheral
-    pub fn clint(mut self, clint: Option<String>) -> Self {
-        self.clint = clint;
-        self
-    }
-
-    /// Set the ID of the PLIC peripheral
-    pub fn plic(mut self, plic: Option<String>) -> Self {
-        self.plic = plic;
-        self
-    }
-
     /// Set the core interrupt enumeration values
     pub fn core_interrupts(mut self, core_interrupts: Vec<Interrupt>) -> Self {
         self.core_interrupts = Some(core_interrupts);
@@ -125,9 +80,6 @@ impl RiscvBuilder {
     /// Validate and build a [`Riscv`].
     pub fn build(self, lvl: ValidateLevel) -> Result<Riscv, SvdError> {
         let riscv = Riscv {
-            clic: self.clic,
-            clint: self.clint,
-            plic: self.plic,
             core_interrupts: self
                 .core_interrupts
                 .ok_or_else(|| BuildError::Uninitialized("core_interrupts".to_string()))?,
@@ -155,15 +107,6 @@ impl Riscv {
         builder: RiscvBuilder,
         lvl: ValidateLevel,
     ) -> Result<(), SvdError> {
-        if builder.clic.is_some() {
-            self.clic = builder.clic;
-        }
-        if builder.clint.is_some() {
-            self.clint = builder.clint;
-        }
-        if builder.plic.is_some() {
-            self.plic = builder.plic;
-        }
         if let Some(core_interrupts) = builder.core_interrupts {
             self.core_interrupts = core_interrupts;
         }
