@@ -61,3 +61,6 @@ mod register;
 //mod registerproperties;
 mod usage;
 mod writeconstraint;
+
+#[cfg(feature = "unstable-riscv")]
+mod riscv;

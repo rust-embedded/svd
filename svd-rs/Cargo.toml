@@ -15,6 +15,7 @@ readme = "README.md"
 
 [features]
 derive-from = []
+unstable-riscv = []
 
 [dependencies]
 thiserror = "1.0.31"

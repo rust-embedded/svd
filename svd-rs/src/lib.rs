@@ -94,6 +94,12 @@ pub use self::protection::Protection;
 pub mod datatype;
 pub use self::datatype::DataType;
 
+/// Custom objects for the RISC-V ecosystem
+#[cfg(feature = "unstable-riscv")]
+pub mod riscv;
+#[cfg(feature = "unstable-riscv")]
+pub use self::riscv::Riscv;
+
 /// Level of validation
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ValidateLevel {
