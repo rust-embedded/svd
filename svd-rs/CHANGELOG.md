@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 
 - Add `DataType`
+- Fix run-time panic for write constraint check
 
 ## [v0.14.8] - 2024-02-13
 
