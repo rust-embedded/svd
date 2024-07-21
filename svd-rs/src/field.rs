@@ -336,8 +336,13 @@ impl FieldInfo {
                 }
             }
 
-            if let Some(WriteConstraint::Range(constraint)) = self.write_constraint {
-                constraint.check_range(0..2_u64.pow(self.bit_range.width))?;
+            match self.write_constraint {
+                // If the bit_range has its maximum width, all values will of
+                // course fit in so we can skip validation.
+                Some(WriteConstraint::Range(constraint)) if self.bit_range.width < 64 => {
+                    constraint.check_range(0..2_u64.pow(self.bit_range.width))?;
+                }
+                _ => (),
             }
         }
 
