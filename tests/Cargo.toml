@@ -14,6 +14,6 @@ unstable-riscv = ["svd-rs/unstable-riscv", "svd-parser/unstable-riscv", "svd-enc
 svd-rs = { path = "../svd-rs"}
 svd-parser = { path = "../svd-parser"}
 svd-encoder = { path = "../svd-encoder"}
-roxmltree = "0.19"
+roxmltree = "0.20"
 xmltree = "0.10.3"
 anyhow = "1.0.45"
