@@ -29,7 +29,7 @@ impl Parse for Riscv {
                 .map(|i| Exception::parse(&i, config))
                 .collect();
             builder = builder.exceptions(exceptions?);
-        };
+        }
 
         if let Some(priorities) = tree.get_child("priorities") {
             let priorities: Result<Vec<_>, _> = priorities
@@ -38,7 +38,7 @@ impl Parse for Riscv {
                 .map(|i| Priority::parse(&i, config))
                 .collect();
             builder = builder.priorities(priorities?);
-        };
+        }
 
         if let Some(harts) = tree.get_child("harts") {
             let harts: Result<Vec<_>, _> = harts
@@ -47,7 +47,7 @@ impl Parse for Riscv {
                 .map(|i| Hart::parse(&i, config))
                 .collect();
             builder = builder.harts(harts?);
-        };
+        }
 
         builder
             .build(config.validate_level)
