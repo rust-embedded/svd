@@ -1,5 +1,5 @@
 use super::{new_node, Config, Element, Encode, EncodeError, XMLNode};
-use crate::svd::riscv::{Hart, Priority, Riscv};
+use crate::svd::riscv::{Exception, Hart, Priority, Riscv};
 
 impl Encode for Riscv {
     type Error = EncodeError;
@@ -15,6 +15,15 @@ impl Encode for Riscv {
                     .push(interrupt.encode_node_with_config(config)?);
             }
             elem.children.push(XMLNode::Element(interrupts));
+        }
+        if !self.exceptions.is_empty() {
+            let mut exceptions = Element::new("exceptions");
+            for exception in &self.exceptions {
+                exceptions
+                    .children
+                    .push(exception.encode_node_with_config(config)?);
+            }
+            elem.children.push(XMLNode::Element(exceptions));
         }
         if !self.priorities.is_empty() {
             let mut priorities = Element::new("priorities");
@@ -33,6 +42,22 @@ impl Encode for Riscv {
             elem.children.push(XMLNode::Element(harts));
         }
 
+        Ok(elem)
+    }
+}
+
+impl Encode for Exception {
+    type Error = EncodeError;
+
+    fn encode_with_config(&self, _config: &Config) -> Result<Element, EncodeError> {
+        let mut children = vec![new_node("name", self.name.clone())];
+        if let Some(desc) = &self.description {
+            children.push(new_node("description", desc.clone()));
+        }
+        children.push(new_node("value", format!("{}", self.value)));
+
+        let mut elem = Element::new("exception");
+        elem.children = children;
         Ok(elem)
     }
 }

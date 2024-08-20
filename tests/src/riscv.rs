@@ -1,6 +1,6 @@
 use super::run_test;
 use crate::svd::{
-    riscv::{Hart, Priority, Riscv},
+    riscv::{Exception, Hart, Priority, Riscv},
     Interrupt, ValidateLevel,
 };
 
@@ -23,6 +23,21 @@ fn decode_encode() {
             .name("MachineExternal".to_string())
             .description(Some("Machine External Interrupt".to_string()))
             .value(11)
+            .build(ValidateLevel::Strict)
+            .unwrap(),
+    ];
+
+    let exceptions = vec![
+        Exception::builder()
+            .name("InstructionAddressMisaligned".to_string())
+            .description(Some("Instruction Address Misaligned".to_string()))
+            .value(0)
+            .build(ValidateLevel::Strict)
+            .unwrap(),
+        Exception::builder()
+            .name("InstructionAccessFault".to_string())
+            .description(Some("Instruction Access Fault".to_string()))
+            .value(1)
             .build(ValidateLevel::Strict)
             .unwrap(),
     ];
@@ -88,6 +103,7 @@ fn decode_encode() {
     let tests = vec![(
         Riscv::builder()
             .core_interrupts(interrupts)
+            .exceptions(exceptions)
             .priorities(priorities)
             .harts(harts)
             .build(ValidateLevel::Strict)
@@ -111,6 +127,18 @@ fn decode_encode() {
                             <value>11</value>
                         </interrupt>
                     </coreInterrupts>
+                    <exceptions>
+                        <exception>
+                            <name>InstructionAddressMisaligned</name>
+                            <description>Instruction Address Misaligned</description>
+                            <value>0</value>
+                        </exception>
+                        <exception>
+                            <name>InstructionAccessFault</name>
+                            <description>Instruction Access Fault</description>
+                            <value>1</value>
+                        </exception>
+                    </exceptions>
                     <priorities>
                         <priority>
                             <name>P0</name>
@@ -181,6 +209,18 @@ fn decode_encode() {
                             <value>11</value>
                         </interrupt>
                     </coreInterrupts>
+                    <exceptions>
+                        <exception>
+                            <name>InstructionAddressMisaligned</name>
+                            <description>Instruction Address Misaligned</description>
+                            <value>0</value>
+                        </exception>
+                        <exception>
+                            <name>InstructionAccessFault</name>
+                            <description>Instruction Access Fault</description>
+                            <value>1</value>
+                        </exception>
+                    </exceptions>
                     <priorities>
                         <priority>
                             <name>P0</name>

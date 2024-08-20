@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Add `riscv::Exception` for custom exception source enumerations.
 - Add `riscv` element for configuration parameters related to RISC-V targets.
   You must use the `unstable-riscv` feature to enable this exeperimental element.
 - Add `DataType`
