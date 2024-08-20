@@ -1,5 +1,5 @@
 use super::*;
-use crate::svd::riscv::{Hart, Interrupt, Priority, Riscv};
+use crate::svd::riscv::{Exception, Hart, Interrupt, Priority, Riscv};
 
 impl Parse for Riscv {
     type Object = Self;
@@ -22,6 +22,15 @@ impl Parse for Riscv {
             builder = builder.core_interrupts(interrupts?);
         }
 
+        if let Some(exceptions) = tree.get_child("exceptions") {
+            let exceptions: Result<Vec<_>, _> = exceptions
+                .children()
+                .filter(|t| t.is_element() && t.has_tag_name("exception"))
+                .map(|i| Exception::parse(&i, config))
+                .collect();
+            builder = builder.exceptions(exceptions?);
+        }
+
         if let Some(priorities) = tree.get_child("priorities") {
             let priorities: Result<Vec<_>, _> = priorities
                 .children()
@@ -29,7 +38,7 @@ impl Parse for Riscv {
                 .map(|i| Priority::parse(&i, config))
                 .collect();
             builder = builder.priorities(priorities?);
-        };
+        }
 
         if let Some(harts) = tree.get_child("harts") {
             let harts: Result<Vec<_>, _> = harts
@@ -38,9 +47,28 @@ impl Parse for Riscv {
                 .map(|i| Hart::parse(&i, config))
                 .collect();
             builder = builder.harts(harts?);
-        };
+        }
 
         builder
+            .build(config.validate_level)
+            .map_err(|e| SVDError::from(e).at(tree.id()))
+    }
+}
+
+impl Parse for Exception {
+    type Object = Self;
+    type Error = SVDErrorAt;
+    type Config = Config;
+
+    fn parse(tree: &Node, config: &Config) -> Result<Self, Self::Error> {
+        if !tree.has_tag_name("exception") {
+            return Err(SVDError::NotExpectedTag("exception".to_string()).at(tree.id()));
+        }
+
+        Exception::builder()
+            .name(tree.get_child_text("name")?)
+            .description(tree.get_child_text_opt("description")?)
+            .value(tree.get_child_u32("value")?)
             .build(config.validate_level)
             .map_err(|e| SVDError::from(e).at(tree.id()))
     }

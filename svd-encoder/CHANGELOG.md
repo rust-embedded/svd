@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Adapt the `riscv` element to handle `riscv::Exception`.
 - Add `riscv` element for configuration parameters related to RISC-V targets.
   You must use the `unstable-riscv` feature to enable this exeperimental element.
 - Bump MSRV to 1.65.0

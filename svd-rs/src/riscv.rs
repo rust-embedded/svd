@@ -1,6 +1,10 @@
 pub use super::Interrupt;
 use super::{BuildError, SvdError, ValidateLevel};
 
+/// Description of the custom exceptions in the device.
+pub mod exception;
+pub use exception::Exception;
+
 /// Description of HARTs in the device.
 pub mod hart;
 pub use hart::Hart;
@@ -25,6 +29,13 @@ pub struct Riscv {
     )]
     pub core_interrupts: Vec<Interrupt>,
 
+    /// Exception enumeration values
+    #[cfg_attr(
+        feature = "serde",
+        serde(default, skip_serializing_if = "Vec::is_empty")
+    )]
+    pub exceptions: Vec<Exception>,
+
     /// Priority level enumeration values
     #[cfg_attr(
         feature = "serde",
@@ -44,6 +55,7 @@ pub struct Riscv {
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct RiscvBuilder {
     core_interrupts: Option<Vec<Interrupt>>,
+    exceptions: Option<Vec<Exception>>,
     priorities: Option<Vec<Priority>>,
     harts: Option<Vec<Hart>>,
 }
@@ -52,6 +64,7 @@ impl From<Riscv> for RiscvBuilder {
     fn from(riscv: Riscv) -> Self {
         Self {
             core_interrupts: Some(riscv.core_interrupts),
+            exceptions: Some(riscv.exceptions),
             priorities: Some(riscv.priorities),
             harts: Some(riscv.harts),
         }
@@ -62,6 +75,12 @@ impl RiscvBuilder {
     /// Set the core interrupt enumeration values
     pub fn core_interrupts(mut self, core_interrupts: Vec<Interrupt>) -> Self {
         self.core_interrupts = Some(core_interrupts);
+        self
+    }
+
+    /// Set the exception enumeration values
+    pub fn exceptions(mut self, exceptions: Vec<Exception>) -> Self {
+        self.exceptions = Some(exceptions);
         self
     }
 
@@ -80,12 +99,18 @@ impl RiscvBuilder {
     /// Validate and build a [`Riscv`].
     pub fn build(self, lvl: ValidateLevel) -> Result<Riscv, SvdError> {
         let riscv = Riscv {
-            core_interrupts: self
-                .core_interrupts
-                .ok_or_else(|| BuildError::Uninitialized("core_interrupts".to_string()))?,
-            priorities: self
-                .priorities
-                .ok_or_else(|| BuildError::Uninitialized("priorities".to_string()))?,
+            core_interrupts: match self.core_interrupts {
+                Some(core_interrupts) => core_interrupts,
+                None => Vec::new(),
+            },
+            exceptions: match self.exceptions {
+                Some(exceptions) => exceptions,
+                None => Vec::new(),
+            },
+            priorities: match self.priorities {
+                Some(priorities) => priorities,
+                None => Vec::new(),
+            },
             harts: self
                 .harts
                 .ok_or_else(|| BuildError::Uninitialized("harts".to_string()))?,
@@ -110,6 +135,9 @@ impl Riscv {
         if let Some(core_interrupts) = builder.core_interrupts {
             self.core_interrupts = core_interrupts;
         }
+        if let Some(exceptions) = builder.exceptions {
+            self.exceptions = exceptions;
+        }
         if let Some(priorities) = builder.priorities {
             self.priorities = priorities;
         }
@@ -124,11 +152,15 @@ impl Riscv {
     /// # Errors
     ///
     /// - If any of the core interrupt enumeration values are invalid
+    /// - If any of the exception enumeration values are invalid
     /// - If any of the priority level enumeration values are invalid
     /// - If any of the HART enumeration values are invalid
     pub fn validate(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
         for ci in &self.core_interrupts {
             ci.validate(lvl)?;
+        }
+        for e in &self.exceptions {
+            e.validate(lvl)?;
         }
         for p in &self.priorities {
             p.validate(lvl)?;
