@@ -7,12 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [v0.14.5] - 2023-08-20
+
 - Adapt the `riscv` element to handle `riscv::Exception`.
 - Add `riscv` element for configuration parameters related to RISC-V targets.
   You must use the `unstable-riscv` feature to enable this exeperimental element.
 - Bump MSRV to 1.65.0
 
-## [v0.14.3] - 2023-11-15
+## [v0.14.4] - 2023-11-15
 
 - Bump `svd-rs` to 0.14.4
 
@@ -55,7 +57,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.4...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.5...HEAD
+[v0.14.5]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.8...svd-rs-v0.14.9
 [v0.14.4]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.3...svd-rs-v0.14.4
 [v0.14.3]: https://github.com/rust-embedded/svd/compare/svd-encoder-v0.14.2..svd-rs-v0.14.2
 [v0.14.2]: https://github.com/rust-embedded/svd/compare/svd-encoder-v0.14.1..svd-encoder-v0.14.2

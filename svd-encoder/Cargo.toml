@@ -8,7 +8,7 @@ name = "svd-encoder"
 repository = "https://github.com/rust-embedded/svd"
 edition = "2021"
 rust-version = "1.65.0"
-version = "0.14.4"
+version = "0.14.5"
 readme = "README.md"
 
 [features]
@@ -16,7 +16,7 @@ unstable-riscv = ["svd-rs/unstable-riscv"]
 
 [dependencies]
 convert_case = "0.6.0"
-svd-rs = { version = "0.14.7", path = "../svd-rs" }
+svd-rs = { version = "0.14.9", path = "../svd-rs" }
 thiserror = "1.0.31"
 
 [dependencies.xmltree]
