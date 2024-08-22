@@ -1,9 +1,7 @@
 //! Provides [expand] method to convert arrays, clusters and derived items in regular instances
 
 use anyhow::{anyhow, Result};
-use std::collections::HashMap;
-use std::fmt;
-use std::mem::take;
+use std::{collections::HashMap, fmt, mem::take, ops::Deref};
 use svd_rs::{
     array::names, cluster, field, peripheral, register, Cluster, ClusterInfo, DeriveFrom, Device,
     EnumeratedValues, Field, Peripheral, Register, RegisterCluster, RegisterProperties,
@@ -63,11 +61,11 @@ impl PartialEq<str> for BlockPath {
         }
         let mut parts = other.split('.');
         if let Some(part1) = parts.next() {
-            if self.peripheral != part1 {
+            if self.peripheral.deref() != part1 {
                 return false;
             }
             for p in parts.zip(self.path.iter()) {
-                if p.0 != p.1 {
+                if p.0 != p.1.deref() {
                     return false;
                 }
             }
@@ -120,7 +118,7 @@ impl RegisterPath {
 impl PartialEq<str> for RegisterPath {
     fn eq(&self, other: &str) -> bool {
         if let Some((block, reg)) = other.rsplit_once('.') {
-            self.name == reg && &self.block == block
+            self.name.deref() == reg && &self.block == block
         } else {
             false
         }
@@ -180,7 +178,7 @@ impl FieldPath {
 impl PartialEq<str> for FieldPath {
     fn eq(&self, other: &str) -> bool {
         if let Some((reg, field)) = other.rsplit_once('.') {
-            self.name == field && &self.register == reg
+            self.name.deref() == field && &self.register == reg
         } else {
             false
         }
@@ -224,7 +222,7 @@ impl EnumPath {
 impl PartialEq<str> for EnumPath {
     fn eq(&self, other: &str) -> bool {
         if let Some((field, evs)) = other.rsplit_once('.') {
-            self.name == evs && &self.field == field
+            self.name.deref() == evs && &self.field == field
         } else {
             false
         }
@@ -263,7 +261,7 @@ impl<'a> Index<'a> {
                 self.peripherals.insert(path, p);
             }
         }
-        let path = BlockPath::new(&p.name);
+        let path = BlockPath::new(p.name.deref());
         for r in p.registers() {
             self.add_register(&path, r);
         }
@@ -286,7 +284,7 @@ impl<'a> Index<'a> {
                 self.clusters.insert(cpath, c);
             }
         }
-        let cpath = path.new_cluster(&c.name);
+        let cpath = path.new_cluster(c.name.deref());
         for r in c.registers() {
             self.add_register(&cpath, r);
         }
@@ -305,7 +303,7 @@ impl<'a> Index<'a> {
                 self.registers.insert(rpath, r);
             }
         }
-        let rpath = path.new_register(&r.name);
+        let rpath = path.new_register(r.name.deref());
         for f in r.fields() {
             self.add_field(&rpath, f);
         }
@@ -317,16 +315,16 @@ impl<'a> Index<'a> {
                 let fpath = path.new_field(name);
                 for evs in &f.enumerated_values {
                     if let Some(name) = evs.name.as_ref() {
-                        self.evs.insert(fpath.new_enum(name), evs);
+                        self.evs.insert(fpath.new_enum(name.deref()), evs);
                     }
                 }
                 self.fields.insert(fpath, f);
             }
         }
-        let fpath = path.new_field(&f.name);
+        let fpath = path.new_field(f.name.deref());
         for evs in &f.enumerated_values {
             if let Some(name) = evs.name.as_ref() {
-                self.evs.insert(fpath.new_enum(name), evs);
+                self.evs.insert(fpath.new_enum(name.deref()), evs);
             }
         }
         self.fields.insert(fpath, f);
@@ -365,7 +363,7 @@ fn expand_cluster_array(
     if let Some(dpath) = dpath {
         cpath = derive_cluster(&mut c, &dpath, path, index)?;
     }
-    let cpath = cpath.unwrap_or_else(|| path.new_cluster(&c.name));
+    let cpath = cpath.unwrap_or_else(|| path.new_cluster(c.name.deref()));
 
     for rc in take(&mut c.children) {
         expand_register_cluster(&mut c.children, rc, &cpath, index)?;
@@ -499,7 +497,7 @@ fn expand_register_array(
     if let Some(dpath) = dpath {
         rpath = derive_register(&mut r, &dpath, path, index)?;
     }
-    let rpath = rpath.unwrap_or_else(|| path.new_register(&r.name));
+    let rpath = rpath.unwrap_or_else(|| path.new_register(r.name.deref()));
 
     if let Some(field) = r.fields.as_mut() {
         for f in take(field) {
@@ -529,7 +527,7 @@ fn expand_field(
     if let Some(dpath) = dpath {
         fpath = derive_field(&mut f, &dpath, rpath, index)?;
     }
-    let fpath = fpath.unwrap_or_else(|| rpath.new_field(&f.name));
+    let fpath = fpath.unwrap_or_else(|| rpath.new_field(f.name.deref()));
 
     for ev in &mut f.enumerated_values {
         let dpath = ev.derived_from.take();
@@ -564,7 +562,7 @@ pub fn derive_enumerated_values(
         if let Some(r) = index.registers.get(rdpath) {
             let mut found = None;
             for f in r.fields() {
-                let epath = EnumPath::new(rdpath.new_field(&f.name), dname);
+                let epath = EnumPath::new(rdpath.new_field(f.name.deref()), dname);
                 if let Some(d) = index.evs.get(&epath) {
                     found = Some((d, epath));
                     break;
@@ -645,7 +643,7 @@ pub fn expand(indevice: &Device) -> Result<Device> {
         if let Some(dpath) = dpath {
             path = derive_peripheral(&mut p, &dpath, &index)?;
         }
-        let path = path.unwrap_or_else(|| BlockPath::new(&p.name));
+        let path = path.unwrap_or_else(|| BlockPath::new(p.name.deref()));
         if let Some(regs) = p.registers.as_mut() {
             for rc in take(regs) {
                 expand_register_cluster(regs, rc, &path, &index)?;
