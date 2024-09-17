@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Bump svd-rs to 0.14.9
+
 ## [v0.14.6] - 2024-08-20
 
 - Adapt the `riscv` element to handle `riscv::Exception`.
