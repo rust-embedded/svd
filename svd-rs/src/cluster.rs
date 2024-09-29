@@ -240,7 +240,7 @@ impl ClusterInfo {
             self.default_register_properties
                 .modify_from(builder.default_register_properties, lvl)?;
             if let Some(children) = builder.children {
-                self.children = children;
+                self.children.extend(children);
             }
         }
         self.validate(lvl)
