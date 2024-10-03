@@ -101,20 +101,15 @@ pub mod riscv;
 pub use self::riscv::Riscv;
 
 /// Level of validation
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum ValidateLevel {
     /// No validation.
     Disabled,
     /// Weak validation.
+    #[default]
     Weak,
     /// Strict validation.
     Strict,
-}
-
-impl Default for ValidateLevel {
-    fn default() -> Self {
-        ValidateLevel::Weak
-    }
 }
 
 impl ValidateLevel {

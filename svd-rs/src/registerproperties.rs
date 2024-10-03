@@ -133,7 +133,7 @@ pub(crate) fn check_reset_value(
     mask: Option<u64>,
     lvl: ValidateLevel,
 ) -> Result<(), Error> {
-    const MAX_BITS: u32 = core::u64::MAX.count_ones();
+    const MAX_BITS: u32 = u64::MAX.count_ones();
 
     if let (Some(size), Some(value)) = (size, value) {
         if MAX_BITS - value.leading_zeros() > size {

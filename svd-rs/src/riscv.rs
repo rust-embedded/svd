@@ -99,18 +99,9 @@ impl RiscvBuilder {
     /// Validate and build a [`Riscv`].
     pub fn build(self, lvl: ValidateLevel) -> Result<Riscv, SvdError> {
         let riscv = Riscv {
-            core_interrupts: match self.core_interrupts {
-                Some(core_interrupts) => core_interrupts,
-                None => Vec::new(),
-            },
-            exceptions: match self.exceptions {
-                Some(exceptions) => exceptions,
-                None => Vec::new(),
-            },
-            priorities: match self.priorities {
-                Some(priorities) => priorities,
-                None => Vec::new(),
-            },
+            core_interrupts: self.core_interrupts.unwrap_or_default(),
+            exceptions: self.exceptions.unwrap_or_default(),
+            priorities: self.priorities.unwrap_or_default(),
             harts: self
                 .harts
                 .ok_or_else(|| BuildError::Uninitialized("harts".to_string()))?,
