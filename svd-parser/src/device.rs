@@ -1,6 +1,4 @@
 use super::*;
-#[cfg(feature = "unstable-riscv")]
-use crate::svd::riscv::Riscv;
 use crate::svd::{cpu::Cpu, peripheral::Peripheral, registerproperties::RegisterProperties};
 
 /// Parses a SVD file
@@ -33,10 +31,6 @@ impl Parse for Device {
                     .collect();
                 ps?
             });
-        #[cfg(feature = "unstable-riscv")]
-        if let Some(riscv) = optional::<Riscv>("riscv", tree, config)? {
-            device = device.riscv(riscv);
-        }
         if let Some(version) = tree.get_child_text_opt("version")? {
             device = device.version(version)
         }

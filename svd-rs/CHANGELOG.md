@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Revert the `riscv` elements, as well as the `unstable-riscv` feature.
+
 ## [v0.14.9] - 2024-08-20
 
 - Add `riscv::Exception` for custom exception source enumerations.
