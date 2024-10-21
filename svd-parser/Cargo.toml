@@ -17,7 +17,6 @@ readme = "README.md"
 [features]
 derive-from = ["svd-rs/derive-from"]
 expand = ["derive-from"]
-unstable-riscv = ["svd-rs/unstable-riscv"]
 
 [dependencies]
 svd-rs = { version = "0.14.9", path = "../svd-rs" }

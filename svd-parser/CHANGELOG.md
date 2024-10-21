@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+
+- Revert the `riscv` element, as well as the `unstable-riscv` feature.
+
 ## [v0.14.7] - 2024-10-03
 
 - Bump svd-rs to 0.14.9

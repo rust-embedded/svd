@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Revert the `riscv` element, as well as the `unstable-riscv` feature.
+
 ## [v0.14.5] - 2023-08-20
 
 - Adapt the `riscv` element to handle `riscv::Exception`.

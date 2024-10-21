@@ -211,8 +211,6 @@ mod readaction;
 mod register;
 mod registercluster;
 mod registerproperties;
-#[cfg(feature = "unstable-riscv")]
-mod riscv;
 mod usage;
 mod writeconstraint;
 
