@@ -48,12 +48,12 @@ impl Default for Access {
 impl Access {
     /// Parse a string into an [`Access`] value, returning [`Option::None`] if the string is not valid.
     pub fn parse_str(s: &str) -> Option<Self> {
-        match s {
+        match s.to_ascii_lowercase().as_str() {
             "read-only" => Some(Self::ReadOnly),
             "read-write" => Some(Self::ReadWrite),
-            "read-writeOnce" => Some(Self::ReadWriteOnce),
+            "read-writeonce" => Some(Self::ReadWriteOnce),
             "write-only" => Some(Self::WriteOnly),
-            "writeOnce" => Some(Self::WriteOnce),
+            "writeonce" => Some(Self::WriteOnce),
             _ => None,
         }
     }
