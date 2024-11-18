@@ -89,6 +89,7 @@ pub struct PeripheralInfo {
     pub header_struct_name: Option<String>,
 
     /// Lowest address reserved or used by the peripheral
+    #[cfg_attr(feature = "serde", serde(serialize_with = "crate::as_hex"))]
     pub base_address: u64,
 
     /// Default properties for all registers

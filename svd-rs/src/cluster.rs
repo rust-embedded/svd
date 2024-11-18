@@ -55,6 +55,7 @@ pub struct ClusterInfo {
     pub header_struct_name: Option<String>,
 
     /// Cluster address relative to the `baseAddress` of the peripheral
+    #[cfg_attr(feature = "serde", serde(serialize_with = "crate::as_hex"))]
     pub address_offset: u32,
 
     /// Default properties for all registers

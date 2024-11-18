@@ -60,6 +60,7 @@ pub struct RegisterInfo {
     pub alternate_register: Option<String>,
 
     /// Define the address offset relative to the enclosing element
+    #[cfg_attr(feature = "serde", serde(serialize_with = "crate::as_hex"))]
     pub address_offset: u32,
 
     /// Specifies register size, access permission and reset value

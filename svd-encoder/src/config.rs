@@ -130,7 +130,7 @@ where
         NumberFormat::UpperHex => format!("{:#X}", value),
         NumberFormat::UpperHex8 => format!("{:#010X}", value),
         NumberFormat::UpperHex16 => {
-            if value.into() > std::u32::MAX as u64 {
+            if value.into() > u32::MAX as u64 {
                 format!("{:#018X}", value)
             } else {
                 format!("{:#010X}", value)
@@ -139,7 +139,7 @@ where
         NumberFormat::LowerHex => format!("{:#x}", value),
         NumberFormat::LowerHex8 => format!("{:#010x}", value),
         NumberFormat::LowerHex16 => {
-            if value.into() > std::u32::MAX as u64 {
+            if value.into() > u32::MAX as u64 {
                 format!("{:#018x}", value)
             } else {
                 format!("{:#010x}", value)

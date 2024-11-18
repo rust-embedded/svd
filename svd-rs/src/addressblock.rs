@@ -6,8 +6,10 @@ use super::{BuildError, Protection, SvdError, ValidateLevel};
 #[non_exhaustive]
 pub struct AddressBlock {
     /// Specifies the start address of an address block relative to the peripheral [`baseAddress`](crate::Peripheral::base_address).
+    #[cfg_attr(feature = "serde", serde(serialize_with = "crate::as_hex"))]
     pub offset: u32,
     /// Specifies the number of [`addressUnitBits`](crate::Device::address_unit_bits) being covered by this address block.
+    #[cfg_attr(feature = "serde", serde(serialize_with = "crate::as_hex"))]
     pub size: u32,
     /// Usage of the address block.
     pub usage: AddressBlockUsage,

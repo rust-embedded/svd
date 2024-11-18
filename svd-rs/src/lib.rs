@@ -95,20 +95,15 @@ pub mod datatype;
 pub use self::datatype::DataType;
 
 /// Level of validation
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum ValidateLevel {
     /// No validation.
     Disabled,
     /// Weak validation.
+    #[default]
     Weak,
     /// Strict validation.
     Strict,
-}
-
-impl Default for ValidateLevel {
-    fn default() -> Self {
-        ValidateLevel::Weak
-    }
 }
 
 impl ValidateLevel {
@@ -280,4 +275,80 @@ where
     fn description(&self) -> Option<&str> {
         T::description(*self)
     }
+}
+
+#[cfg(feature = "serde")]
+struct Hex<T>(T);
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for Hex<u64> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let n = self.0;
+        let (h4, h3, h2, h1) = (
+            (n >> 48) & 0xffff,
+            (n >> 32) & 0xffff,
+            (n >> 16) & 0xffff,
+            n & 0xffff,
+        );
+        let f = if h4 != 0 {
+            format!("0x{h4:04x}{h3:04x}{h2:04x}{h1:04x}")
+        } else if h3 != 0 {
+            format!("0x{h3:04x}{h2:04x}{h1:04x}")
+        } else if h2 != 0 {
+            format!("0x{h2:04x}{h1:04x}")
+        } else if h1 & 0xff00 != 0 {
+            format!("0x{h1:04x}")
+        } else if h1 != 0 {
+            format!("0x{:02x}", h1 & 0xff)
+        } else {
+            "0".to_string()
+        };
+        serializer.serialize_str(&f)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for Hex<u32> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let n = self.0;
+        let (h2, h1) = ((n >> 16) & 0xffff, n & 0xffff);
+        let f = if h2 != 0 {
+            format!("0x{h2:04x}{h1:04x}")
+        } else if h1 & 0xff00 != 0 {
+            format!("0x{h1:04x}")
+        } else if h1 != 0 {
+            format!("0x{:02x}", h1 & 0xff)
+        } else {
+            "0".to_string()
+        };
+        serializer.serialize_str(&f)
+    }
+}
+
+#[cfg(feature = "serde")]
+fn as_hex<T, S>(n: &T, s: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+    T: Copy,
+    Hex<T>: serde::Serialize,
+{
+    use serde::Serialize;
+    Hex(*n).serialize(s)
+}
+
+#[cfg(feature = "serde")]
+fn as_opt_hex<T, S>(n: &Option<T>, s: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+    T: Copy,
+    Hex<T>: serde::Serialize,
+{
+    use serde::Serialize;
+    (*n).map(Hex).serialize(s)
 }
