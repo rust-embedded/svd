@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 
 - Revert the `riscv` elements, as well as the `unstable-riscv` feature.
+- Add `bitmask` for `FieldInfo`, `Field` and `RegisterInfo`
 
 ## [v0.14.9] - 2024-08-20
 
@@ -143,4 +144,3 @@ Previous versions in common [changelog](../CHANGELOG.md).
 [v0.11.2]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.11.1...svd-rs-v0.11.2
 [v0.11.1]: https://github.com/rust-embedded/svd/compare/v0.11.0...svd-rs-v0.11.1
 [v0.11.0]: https://github.com/rust-embedded/svd/compare/v0.10.2...v0.11.0
-

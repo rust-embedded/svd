@@ -420,6 +420,11 @@ impl RegisterInfo {
     pub fn get_mut_field(&mut self, name: &str) -> Option<&mut Field> {
         self.fields_mut().find(|f| f.name == name)
     }
+
+    /// Get bits which is affected by register fields
+    pub fn bitmask(&self) -> u64 {
+        self.fields().fold(0, |mask, f| mask | f.bitmask())
+    }
 }
 
 impl Register {
