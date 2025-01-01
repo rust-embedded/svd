@@ -182,7 +182,7 @@ impl Sorting {
     fn from_parts(parts: &[&str]) -> Option<Self> {
         if parts.contains(&"Offset") {
             Some(Self::Offset)
-        } else if parts.contains(&"OffsetReserved") {
+        } else if parts.contains(&"OffsetReversed") {
             Some(Self::OffsetReversed)
         } else if parts.contains(&"Name") {
             Some(Self::Name)
