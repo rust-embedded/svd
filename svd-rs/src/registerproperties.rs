@@ -26,7 +26,11 @@ pub struct RegisterProperties {
     /// Bit-width of register
     #[cfg_attr(
         feature = "serde",
-        serde(default, skip_serializing_if = "Option::is_none")
+        serde(
+            default,
+            skip_serializing_if = "Option::is_none",
+            serialize_with = "crate::as_opt_hex"
+        )
     )]
     pub size: Option<u32>,
 
@@ -47,14 +51,22 @@ pub struct RegisterProperties {
     /// Register value at RESET
     #[cfg_attr(
         feature = "serde",
-        serde(default, skip_serializing_if = "Option::is_none")
+        serde(
+            default,
+            skip_serializing_if = "Option::is_none",
+            serialize_with = "crate::as_opt_hex"
+        )
     )]
     pub reset_value: Option<u64>,
 
     /// Define which register bits have a defined reset value
     #[cfg_attr(
         feature = "serde",
-        serde(default, skip_serializing_if = "Option::is_none")
+        serde(
+            default,
+            skip_serializing_if = "Option::is_none",
+            serialize_with = "crate::as_opt_hex"
+        )
     )]
     pub reset_mask: Option<u64>,
 }
@@ -133,7 +145,7 @@ pub(crate) fn check_reset_value(
     mask: Option<u64>,
     lvl: ValidateLevel,
 ) -> Result<(), Error> {
-    const MAX_BITS: u32 = core::u64::MAX.count_ones();
+    const MAX_BITS: u32 = u64::MAX.count_ones();
 
     if let (Some(size), Some(value)) = (size, value) {
         if MAX_BITS - value.leading_zeros() > size {
