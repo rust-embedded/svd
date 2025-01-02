@@ -375,6 +375,12 @@ impl FieldInfo {
         self.bit_range.msb()
     }
 
+    /// Get bits which is affected by field
+    pub fn bitmask(&self) -> u64 {
+        let BitRange { offset, width, .. } = self.bit_range;
+        (!0u64 >> (64 - width)) << offset
+    }
+
     /// Get enumeratedValues cluster by usage
     pub fn get_enumerated_values(&self, usage: Usage) -> Option<&EnumeratedValues> {
         match self.enumerated_values.len() {
@@ -405,6 +411,21 @@ impl Field {
             dim.validate(lvl)?;
         }
         self.deref().validate_all(lvl)
+    }
+
+    /// Get bits which is affected by field or field array
+    pub fn bitmask(&self) -> u64 {
+        match self {
+            Field::Single(f) => f.bitmask(),
+            Field::Array(f, d) => {
+                let mask = f.bitmask();
+                let mut bits = 0;
+                for i in 0..d.dim {
+                    bits |= mask << (i * d.dim_increment);
+                }
+                bits
+            }
+        }
     }
 }
 
