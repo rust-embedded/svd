@@ -298,6 +298,64 @@ impl PeripheralInfoBuilder {
         per.validate(lvl)?;
         Ok(per)
     }
+
+    /// Minimize builder before use it to modify FieldInfo
+    pub fn minimize(&mut self, p: &PeripheralInfo) {
+        if let Some(name) = &self.name {
+            if name == &p.name {
+                self.name = None;
+            }
+        }
+        if self.display_name == p.display_name {
+            self.display_name = None;
+        }
+        if self.version == p.version {
+            self.version = None;
+        }
+        if self.description == p.description {
+            self.description = None;
+        }
+        if self.alternate_peripheral == p.alternate_peripheral {
+            self.alternate_peripheral = None;
+        }
+        if self.group_name == p.group_name {
+            self.group_name = None;
+        }
+        if self.prepend_to_name == p.prepend_to_name {
+            self.prepend_to_name = None;
+        }
+        if self.append_to_name == p.append_to_name {
+            self.append_to_name = None;
+        }
+        if self.header_struct_name == p.header_struct_name {
+            self.header_struct_name = None;
+        }
+        if let Some(base_address) = &self.base_address {
+            if base_address == &p.base_address {
+                self.base_address = None;
+            }
+        }
+        self.default_register_properties
+            .minimize(&p.default_register_properties);
+        if self.address_block == p.address_block {
+            self.address_block = None;
+        }
+        if let Some(interrupt) = &self.interrupt {
+            if interrupt == &p.interrupt {
+                self.interrupt = None;
+            }
+        }
+        if self.registers == p.registers {
+            self.registers = None;
+        }
+        if self.derived_from == p.derived_from {
+            self.derived_from = None;
+        }
+    }
+    /// Check if all entries are `None`
+    pub fn is_empty(&self) -> bool {
+        self == &Self::default()
+    }
 }
 
 impl PeripheralInfo {

@@ -288,6 +288,55 @@ impl RegisterInfoBuilder {
         reg.validate(lvl)?;
         Ok(reg)
     }
+
+    /// Minimize builder before use it to modify FieldInfo
+    pub fn minimize(&mut self, r: &RegisterInfo) {
+        if let Some(name) = &self.name {
+            if name == &r.name {
+                self.name = None;
+            }
+        }
+        if self.display_name == r.display_name {
+            self.display_name = None;
+        }
+        if self.description == r.description {
+            self.description = None;
+        }
+        if self.alternate_group == r.alternate_group {
+            self.alternate_group = None;
+        }
+        if self.alternate_register == r.alternate_register {
+            self.alternate_register = None;
+        }
+        if let Some(address_offset) = &self.address_offset {
+            if address_offset == &r.address_offset {
+                self.address_offset = None;
+            }
+        }
+        self.properties.minimize(&r.properties);
+        if self.datatype == r.datatype {
+            self.datatype = None;
+        }
+        if self.modified_write_values == r.modified_write_values {
+            self.modified_write_values = None;
+        }
+        if self.write_constraint == r.write_constraint {
+            self.write_constraint = None;
+        }
+        if self.read_action == r.read_action {
+            self.read_action = None;
+        }
+        if self.fields == r.fields {
+            self.fields = None;
+        }
+        if self.derived_from == r.derived_from {
+            self.derived_from = None;
+        }
+    }
+    /// Check if all entries are `None`
+    pub fn is_empty(&self) -> bool {
+        self == &Self::default()
+    }
 }
 
 impl RegisterInfo {

@@ -233,6 +233,56 @@ impl FieldInfoBuilder {
         field.validate(lvl)?;
         Ok(field)
     }
+    /// Minimize builder before use it to modify FieldInfo
+    pub fn minimize(&mut self, f: &FieldInfo) {
+        if let Some(name) = &self.name {
+            if name == &f.name {
+                self.name = None;
+            }
+        }
+        if self.description == f.description {
+            self.description = None;
+        }
+        if let Some(bit_range) = &self.bit_range {
+            if bit_range == &f.bit_range {
+                self.bit_range = None;
+            }
+        }
+        if let Some(bit_offset) = &self.bit_offset {
+            if bit_offset == &f.bit_offset() {
+                self.bit_offset = None;
+            }
+        }
+        if let Some(bit_width) = &self.bit_width {
+            if bit_width == &f.bit_width() {
+                self.bit_width = None;
+            }
+        }
+        if self.access == f.access {
+            self.access = None;
+        }
+        if self.modified_write_values == f.modified_write_values {
+            self.modified_write_values = None;
+        }
+        if self.write_constraint == f.write_constraint {
+            self.write_constraint = None;
+        }
+        if self.read_action == f.read_action {
+            self.read_action = None;
+        }
+        if let Some(enumerated_values) = &self.enumerated_values {
+            if enumerated_values == &f.enumerated_values {
+                self.enumerated_values = None;
+            }
+        }
+        if self.derived_from == f.derived_from {
+            self.derived_from = None;
+        }
+    }
+    /// Check if all entries are `None`
+    pub fn is_empty(&self) -> bool {
+        self == &Self::default()
+    }
 }
 
 impl FieldInfo {

@@ -125,6 +125,25 @@ impl RegisterProperties {
         self.validate(lvl)?;
         Ok(self)
     }
+
+    /// Minimize builder before use it to modify FieldInfo
+    pub fn minimize(&mut self, p: &Self) {
+        if self.size == p.size {
+            self.size = None;
+        }
+        if self.access == p.access {
+            self.access = None;
+        }
+        if self.protection == p.protection {
+            self.protection = None;
+        }
+        if self.reset_value == p.reset_value {
+            self.reset_value = None;
+        }
+        if self.reset_mask == p.reset_mask {
+            self.reset_mask = None;
+        }
+    }
 }
 
 pub(crate) fn check_reset_value(
