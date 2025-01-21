@@ -4,17 +4,20 @@ use super::{
     ModifiedWriteValues, Name, ReadAction, RegisterProperties, SvdError, ValidateLevel,
     WriteConstraint,
 };
-use std::ops::Deref;
+use std::{fmt::format, ops::Deref};
 
 /// A single register or array of registers. A register is a named, programmable resource that belongs to a [peripheral](crate::Peripheral).
 pub type Register = MaybeArray<RegisterInfo>;
 
 /// Errors from [`RegisterInfo::validate`]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     /// Register had no fields, but specified a `<fields>` tag.
     #[error("Register have `fields` tag, but it is empty")]
     EmptyFields,
+    #[error("{0}")]
+    Properties(#[from] crate::registerproperties::Error),
 }
 
 /// A register is a named, programmable resource that belongs to a [peripheral](crate::Peripheral).
@@ -388,11 +391,14 @@ impl RegisterInfo {
     }
     /// Validate the [`RegisterInfo`] recursively
     pub fn validate_all(&self, lvl: ValidateLevel) -> Result<(), SvdError> {
-        self.properties.validate(lvl)?;
-        for f in self.fields() {
-            f.validate_all(lvl)?;
-        }
-        self.validate(lvl)
+        let res = || {
+            self.properties.validate(lvl)?;
+            for f in self.fields() {
+                f.validate_all(lvl)?;
+            }
+            self.validate(lvl)
+        };
+        res().context(|| format!("Validating register {}", self.name))
     }
 
     /// Returns iterator over child fields

@@ -14,10 +14,15 @@ pub type Peripheral = MaybeArray<PeripheralInfo>;
 
 /// Errors from [Peripheral::validate]
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     /// The peripheral has no registers, but specified a `<registers>` tag.
     #[error("Peripheral have `registers` tag, but it is empty")]
     EmptyRegisters,
+    #[error("Validating register {0}")]
+    InRegister(String, crate::register::Error),
+    #[error("Validating cluster {0}")]
+    InCluster(String, crate::cluster::Error),
 }
 
 /// A description of a peripheral in the [device](crate::Device), describing, for example, the [memory mappings](crate::RegisterInfo).
