@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Do not derive `DimElement`
 - Revert the `riscv` elements, as well as the `unstable-riscv` feature.
 - Add `bitmask` for `FieldInfo`, `Field` and `RegisterInfo`
 
