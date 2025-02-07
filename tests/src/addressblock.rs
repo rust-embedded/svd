@@ -8,7 +8,7 @@ fn decode_encode() {
     encode_config.update("address_block_offset", "Dec");
     encode_config.update("address_block_size", "UpperHex8");
 
-    let tests = vec![(
+    let tests = [(
         AddressBlock::builder()
             .offset(0)
             .size(0x00000F00)

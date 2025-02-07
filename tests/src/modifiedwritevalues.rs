@@ -4,7 +4,7 @@ use crate::svd::ModifiedWriteValues;
 #[test]
 fn decode_encode() {
     // FIXME: Do we need a more extensive test?
-    let tests = vec![(
+    let tests = [(
         ModifiedWriteValues::OneToToggle,
         "<modifiedWriteValues>oneToToggle</modifiedWriteValues>",
         "<modifiedWriteValues>oneToToggle</modifiedWriteValues>",

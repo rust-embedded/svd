@@ -3,7 +3,7 @@ use crate::svd::{EnumeratedValue, ValidateLevel};
 
 #[test]
 fn decode_encode() {
-    let tests = vec![(
+    let tests = [(
         EnumeratedValue::builder()
             .name("WS0".to_string())
             .description(Some(
@@ -35,7 +35,7 @@ fn decode_encode() {
     encode_config.update("enumerated_value_name", "Pascal");
     encode_config.update("enumerated_value_value", "Bin");
 
-    let tests = vec![(
+    let tests = [(
         EnumeratedValue::builder()
             .name("WS0".to_string())
             .description(Some(

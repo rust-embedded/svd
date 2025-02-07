@@ -3,7 +3,7 @@ use crate::svd::Usage;
 
 #[test]
 fn decode_encode() {
-    let tests = vec![
+    let tests = [
         (Usage::Read, "<usage>read</usage>", "<usage>read</usage>"),
         (Usage::Write, "<usage>write</usage>", "<usage>write</usage>"),
         (

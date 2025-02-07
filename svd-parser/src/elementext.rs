@@ -29,7 +29,7 @@ pub trait ElementExt {
 }
 
 /// Implements extensions for roxmltree::Node
-impl<'a, 'input> ElementExt for Node<'a, 'input> {
+impl ElementExt for Node<'_, '_> {
     fn get_child<K>(&self, k: K) -> Option<Node>
     where
         K: AsRef<str>,
