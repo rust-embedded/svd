@@ -3,7 +3,7 @@ use crate::svd::{Cpu, Endian, ValidateLevel};
 
 #[test]
 fn decode_encode() {
-    let tests = vec![(
+    let tests = [(
         Cpu::builder()
             .name("EFM32JG12B500F512GM48".to_string())
             .revision("5.1.1".to_string())

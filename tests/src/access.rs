@@ -3,7 +3,7 @@ use crate::svd::Access;
 
 #[test]
 fn decode_encode() {
-    let tests = vec![
+    let tests = [
         (
             Access::ReadOnly,
             "<access>read-only</access>",

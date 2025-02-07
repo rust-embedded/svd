@@ -95,20 +95,15 @@ pub mod datatype;
 pub use self::datatype::DataType;
 
 /// Level of validation
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub enum ValidateLevel {
     /// No validation.
     Disabled,
     /// Weak validation.
+    #[default]
     Weak,
     /// Strict validation.
     Strict,
-}
-
-impl Default for ValidateLevel {
-    fn default() -> Self {
-        ValidateLevel::Weak
-    }
 }
 
 impl ValidateLevel {

@@ -3,7 +3,7 @@ use crate::svd::{DimElement, ValidateLevel};
 
 #[test]
 fn decode_encode() {
-    let tests = vec![(
+    let tests = [(
         DimElement::builder()
             .dim(2)
             .dim_increment(4)
@@ -25,7 +25,7 @@ fn decode_encode() {
     )];
     run_test::<DimElement>(&tests[..], None, None);
 
-    let tests = vec![(
+    let tests = [(
         DimElement::builder()
             .dim(3)
             .dim_increment(4)
@@ -51,7 +51,7 @@ fn decode_encode() {
     )];
     run_test::<DimElement>(&tests[..], None, None);
 
-    let tests = vec![(
+    let tests = [(
         DimElement::builder()
             .dim(3)
             .dim_increment(4)
@@ -77,7 +77,7 @@ fn decode_encode() {
     )];
     run_test::<DimElement>(&tests[..], None, None);
 
-    let tests = vec![(
+    let tests = [(
         DimElement::builder()
             .dim(1)
             .dim_increment(0)
@@ -104,7 +104,7 @@ fn decode_encode() {
     encode_config.update("dim_dim", "UpperHex");
     encode_config.update("dim_increment", "LowerHex");
 
-    let tests = vec![(
+    let tests = [(
         DimElement::builder()
             .dim(14)
             .dim_increment(15)

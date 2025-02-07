@@ -49,7 +49,7 @@ fn decode_encode() {
     encode_config.update("field_name", "Snake");
     encode_config.update("field_bit_range", "MsbLsb");
 
-    let tests = vec![(
+    let tests = [(
         FieldInfo::builder()
             .name("MODE".to_string())
             .derived_from(Some("other_field".to_string()))

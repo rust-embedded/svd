@@ -3,7 +3,7 @@ use crate::svd::{Interrupt, ValidateLevel};
 
 #[test]
 fn decode_encode() {
-    let tests = vec![(
+    let tests = [(
         Interrupt::builder()
             .name("test".to_string())
             .description(Some("description".to_string()))
@@ -30,7 +30,7 @@ fn decode_encode() {
     let mut encode_config = svd_encoder::Config::default();
     encode_config.update("interrupt_name", "Constant");
 
-    let tests = vec![(
+    let tests = [(
         Interrupt::builder()
             .name("test".to_string())
             .description(Some("description".to_string()))

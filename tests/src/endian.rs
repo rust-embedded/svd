@@ -3,7 +3,7 @@ use crate::svd::Endian;
 
 #[test]
 fn decode_encode() {
-    let tests = vec![
+    let tests = [
         (
             Endian::Little,
             "<endian>little</endian>",
