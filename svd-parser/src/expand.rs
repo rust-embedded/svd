@@ -391,16 +391,20 @@ pub fn derive_cluster(
     let (dparent, dname) = BlockPath::parse_str(dpath);
     let rdpath;
     let cluster_path;
-    let d = (if let Some(dparent) = dparent {
+    if let Some(dparent) = dparent {
         cluster_path = dparent.new_cluster(dname);
         rdpath = dparent;
-        index.clusters.get(&cluster_path)
     } else {
         cluster_path = path.new_cluster(dname);
         rdpath = path.clone();
-        index.clusters.get(&cluster_path)
-    })
-    .ok_or_else(|| anyhow!("cluster {} not found", dpath))?;
+    }
+    if &rdpath == path && dname == &c.name {
+        return Err(anyhow!("Cluster {cluster_path} is self-derived"));
+    }
+    let d = index
+        .clusters
+        .get(&cluster_path)
+        .ok_or_else(|| anyhow!("cluster {} not found", dpath))?;
 
     let mut cpath = None;
     if c.children.is_empty() {
@@ -422,16 +426,20 @@ pub fn derive_register(
     let (dblock, dname) = RegisterPath::parse_str(dpath);
     let rdpath;
     let reg_path;
-    let d = (if let Some(dblock) = dblock {
+    if let Some(dblock) = dblock {
         reg_path = dblock.new_register(dname);
         rdpath = dblock;
-        index.registers.get(&reg_path)
     } else {
         reg_path = path.new_register(dname);
         rdpath = path.clone();
-        index.registers.get(&reg_path)
-    })
-    .ok_or_else(|| anyhow!("register {} not found", dpath))?;
+    }
+    if &rdpath == path && dname == &r.name {
+        return Err(anyhow!("Register {reg_path} is self-derived"));
+    }
+    let d = index
+        .registers
+        .get(&reg_path)
+        .ok_or_else(|| anyhow!("register {} not found", dpath))?;
 
     let mut rpath = None;
     if r.fields.is_none() {
@@ -453,16 +461,20 @@ pub fn derive_field(
     let (dregister, dname) = FieldPath::parse_str(dpath);
     let rdpath;
     let field_path;
-    let d = (if let Some(dregister) = dregister {
+    if let Some(dregister) = dregister {
         field_path = dregister.new_field(dname);
         rdpath = dregister;
-        index.fields.get(&field_path)
     } else {
         field_path = rpath.new_field(dname);
         rdpath = rpath.clone();
-        index.fields.get(&field_path)
-    })
-    .ok_or_else(|| anyhow!("field {} not found", dpath))?;
+    }
+    if &rdpath == rpath && dname == &f.name {
+        return Err(anyhow!("Field {field_path} is self-derived"));
+    }
+    let d = index
+        .fields
+        .get(&field_path)
+        .ok_or_else(|| anyhow!("field {} not found", dpath))?;
 
     let mut fpath = None;
     if f.enumerated_values.is_empty() {
@@ -556,6 +568,9 @@ pub fn derive_enumerated_values(
     fpath: &FieldPath,
     index: &Index,
 ) -> Result<EnumPath> {
+    if Some(dpath) == ev.name.as_deref() {
+        return Err(anyhow!("EnumeratedValues {fpath}.{dpath} is self-derived"));
+    }
     let mut v: Vec<&str> = dpath.split('.').collect();
     let dname = v.pop().unwrap();
     let d = if v.is_empty() {
@@ -590,6 +605,9 @@ pub fn derive_enumerated_values(
             };
             FieldPath::new(rdpath, fdname)
         };
+        if &fdpath == fpath && Some(dname) == ev.name.as_deref() {
+            return Err(anyhow!("EnumeratedValues {fpath}.{dname} is self-derived"));
+        }
         let epath = EnumPath::new(fdpath, dname);
         index.evs.get(&epath).map(|d| (d, epath))
     };
@@ -615,6 +633,9 @@ pub fn derive_peripheral(
     dpath: &str,
     index: &Index,
 ) -> Result<Option<BlockPath>> {
+    if dpath == &p.name {
+        return Err(anyhow!("Peripheral {dpath} is self-derived"));
+    }
     let mut path = None;
     let derpath = BlockPath::new(dpath);
     let d = index
