@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [Unreleased]
+
+## [v0.14.10] - 2025-02-08
 
 - Do not derive `DimElement`
 - Revert the `riscv` elements, as well as the `unstable-riscv` feature.
@@ -126,7 +128,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.9...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.10...HEAD
+[v0.14.10]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.9...svd-rs-v0.14.10
 [v0.14.9]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.8...svd-rs-v0.14.9
 [v0.14.8]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.7...svd-rs-v0.14.8
 [v0.14.7]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.6...svd-rs-v0.14.7
