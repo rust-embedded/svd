@@ -1,7 +1,5 @@
 [package]
-authors = [
-    "The Tools Team <tools@teams.rust-embedded.org>",
-]
+authors = ["The Tools Team <tools@teams.rust-embedded.org>"]
 description = "A CMSIS-SVD base structures"
 documentation = "https://docs.rs/svd-rs"
 keywords = ["CMSIS", "SVD"]
@@ -10,7 +8,7 @@ name = "svd-rs"
 repository = "https://github.com/rust-embedded/svd"
 edition = "2021"
 rust-version = "1.65.0"
-version = "0.14.9"
+version = "0.14.10"
 readme = "README.md"
 
 [features]

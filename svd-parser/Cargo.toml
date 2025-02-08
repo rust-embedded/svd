@@ -11,7 +11,7 @@ name = "svd-parser"
 repository = "https://github.com/rust-embedded/svd"
 edition = "2021"
 rust-version = "1.65.0"
-version = "0.14.7"
+version = "0.14.8"
 readme = "README.md"
 
 [features]
@@ -27,7 +27,7 @@ thiserror = "1.0.31"
 [dev-dependencies]
 serde_json = { version = "1.0", features = ["preserve_order"] }
 serde_yaml = "0.8.26"
-svd-rs = { version = "0.14.9", path = "../svd-rs", features = ["serde"] }
+svd-rs = { version = "0.14.10", path = "../svd-rs", features = ["serde"] }
 
 [[example]]
 name = "svd2json"
