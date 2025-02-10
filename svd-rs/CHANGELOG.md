@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-- Partially revert #283
+## [v0.14.11] - 2025-02-10
+
+- Partially revert #283. Check name on "%s" when derive array
 
 ## [v0.14.10] - 2025-02-08
 
@@ -130,7 +132,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.10...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.11...HEAD
+[v0.14.11]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.10...svd-rs-v0.14.11
 [v0.14.10]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.9...svd-rs-v0.14.10
 [v0.14.9]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.8...svd-rs-v0.14.9
 [v0.14.8]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.7...svd-rs-v0.14.8
