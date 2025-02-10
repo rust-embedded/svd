@@ -109,14 +109,25 @@ impl DeriveFrom for FieldInfo {
 
 impl<T> DeriveFrom for MaybeArray<T>
 where
-    T: DeriveFrom,
+    T: DeriveFrom + crate::Name,
 {
     fn derive_from(&self, other: &Self) -> Self {
-        use std::ops::Deref;
-        let info = self.deref().derive_from(other.deref());
-        match self {
-            Self::Single(_) => Self::Single(info),
-            Self::Array(_, dim) => Self::Array(info, dim.clone()),
+        match (self, other) {
+            (Self::Single(info), Self::Single(other_info)) => {
+                Self::Single(info.derive_from(other_info))
+            }
+            (Self::Single(info), Self::Array(other_info, other_dim)) => {
+                if info.name().contains("%s") {
+                    let mut dim = other_dim.clone();
+                    dim.dim_name = None;
+                    Self::Array(info.derive_from(other_info), dim)
+                } else {
+                    Self::Single(info.derive_from(other_info))
+                }
+            }
+            (Self::Array(info, dim), Self::Single(other_info) | Self::Array(other_info, _)) => {
+                Self::Array(info.derive_from(other_info), dim.clone())
+            }
         }
     }
 }
