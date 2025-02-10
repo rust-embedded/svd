@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Partially revert #283
+
 ## [v0.14.10] - 2025-02-08
 
 - Do not derive `DimElement`
