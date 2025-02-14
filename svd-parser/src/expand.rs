@@ -348,8 +348,8 @@ fn expand_register_cluster(
     index: &Index,
 ) -> Result<()> {
     match rc {
-        RegisterCluster::Cluster(c) => expand_cluster_array(regs, c, path, index)?,
-        RegisterCluster::Register(r) => expand_register_array(regs, r, path, index)?,
+        RegisterCluster::Cluster(c) => expand_cluster_array(regs, *c, path, index)?,
+        RegisterCluster::Register(r) => expand_register_array(regs, *r, path, index)?,
     }
     Ok(())
 }
