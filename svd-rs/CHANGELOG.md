@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Add missing entry for `address_block` in `DeriveFrom` impl
+
 ## [v0.14.11] - 2025-02-10
 
 - Partially revert #283. Check name on "%s" when derive array
