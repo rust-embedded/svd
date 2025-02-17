@@ -56,6 +56,9 @@ impl DeriveFrom for PeripheralInfo {
             .default_register_properties
             .derive_from(&other.default_register_properties);
         derived.registers = derived.registers.or_else(|| other.registers.clone());
+        derived.address_block = derived
+            .address_block
+            .or_else(|| other.address_block.clone());
         if derived.interrupt.is_empty() {
             derived.interrupt = other.interrupt.clone();
         }
