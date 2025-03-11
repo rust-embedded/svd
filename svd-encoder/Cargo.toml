@@ -7,15 +7,15 @@ license = "MIT OR Apache-2.0"
 name = "svd-encoder"
 repository = "https://github.com/rust-embedded/svd"
 edition = "2021"
-rust-version = "1.65.0"
-version = "0.14.6"
+rust-version = "1.70.0"
+version = "0.14.7"
 readme = "README.md"
 
 [dependencies]
 convert_case = "0.6.0"
-svd-rs = { version = "0.14.10", path = "../svd-rs" }
+svd-rs = { version = "0.14.12", path = "../svd-rs" }
 thiserror = "1.0.31"
 
 [dependencies.xmltree]
-version = "0.10.3"
+version = "0.11.0"
 features = ["attribute-order"]

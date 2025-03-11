@@ -23,13 +23,13 @@ jobs:
     continue-on-error: ${{ matrix.experimental || false }}
     strategy:
       matrix:
-        rust: [ stable ]
+        rust: [stable]
         include:
           # Test nightly but don't fail the build.
           - rust: nightly
             experimental: true
           # MSRV
-          - rust: 1.65.0
+          - rust: 1.70.0
             name: "MSRV"
     steps:
       - name: Checkout repository

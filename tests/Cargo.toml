@@ -12,5 +12,5 @@ svd-rs = { path = "../svd-rs"}
 svd-parser = { path = "../svd-parser"}
 svd-encoder = { path = "../svd-encoder"}
 roxmltree = "0.20"
-xmltree = "0.10.3"
+xmltree = "0.11.0"
 anyhow = "1.0.45"
