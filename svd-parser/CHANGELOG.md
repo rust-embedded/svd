@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.14.9] - 2025-03-11
+
+- Bump MSRV to 1.70.0
+
 ## [v0.14.8] - 2025-02-08
 
 - Revert the `riscv` element, as well as the `unstable-riscv` feature.
@@ -84,7 +88,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.10...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.12...HEAD
+[v0.14.9]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.11...svd-rs-v0.14.12
 [v0.14.8]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.9...svd-rs-v0.14.10
 [v0.14.6]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.8...svd-rs-v0.14.9
 [v0.14.5]: https://github.com/rust-embedded/svd/compare/svd-parser-v0.14.4...svd-rs-v0.14.7

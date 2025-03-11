@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.14.12] - 2025-03-11
+
+- Bump MSRV to 1.70.0
 - Add missing entry for `address_block` in `DeriveFrom` impl
 
 ## [v0.14.11] - 2025-02-10
@@ -134,7 +137,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.11...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.12...HEAD
+[v0.14.12]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.11...svd-rs-v0.14.12
 [v0.14.11]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.10...svd-rs-v0.14.11
 [v0.14.10]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.9...svd-rs-v0.14.10
 [v0.14.9]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.8...svd-rs-v0.14.9

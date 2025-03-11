@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [v0.14.7] - 2025-02-28
+## [v0.14.7] - 2025-03-11
 
+- Bump MSRV to 1.70.0
 - Bump `xmltree` to "0.11"
 
 ## [v0.14.6] - 2025-02-08
@@ -65,8 +66,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-encoder-v0.14.7...HEAD
-[v0.14.7]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.11...svd-encoder-v0.14.7
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.12...HEAD
+[v0.14.7]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.11...svd-rs-v0.14.12
 [v0.14.6]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.9...svd-rs-v0.14.10
 [v0.14.5]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.8...svd-rs-v0.14.9
 [v0.14.4]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.3...svd-rs-v0.14.4
