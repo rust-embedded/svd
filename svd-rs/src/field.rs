@@ -1,3 +1,5 @@
+use crate::MString;
+
 use super::{
     array::{descriptions, names},
     bitrange, Access, BitRange, BuildError, Description, DimElement, EmptyToNone, EnumeratedValues,
@@ -110,8 +112,8 @@ pub fn expand<'a>(
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct FieldInfoBuilder {
-    name: Option<String>,
-    description: Option<String>,
+    name: Option<MString>,
+    description: Option<MString>,
     bit_range: Option<BitRange>,
     bit_offset: Option<u32>,
     bit_width: Option<u32>,
@@ -126,8 +128,8 @@ pub struct FieldInfoBuilder {
 impl From<FieldInfo> for FieldInfoBuilder {
     fn from(f: FieldInfo) -> Self {
         Self {
-            name: Some(f.name),
-            description: f.description,
+            name: Some(f.name.into()),
+            description: f.description.map(Into::into),
             bit_range: Some(f.bit_range),
             bit_offset: None,
             bit_width: None,
@@ -144,12 +146,12 @@ impl From<FieldInfo> for FieldInfoBuilder {
 impl FieldInfoBuilder {
     /// Set the name of the field
     pub fn name(mut self, value: String) -> Self {
-        self.name = Some(value);
+        self.name = Some(value.into());
         self
     }
     /// Set the description of the field
     pub fn description(mut self, value: Option<String>) -> Self {
-        self.description = value;
+        self.description = value.map(Into::into);
         self
     }
     /// Set the bit range of the field
@@ -218,7 +220,8 @@ impl FieldInfoBuilder {
         let field = FieldInfo {
             name: self
                 .name
-                .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?,
+                .ok_or_else(|| BuildError::Uninitialized("name".to_string()))?
+                .as_str()?,
             description: self.description.empty_to_none(),
             bit_range: self
                 .bit_range

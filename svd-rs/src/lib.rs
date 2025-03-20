@@ -126,8 +126,8 @@ pub mod derive_from;
 #[cfg(feature = "derive-from")]
 pub use derive_from::DeriveFrom;
 
+use fancy_regex::Regex;
 use once_cell::sync::Lazy;
-use regex::Regex;
 
 /// Errors that can occur during building.
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
@@ -176,6 +176,9 @@ pub enum BuildError {
     /// Field was not set when building it.
     #[error("`{0}` must be initialized")]
     Uninitialized(String),
+    /// Unbuildable
+    #[error("Unbuildable")],
+    Unbuildable,
 }
 
 /// Invalid error
@@ -184,11 +187,14 @@ pub enum NameError {
     /// Name is invalid
     #[error("Name `{0}` contains unexpected symbol")]
     Invalid(String, String),
+    /// Regex matching error
+    #[error("Error matching to regex")]
+    Regex,
 }
 
 pub(crate) fn check_name(name: &str, tag: &str) -> Result<(), NameError> {
     static PATTERN: Lazy<Regex> = Lazy::new(|| Regex::new("^[_A-Za-z0-9]*$").unwrap());
-    if PATTERN.is_match(name) {
+    if PATTERN.is_match(name).map_err(|_| NameError::Regex)? {
         Ok(())
     } else {
         Err(NameError::Invalid(name.to_string(), tag.to_string()))
@@ -199,7 +205,7 @@ pub(crate) fn check_dimable_name(name: &str, tag: &str) -> Result<(), NameError>
     static PATTERN: Lazy<Regex> = Lazy::new(|| {
         Regex::new("^(((%s)|(%s)[_A-Za-z]{1}[_A-Za-z0-9]*)|([_A-Za-z]{1}[_A-Za-z0-9]*(\\[%s\\])?)|([_A-Za-z]{1}[_A-Za-z0-9]*(%s)?[_A-Za-z0-9]*))$").unwrap()
     });
-    if PATTERN.is_match(name) {
+    if PATTERN.is_match(name).map_err(|_| NameError::Regex)? {
         Ok(())
     } else {
         Err(NameError::Invalid(name.to_string(), tag.to_string()))
@@ -274,5 +280,32 @@ where
 {
     fn description(&self) -> Option<&str> {
         T::description(*self)
+    }
+}
+
+#[derive(Clone, Debug)]
+enum MString {
+    String(String),
+    Replace(fancy_regex::Regex, String),
+}
+
+impl Default for MString {
+    fn default() -> Self {
+        Self::String(String::default())
+    }
+}
+
+impl From<String> for MString {
+    fn from(value: String) -> Self {
+        Self::String(value)
+    }
+}
+
+impl MString {
+    pub fn as_str(self) -> Result<String, BuildError> {
+        match self {
+            Self::String(s) => Ok(s),
+            Self::Replace(_, _) => Err(BuildError::Unbuildable),
+        }
     }
 }
