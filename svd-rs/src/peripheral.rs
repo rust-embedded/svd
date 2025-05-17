@@ -60,7 +60,7 @@ pub struct PeripheralInfo {
     )]
     pub alternate_peripheral: Option<String>,
 
-    /// Assigns this peripheral to a group of peripherals. This is only used bye the System View
+    /// Assigns this peripheral to a group of peripherals. This is only used by the System View
     #[cfg_attr(
         feature = "serde",
         serde(default, skip_serializing_if = "Option::is_none")
