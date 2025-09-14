@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Bump MSRV to 1.84.0
 - Set `resolver = "3"`, which implies `resolver.incompatible-rust-versions = "fallback"`
+- Allow overriding `dimElementGroup` fields when deriving.
 
 ## [v0.14.12] - 2025-03-11
 
