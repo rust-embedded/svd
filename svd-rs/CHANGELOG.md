@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Allow overriding `dimElementGroup` fields when deriving.
+
 ## [v0.14.12] - 2025-03-11
 
 - Bump MSRV to 1.70.0
