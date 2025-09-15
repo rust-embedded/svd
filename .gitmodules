@@ -1,4 +1,4 @@
 [submodule "cmsis-svd"]
 	path = cmsis-svd
-	url = git://github.com/posborne/cmsis-svd.git
+	url = https://github.com/cmsis-svd/cmsis-svd.git
 	update = none
