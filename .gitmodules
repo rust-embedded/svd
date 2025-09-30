@@ -1,4 +1,0 @@
-[submodule "cmsis-svd"]
-	path = cmsis-svd
-	url = https://github.com/cmsis-svd/cmsis-svd.git
-	update = none
