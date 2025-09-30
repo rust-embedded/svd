@@ -221,7 +221,7 @@ impl DimElement {
         Ok(())
     }
     /// Get the indexes of the array or list.
-    pub fn indexes(&self) -> Indexes {
+    pub fn indexes(&self) -> Indexes<'_> {
         Indexes {
             i: 0,
             dim: self.dim,

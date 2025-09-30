@@ -418,7 +418,7 @@ impl PeripheralInfo {
     }
 
     /// Returns iterator over child registers
-    pub fn registers(&self) -> RegisterIter {
+    pub fn registers(&self) -> RegisterIter<'_> {
         RegisterIter {
             all: match &self.registers {
                 Some(regs) => regs.iter(),
@@ -428,7 +428,7 @@ impl PeripheralInfo {
     }
 
     /// Returns mutable iterator over child registers
-    pub fn registers_mut(&mut self) -> RegisterIterMut {
+    pub fn registers_mut(&mut self) -> RegisterIterMut<'_> {
         RegisterIterMut {
             all: match &mut self.registers {
                 Some(regs) => regs.iter_mut(),
@@ -438,7 +438,7 @@ impl PeripheralInfo {
     }
 
     /// Returns iterator over child clusters
-    pub fn clusters(&self) -> ClusterIter {
+    pub fn clusters(&self) -> ClusterIter<'_> {
         ClusterIter {
             all: match &self.registers {
                 Some(regs) => regs.iter(),
@@ -448,7 +448,7 @@ impl PeripheralInfo {
     }
 
     /// Returns mutable iterator over child clusters
-    pub fn clusters_mut(&mut self) -> ClusterIterMut {
+    pub fn clusters_mut(&mut self) -> ClusterIterMut<'_> {
         ClusterIterMut {
             all: match &mut self.registers {
                 Some(regs) => regs.iter_mut(),
@@ -459,12 +459,12 @@ impl PeripheralInfo {
 
     /// Returns iterator over all descendant registers
     #[deprecated(since = "0.12.1", note = "Please use `all_registers` instead")]
-    pub fn reg_iter(&self) -> AllRegistersIter {
+    pub fn reg_iter(&self) -> AllRegistersIter<'_> {
         self.all_registers()
     }
 
     /// Returns iterator over all descendant registers
-    pub fn all_registers(&self) -> AllRegistersIter {
+    pub fn all_registers(&self) -> AllRegistersIter<'_> {
         AllRegistersIter {
             rem: match &self.registers {
                 Some(regs) => regs.iter().rev().collect(),
@@ -475,12 +475,12 @@ impl PeripheralInfo {
 
     /// Returns mutable iterator over all descendant registers
     #[deprecated(since = "0.12.1", note = "Please use `all_registers_mut` instead")]
-    pub fn reg_iter_mut(&mut self) -> AllRegistersIterMut {
+    pub fn reg_iter_mut(&mut self) -> AllRegistersIterMut<'_> {
         self.all_registers_mut()
     }
 
     /// Returns mutable iterator over all descendant registers
-    pub fn all_registers_mut(&mut self) -> AllRegistersIterMut {
+    pub fn all_registers_mut(&mut self) -> AllRegistersIterMut<'_> {
         AllRegistersIterMut {
             rem: match &mut self.registers {
                 Some(regs) => regs.iter_mut().rev().collect(),
