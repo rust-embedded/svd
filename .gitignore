@@ -2,3 +2,8 @@
 [._]*.sw[a-p]
 Cargo.lock
 target
+
+# generate-tests.sh related ignores
+cmsis-svd-data
+tests/cmsis.rs
+tests/cmsis_tests

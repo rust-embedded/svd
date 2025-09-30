@@ -24,8 +24,14 @@ main() {
     rm -rf tests/cmsis_tests
     mkdir -p tests/cmsis_tests
 
+    local svd_source=cmsis-svd-data
+    if [ ! -d $svd_source ]
+    then
+        git clone https://github.com/cmsis-svd/cmsis-svd-data.git
+    fi
+
     local vendor_dir
-    for vendor_dir in $(echo cmsis-svd/data/*); do
+    for vendor_dir in $(echo $svd_source/data/*); do
         local vendor=$(basename $vendor_dir)
         cat >"$cmsis_dir/$vendor.rs" <<EOF
 #![allow(non_snake_case)]
