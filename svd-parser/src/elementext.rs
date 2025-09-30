@@ -8,7 +8,7 @@ use super::{Parse, SVDError, SVDErrorAt};
 
 /// Defines extensions for implementation over roxmltree::Node
 pub trait ElementExt {
-    fn get_child<K>(&self, k: K) -> Option<Node>
+    fn get_child<K>(&self, k: K) -> Option<Node<'_, '_>>
     where
         K: AsRef<str>;
     fn get_child_text_opt<K>(&self, k: K) -> Result<Option<String>, SVDErrorAt>
@@ -20,7 +20,7 @@ pub trait ElementExt {
 
     fn get_text(&self) -> Result<&str, SVDErrorAt>;
 
-    fn get_child_elem(&self, n: &str) -> Result<Node, SVDErrorAt>;
+    fn get_child_elem(&self, n: &str) -> Result<Node<'_, '_>, SVDErrorAt>;
     fn get_child_u32(&self, n: &str) -> Result<u32, SVDErrorAt>;
     fn get_child_u64(&self, n: &str) -> Result<u64, SVDErrorAt>;
     fn get_child_bool(&self, n: &str) -> Result<bool, SVDErrorAt>;
@@ -30,7 +30,7 @@ pub trait ElementExt {
 
 /// Implements extensions for roxmltree::Node
 impl ElementExt for Node<'_, '_> {
-    fn get_child<K>(&self, k: K) -> Option<Node>
+    fn get_child<K>(&self, k: K) -> Option<Node<'_, '_>>
     where
         K: AsRef<str>,
     {
@@ -80,7 +80,7 @@ impl ElementExt for Node<'_, '_> {
     }
 
     /// Get a named child element from an XML Element
-    fn get_child_elem(&self, n: &str) -> Result<Node, SVDErrorAt> {
+    fn get_child_elem(&self, n: &str) -> Result<Node<'_, '_>, SVDErrorAt> {
         self.get_child(n)
             .ok_or_else(|| SVDError::MissingTag(n.to_string()).at(self.id()))
     }
