@@ -396,7 +396,7 @@ impl RegisterInfo {
     }
 
     /// Returns iterator over child fields
-    pub fn fields(&self) -> std::slice::Iter<Field> {
+    pub fn fields(&self) -> std::slice::Iter<'_, Field> {
         match &self.fields {
             Some(fields) => fields.iter(),
             None => [].iter(),
@@ -404,7 +404,7 @@ impl RegisterInfo {
     }
 
     /// Returns mutable iterator over child fields
-    pub fn fields_mut(&mut self) -> std::slice::IterMut<Field> {
+    pub fn fields_mut(&mut self) -> std::slice::IterMut<'_, Field> {
         match &mut self.fields {
             Some(fields) => fields.iter_mut(),
             None => [].iter_mut(),

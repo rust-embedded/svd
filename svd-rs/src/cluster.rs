@@ -276,12 +276,12 @@ impl ClusterInfo {
 
     /// Returns iterator over all descendant registers
     #[deprecated(since = "0.12.1", note = "Please use `all_registers` instead")]
-    pub fn reg_iter(&self) -> AllRegistersIter {
+    pub fn reg_iter(&self) -> AllRegistersIter<'_> {
         self.all_registers()
     }
 
     /// Returns iterator over all descendant registers
-    pub fn all_registers(&self) -> AllRegistersIter {
+    pub fn all_registers(&self) -> AllRegistersIter<'_> {
         AllRegistersIter {
             rem: self.children.iter().rev().collect(),
         }
@@ -289,40 +289,40 @@ impl ClusterInfo {
 
     /// Returns mutable iterator over all descendant registers
     #[deprecated(since = "0.12.1", note = "Please use `all_registers_mut` instead")]
-    pub fn reg_iter_mut(&mut self) -> AllRegistersIterMut {
+    pub fn reg_iter_mut(&mut self) -> AllRegistersIterMut<'_> {
         self.all_registers_mut()
     }
 
     /// Returns mutable iterator over all descendant registers
-    pub fn all_registers_mut(&mut self) -> AllRegistersIterMut {
+    pub fn all_registers_mut(&mut self) -> AllRegistersIterMut<'_> {
         AllRegistersIterMut {
             rem: self.children.iter_mut().rev().collect(),
         }
     }
 
     /// Returns iterator over child registers
-    pub fn registers(&self) -> RegisterIter {
+    pub fn registers(&self) -> RegisterIter<'_> {
         RegisterIter {
             all: self.children.iter(),
         }
     }
 
     /// Returns mutable iterator over child registers
-    pub fn registers_mut(&mut self) -> RegisterIterMut {
+    pub fn registers_mut(&mut self) -> RegisterIterMut<'_> {
         RegisterIterMut {
             all: self.children.iter_mut(),
         }
     }
 
     /// Returns iterator over child clusters
-    pub fn clusters(&self) -> ClusterIter {
+    pub fn clusters(&self) -> ClusterIter<'_> {
         ClusterIter {
             all: self.children.iter(),
         }
     }
 
     /// Returns mutable iterator over child clusters
-    pub fn clusters_mut(&mut self) -> ClusterIterMut {
+    pub fn clusters_mut(&mut self) -> ClusterIterMut<'_> {
         ClusterIterMut {
             all: self.children.iter_mut(),
         }
