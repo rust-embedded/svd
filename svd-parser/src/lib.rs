@@ -38,6 +38,8 @@ pub mod types;
 #[non_exhaustive]
 /// Advanced parser options
 pub struct Config {
+    /// CPU target architecture
+    pub target: Target,
     /// SVD error check level
     pub validate_level: ValidateLevel,
     #[cfg(feature = "expand")]
@@ -78,6 +80,26 @@ impl Config {
         self.ignore_enums = val;
         self
     }
+}
+
+#[allow(clippy::upper_case_acronyms)]
+#[allow(non_camel_case_types)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+/// CPU target architecture
+pub enum Target {
+    #[default]
+    /// ARM Cortex-M
+    CortexM,
+    /// Texas Instruments MSP430
+    Msp430,
+    /// RISC-V
+    RISCV,
+    /// Xtensa LX
+    XtensaLX,
+    /// MIPS
+    Mips,
+    /// None specified
+    None,
 }
 
 /// Parse trait allows SVD objects to be parsed from XML elements.
