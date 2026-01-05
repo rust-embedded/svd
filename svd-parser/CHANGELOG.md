@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Add `Target` enum to `Config` and make `vendorSystickConfig` only required for ARM.
+
 ## [v0.14.9] - 2025-03-11
 
 - Bump MSRV to 1.70.0

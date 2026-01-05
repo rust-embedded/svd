@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Pin `indexmap` to `2.11.4` to support our MSRV
+
 ## [v0.14.7] - 2025-03-11
 
 - Bump MSRV to 1.70.0

@@ -12,6 +12,14 @@ impl Parse for Cpu {
             return Err(SVDError::NotExpectedTag("cpu".to_string()).at(tree.id()));
         }
 
+        // Vendor systick is required by ARM targets, but not others
+        // So for others we just default to false if not provided
+        let has_vendor_systick = match tree.get_child_bool("vendorSystickConfig") {
+            Ok(v) => v,
+            Err(e) if config.target == Target::CortexM => return Err(e),
+            _ => false,
+        };
+
         Cpu::builder()
             .name(tree.get_child_text("name")?)
             .revision(tree.get_child_text("revision")?)
@@ -26,7 +34,7 @@ impl Parse for Cpu {
             .dtcm_present(optional::<BoolParse>("dtcmPresent", tree, &())?)
             .vtor_present(optional::<BoolParse>("vtorPresent", tree, &())?)
             .nvic_priority_bits(tree.get_child_u32("nvicPrioBits")?)
-            .has_vendor_systick(tree.get_child_bool("vendorSystickConfig")?)
+            .has_vendor_systick(has_vendor_systick)
             .device_num_interrupts(optional::<u32>("deviceNumInterrupts", tree, &())?)
             .sau_num_regions(optional::<u32>("sauNumRegions", tree, &())?)
             .build(config.validate_level)
