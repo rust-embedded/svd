@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 - Add `Target` enum to `Config` and make `vendorSystickConfig` only required for ARM.
+- Bump MSRV to 1.84.0
+- Set `resolver = "3"`, which implies `resolver.incompatible-rust-versions = "fallback"`
 
 ## [v0.14.9] - 2025-03-11
 

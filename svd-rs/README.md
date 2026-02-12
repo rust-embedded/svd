@@ -13,7 +13,7 @@ This project is developed and maintained by the [Tools team][team].
 
 ## Minimum Supported Rust Version (MSRV)
 
-This crate is guaranteed to compile on stable Rust 1.70.0 and up. It *might*
+This crate is guaranteed to compile on stable Rust 1.84.0 and up. It *might*
 compile with older versions but that may change in any new patch release.
 
 ## License

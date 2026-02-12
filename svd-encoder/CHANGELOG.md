@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 - Pin `indexmap` to `2.11.4` to support our MSRV
+- Bump MSRV to 1.84.0
+- Set `resolver = "3"`, which implies `resolver.incompatible-rust-versions = "fallback"`
 
 ## [v0.14.7] - 2025-03-11
 
