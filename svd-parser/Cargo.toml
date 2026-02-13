@@ -10,7 +10,7 @@ license = "MIT OR Apache-2.0"
 name = "svd-parser"
 repository = "https://github.com/rust-embedded/svd"
 edition = "2021"
-rust-version = "1.70.0"
+rust-version = "1.84.0"
 version = "0.14.9"
 readme = "README.md"
 
