@@ -16,7 +16,7 @@ fn decode_encode() {
             .unwrap(),
         "
                 <cpu>
-                    <name>EFM32JG12B500F512GM48</name>  
+                    <name>EFM32JG12B500F512GM48</name>
                     <revision>5.1.1</revision>
                     <endian>little</endian>
                     <mpuPresent>true</mpuPresent>
@@ -27,7 +27,7 @@ fn decode_encode() {
             ",
         "
                 <cpu>
-                    <name>EFM32JG12B500F512GM48</name>  
+                    <name>EFM32JG12B500F512GM48</name>
                     <revision>5.1.1</revision>
                     <endian>little</endian>
                     <mpuPresent>true</mpuPresent>
