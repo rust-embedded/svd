@@ -20,12 +20,22 @@ impl Parse for Cpu {
             _ => false,
         };
 
+        let has_mpu_present = match tree.get_child_bool("mpuPresent") {
+            Ok(v) => v,
+            _ => false,
+        };
+
+        let has_fpu_present = match tree.get_child_bool("fpuPresent") {
+            Ok(v) => v,
+            _ => false,
+        };
+
         Cpu::builder()
             .name(tree.get_child_text("name")?)
             .revision(tree.get_child_text("revision")?)
             .endian(Endian::parse(&tree.get_child_elem("endian")?, config)?)
-            .mpu_present(tree.get_child_bool("mpuPresent")?)
-            .fpu_present(tree.get_child_bool("fpuPresent")?)
+            .mpu_present(has_mpu_present)
+            .fpu_present(has_fpu_present)
             .fpu_double_precision(optional::<BoolParse>("fpuDP", tree, &())?)
             .dsp_present(optional::<BoolParse>("dspPresent", tree, &())?)
             .icache_present(optional::<BoolParse>("icachePresent", tree, &())?)
