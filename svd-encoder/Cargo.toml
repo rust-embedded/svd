@@ -8,12 +8,12 @@ name = "svd-encoder"
 repository = "https://github.com/rust-embedded/svd"
 edition = "2021"
 rust-version = "1.84.0"
-version = "0.14.7"
+version = "0.14.8"
 readme = "README.md"
 
 [dependencies]
 convert_case = "0.6.0"
-svd-rs = { version = "0.14.12", path = "../svd-rs" }
+svd-rs = { version = "0.14.13", path = "../svd-rs" }
 thiserror = "1.0.31"
 # This is a transitive dep introduced by XML tree,
 # but we need to pin to this version to support our current MSRV of 1.70.0
