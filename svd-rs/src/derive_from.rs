@@ -1,6 +1,6 @@
 //! Implementations of DeriveFrom, setting non-explicit fields.
 use crate::{
-    ClusterInfo, EnumeratedValues, FieldInfo, MaybeArray, PeripheralInfo, RegisterInfo,
+    ClusterInfo, DimElement, EnumeratedValues, FieldInfo, MaybeArray, PeripheralInfo, RegisterInfo,
     RegisterProperties,
 };
 
@@ -110,6 +110,27 @@ impl DeriveFrom for FieldInfo {
     }
 }
 
+impl DeriveFrom for DimElement {
+    fn derive_from(&self, other: &Self) -> Self {
+        let Self {
+            dim,              // mandatory
+            dim_increment: _, // mandatory
+            dim_index,
+            dim_name,
+            dim_array_index,
+        } = other;
+
+        let mut derived = self.clone();
+        derived.dim_name = derived.dim_name.or_else(|| dim_name.clone());
+        if derived.dim == *dim {
+            // Only derive dimIndex and dimArrayIndex if the dimensions are the same.
+            derived.dim_index = derived.dim_index.or_else(|| dim_index.clone());
+            derived.dim_array_index = derived.dim_array_index.or_else(|| dim_array_index.clone());
+        }
+        derived
+    }
+}
+
 impl<T> DeriveFrom for MaybeArray<T>
 where
     T: DeriveFrom + crate::Name,
@@ -128,8 +149,11 @@ where
                     Self::Single(info.derive_from(other_info))
                 }
             }
-            (Self::Array(info, dim), Self::Single(other_info) | Self::Array(other_info, _)) => {
+            (Self::Array(info, dim), Self::Single(other_info)) => {
                 Self::Array(info.derive_from(other_info), dim.clone())
+            }
+            (Self::Array(info, dim), Self::Array(other_info, other_dim)) => {
+                Self::Array(info.derive_from(other_info), dim.derive_from(other_dim))
             }
         }
     }
