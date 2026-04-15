@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [v0.14.13] - 2026-04-15
+## [v0.14.13] - 2026-08-11
 
 - Bump MSRV to 1.84.0
 - Set `resolver = "3"`, which implies `resolver.incompatible-rust-versions = "fallback"`

@@ -15,9 +15,7 @@ readme = "README.md"
 convert_case = "0.6.0"
 svd-rs = { version = "0.14.13", path = "../svd-rs" }
 thiserror = "1.0.31"
-# This is a transitive dep introduced by XML tree,
-# but we need to pin to this version to support our current MSRV of 1.70.0
-indexmap = "=2.11.4"
+indexmap = "2.13.1"
 
 [dependencies.xmltree]
 version = "0.11.0"
