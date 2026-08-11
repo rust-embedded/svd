@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.14.10] - 2026-08-11
+
 - Add `Target` enum to `Config` and make `vendorSystickConfig` only required for ARM.
 - Bump MSRV to 1.84.0
 - Set `resolver = "3"`, which implies `resolver.incompatible-rust-versions = "fallback"`
@@ -92,7 +94,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous versions in common [changelog](../CHANGELOG.md).
 
-[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.12...HEAD
+[Unreleased]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.13...HEAD
+[v0.14.10]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.12...svd-rs-v0.14.13
 [v0.14.9]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.11...svd-rs-v0.14.12
 [v0.14.8]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.9...svd-rs-v0.14.10
 [v0.14.6]: https://github.com/rust-embedded/svd/compare/svd-rs-v0.14.8...svd-rs-v0.14.9
